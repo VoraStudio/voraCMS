@@ -1,0 +1,195 @@
+<?php
+
+/* ===========================================================
+   EntrySerializer — VoraCMS
+   ===========================================================
+   Converteix entitats Doctrine (Entry) en arrays JSON per a l'API.
+   És el cor de la transformació: converteix els FieldValues
+   en un objecte pla { slug: valor } que el frontend pot consumir.
+
+   Tipus de camp suportats:
+     text, richtext → string directe
+     image          → array [{ id, url, formats }]
+     gallery        → array d'imatges
+     boolean        → true/false
+     number         → float
+     date/datetime  → string ISO
+     youtube        → array { id, url, embed }
+   =========================================================== */
+
+namespace App\Service;
+
+use App\Entity\Entry;
+use App\Entity\FieldDefinition;
+use App\Entity\FieldValue;
+use App\Entity\Media;
+use App\Repository\MediaRepository;
+
+class EntrySerializer
+{
+    /* Cache interna per evitar múltiples queries a media amb el mateix ID */
+    private array $mediaCache = [];
+
+    public function __construct(
+        private MediaRepository $mediaRepo
+    ) {}
+
+    /* ----- INICI SECCIÓ SERIALITZACIÓ PRINCIPAL ----- */
+    /* Converteix una Entry en array. Itera tots els FieldValues i els aplan per slug. */
+    public function serialize(Entry $entry): array
+    {
+        $data = [
+            'id' => $entry->getId(),
+            'status' => $entry->getStatus(),
+            'locale' => $entry->getLocale(),
+            'createdAt' => $entry->getCreatedAt()->format('c'),
+            'updatedAt' => $entry->getUpdatedAt()?->format('c'),
+            'publishedAt' => $entry->getPublishedAt()?->format('c'),
+        ];
+
+        /* Cada FieldDefinition té un slug únic dins del content type */
+        /* Ex: titul, descripcio, data, imatge, hora, location */
+        foreach ($entry->getFieldValues() as $fv) {
+            $fieldDef = $fv->getFieldDefinition();
+            if (!$fieldDef) continue;
+
+            $slug = $fieldDef->getSlug();
+            $data[$slug] = $this->serializeValue($fv, $fieldDef);
+        }
+
+        return $data;
+    }
+
+    /* Serialitza un array d'entries (per al llistat) */
+    public function serializeCollection(array $entries): array
+    {
+        return array_map(fn(Entry $e) => $this->serialize($e), $entries);
+    }
+
+    /* ----- INICI SECCIÓ SERIALITZACIÓ PER TIPUS ----- */
+    /* Cada tipus de camp es serialitza de forma diferent. */
+    private function serializeValue(FieldValue $fv, FieldDefinition $fieldDef): mixed
+    {
+        $value = $fv->getValue();
+        $type = $fieldDef->getFieldType();
+
+        return match ($type) {
+            FieldDefinition::TYPE_IMAGE => $this->serializeImage($value),
+            FieldDefinition::TYPE_GALLERY => $this->serializeGallery($value),
+            FieldDefinition::TYPE_YOUTUBE => $this->serializeYoutube($value),
+            FieldDefinition::TYPE_BOOLEAN => filter_var($value, FILTER_VALIDATE_BOOLEAN),
+            FieldDefinition::TYPE_NUMBER => is_numeric($value) ? (float) $value : null,
+            FieldDefinition::TYPE_DATE => $this->serializeDate($value),
+            FieldDefinition::TYPE_DATETIME => $this->serializeDate($value),
+            default => $value,
+        };
+    }
+
+    /* Cacheja medias per ID per evitar N+1 queries */
+    private function resolveMedia(int $id): ?Media
+    {
+        if (!isset($this->mediaCache[$id])) {
+            $this->mediaCache[$id] = $this->mediaRepo->find($id);
+        }
+        return $this->mediaCache[$id];
+    }
+
+    /* ----- INICI SECCIÓ IMATGE ----- */
+    /* Retorna array amb url + formats (compatibilitat Strapi).
+       Si el valor és numèric, el resol com a ID de Media.
+       Si no, el tracta com a URL directa (fallback). */
+    private function serializeImage(?string $value): ?array
+    {
+        if (!$value) return null;
+
+        if (is_numeric($value)) {
+            $media = $this->resolveMedia((int) $value);
+            if ($media) {
+                return [
+                    [
+                        'id' => $media->getId(),
+                        'name' => $media->getOriginalFilename(),
+                        'url' => $media->getPath(),
+                        'formats' => [
+                            'small' => ['url' => $media->getPath()],
+                            'thumbnail' => ['url' => $media->getPath()],
+                        ],
+                    ],
+                ];
+            }
+        }
+
+        /* Fallback: si el valor és una URL directa */
+        return [
+            [
+                'id' => 0,
+                'url' => $value,
+                'formats' => [
+                    'small' => ['url' => $value],
+                    'thumbnail' => ['url' => $value],
+                ],
+            ],
+        ];
+    }
+
+    /* ----- INICI SECCIÓ GALERIA (múltiples imatges) ----- */
+    /* El valor arriba com a string d'IDs separats per comes: "1,3,5" */
+    private function serializeGallery(?string $value): array
+    {
+        if (!$value) return [];
+        $ids = array_filter(explode(',', $value));
+        $images = [];
+
+        foreach ($ids as $id) {
+            if (is_numeric($id)) {
+                $media = $this->resolveMedia((int) $id);
+                if ($media) {
+                    $images[] = [
+                        'id' => $media->getId(),
+                        'name' => $media->getOriginalFilename(),
+                        'url' => $media->getPath(),
+                        'formats' => [
+                            'small' => ['url' => $media->getPath()],
+                        ],
+                    ];
+                    continue;
+                }
+            }
+            $images[] = [
+                'id' => 0,
+                'url' => $id,
+                'formats' => [
+                    'small' => ['url' => $id],
+                ],
+            ];
+        }
+
+        return $images;
+    }
+
+    /* ----- INICI SECCIÓ DATA ----- */
+    /* Normalitza el format datetime-local (YYYY-MM-DDTHH:mm) afegint :00 */
+    private function serializeDate(?string $value): ?string
+    {
+        if (!$value) return null;
+
+        if (preg_match('/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/', $value)) {
+            return $value . ':00';
+        }
+
+        return $value;
+    }
+
+    /* ----- INICI SECCIÓ YOUTUBE ----- */
+    /* Retorna array amb ID, url de watch i url d'embed */
+    private function serializeYoutube(?string $value): ?array
+    {
+        if (!$value) return null;
+
+        return [
+            'id' => $value,
+            'url' => 'https://www.youtube.com/watch?v=' . $value,
+            'embed' => 'https://www.youtube.com/embed/' . $value,
+        ];
+    }
+}

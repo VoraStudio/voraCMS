@@ -1,0 +1,52 @@
+{% extends 'admin/layout.html.twig' %}
+
+{% block page_title %}Tipus de contingut{% endblock %}
+
+{% block topbar_actions %}
+<a href="{{ path('admin_content_type_new') }}" class="btn btn-primary btn-sm">
+    <i class="bi bi-plus-lg"></i> Nou tipus
+</a>
+{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="table-responsive">
+        <table class="table table-hover mb-0">
+            <thead>
+                <tr>
+                    <th>Nom</th>
+                    <th>Slug</th>
+                    <th>Camps</th>
+                    <th>Entrades</th>
+                    <th>Actiu</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for ct in contentTypes %}
+                <tr>
+                    <td class="text-capitalize fw-semibold">{{ ct.name }}</td>
+                    <td><code>{{ ct.slug }}</code></td>
+                    <td>{{ ct.fields|length }}</td>
+                    <td>{{ ct.entries|length }}</td>
+                    <td>
+                        {% if ct.active %}
+                            <span class="badge bg-success">Sí</span>
+                        {% else %}
+                            <span class="badge bg-secondary">No</span>
+                        {% endif %}
+                    </td>
+                    <td class="text-end">
+                        <a href="{{ path('admin_content_type_edit', {id: ct.id}) }}" class="btn btn-outline-primary btn-sm"><i class="bi bi-pencil"></i></a>
+                        <form method="post" action="{{ path('admin_content_type_delete', {id: ct.id}) }}" style="display:inline" onsubmit="return confirm('Segur que vols eliminar aquest tipus?');">
+                            <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ ct.id) }}">
+                            <button class="btn btn-outline-danger btn-sm"><i class="bi bi-trash"></i></button>
+                        </form>
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

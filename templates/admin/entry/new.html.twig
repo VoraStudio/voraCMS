@@ -1,0 +1,295 @@
+{% extends 'admin/layout.html.twig' %}
+
+{% block page_title %}Nova entrada: {{ contentType.name }}{% endblock %}
+
+{% block topbar_actions %}
+<a href="{{ path('admin_entry_by_type', {slug: contentType.slug}) }}" class="btn btn-outline-primary btn-sm">
+    <i class="bi bi-arrow-left"></i> Tornar
+</a>
+{% endblock %}
+
+{% block stylesheets %}
+{{ parent() }}
+<link href="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.snow.css" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-body">
+        <form method="post" id="entryForm" enctype="multipart/form-data">
+            <div class="row g-3 mb-3">
+                <div class="col-md-6">
+                    <label class="form-label">Estat</label>
+                    <select name="status" class="form-select form-select-sm">
+                        <option value="draft">Esborrany</option>
+                        <option value="published">Publicar</option>
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Idioma</label>
+                    <select name="locale" class="form-select form-select-sm">
+                        {% for code, name in locales %}
+                        <option value="{{ code }}">{{ name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+
+            <hr style="border-color:var(--s-card-border);opacity:0.5;">
+            <div class="entry-fields-grid">
+            {% for field in contentType.fields %}
+            <div class="mb-3 field-{{ field.fieldType }}">
+                <label class="form-label">
+                    {{ field.name }}
+                    {% if field.required %}<span style="color:var(--s-danger);">*</span>{% endif %}
+                </label>
+
+                {% if field.fieldType == 'richtext' %}
+                {# Quill editor wrapper #}
+                <div class="quill-wrapper" data-field-id="{{ field.id }}" data-field-name="field_{{ field.id }}">
+                    <div class="js-quill-editor" style="min-height:200px;"></div>
+                    <textarea name="field_{{ field.id }}" class="d-none" rows="4"></textarea>
+                </div>
+
+                {% elseif field.fieldType == 'textarea' %}
+                <textarea name="field_{{ field.id }}" class="form-control" rows="4" {% if field.required %}required{% endif %}></textarea>
+
+                {% elseif field.fieldType == 'date' %}
+                <input type="datetime-local" name="field_{{ field.id }}" class="form-control" {% if field.required %}required{% endif %}>
+
+                {% elseif field.fieldType == 'datetime' %}
+                <input type="datetime-local" name="field_{{ field.id }}" class="form-control">
+
+                {% elseif field.fieldType == 'boolean' %}
+                <div class="form-check">
+                    <input type="checkbox" name="field_{{ field.id }}" class="form-check-input" value="1">
+                    <label class="form-check-label small">Sí</label>
+                </div>
+
+                {% elseif field.fieldType == 'number' %}
+                <input type="number" name="field_{{ field.id }}" class="form-control" step="any" {% if field.required %}required{% endif %}>
+
+                {% elseif field.fieldType == 'email' %}
+                <input type="email" name="field_{{ field.id }}" class="form-control" {% if field.required %}required{% endif %}>
+
+                {% elseif field.fieldType == 'url' %}
+                <input type="url" name="field_{{ field.id }}" class="form-control" {% if field.required %}required{% endif %}>
+
+                {% elseif field.fieldType == 'color' %}
+                <input type="color" name="field_{{ field.id }}" class="form-control form-control-color">
+
+                {% elseif field.fieldType == 'image' %}
+                <div class="image-field" data-field-id="{{ field.id }}">
+                    <div class="d-flex gap-2">
+                        <input type="file" name="field_{{ field.id }}_file" class="form-control form-control-sm" accept=".jpg,.jpeg,.webp,.avif">
+                        <button type="button" class="btn btn-outline-primary btn-sm pick-media" data-field="{{ field.id }}" data-multiple="false">
+                            <i class="bi bi-images"></i>
+                        </button>
+                    </div>
+                    <input type="hidden" name="field_{{ field.id }}" class="image-value">
+                    <div class="image-preview mt-2 d-none">
+                        <img src="" class="rounded" style="max-height:100px;max-width:100%;">
+                        <button type="button" class="btn btn-sm btn-outline-danger remove-image ms-2"><i class="bi bi-x"></i></button>
+                    </div>
+                    <small style="color:var(--s-text-secondary);">JPG, WebP o AVIF · Màxim 1MB</small>
+                </div>
+
+                {% elseif field.fieldType == 'gallery' %}
+                <div class="gallery-field" data-field-id="{{ field.id }}">
+                    <div class="d-flex gap-2 mb-2">
+                        <input type="file" name="field_{{ field.id }}_files[]" class="form-control form-control-sm" accept=".jpg,.jpeg,.webp,.avif" multiple>
+                        <button type="button" class="btn btn-outline-primary btn-sm pick-media" data-field="{{ field.id }}" data-multiple="true">
+                            <i class="bi bi-images"></i>
+                        </button>
+                    </div>
+                    <input type="hidden" name="field_{{ field.id }}" class="gallery-value">
+                    <div class="gallery-previews d-flex gap-2 flex-wrap"></div>
+                    <small style="color:var(--s-text-secondary);">JPG, WebP o AVIF · Màxim 1MB cadascuna</small>
+                </div>
+
+                {% elseif field.fieldType == 'youtube' %}
+                <div class="input-group">
+                    <span class="input-group-text" style="font-size:0.7rem;"><i class="bi bi-youtube"></i></span>
+                    <input type="url" name="field_{{ field.id }}" class="form-control youtube-input" placeholder="https://youtube.com/watch?v=..." {% if field.required %}required{% endif %}>
+                </div>
+                <div class="youtube-preview mt-2 d-none">
+                    <div class="ratio ratio-16x9 rounded overflow-hidden" style="max-width:320px;background:var(--s-bg);">
+                        <iframe src="" allowfullscreen loading="lazy"></iframe>
+                    </div>
+                </div>
+
+                {% else %}
+                <input type="text" name="field_{{ field.id }}" class="form-control" {% if field.required %}required{% endif %}>
+                {% endif %}
+
+                {% if field.helpText %}
+                <small style="color:var(--s-text-secondary);">{{ field.helpText }}</small>
+                {% endif %}
+            </div>
+            {% endfor %}
+            </div>
+
+            <hr class="mt-4" style="border-color:var(--s-card-border);opacity:0.5;">
+            <button type="submit" class="btn btn-primary w-100">Crear entrada</button>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+<script src="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    // ─── YouTube preview ───
+    document.querySelectorAll('.youtube-input').forEach(function (input) {
+        input.addEventListener('input', function () {
+            var preview = this.closest('.mb-3').querySelector('.youtube-preview');
+            var iframe = preview.querySelector('iframe');
+            var id = extractYoutubeId(this.value);
+            if (id) {
+                iframe.src = 'https://www.youtube.com/embed/' + id;
+                preview.classList.remove('d-none');
+            } else {
+                preview.classList.add('d-none');
+                iframe.src = '';
+            }
+        });
+    });
+
+    function extractYoutubeId(url) {
+        if (!url) return null;
+        var m = url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+        return m ? m[1] : null;
+    }
+
+    // ─── Image: preview on file pick ───
+    document.querySelectorAll('.image-field input[type="file"]').forEach(function (input) {
+        input.addEventListener('change', function () {
+            var preview = this.closest('.image-field').querySelector('.image-preview');
+            var img = preview.querySelector('img');
+            var hidden = this.closest('.image-field').querySelector('.image-value');
+            if (this.files && this.files[0]) {
+                var reader = new FileReader();
+                reader.onload = function (e) { img.src = e.target.result; };
+                reader.readAsDataURL(this.files[0]);
+                preview.classList.remove('d-none');
+                hidden.value = '__upload__'; // mark for server-side upload
+            } else {
+                preview.classList.add('d-none');
+                hidden.value = '';
+            }
+        });
+    });
+
+    document.querySelectorAll('.remove-image').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            var field = this.closest('.image-field');
+            field.querySelector('input[type="file"]').value = '';
+            field.querySelector('.image-preview').classList.add('d-none');
+            field.querySelector('.image-value').value = '';
+        });
+    });
+
+    // ─── Gallery: preview on file pick ───
+    document.querySelectorAll('.gallery-field input[type="file"]').forEach(function (input) {
+        input.addEventListener('change', function () {
+            var previews = this.closest('.gallery-field').querySelector('.gallery-previews');
+            var hidden = this.closest('.gallery-field').querySelector('.gallery-value');
+            previews.innerHTML = '';
+            var ids = [];
+            Array.from(this.files).forEach(function (file) {
+                var reader = new FileReader();
+                reader.onload = function (e) {
+                    var div = document.createElement('div');
+                    div.style.cssText = 'position:relative;width:80px;height:80px;border-radius:4px;overflow:hidden;background:var(--s-bg);';
+                    div.innerHTML = '<img src="' + e.target.result + '" style="width:100%;height:100%;object-fit:cover;">';
+                    previews.appendChild(div);
+                };
+                reader.readAsDataURL(file);
+                ids.push('__upload__');
+            });
+            hidden.value = ids.join(',');
+        });
+    });
+
+    // ─── Media picker modal ───
+    document.querySelectorAll('.pick-media').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            var fieldId = this.dataset.field;
+            var pickerUrl = '{{ path('admin_media_picker') }}?field=' + encodeURIComponent(fieldId);
+            window.open(pickerUrl, 'mediaPicker', 'width=600,height=500');
+        });
+    });
+
+    window.addEventListener('message', function (e) {
+        if (e.data.type === 'media-pick') {
+            var fieldId = e.data.fieldId || e.data.field;
+            var mediaId = e.data.id;
+            var mediaUrl = e.data.url;
+            // Find the closest image/gallery field and update it
+            var imgField = document.querySelector('.image-field[data-field-id="' + fieldId + '"]');
+            if (imgField) {
+                var preview = imgField.querySelector('.image-preview');
+                preview.querySelector('img').src = mediaUrl;
+                preview.classList.remove('d-none');
+                imgField.querySelector('.image-value').value = mediaId;
+            }
+            var galField = document.querySelector('.gallery-field[data-field-id="' + fieldId + '"]');
+            if (galField) {
+                var previews = galField.querySelector('.gallery-previews');
+                var hidden = galField.querySelector('.gallery-value');
+                // Append selected image
+                var div = document.createElement('div');
+                div.style.cssText = 'position:relative;width:80px;height:80px;border-radius:4px;overflow:hidden;background:var(--s-bg);';
+                div.innerHTML = '<img src="' + mediaUrl + '" style="width:100%;height:100%;object-fit:cover;">';
+                previews.appendChild(div);
+                var current = hidden.value ? hidden.value.split(',') : [];
+                current.push(mediaId);
+                hidden.value = current.join(',');
+            }
+        }
+    });
+
+    // ─── Init Quill editors ───
+    document.querySelectorAll('.quill-wrapper').forEach(function (wrapper) {
+        var editorEl = wrapper.querySelector('.js-quill-editor');
+        var textarea = wrapper.querySelector('textarea');
+
+        var quill = new Quill(editorEl, {
+            theme: 'snow',
+            modules: {
+                toolbar: [
+                    ['bold', 'italic', 'underline', 'strike'],
+                    [{ 'list': 'ordered' }, { 'list': 'bullet' }],
+                    [{ 'header': [1, 2, 3, false] }],
+                    ['link', 'clean'],
+                    [{ 'align': [] }],
+                    ['blockquote', 'code-block'],
+                ]
+            },
+            placeholder: 'Escriu aquí...',
+        });
+
+        // Restore initial value if any
+        if (textarea.value) {
+            quill.root.innerHTML = textarea.value;
+        }
+
+        // On form submit, copy content to textarea
+        quill.on('text-change', function () {
+            textarea.value = quill.root.innerHTML;
+        });
+    });
+
+    // Ensure all quill textareas are filled before submit
+    document.getElementById('entryForm').addEventListener('submit', function () {
+        document.querySelectorAll('.quill-wrapper').forEach(function (wrapper) {
+            var editorEl = wrapper.querySelector('.js-quill-editor');
+            var textarea = wrapper.querySelector('textarea');
+            var quill = Quill.find(editorEl);
+            textarea.value = quill.root.innerHTML;
+        });
+    });
+});
+</script>
+{% endblock %}

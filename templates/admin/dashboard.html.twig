@@ -1,0 +1,44 @@
+{% extends 'admin/layout.html.twig' %}
+
+{% block page_title %}Dashboard{% endblock %}
+
+{% block content %}
+{% set cardIcons = ['bi-file-text', 'bi-calendar-event', 'bi-person', 'bi-image', 'bi-link', 'bi-star', 'bi-geo-alt', 'bi-chat-dots'] %}
+<div class="s-dashboard">
+{% if stats is empty %}
+<div class="text-center py-5" style="color:rgba(255,255,255,0.5);">
+    <i class="bi bi-folder-plus display-3" style="color:rgba(255,255,255,0.2);"></i>
+    <p class="mt-3">No hi ha tipus de contingut encara.</p>
+    <a href="{{ path('admin_content_type_new') }}" class="btn btn-primary">Crear primer tipus</a>
+</div>
+{% else %}
+<div class="row g-3">
+    {% for stat in stats %}
+    {% set icon = cardIcons[loop.index0 % cardIcons|length] %}
+    <div class="col-md-4">
+        <div class="s-stat-card">
+            <div class="s-stat-card-icon">
+                <i class="bi {{ icon }}"></i>
+            </div>
+            <h6 class="text-capitalize mb-2">{{ stat.type.name }}</h6>
+            <span class="s-stat-badge mb-3">{{ stat.type.fields|length }} camps</span>
+            <div class="s-stat-numbers mb-3">
+                <div>
+                    <div class="s-stat-label">Total</div>
+                    <div class="s-stat-value">{{ stat.total }}</div>
+                </div>
+                <div>
+                    <div class="s-stat-label">Publicades</div>
+                    <div class="s-stat-value s-stat-value--success">{{ stat.published }}</div>
+                </div>
+            </div>
+            <a href="{{ path('admin_entry_by_type', {slug: stat.type.slug}) }}" class="s-stat-btn">
+                <i class="bi bi-arrow-right-circle me-1"></i> Gestionar entrades
+            </a>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+</div>
+{% endblock %}
