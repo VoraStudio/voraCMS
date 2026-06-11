@@ -6,10 +6,11 @@ use App\Repository\ContentTypeRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\ORM\Mapping\UniqueConstraint;
 use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: ContentTypeRepository::class)]
-#[ORM\Table(name: 'content_types')]
+#[ORM\Table(name: 'content_types', uniqueConstraints: [new UniqueConstraint(name: 'ct_slug_client', columns: ['slug', 'client_id'])])]
 class ContentType
 {
     #[ORM\Id]
@@ -17,7 +18,7 @@ class ContentType
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\Column(length: 100, unique: true)]
+    #[ORM\Column(length: 100)]
     #[Assert\NotBlank]
     private ?string $slug = null;
 
@@ -30,6 +31,13 @@ class ContentType
 
     #[ORM\Column(options: ['default' => true])]
     private ?bool $active = true;
+
+    #[ORM\Column(options: ['default' => false])]
+    private bool $base = false;
+
+    #[ORM\ManyToOne(inversedBy: 'contentTypes')]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?Client $client = null;
 
     #[ORM\OneToMany(targetEntity: FieldDefinition::class, mappedBy: 'contentType', orphanRemoval: true, cascade: ['persist', 'remove'])]
     #[ORM\OrderBy(['sortOrder' => 'ASC'])]
@@ -61,6 +69,12 @@ class ContentType
 
     public function isActive(): ?bool { return $this->active; }
     public function setActive(bool $active): static { $this->active = $active; return $this; }
+
+    public function isBase(): bool { return $this->base; }
+    public function setBase(bool $base): static { $this->base = $base; return $this; }
+
+    public function getClient(): ?Client { return $this->client; }
+    public function setClient(?Client $client): static { $this->client = $client; return $this; }
 
     public function getFields(): Collection { return $this->fields; }
     public function addField(FieldDefinition $field): static

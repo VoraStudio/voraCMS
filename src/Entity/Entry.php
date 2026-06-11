@@ -35,6 +35,10 @@ class Entry
     #[ORM\ManyToOne(targetEntity: User::class)]
     private ?User $author = null;
 
+    #[ORM\ManyToOne(inversedBy: 'entries')]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?Client $client = null;
+
     #[ORM\OneToMany(targetEntity: FieldValue::class, mappedBy: 'entry', orphanRemoval: true, cascade: ['persist', 'remove'])]
     private Collection $fieldValues;
 
@@ -66,6 +70,9 @@ class Entry
 
     public function getAuthor(): ?User { return $this->author; }
     public function setAuthor(?User $author): static { $this->author = $author; return $this; }
+
+    public function getClient(): ?Client { return $this->client; }
+    public function setClient(?Client $client): static { $this->client = $client; return $this; }
 
     public function getFieldValues(): Collection { return $this->fieldValues; }
     public function addFieldValue(FieldValue $fieldValue): static
