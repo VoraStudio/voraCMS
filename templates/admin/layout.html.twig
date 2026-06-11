@@ -14,6 +14,26 @@
             <img src="{{ asset('img/logoVora.png') }}" alt="Vora Studio" class="s-sidebar-logo">
         </a>
 
+        {# ─── Client context badge ─── #}
+        {% if currentClient is defined and currentClient %}
+        <div style="padding: 0 20px 16px;">
+            <div style="background: rgba(73,69,255,0.10); border: 1px solid rgba(73,69,255,0.18); border-radius: 10px; padding: 10px 14px;">
+                <div style="font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.08em; color: rgba(255,255,255,0.35); margin-bottom: 4px;">Client actual</div>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    {% if currentClient.logo %}
+                        <img src="{{ currentClient.logo }}" alt="{{ currentClient.name }}" style="width: 24px; height: 24px; object-fit: cover; border-radius: 6px;">
+                    {% else %}
+                        <div style="width: 24px; height: 24px; border-radius: 6px; background: linear-gradient(135deg, rgba(73,69,255,0.40), rgba(73,69,255,0.15)); display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 700; color: rgba(73,69,255,0.70);">
+                            {{ currentClient.name|first|upper }}
+                        </div>
+                    {% endif %}
+                    <span style="color: rgba(255,255,255,0.75); font-size: 0.8rem; font-weight: 600;">{{ currentClient.name }}</span>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        {# ─── Navigation ─── #}
         <div class="s-sidebar-nav">
             <div class="s-sidebar-section">General</div>
 
@@ -24,6 +44,13 @@
             <a class="s-sidebar-link{% if app.request.get('_route') == 'admin_content_type_index' %} active{% endif %}" href="{{ path('admin_content_type_index') }}">
                 <i class="bi bi-layers-fill"></i> Tipus de contingut
             </a>
+
+            {# ─── Clients link (super-admin only) ─── #}
+            {% if is_granted('ROLE_SUPER_ADMIN') %}
+            <a class="s-sidebar-link{% if app.request.get('_route') starts with 'admin_client_' %} active{% endif %}" href="{{ path('admin_client_index') }}">
+                <i class="bi bi-building"></i> Clients
+            </a>
+            {% endif %}
 
             {% set sidebarTypes = admin_content_types() %}
             {% if sidebarTypes is not empty %}
@@ -40,6 +67,7 @@
             {% endif %}
         </div>
 
+        {# ─── Footer ─── #}
         <div class="s-sidebar-footer">
             <div class="dropdown dropup">
                 <a class="dropdown-toggle d-flex align-items-center gap-2" href="#" data-bs-toggle="dropdown">
