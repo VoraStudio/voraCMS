@@ -33,6 +33,18 @@ class AdminExtension extends AbstractExtension
     }
 
     /* -----------------------------------------------------------
+       getGlobals — Variables globals disponibles a totes les
+       plantilles. currentClient proporciona el client actual
+       (o null per super-admin) a la sidebar i al dashboard.
+       ----------------------------------------------------------- */
+    public function getGlobals(): array
+    {
+        return [
+            'currentClient' => $this->clientScope->getClient(),
+        ];
+    }
+
+    /* -----------------------------------------------------------
        getContentTypes — Retorna els ContentType visibles per al
        client actual. Delega al repositori, que internament
        consulta ClientScope per aplicar el filtre adequat.

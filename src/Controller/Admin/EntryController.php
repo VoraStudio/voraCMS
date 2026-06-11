@@ -1,5 +1,20 @@
 <?php
 
+/* ===========================================================
+   EntryController — CRUD d'entrades amb tenant isolation.
+
+   Cada entrada pertany a un ContentType (que pertany a un
+   Client) i a més té una referència directa client_id
+   (defense in depth del disseny).
+
+   Les verificacions de propietat als mètodes edit() i
+   delete() comproven que l'entrada pertany al client
+   actual, evitant accessos creuats entre tenants.
+
+   En el mètode new(), assignem l'entrada al client actual
+   obtingut via ClientScope per garantir l'aïllament.
+   =========================================================== */
+
 namespace App\Controller\Admin;
 
 use App\Entity\ContentType;
@@ -8,6 +23,7 @@ use App\Entity\FieldValue;
 use App\Entity\FieldDefinition;
 use App\Repository\ContentTypeRepository;
 use App\Repository\MediaRepository;
+use App\Service\ClientScope;
 use App\Service\MediaService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -18,11 +34,23 @@ use Symfony\Component\Routing\Attribute\Route;
 #[Route('/admin/entry')]
 class EntryController extends AbstractController
 {
+    public function __construct(
+        private readonly ClientScope $clientScope,
+    ) {}
+
+    /* -----------------------------------------------------------
+       byType — Llista les entrades d'un tipus de contingut.
+       Verifica que el ContentType pertany al client actual
+       abans de mostrar les entrades.
+       ----------------------------------------------------------- */
     #[Route('/type/{slug}', name: 'admin_entry_by_type')]
     public function byType(string $slug, ContentTypeRepository $ctRepo, MediaRepository $mediaRepo): Response
     {
         $contentType = $ctRepo->findBySlug($slug);
         if (!$contentType) throw $this->createNotFoundException();
+
+        /* ── Verificació de propietat ── */
+        $this->verifyContentTypeOwnership($contentType);
 
         $entries = $contentType->getEntries();
         $thumbnails = [];
@@ -56,11 +84,20 @@ class EntryController extends AbstractController
         ]);
     }
 
+    /* -----------------------------------------------------------
+       new — Crea una nova entrada dins del ContentType
+       especificat. Assigna el client actual a l'entrada
+       (defense in depth) per garantir que sempre pertany
+       al tenant correcte, independentment del ContentType.
+       ----------------------------------------------------------- */
     #[Route('/new/{slug}', name: 'admin_entry_new', methods: ['GET', 'POST'])]
     public function new(Request $request, string $slug, ContentTypeRepository $ctRepo, EntityManagerInterface $em, MediaService $mediaService): Response
     {
         $contentType = $ctRepo->findBySlug($slug);
         if (!$contentType) throw $this->createNotFoundException();
+
+        /* ── Verificació de propietat ── */
+        $this->verifyContentTypeOwnership($contentType);
 
         if ($request->isMethod('POST')) {
             $entry = new Entry();
@@ -68,6 +105,12 @@ class EntryController extends AbstractController
             $entry->setStatus($request->request->get('status', Entry::STATUS_DRAFT));
             $entry->setLocale($request->request->get('locale', 'ca'));
             $entry->setAuthor($this->getUser());
+
+            /* ── Assignar client actual a l'entrada ── */
+            $currentClient = $this->clientScope->getClient();
+            if ($currentClient !== null) {
+                $entry->setClient($currentClient);
+            }
 
             foreach ($contentType->getFields() as $fieldDef) {
                 $value = $this->resolveFieldValue($request, $fieldDef, $mediaService);
@@ -94,10 +137,18 @@ class EntryController extends AbstractController
         ]);
     }
 
+    /* -----------------------------------------------------------
+       edit — Edita una entrada existent.
+       Verifica que l'entrada pertany al client actual abans
+       de permetre la modificació.
+       ----------------------------------------------------------- */
     #[Route('/{id}/edit', name: 'admin_entry_edit', methods: ['GET', 'POST'])]
     public function edit(Request $request, Entry $entry, EntityManagerInterface $em, MediaService $mediaService, MediaRepository $mediaRepo): Response
     {
-        // Build map of media ID → path for previews (solo en GET, pero lo necesitamos siempre para el render)
+        /* ── Verificació de propietat ── */
+        $this->verifyEntryOwnership($entry);
+
+        // Build map of media ID → path for previews
         $mediaPaths = [];
         foreach ($entry->getFieldValues() as $fv) {
             $type = $fv->getFieldDefinition()?->getFieldType();
@@ -148,9 +199,16 @@ class EntryController extends AbstractController
         ]);
     }
 
+    /* -----------------------------------------------------------
+       delete — Elimina una entrada.
+       Verifica propietat abans d'eliminar i valida CSRF.
+       ----------------------------------------------------------- */
     #[Route('/{id}/delete', name: 'admin_entry_delete', methods: ['POST'])]
     public function delete(Request $request, Entry $entry, EntityManagerInterface $em): Response
     {
+        /* ── Verificació de propietat ── */
+        $this->verifyEntryOwnership($entry);
+
         $slug = $entry->getContentType()->getSlug();
         if ($this->isCsrfTokenValid('delete' . $entry->getId(), $request->request->get('_token'))) {
             $em->remove($entry);
@@ -158,6 +216,44 @@ class EntryController extends AbstractController
             $this->addFlash('success', 'Entrada eliminada.');
         }
         return $this->redirectToRoute('admin_entry_by_type', ['slug' => $slug]);
+    }
+
+    /* -----------------------------------------------------------
+       verifyEntryOwnership — Comprova que l'entrada pertany al
+       client actual. Super-admin bypassa la verificació.
+       ----------------------------------------------------------- */
+    private function verifyEntryOwnership(Entry $entry): void
+    {
+        $currentClient = $this->clientScope->getClient();
+
+        if ($currentClient === null) {
+            return; /* Super-admin: accés complet */
+        }
+
+        if ($entry->getClient()?->getId() !== $currentClient->getId()) {
+            throw $this->createAccessDeniedException(
+                'No tens permís per modificar aquesta entrada.'
+            );
+        }
+    }
+
+    /* -----------------------------------------------------------
+       verifyContentTypeOwnership — Comprova que el ContentType
+       pertany al client actual.
+       ----------------------------------------------------------- */
+    private function verifyContentTypeOwnership(ContentType $contentType): void
+    {
+        $currentClient = $this->clientScope->getClient();
+
+        if ($currentClient === null) {
+            return; /* Super-admin: accés complet */
+        }
+
+        if ($contentType->getClient()?->getId() !== $currentClient->getId()) {
+            throw $this->createAccessDeniedException(
+                'No tens permís per accedir a aquest tipus de contingut.'
+            );
+        }
     }
 
     private function resolveFieldValue(Request $request, FieldDefinition $fieldDef, MediaService $mediaService): string
@@ -180,7 +276,6 @@ class EntryController extends AbstractController
                     $this->addFlash('error', 'Error en pujar imatge: ' . $e->getMessage());
                 }
             }
-            // Si no hi ha fitxer, mantenim el valor existent ($raw)
             return $raw;
         }
 
