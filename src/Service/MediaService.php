@@ -1,5 +1,16 @@
 <?php
 
+/* ══════════════════════════════════════════════════════════════
+   MediaService — Pujada de fitxers amb tenant isolation
+   ══════════════════════════════════════════════════════════════
+   Desa els fitxers a /public/uploads/{clientId}/ en lloc
+   del directori arrel pla. Això aïlla físicament els fitxers
+   per client i evita col·lisions de noms entre tenants.
+
+   Si no hi ha client al ClientScope (cas rar, p.ex. CLI
+   sense --client), fa fallback al directori arrel /uploads/.
+   ══════════════════════════════════════════════════════════════ */
+
 namespace App\Service;
 
 use App\Entity\Media;
@@ -15,11 +26,16 @@ class MediaService
 
     public function __construct(
         private EntityManagerInterface $em,
+        private ClientScope $clientScope,
         string $projectDir
     ) {
         $this->uploadDir = $projectDir . '/public/uploads';
     }
 
+    /* ─── UPLOAD ─── */
+    /* Puja un fitxer al directori del client actual.
+       Crea el subdirectori /uploads/{clientId}/ si no existeix.
+       Assigna el client a l'entitat Media per a la traçabilitat. */
     public function upload(UploadedFile $file, ?User $user = null): Media
     {
         $extension = strtolower($file->getClientOriginalExtension());
@@ -40,21 +56,45 @@ class MediaService
 
         $safeFilename = uniqid() . '_' . time() . '.' . $extension;
 
-        // Capturar tot ANTES de $file->move() perquè move() retorna un nou objecte
-        // i el UploadedFile original queda apuntant al temporal (que ja no existeix)
+        /* ─── Directori per client ─── */
+        $clientId = $this->clientScope->getClientId();
+        if ($clientId !== null) {
+            $clientUploadDir = $this->uploadDir . '/' . $clientId;
+            if (!is_dir($clientUploadDir)) {
+                mkdir($clientUploadDir, 0775, true);
+            }
+        } else {
+            $clientUploadDir = $this->uploadDir;
+        }
+
+        /* Capturar abans de move() — el UploadedFile original
+           queda apuntant al temporal que ja no existeix. */
         $originalName = $file->getClientOriginalName();
         $mimeType = $file->getMimeType() ?? 'application/octet-stream';
 
-        $file->move($this->uploadDir, $safeFilename);
+        $file->move($clientUploadDir, $safeFilename);
 
         $media = new Media();
         $media->setFilename($safeFilename);
         $media->setOriginalFilename($originalName);
         $media->setExtension($extension);
         $media->setMimeType($mimeType);
-        $media->setPath('/uploads/' . $safeFilename);
+
+        /* ─── Path relativa amb subdirectori de client ─── */
+        if ($clientId !== null) {
+            $media->setPath('/uploads/' . $clientId . '/' . $safeFilename);
+        } else {
+            $media->setPath('/uploads/' . $safeFilename);
+        }
+
         $media->setFileSize($fileSize);
         $media->setUploadedBy($user);
+
+        /* ─── Assignar client a l'entitat Media ─── */
+        $client = $this->clientScope->getClient();
+        if ($client) {
+            $media->setClient($client);
+        }
 
         $this->em->persist($media);
         $this->em->flush();
