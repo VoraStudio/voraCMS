@@ -1,0 +1,106 @@
+{% extends 'admin/layout.html.twig' %}
+
+{# ─── Page Title ─── #}
+{% block page_title %}Nou client{% endblock %}
+
+{# ─── Topbar Actions ─── #}
+{% block topbar_actions %}
+<a href="{{ path('admin_client_index') }}" class="btn btn-outline-primary btn-sm">
+    <i class="bi bi-arrow-left"></i> Tornar
+</a>
+{% endblock %}
+
+{# ─── Content ─── #}
+{% block content %}
+<div class="card">
+    <div class="card-body">
+        {# ─── Form Header ─── #}
+        <div class="d-flex align-items-center gap-3 mb-4">
+            <div style="width:48px;height:48px;border-radius:14px;background: linear-gradient(135deg, rgba(73,69,255,0.30) 0%, rgba(73,69,255,0.10) 100%); display:flex;align-items:center;justify-content:center; font-size:1.2rem; color: rgba(73,69,255,0.70);">
+                <i class="bi bi-building-add"></i>
+            </div>
+            <div>
+                <h6 class="mb-0">Crear nou client</h6>
+                <span style="color:var(--s-text-secondary);font-size:0.75rem;">Configura les dades bàsiques del client</span>
+            </div>
+        </div>
+
+        {# ─── Form ─── #}
+        <form method="post">
+            <div class="row g-3 mb-3">
+                {# ─── Name ─── #}
+                <div class="col-md-6">
+                    <label class="form-label" for="nameInput">Nom *</label>
+                    <input type="text" name="name" class="form-control" id="nameInput" required placeholder="Nom del client (ex: Restaurant Can Roca)">
+                </div>
+
+                {# ─── Slug (auto-generated) ─── #}
+                <div class="col-md-6">
+                    <label class="form-label" for="slugInput">Slug *</label>
+                    <input type="text" name="slug" class="form-control" id="slugInput" required placeholder="restaurant_can_roca">
+                    <div class="form-text">Identificador únic per URLs. Es genera automàticament des del nom.</div>
+                </div>
+
+                {# ─── Logo URL ─── #}
+                <div class="col-12">
+                    <label class="form-label" for="logoInput">Logo (URL)</label>
+                    <input type="url" name="logo" class="form-control" id="logoInput" placeholder="https://exemple.com/logo.png">
+                    <div class="form-text">Opcional. URL de la imatge del logo del client.</div>
+                </div>
+
+                {# ─── Active checkbox ─── #}
+                <div class="col-12">
+                    <div class="form-check">
+                        <input type="checkbox" name="active" class="form-check-input" id="activeCheck" checked value="1">
+                        <label class="form-check-label" for="activeCheck">Actiu</label>
+                    </div>
+                    <div class="form-text">Els clients inactius no poden ser accedits pels seus usuaris.</div>
+                </div>
+            </div>
+
+            {# ─── Divider ─── #}
+            <hr style="border-color:rgba(255,255,255,0.06);opacity:0.5;">
+
+            {# ─── Info box ─── #}
+            <div style="background: rgba(73,69,255,0.06); border: 1px solid rgba(73,69,255,0.12); border-radius: var(--s-radius); padding: 12px 16px; margin-bottom: 16px; display: flex; align-items: flex-start; gap: 10px;">
+                <i class="bi bi-info-circle" style="color: rgba(73,69,255,0.60); font-size: 1rem; margin-top: 1px;"></i>
+                <div>
+                    <span style="color: rgba(255,255,255,0.70); font-size: 0.8rem; font-weight: 500;">Què passa en crear un client?</span>
+                    <p style="color: rgba(255,255,255,0.40); font-size: 0.75rem; margin: 2px 0 0;">
+                        Es crea un espai aïllat amb els seus propis tipus de contingut, entrades, usuaris i mediateca.
+                        Cap client pot veure ni modificar les dades d'un altre.
+                    </p>
+                </div>
+            </div>
+
+            {# ─── Submit ─── #}
+            <button type="submit" class="btn btn-primary w-100">
+                <i class="bi bi-check-lg me-1"></i> Crear client
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{# ─── JavaScript: Auto-slug ─── #}
+{% block javascripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    /* ── Auto-generate slug from name ──
+       Converteix el nom a minúscules, elimina accents,
+       substitueix espais i caràcters especials per guions baixos. */
+    var nameInput = document.getElementById('nameInput');
+    var slugInput = document.getElementById('slugInput');
+
+    nameInput.addEventListener('input', function() {
+        var slug = this.value
+            .toLowerCase()
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '')   // Elimina accents
+            .replace(/[^a-z0-9]+/g, '_')       // Caràcters no alfanumèrics → _
+            .replace(/^_|_$/g, '');            // Elimina _ inicial i final
+        slugInput.value = slug;
+    });
+});
+</script>
+{% endblock %}
