@@ -17,6 +17,7 @@
 
 namespace App\DataFixtures;
 
+use App\Entity\Client;
 use App\Entity\ContentType;
 use App\Entity\Entry;
 use App\Entity\FieldDefinition;
@@ -31,6 +32,9 @@ class DemoFixtures extends Fixture
     {
         $admin = $manager->getRepository(User::class)->findOneBy(['email' => 'admin@vorastudio.cat']);
 
+        /* ----- Client per defecte ----- */
+        $defaultClient = $manager->getRepository(Client::class)->findOneBy(['slug' => 'default']);
+
         /* ===========================================================
            1. CONTENT TYPE: NOTÍCIES (slug: noticia)
               Camps: titul (text) · descripcio (richtext) · data (date)
@@ -41,6 +45,8 @@ class DemoFixtures extends Fixture
         $noticies->setName('Notícies');
         $noticies->setSlug('noticia');
         $noticies->setDescription('Articles i notícies del projecte');
+        $noticies->setBase(true);
+        $noticies->setClient($defaultClient);
 
         $f1 = new FieldDefinition();
         $f1->setName('Títol');
@@ -94,6 +100,8 @@ class DemoFixtures extends Fixture
         $events->setName('Events');
         $events->setSlug('event');
         $events->setDescription('Esdeveniments i actes');
+        $events->setBase(true);
+        $events->setClient($defaultClient);
 
         $fe1 = new FieldDefinition();
         $fe1->setName('Títol');
@@ -147,6 +155,7 @@ class DemoFixtures extends Fixture
         $entry->setContentType($noticies);
         $entry->setStatus(Entry::STATUS_PUBLISHED);
         $entry->setAuthor($admin);
+        $entry->setClient($defaultClient);
         $entry->setPublishedAt(new \DateTime());
         $this->addFieldValue($manager, $entry, $f1, 'Exposició d\'Art Contemporani 2026');
         $this->addFieldValue($manager, $entry, $f2, '<p>Gran exposició d\'art contemporani amb obres de diversos artistes internacionals.</p>');
@@ -159,6 +168,7 @@ class DemoFixtures extends Fixture
         $entry2->setContentType($events);
         $entry2->setStatus(Entry::STATUS_PUBLISHED);
         $entry2->setAuthor($admin);
+        $entry2->setClient($defaultClient);
         $entry2->setPublishedAt(new \DateTime());
         $this->addFieldValue($manager, $entry2, $fe1, 'Vernisage: Noves mirades');
         $this->addFieldValue($manager, $entry2, $fe2, '<p>Inauguració de la temporada amb una selecció d\'obres en format reduït.</p>');
