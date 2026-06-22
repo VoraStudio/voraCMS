@@ -1,114 +1,285 @@
 {% extends 'admin/layout.html.twig' %}
 
-{% block page_title %}
-    {% if currentClient %}Dashboard · {{ currentClient.name }}{% else %}Dashboard{% endif %}
-{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
 
 {% block content %}
 {% set cardIcons = ['bi-file-text', 'bi-calendar-event', 'bi-person', 'bi-image', 'bi-link', 'bi-star', 'bi-geo-alt', 'bi-chat-dots'] %}
 <div class="s-dashboard">
 
-{# ─── Client Context Header ─── #}
-{% if currentClient %}
-    <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 28px; position: relative; z-index: 1;">
-        {% if currentClient.logo %}
-            <img src="{{ currentClient.logo }}" alt="{{ currentClient.name }}" style="width: 40px; height: 40px; object-fit: cover; border-radius: 12px; border: 2px solid rgba(255,255,255,0.10);">
-        {% else %}
-            <div style="width: 40px; height: 40px; border-radius: 12px; background: linear-gradient(135deg, rgba(73,69,255,0.35), rgba(73,69,255,0.12)); display: flex; align-items: center; justify-content: center; font-size: 1rem; font-weight: 700; color: rgba(73,69,255,0.75); flex-shrink: 0;">
-                {{ currentClient.name|first|upper }}
+{##}
+{## ─── ADMIN DASHBOARD — Global, tots els clients ─── #}
+{##}
+{% if isAdmin is defined and isAdmin %}
+
+    {# ─── Mètriques globals: Clientes · Proyectos · Publicaciones · Visites ─── #}
+    <div class="row g-3 mb-4" style="position:relative;z-index:1;">
+        <div class="col-md-3">
+            <div class="s-stat-card" data-anim="metric" style="padding:20px 24px;text-align:center;">
+                <div class="s-stat-label" style="margin-bottom:8px;">
+                    <i class="bi bi-buildings me-1 s-stat-label-icon"></i> Clients
+                </div>
+                <div class="s-stat-value">
+                    {{ metrics.totalClientes }}
+                </div>
             </div>
-        {% endif %}
-        <div>
-            <div style="font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.08em; color: rgba(255,255,255,0.35);">Gestionant</div>
-            <div style="font-size: 1.1rem; font-weight: 650; color: rgba(255,255,255,0.85); letter-spacing: -0.02em;">{{ currentClient.name }}</div>
+        </div>
+        <div class="col-md-3">
+            <div class="s-stat-card" data-anim="metric" style="padding:20px 24px;text-align:center;">
+                <div class="s-stat-label" style="margin-bottom:8px;">
+                    <i class="bi bi-folder me-1 s-stat-label-icon"></i> Projectes
+                </div>
+                <div class="s-stat-value">
+                    {{ metrics.totalProyectos }}
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="s-stat-card" data-anim="metric" style="padding:20px 24px;text-align:center;">
+                <div class="s-stat-label" style="margin-bottom:8px;">
+                    <i class="bi bi-check-circle me-1 s-stat-label-icon"></i> Publicacions
+                </div>
+                <div class="s-stat-value s-stat-value--success">
+                    {{ metrics.totalPublicaciones }}
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="s-stat-card" data-anim="metric" style="padding:20px 24px;text-align:center;">
+                <div class="s-stat-label" style="margin-bottom:8px;">
+                    <i class="bi bi-eye me-1 s-stat-label-icon"></i> Visites avui
+                </div>
+                <div class="s-stat-value" style="color:var(--s-accent-icon);">
+                    {{ metrics.totalVisites }}
+                </div>
+            </div>
         </div>
     </div>
-{% endif %}
 
-{# ─── Super Admin Overview ─── #}
-{% if is_granted('ROLE_SUPER_ADMIN') and clients is not empty %}
-    <div style="margin-bottom: 32px; position: relative; z-index: 1;">
-        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
-            <h6 style="color: rgba(255,255,255,0.60); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em; margin: 0;">
-                <i class="bi bi-buildings me-2" style="color: rgba(73,69,255,0.60);"></i>Tots els clients
+    {# ─── Últims projectes afegits ─── #}
+    {% if latestProjects is not empty %}
+    <div class="mb-4" style="position:relative;z-index:1;">
+        <h6 style="color:var(--s-accent-icon-soft);font-size:0.75rem;text-transform:uppercase;letter-spacing:0.08em;margin:0 0 12px;">
+            <i class="bi bi-folder me-2" style="color:var(--s-accent-icon-soft);"></i>Últims projectes
+        </h6>
+        <div class="row g-3">
+            {% for project in latestProjects %}
+            {% set color = project.color ?: '#FFFFFF' %}
+            <div class="col-md-4">
+                <div class="s-stat-card"
+                     style="cursor:pointer;padding:20px 20px 18px;border-top:3px solid {{ color }};border-radius:24px;"
+                     onclick="window.location='{{ path('admin_switch_project', {id: project.id}) }}'">
+                    <div class="s-stat-card-icon" style="font-size:2rem;color:{{ color }}88;margin-bottom:4px;">
+                        <i class="bi bi-folder2-open"></i>
+                    </div>
+                    <h6 class="text-capitalize" style="font-size:0.85rem;margin-bottom:4px;display:flex;align-items:center;justify-content:center;gap:6px;">
+                        <span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:{{ color }};flex-shrink:0;"></span>
+                        {{ project.name }}
+                    </h6>
+                    <p style="font-size:0.7rem;color:var(--s-text-secondary);margin:0;text-align:center;">
+                        <i class="bi bi-building me-1" style="font-size:0.6rem;"></i>{{ project.client.name }}
+                    </p>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    {# ─── Últimes publicacions ─── #}
+    {% if latestPublications is not empty %}
+    <div class="mb-4" style="position:relative;z-index:1;">
+        <h6 style="color:var(--s-accent-icon-soft);font-size:0.75rem;text-transform:uppercase;letter-spacing:0.08em;margin:0 0 12px;">
+            <i class="bi bi-file-text me-2" style="color:var(--s-accent-icon-soft);"></i>Últimes publicacions
+        </h6>
+        <div style="background:var(--s-card-bg);border:1px solid var(--s-card-border);border-radius:var(--s-radius-lg);overflow:hidden;">
+            {% for entry in latestPublications %}
+            {% set title = '' %}
+            {% for fv in entry.fieldValues|sort((a, b) => a.fieldDefinition.sortOrder <=> b.fieldDefinition.sortOrder) %}
+                {% if fv.fieldDefinition.fieldType in ['text', 'textarea'] and fv.value and not title %}
+                    {% set title = fv.value %}
+                {% endif %}
+            {% endfor %}
+            <div style="display:flex;align-items:center;gap:8px;padding:8px 12px;border-bottom:1px solid var(--s-card-border);transition:background 0.2s;"
+                 onmouseover="this.style.background='var(--s-hover)'" onmouseout="this.style.background='transparent'">
+                <a href="{{ path('admin_entry_show', {id: entry.id}) }}" style="flex:1;min-width:0;text-decoration:none;color:inherit;">
+                    <div style="font-size:0.85rem;font-weight:500;color:var(--s-text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+                        {% if title %}
+                            {{ title|length > 50 ? title|slice(0, 50) ~ '…' : title }}
+                        {% else %}
+                            <span style="color:var(--s-text-secondary);font-style:italic;">Sense títol</span>
+                        {% endif %}
+                    </div>
+                    <div style="font-size:0.7rem;color:var(--s-text-secondary);margin-top:2px;">
+                        <a href="{{ path('admin_client_edit', {id: entry.client.id}) }}" style="color:var(--s-accent-icon);font-weight:600;text-decoration:none;"
+                           onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">
+                            {{ entry.client.name }}
+                        </a>
+                        <span style="margin:0 6px;opacity:0.3;">·</span>
+                        <span>{{ entry.contentType.name }}</span>
+                        <span style="margin:0 6px;opacity:0.3;">·</span>
+                        <span>{{ entry.createdAt|date('d/m/Y H:i') }}</span>
+                    </div>
+                </a>
+                {% if entry.status == 'published' %}
+                    <span class="badge bg-success" style="font-size:0.6rem;flex-shrink:0;">Publicat</span>
+                {% elseif entry.status == 'draft' %}
+                    <span class="badge bg-secondary" style="font-size:0.6rem;flex-shrink:0;">Esborrany</span>
+                {% endif %}
+                <div style="display:flex;gap:4px;flex-shrink:0;">
+                    <a href="{{ path('admin_entry_edit', {id: entry.id}) }}" style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:6px;color:var(--s-text-secondary);text-decoration:none;transition:all 0.15s;"
+                       onmouseover="this.style.background='var(--s-hover)';this.style.color='var(--s-text)'" onmouseout="this.style.background='transparent';this.style.color='var(--s-text-secondary)'" title="Editar">
+                        <i class="bi bi-pencil" style="font-size:0.75rem;"></i>
+                    </a>
+                    <form method="post" action="{{ path('admin_entry_delete', {id: entry.id}) }}" style="display:inline" id="del-pub-{{ entry.id }}">
+                        <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ entry.id) }}">
+                        <button type="button" style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:6px;border:none;background:none;color:var(--s-text-secondary);cursor:pointer;transition:all 0.15s;padding:0;"
+                                onmouseover="this.style.background='rgba(239,83,80,0.12)';this.style.color='rgba(239,83,80,0.80)'" onmouseout="this.style.background='transparent';this.style.color='var(--s-text-secondary)'"
+                                title="Eliminar"
+                                onclick="swalConfirm('Segur que vols eliminar aquesta entrada?',function(){document.getElementById('del-pub-{{ entry.id }}').submit()})">
+                            <i class="bi bi-trash" style="font-size:0.75rem;"></i>
+                        </button>
+                    </form>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    {# ─── Clients amb mètriques ─── #}
+    {% if clientMetrics is not empty %}
+    <div class="mb-4" style="position:relative;z-index:1;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+            <h6 style="color:var(--s-accent-icon-soft);font-size:0.75rem;text-transform:uppercase;letter-spacing:0.08em;margin:0;">
+                <i class="bi bi-buildings me-2" style="color:var(--s-accent-icon-soft);"></i>Clients
             </h6>
             <a href="{{ path('admin_client_index') }}" class="btn btn-outline-primary btn-sm" style="font-size:0.75rem;padding:6px 14px;min-height:32px;">
                 Gestionar <i class="bi bi-arrow-right ms-1"></i>
             </a>
         </div>
         <div class="row g-3">
-            {% for client in clients %}
+            {% for cm in clientMetrics %}
+            {% set client = cm.client %}
             <div class="col-md-3">
-                <div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); border-radius: 14px; padding: 18px; transition: all 300ms ease; cursor: default;"
-                     onmouseover="this.style.borderColor='rgba(73,69,255,0.25)';this.style.background='rgba(73,69,255,0.04)';"
-                     onmouseout="this.style.borderColor='rgba(255,255,255,0.06)';this.style.background='rgba(255,255,255,0.02)';">
-                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
-                        {% if client.logo %}
-                            <img src="{{ client.logo }}" alt="{{ client.name }}" style="width:32px;height:32px;object-fit:cover;border-radius:8px;">
-                        {% else %}
-                            <div style="width:32px;height:32px;border-radius:8px;background: linear-gradient(135deg, rgba(73,69,255,0.30), rgba(73,69,255,0.08)); display:flex;align-items:center;justify-content:center; font-weight:700; font-size:0.75rem; color: rgba(73,69,255,0.70);">
-                                {{ client.name|first|upper }}
-                            </div>
-                        {% endif %}
+                <div style="background:var(--s-card-bg);border:1px solid var(--s-card-border);border-radius:14px;padding:18px;transition:all 300ms ease;cursor:default;"
+                     onmouseover="this.style.borderColor='var(--s-accent-icon-card)';this.style.background='var(--s-hover)';"
+                     onmouseout="this.style.borderColor='var(--s-card-border)';this.style.background='var(--s-card-bg)';">
+                    <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+                        <div style="width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg, var(--s-accent-icon-card), transparent);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.85rem;color:var(--s-accent-icon);flex-shrink:0;">
+                            {{ client.name|first|upper }}
+                        </div>
                         <div>
-                            <div style="font-size:0.8rem;font-weight:600;color:rgba(255,255,255,0.80);">{{ client.name }}</div>
-                            <code style="font-size:0.65rem;">{{ client.slug }}</code>
+                            <div style="font-size:0.8rem;font-weight:600;color:var(--s-text);">{{ client.name }}</div>
+                            <code style="font-size:0.65rem;color:var(--s-text-secondary);">{{ client.slug }}</code>
                         </div>
                     </div>
-                    <div style="display: flex; gap: 16px; font-size: 0.7rem; color: rgba(255,255,255,0.40);">
-                        <span><i class="bi bi-layers me-1" style="font-size:0.6rem;"></i> {{ client.contentTypes|length }}</span>
-                        <span><i class="bi bi-file-text me-1" style="font-size:0.6rem;"></i> {{ client.entries|length }}</span>
-                        <span><i class="bi bi-people me-1" style="font-size:0.6rem;"></i> {{ client.users|length }}</span>
+                    <div style="display:flex;gap:10px;font-size:0.7rem;color:var(--s-text-secondary);flex-wrap:wrap;">
+                        <span title="Projectes"><i class="bi bi-folder me-1" style="font-size:0.6rem;"></i> {{ cm.projects }}</span>
+                        <span title="Publicacions"><i class="bi bi-check-circle me-1" style="font-size:0.6rem;"></i> {{ cm.published }}</span>
+                        <span title="Entrades avui"><i class="bi bi-activity me-1" style="font-size:0.6rem;"></i> {{ cm.today }}</span>
+                        <span title="Visites avui"><i class="bi bi-eye me-1" style="font-size:0.6rem;"></i> {{ cm.visitsToday }}</span>
                     </div>
                 </div>
             </div>
             {% endfor %}
         </div>
     </div>
+    {% endif %}
 
-    <div style="margin-bottom: 24px; position: relative; z-index: 1;">
-        <h6 style="color: rgba(255,255,255,0.60); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em; margin: 0 0 4px;">
-            <i class="bi bi-grid-1x2 me-2" style="color: rgba(73,69,255,0.60);"></i>Tipus de contingut globals
-        </h6>
-        <span style="font-size:0.7rem;color:rgba(255,255,255,0.30);">Visió agregada de tots els clients</span>
-    </div>
-{% endif %}
-
-{# ─── Content Type Stats ─── #}
-{% if stats is empty %}
-<div class="text-center py-5" style="color:rgba(255,255,255,0.5);position:relative;z-index:1;">
-    <i class="bi bi-folder-plus display-3" style="color:rgba(255,255,255,0.15);"></i>
-    <p class="mt-3">No hi ha tipus de contingut encara.</p>
-    <a href="{{ path('admin_content_type_new') }}" class="btn btn-primary">Crear primer tipus</a>
-</div>
+{##}
+{## ─── NON-ADMIN DASHBOARD — Scoped al client ─── #}
+{##}
 {% else %}
-<div class="row g-3" style="position:relative;z-index:1;">
-    {% for stat in stats %}
-    {% set icon = cardIcons[loop.index0 % cardIcons|length] %}
-    <div class="col-md-4">
-        <div class="s-stat-card">
-            <div class="s-stat-card-icon">
-                <i class="bi {{ icon }}"></i>
-            </div>
-            <h6 class="text-capitalize mb-2">{{ stat.type.name }}</h6>
-            <span class="s-stat-badge mb-3">{{ stat.type.fields|length }} camps</span>
-            <div class="s-stat-numbers mb-3">
-                <div>
-                    <div class="s-stat-label">Total</div>
-                    <div class="s-stat-value">{{ stat.total }}</div>
+
+    {# ─── Mètriques agregades ─── #}
+    {% if metrics is defined and metrics %}
+    <div class="row g-3 mb-4" style="position:relative;z-index:1;">
+        <div class="col-md-3">
+            <div class="s-stat-card" data-anim="metric" style="padding:20px 24px;text-align:center;">
+                <div class="s-stat-label" style="margin-bottom:8px;">
+                    <i class="bi bi-file-text me-1 s-stat-label-icon"></i> Entrades
                 </div>
-                <div>
-                    <div class="s-stat-label">Publicades</div>
-                    <div class="s-stat-value s-stat-value--success">{{ stat.published }}</div>
+                <div class="s-stat-value">
+                    {{ metrics.totalEntries }}
                 </div>
             </div>
-            <a href="{{ path('admin_entry_by_type', {slug: stat.type.slug}) }}" class="s-stat-btn">
-                <i class="bi bi-arrow-right-circle me-1"></i> Gestionar entrades
-            </a>
+        </div>
+        <div class="col-md-3">
+            <div class="s-stat-card" data-anim="metric" style="padding:20px 24px;text-align:center;">
+                <div class="s-stat-label" style="margin-bottom:8px;">
+                    <i class="bi bi-check-circle me-1 s-stat-label-icon"></i> Publicacions
+                </div>
+                <div class="s-stat-value s-stat-value--success">
+                    {{ metrics.totalPublished }}
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="s-stat-card" data-anim="metric" style="padding:20px 24px;text-align:center;">
+                <div class="s-stat-label" style="margin-bottom:8px;">
+                    <i class="bi bi-images me-1 s-stat-label-icon"></i> Fitxers
+                </div>
+                <div class="s-stat-value">
+                    {{ metrics.totalMedia }}
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="s-stat-card" data-anim="metric" style="padding:20px 24px;text-align:center;">
+                <div class="s-stat-label" style="margin-bottom:8px;">
+                    <i class="bi bi-folder me-1 s-stat-label-icon"></i> Projectes
+                </div>
+                <div class="s-stat-value">
+                    {{ metrics.totalProjects }}
+                </div>
+            </div>
         </div>
     </div>
-    {% endfor %}
-</div>
+    {% endif %}
+
+    {# ─── Content Type Stats (només si hi ha projecte actiu) ─── #}
+    {% if projectToShow is not null %}
+        {% if stats is empty %}
+        <div class="text-center py-5" style="color:rgba(255,255,255,0.5);position:relative;z-index:1;">
+            <i class="bi bi-folder-plus display-3" style="color:rgba(255,255,255,0.15);"></i>
+            <p class="mt-3">Aquest projecte no té seccions encara.</p>
+            <a href="{{ path('admin_content_type_new') }}" class="btn btn-primary"><span>Crear primera secció</span></a>
+        </div>
+        {% else %}
+        <div style="margin-bottom:16px;position:relative;z-index:1;">
+            <h6 style="color:rgba(255,255,255,0.60);font-size:0.75rem;text-transform:uppercase;letter-spacing:0.08em;margin:0;">
+                <i class="bi bi-grid-1x2 me-2" style="color:rgba(96,165,250,0.60);"></i>{{ projectToShow.name }}
+            </h6>
+        </div>
+        <div class="row g-3" style="position:relative;z-index:1;">
+            {% for stat in stats %}
+            {% set icon = cardIcons[loop.index0 % cardIcons|length] %}
+            <div class="col-md-4">
+                <div class="s-stat-card" data-anim="card">
+                    <div class="s-stat-card-icon">
+                        <i class="bi {{ icon }}"></i>
+                    </div>
+                    <h6 class="text-capitalize mb-2">{{ stat.type.name }}</h6>
+                    <div class="s-stat-numbers mb-3" style="gap:32px;">
+                        <div>
+                            <div class="s-stat-label">Entrades</div>
+                            <div class="s-stat-value">{{ stat.total }}</div>
+                        </div>
+                        <div>
+                            <div class="s-stat-label">Publicacions</div>
+                            <div class="s-stat-value s-stat-value--success">{{ stat.published }}</div>
+                        </div>
+                    </div>
+                    <a href="{{ path('admin_entry_by_type', {slug: stat.type.slug}) }}" class="s-stat-btn">
+                        <i class="bi bi-arrow-right-circle me-1"></i> Gestionar entrades
+                    </a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+    {% endif %}
+
 {% endif %}
 
 </div>

@@ -25,6 +25,7 @@
 
 namespace App\Controller\Api;
 
+use App\Entity\Client;
 use App\Repository\ClientRepository;
 use App\Repository\ContentTypeRepository;
 use App\Repository\EntryRepository;

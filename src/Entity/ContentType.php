@@ -39,6 +39,10 @@ class ContentType
     #[ORM\JoinColumn(nullable: false)]
     private ?Client $client = null;
 
+    #[ORM\ManyToOne(inversedBy: 'contentTypes')]
+    #[ORM\JoinColumn(nullable: true)]
+    private ?Project $project = null;
+
     #[ORM\OneToMany(targetEntity: FieldDefinition::class, mappedBy: 'contentType', orphanRemoval: true, cascade: ['persist', 'remove'])]
     #[ORM\OrderBy(['sortOrder' => 'ASC'])]
     private Collection $fields;
@@ -75,6 +79,9 @@ class ContentType
 
     public function getClient(): ?Client { return $this->client; }
     public function setClient(?Client $client): static { $this->client = $client; return $this; }
+
+    public function getProject(): ?Project { return $this->project; }
+    public function setProject(?Project $project): static { $this->project = $project; return $this; }
 
     public function getFields(): Collection { return $this->fields; }
     public function addField(FieldDefinition $field): static

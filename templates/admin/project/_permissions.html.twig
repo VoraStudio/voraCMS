@@ -1,0 +1,15 @@
+{# ─── Permisos del client sobre el projecte ─── #}
+{% if clientUser is defined and clientUser %}
+<div class="col-12">
+    <label class="form-label">Permisos del client</label>
+    <div class="form-check">
+        <input type="checkbox" name="can_manage_content_types" id="can_manage_content_types" class="form-check-input" value="1" {% if userProject is defined and userProject and userProject.canManageContentTypes %}checked{% endif %}>
+        <label class="form-check-label small" for="can_manage_content_types">
+            Permetre a <strong>{{ clientUser.name }}</strong> gestionar tipus de contingut d'aquest projecte
+        </label>
+    </div>
+    <small style="color:var(--s-text-secondary);">
+        Activat: pot gestionar tipus de contingut en aquest projecte. Desactivat: torna al comportament per defecte del seu rol (MOD pot, USUARIO no).
+    </small>
+</div>
+{% endif %}

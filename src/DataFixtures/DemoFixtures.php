@@ -111,12 +111,20 @@ class DemoFixtures extends Fixture
         $fe1->setSortOrder(0);
         $events->addField($fe1);
 
+        $feSub = new FieldDefinition();
+        $feSub->setName('Subtítol');
+        $feSub->setSlug('subtitol');
+        $feSub->setFieldType('text');
+        $feSub->setRequired(false);
+        $feSub->setSortOrder(1);
+        $events->addField($feSub);
+
         $fe2 = new FieldDefinition();
         $fe2->setName('Descripció');
         $fe2->setSlug('descripcio');
         $fe2->setFieldType('richtext');
         $fe2->setRequired(true);
-        $fe2->setSortOrder(1);
+        $fe2->setSortOrder(2);
         $events->addField($fe2);
 
         $fe3 = new FieldDefinition();
@@ -124,16 +132,8 @@ class DemoFixtures extends Fixture
         $fe3->setSlug('data');
         $fe3->setFieldType('date');
         $fe3->setRequired(true);
-        $fe3->setSortOrder(2);
+        $fe3->setSortOrder(3);
         $events->addField($fe3);
-
-        $fe4 = new FieldDefinition();
-        $fe4->setName('Hora');
-        $fe4->setSlug('hora');
-        $fe4->setFieldType('text');
-        $fe4->setRequired(false);
-        $fe4->setSortOrder(3);
-        $events->addField($fe4);
 
         $fe5 = new FieldDefinition();
         $fe5->setName('Ubicació');
@@ -173,7 +173,6 @@ class DemoFixtures extends Fixture
         $this->addFieldValue($manager, $entry2, $fe1, 'Vernisage: Noves mirades');
         $this->addFieldValue($manager, $entry2, $fe2, '<p>Inauguració de la temporada amb una selecció d\'obres en format reduït.</p>');
         $this->addFieldValue($manager, $entry2, $fe3, '2026-07-01');
-        $this->addFieldValue($manager, $entry2, $fe4, '19:00');
         $this->addFieldValue($manager, $entry2, $fe5, 'Girona');
         $manager->persist($entry2);
 

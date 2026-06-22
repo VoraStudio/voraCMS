@@ -79,4 +79,54 @@ class EntryRepository extends ServiceEntityRepository
 
         return $qb->getQuery()->getOneOrNullResult();
     }
+
+    /* -----------------------------------------------------------
+       findLatestPublished — Retorna les últimes entrades publicades
+       (sense scope de client, per al dashboard d'admin).
+       Inclou el nom del client per mostrar-lo al panell.
+       ----------------------------------------------------------- */
+    public function findLatestPublished(int $limit = 10): array
+    {
+        return $this->createQueryBuilder('e')
+            ->join('e.client', 'c')
+            ->addSelect('c')
+            ->where('e.status = :status')
+            ->setParameter('status', Entry::STATUS_PUBLISHED)
+            ->orderBy('e.createdAt', 'DESC')
+            ->setMaxResults($limit)
+            ->getQuery()
+            ->getResult();
+    }
+
+    /* -----------------------------------------------------------
+       countPublishedByClient — Total d'entrades publicades per client
+       ----------------------------------------------------------- */
+    public function countPublishedByClient(int $clientId): int
+    {
+        return (int) $this->createQueryBuilder('e')
+            ->select('COUNT(e.id)')
+            ->where('e.status = :status')
+            ->andWhere('IDENTITY(e.client) = :clientId')
+            ->setParameter('status', Entry::STATUS_PUBLISHED)
+            ->setParameter('clientId', $clientId)
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
+
+    /* -----------------------------------------------------------
+       countTodayByClient — Entrades creades AVUI per client
+       ----------------------------------------------------------- */
+    public function countTodayByClient(int $clientId): int
+    {
+        $today = new \DateTimeImmutable('today');
+
+        return (int) $this->createQueryBuilder('e')
+            ->select('COUNT(e.id)')
+            ->where('e.createdAt >= :today')
+            ->andWhere('IDENTITY(e.client) = :clientId')
+            ->setParameter('today', $today)
+            ->setParameter('clientId', $clientId)
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
 }

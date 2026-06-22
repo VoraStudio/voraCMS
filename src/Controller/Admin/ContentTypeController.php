@@ -2,13 +2,15 @@
 
 /* ===========================================================
    ContentTypeController — CRUD de tipus de contingut amb
-   tenant isolation (defense in depth).
+   tenant isolation + project isolation.
 
-   Tot i que el repositori ja scopa per client via
-   ClientScope, afegim verificacions explícites de
-   propietat als mètodes edit() i delete() per evitar
-   que un client admin manipuli tipus d'un altre client
-   si el filtre de Doctrine falla o es desactiva.
+   Cada tipus de contingut (secció) pertany a un projecte dins
+   d'un client. Quan es crea un de nou, s'assigna al projecte
+   actiu de la sessió.
+
+   Tot i que el repositori ja scopa per client via ClientScope
+   i per projecte via session, afegim verificacions explícites
+   de propietat per defense in depth.
    =========================================================== */
 
 namespace App\Controller\Admin;
@@ -16,6 +18,7 @@ namespace App\Controller\Admin;
 use App\Entity\ContentType;
 use App\Entity\FieldDefinition;
 use App\Repository\ContentTypeRepository;
+use App\Repository\ProjectRepository;
 use App\Service\ClientScope;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -31,27 +34,48 @@ class ContentTypeController extends AbstractController
     ) {}
 
     /* -----------------------------------------------------------
-       index — Llista els tipus de contingut del client actual.
-       El repositori ja aplica el filtre de tenant isolation
-       automàticament via ClientScope.
-       ----------------------------------------------------------- */
+        index — Llista els tipus de contingut del projecte actiu.
+        Requereix MANAGE_CT sobre el projecte (o accés a CT base).
+        ----------------------------------------------------------- */
     #[Route('/', name: 'admin_content_type_index')]
-    public function index(ContentTypeRepository $repo): Response
-    {
+    public function index(
+        ContentTypeRepository $repo,
+        ProjectRepository $projectRepo,
+        Request $request,
+    ): Response {
+        $this->denyAccessUnlessGranted('ROLE_USUARIO');
+        $projectId = $request->getSession()->get('_project_id');
+        $project = $projectId ? $projectRepo->find($projectId) : null;
+
+        if ($project !== null) {
+            $this->denyAccessUnlessGranted('MANAGE_CT', $project);
+        }
+
         return $this->render('admin/content-type/index.html.twig', [
-            'contentTypes' => $repo->findAll(),
+            'contentTypes' => $repo->findActive($projectId),
             'currentClient' => $this->clientScope->getClient(),
         ]);
     }
 
     /* -----------------------------------------------------------
-       new — Crea un nou tipus de contingut assignat al client
-       actual. El client s'obté del ClientScope (null per a
-       super-admin, que crea tipus globals sense client).
-       ----------------------------------------------------------- */
+        new — Crea un nou tipus de contingut dins del projecte
+        actiu de la sessió. Requereix MANAGE_CT sobre el projecte.
+        ----------------------------------------------------------- */
     #[Route('/new', name: 'admin_content_type_new', methods: ['GET', 'POST'])]
-    public function new(Request $request, EntityManagerInterface $em): Response
-    {
+    public function new(
+        Request $request,
+        EntityManagerInterface $em,
+        ProjectRepository $projectRepo,
+    ): Response {
+        $projectId = $request->getSession()->get('_project_id');
+        $project = $projectId ? $projectRepo->find($projectId) : null;
+
+        if ($project === null) {
+            throw $this->createAccessDeniedException('Cal seleccionar un projecte per crear un tipus de contingut.');
+        }
+
+        $this->denyAccessUnlessGranted('MANAGE_CT', $project);
+
         if ($request->isMethod('POST')) {
             $ct = new ContentType();
             $ct->setName($request->request->get('name'));
@@ -59,10 +83,15 @@ class ContentTypeController extends AbstractController
             $ct->setDescription($request->request->get('description'));
             $ct->setActive($request->request->get('active', true));
 
-            /* ── Assignar client actual (defense in depth) ── */
+            /* Assignar client actual */
             $currentClient = $this->clientScope->getClient();
             if ($currentClient !== null) {
                 $ct->setClient($currentClient);
+            }
+
+            /* Assignar al projecte actiu */
+            if ($project !== null) {
+                $ct->setProject($project);
             }
 
             $fieldNames = $request->request->all('field_name') ?? [];
@@ -83,7 +112,7 @@ class ContentTypeController extends AbstractController
             $em->persist($ct);
             $em->flush();
 
-            $this->addFlash('success', 'Tipus de contingut creat correctament.');
+            $this->addFlash('success', 'Secció creada correctament.');
             return $this->redirectToRoute('admin_content_type_index');
         }
 
@@ -93,14 +122,24 @@ class ContentTypeController extends AbstractController
     }
 
     /* -----------------------------------------------------------
-       edit — Edita un tipus de contingut existent.
-       Verifica que el tipus pertanyi al client actual
-       (defense in depth, més enllà del filtre de Doctrine).
-       ----------------------------------------------------------- */
+        edit — Edita un tipus de contingut existent.
+        Requereix MANAGE_CT sobre el projecte.
+        Verifica propietat per client i projecte.
+        ----------------------------------------------------------- */
     #[Route('/{id}/edit', name: 'admin_content_type_edit', methods: ['GET', 'POST'])]
-    public function edit(Request $request, ContentType $contentType, EntityManagerInterface $em): Response
-    {
-        /* ── Verificació de propietat ── */
+    public function edit(
+        Request $request,
+        ContentType $contentType,
+        EntityManagerInterface $em,
+    ): Response {
+        $project = $contentType->getProject();
+        if ($project !== null) {
+            $this->denyAccessUnlessGranted('MANAGE_CT', $project);
+        } else {
+            $this->denyAccessUnlessGranted('ROLE_ADMIN');
+        }
+
+        /* Verificació de propietat */
         $this->verifyOwnership($contentType);
 
         if ($request->isMethod('POST')) {
@@ -129,7 +168,7 @@ class ContentTypeController extends AbstractController
             }
 
             $em->flush();
-            $this->addFlash('success', 'Tipus de contingut actualitzat.');
+            $this->addFlash('success', 'Secció actualitzada.');
             return $this->redirectToRoute('admin_content_type_index');
         }
 
@@ -140,42 +179,43 @@ class ContentTypeController extends AbstractController
     }
 
     /* -----------------------------------------------------------
-       delete — Elimina un tipus de contingut.
-       Verifica propietat i validació CSRF.
-       ----------------------------------------------------------- */
+        delete — Elimina un tipus de contingut.
+        Requereix MANAGE_CT sobre el projecte. Verifica propietat i CSRF.
+        ----------------------------------------------------------- */
     #[Route('/{id}/delete', name: 'admin_content_type_delete', methods: ['POST'])]
     public function delete(Request $request, ContentType $contentType, EntityManagerInterface $em): Response
     {
-        /* ── Verificació de propietat ── */
+        $project = $contentType->getProject();
+        if ($project !== null) {
+            $this->denyAccessUnlessGranted('MANAGE_CT', $project);
+        } else {
+            $this->denyAccessUnlessGranted('ROLE_ADMIN');
+        }
         $this->verifyOwnership($contentType);
 
         if ($this->isCsrfTokenValid('delete' . $contentType->getId(), $request->request->get('_token'))) {
             $em->remove($contentType);
             $em->flush();
-            $this->addFlash('success', 'Tipus de contingut eliminat.');
+            $this->addFlash('success', 'Secció eliminada.');
         }
         return $this->redirectToRoute('admin_content_type_index');
     }
 
     /* -----------------------------------------------------------
        verifyOwnership — Comprova que el ContentType pertany al
-       client actual. Si no hi ha client (super-admin), permet
-       l'accés. Si hi ha client però el ContentType no hi pertany,
-       llança AccessDeniedException.
+       client actual.
        ----------------------------------------------------------- */
     private function verifyOwnership(ContentType $contentType): void
     {
         $currentClient = $this->clientScope->getClient();
 
-        /* Super-admin pot gestionar qualsevol tipus */
         if ($currentClient === null) {
-            return;
+            return; // Super-admin
         }
 
-        /* Client admin només pot gestionar els seus tipus */
         if ($contentType->getClient()?->getId() !== $currentClient->getId()) {
             throw $this->createAccessDeniedException(
-                'No tens permís per modificar aquest tipus de contingut.'
+                'No tens permís per modificar aquesta secció.'
             );
         }
     }

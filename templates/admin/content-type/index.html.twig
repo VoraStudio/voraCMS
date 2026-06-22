@@ -4,7 +4,7 @@
 
 {% block topbar_actions %}
 <a href="{{ path('admin_content_type_new') }}" class="btn btn-primary btn-sm">
-    <i class="bi bi-plus-lg"></i> Nou tipus
+    <i class="bi bi-plus-lg"></i> <span>Nou tipus</span>
 </a>
 {% endblock %}
 
@@ -38,9 +38,9 @@
                     </td>
                     <td class="text-end">
                         <a href="{{ path('admin_content_type_edit', {id: ct.id}) }}" class="btn btn-outline-primary btn-sm"><i class="bi bi-pencil"></i></a>
-                        <form method="post" action="{{ path('admin_content_type_delete', {id: ct.id}) }}" style="display:inline" onsubmit="return confirm('Segur que vols eliminar aquest tipus?');">
+                        <form method="post" action="{{ path('admin_content_type_delete', {id: ct.id}) }}" style="display:inline" id="dct-{{ ct.id }}">
                             <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ ct.id) }}">
-                            <button class="btn btn-outline-danger btn-sm"><i class="bi bi-trash"></i></button>
+                            <button type="button" class="btn btn-outline-danger btn-sm" onclick="swalConfirm('Segur que vols eliminar aquest tipus i totes les seves entrades?',function(){document.getElementById('dct-{{ ct.id }}').submit()})"><i class="bi bi-trash"></i></button>
                         </form>
                     </td>
                 </tr>

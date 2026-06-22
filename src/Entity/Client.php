@@ -37,7 +37,7 @@ class Client
     #[ORM\OneToMany(targetEntity: User::class, mappedBy: 'client')]
     private Collection $users;
 
-    #[ORM\OneToMany(targetEntity: ContentType::class, mappedBy: 'client')]
+    #[ORM\OneToMany(targetEntity: ContentType::class, mappedBy: 'client', cascade: ['persist', 'remove'])]
     private Collection $contentTypes;
 
     #[ORM\OneToMany(targetEntity: Entry::class, mappedBy: 'client')]
@@ -46,6 +46,9 @@ class Client
     #[ORM\OneToMany(targetEntity: Media::class, mappedBy: 'client')]
     private Collection $media;
 
+    #[ORM\OneToMany(targetEntity: Project::class, mappedBy: 'client')]
+    private Collection $projects;
+
     public function __construct()
     {
         $this->createdAt = new \DateTimeImmutable();
@@ -53,6 +56,7 @@ class Client
         $this->contentTypes = new ArrayCollection();
         $this->entries = new ArrayCollection();
         $this->media = new ArrayCollection();
+        $this->projects = new ArrayCollection();
     }
 
     public function getId(): ?int { return $this->id; }
@@ -135,6 +139,30 @@ class Client
     {
         if ($this->media->removeElement($medium)) {
             if ($medium->getClient() === $this) $medium->setClient(null);
+        }
+        return $this;
+    }
+
+    public function getProjects(): Collection
+    {
+        return $this->projects;
+    }
+
+    public function addProject(Project $project): static
+    {
+        if (!$this->projects->contains($project)) {
+            $this->projects->add($project);
+            $project->setClient($this);
+        }
+        return $this;
+    }
+
+    public function removeProject(Project $project): static
+    {
+        if ($this->projects->removeElement($project)) {
+            if ($project->getClient() === $this) {
+                $project->setClient(null);
+            }
         }
         return $this;
     }

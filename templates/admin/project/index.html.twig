@@ -1,0 +1,99 @@
+{% extends 'admin/layout.html.twig' %}
+
+{% block page_title %}Projectes{% endblock %}
+
+{% block topbar_actions %}
+<a href="{{ path('admin_project_new') }}" class="btn btn-primary btn-sm">
+    <i class="bi bi-plus-lg"></i> <span>Nou projecte</span>
+</a>
+{% endblock %}
+
+{% block content %}
+<div class="row g-3">
+    {% for project in projects %}
+    {% set color = project.color ?: '#4945FF' %}
+    <div class="col-md-6 col-lg-4">
+        <div class="s-stat-card"
+             style="cursor:pointer;padding:28px 28px 24px;border-top:3px solid {{ color }};border-top-left-radius:24px;border-top-right-radius:24px;"
+             onmouseover="this.style.borderTopColor='{{ color }}cc'"
+             onmouseout="this.style.borderTopColor='{{ color }}'"
+             onclick="window.location='{{ path('admin_switch_project', {id: project.id}) }}'">
+
+            {# ─── Icona amb el color del projecte (subtil) ─── #}
+            <div class="s-stat-card-icon" style="color:{{ color }}88;">
+                <i class="bi bi-folder2-open"></i>
+            </div>
+
+            {# ─── Nom amb bol  de color al costat ─── #}
+            <h6 class="text-capitalize mb-2" style="display:flex;align-items:center;justify-content:center;gap:8px;">
+                <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:{{ color }};flex-shrink:0;"></span>
+                {{ project.name }}
+            </h6>
+
+            {# ─── Descripció ─── #}
+            {% if project.description %}
+            <p style="margin:0 0 12px;font-size:0.75rem;color:var(--s-text-secondary);line-height:1.4;text-align:center;">
+                {{ project.description }}
+            </p>
+            {% endif %}
+
+            {# ─── Mètriques ─── #}
+            <div class="s-stat-numbers mb-3" style="gap:32px;">
+                <div>
+                    <div class="s-stat-label">Seccions</div>
+                    <div class="s-stat-value">{{ project.contentTypes|length }}</div>
+                </div>
+                <div>
+                    <div class="s-stat-label">Entrades</div>
+                    <div class="s-stat-value" style="color:rgba(96,165,250,0.90);">{{ project.contentTypes|reduce((carry, ct) => carry + ct.entries|length, 0) }}</div>
+                </div>
+            </div>
+
+            {# ─── Navegar al projecte ─── #}
+            <a href="{{ path('admin_switch_project', {id: project.id}) }}"
+               class="s-stat-btn"
+               onclick="event.stopPropagation();">
+                <i class="bi bi-arrow-right-circle me-1"></i> Obrir projecte
+            </a>
+
+            {# ─── Accions (editar / eliminar) ─── #}
+            <div style="display:flex;gap:8px;justify-content:center;margin-top:10px;">
+                <a href="{{ path('admin_project_edit', {id: project.id}) }}"
+                   class="s-stat-btn"
+                   style="padding:8px 16px;font-size:0.75rem;width:auto;display:inline-flex;gap:6px;"
+                   onclick="event.stopPropagation();">
+                    <i class="bi bi-pencil"></i> Editar
+                </a>
+                <button type="button"
+                        class="s-stat-btn"
+                        style="padding:8px 16px;font-size:0.75rem;width:auto;display:inline-flex;gap:6px;color:rgba(239,83,80,0.70);border-color:rgba(239,83,80,0.15);"
+                        onmouseover="this.style.borderColor='rgba(239,83,80,0.40)';this.style.color='rgba(239,83,80,0.90)';"
+                        onmouseout="this.style.borderColor='rgba(239,83,80,0.15)';this.style.color='rgba(239,83,80,0.70)';"
+                        onclick="event.stopPropagation();document.getElementById('delete-{{ project.id }}').submit();"
+                        {% if project.contentTypes|length > 0 %}disabled title="Elimina primer les seccions"{% endif %}>
+                    <i class="bi bi-trash"></i> Eliminar
+                </button>
+                <form id="delete-{{ project.id }}" action="{{ path('admin_project_delete', {id: project.id}) }}" method="post" style="display:none;">
+                    <input type="hidden" name="_token" value="{{ csrf_token('delete-project-' ~ project.id) }}">
+                </form>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="col-12">
+        <div class="s-stat-card" style="text-align:center;padding:60px 24px;">
+            <div class="s-stat-card-icon" style="font-size:3.5rem;color:rgba(255,255,255,0.15);margin-bottom:16px;">
+                <i class="bi bi-folder-plus"></i>
+            </div>
+            <h6 style="color:var(--s-text);margin-bottom:8px;">No hi ha projectes</h6>
+            <p style="color:var(--s-text-secondary);font-size:0.85rem;margin-bottom:24px;">
+                Crea el teu primer projecte per començar a gestionar continguts.
+            </p>
+            <a href="{{ path('admin_project_new') }}" class="btn btn-primary">
+                <i class="bi bi-plus-lg"></i> <span>Crear projecte</span>
+            </a>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

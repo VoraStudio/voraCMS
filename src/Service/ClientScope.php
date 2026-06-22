@@ -29,9 +29,15 @@ class ClientScope
             return $this->explicitClient;
         }
 
-        // (4) Super-admin context — bypass all scoping
-        if ($this->isSuperAdmin()) {
+        // (4) Admin context — bypass all scoping
+        if ($this->isAdmin()) {
             return null;
+        }
+
+        // (5) Fallback: logged-in user's client
+        $userClient = $this->getUserClient();
+        if ($userClient !== null) {
+            return $userClient;
         }
 
         // (2) Request attribute from admin session
@@ -45,7 +51,7 @@ class ClientScope
             return $this->explicitClient->getId();
         }
 
-        if ($this->isSuperAdmin()) {
+        if ($this->isAdmin()) {
             return null;
         }
 
@@ -66,13 +72,28 @@ class ClientScope
             }
         }
 
+        // (5) Fallback: logged-in user's client
+        $userClient = $this->getUserClient();
+        if ($userClient !== null) {
+            return $userClient->getId();
+        }
+
         // (3) JWT token client_id — Phase 2
         return null;
     }
 
-    public function isSuperAdmin(): bool
+    private function getUserClient(): ?\App\Entity\Client
     {
-        return $this->authorizationChecker->isGranted('ROLE_SUPER_ADMIN');
+        $token = $this->tokenStorage->getToken();
+        if ($token && ($user = $token->getUser()) && $user instanceof \App\Entity\User) {
+            return $user->getClient();
+        }
+        return null;
+    }
+
+    public function isAdmin(): bool
+    {
+        return $this->authorizationChecker->isGranted('ROLE_ADMIN');
     }
 
     public function hasClient(): bool

@@ -23,6 +23,7 @@ use App\Entity\FieldValue;
 use App\Entity\FieldDefinition;
 use App\Repository\ContentTypeRepository;
 use App\Repository\MediaRepository;
+use App\Repository\ProjectRepository;
 use App\Service\ClientScope;
 use App\Service\MediaService;
 use Doctrine\ORM\EntityManagerInterface;
@@ -44,13 +45,27 @@ class EntryController extends AbstractController
        abans de mostrar les entrades.
        ----------------------------------------------------------- */
     #[Route('/type/{slug}', name: 'admin_entry_by_type')]
-    public function byType(string $slug, ContentTypeRepository $ctRepo, MediaRepository $mediaRepo): Response
-    {
-        $contentType = $ctRepo->findBySlug($slug);
+    public function byType(
+        string $slug,
+        ContentTypeRepository $ctRepo,
+        MediaRepository $mediaRepo,
+        ProjectRepository $projectRepo,
+        Request $request,
+    ): Response {
+        $this->denyAccessUnlessGranted('ROLE_USUARIO');
+
+        /* Assegurem que hi ha un projecte actiu a sessió */
+        $projectId = $this->ensureActiveProject($request, $projectRepo);
+        if ($projectId === null) {
+            return $this->redirectToRoute('admin_projects');
+        }
+        /* Filtrem el ContentType pel projecte actiu */
+        $contentType = $ctRepo->findBySlug($slug, $projectId);
         if (!$contentType) throw $this->createNotFoundException();
 
         /* ── Verificació de propietat ── */
         $this->verifyContentTypeOwnership($contentType);
+        $this->verifyContentTypeProject($contentType, $projectId);
 
         $entries = $contentType->getEntries();
         $thumbnails = [];
@@ -61,12 +76,7 @@ class EntryController extends AbstractController
                 $type = $fv->getFieldDefinition()?->getFieldType();
                 $val = $fv->getValue();
 
-                if ($type === FieldDefinition::TYPE_IMAGE && is_numeric($val)) {
-                    $media = $mediaRepo->find((int) $val);
-                    if ($media) { $thumb = $media->getPath(); break; }
-                }
-
-                if ($type === FieldDefinition::TYPE_GALLERY && $val) {
+                if (($type === FieldDefinition::TYPE_IMAGE || $type === FieldDefinition::TYPE_GALLERY) && $val) {
                     $ids = array_filter(explode(',', $val));
                     if (!empty($ids) && is_numeric($ids[0])) {
                         $media = $mediaRepo->find((int) $ids[0]);
@@ -85,6 +95,39 @@ class EntryController extends AbstractController
     }
 
     /* -----------------------------------------------------------
+       show — Mostra una entrada en mode lectura (read-only).
+       ----------------------------------------------------------- */
+    #[Route('/{id}', name: 'admin_entry_show', methods: ['GET'])]
+    public function show(Entry $entry, MediaRepository $mediaRepo): Response
+    {
+        $this->denyAccessUnlessGranted('ROLE_USUARIO');
+
+        /* ── Verificació de propietat ── */
+        $this->verifyEntryOwnership($entry);
+
+        $mediaPaths = [];
+        foreach ($entry->getFieldValues() as $fv) {
+            $type = $fv->getFieldDefinition()?->getFieldType();
+            $val = $fv->getValue();
+
+            if (($type === FieldDefinition::TYPE_IMAGE || $type === FieldDefinition::TYPE_GALLERY) && $val) {
+                foreach (array_filter(explode(',', $val)) as $id) {
+                    if (is_numeric($id) && !isset($mediaPaths[$id])) {
+                        $m = $mediaRepo->find((int) $id);
+                        if ($m) $mediaPaths[$id] = $m->getPath();
+                    }
+                }
+            }
+        }
+
+        return $this->render('admin/entry/show.html.twig', [
+            'entry' => $entry,
+            'contentType' => $entry->getContentType(),
+            'mediaPaths' => $mediaPaths,
+        ]);
+    }
+
+    /* -----------------------------------------------------------
        new — Crea una nova entrada dins del ContentType
        especificat. Assigna el client actual a l'entrada
        (defense in depth) per garantir que sempre pertany
@@ -93,7 +136,10 @@ class EntryController extends AbstractController
     #[Route('/new/{slug}', name: 'admin_entry_new', methods: ['GET', 'POST'])]
     public function new(Request $request, string $slug, ContentTypeRepository $ctRepo, EntityManagerInterface $em, MediaService $mediaService): Response
     {
-        $contentType = $ctRepo->findBySlug($slug);
+        $this->denyAccessUnlessGranted('ROLE_USUARIO');
+
+        $projectId = $request->getSession()->get('_project_id');
+        $contentType = $projectId !== null ? $ctRepo->findBySlug($slug, (int) $projectId) : $ctRepo->findBySlug($slug);
         if (!$contentType) throw $this->createNotFoundException();
 
         /* ── Verificació de propietat ── */
@@ -103,7 +149,6 @@ class EntryController extends AbstractController
             $entry = new Entry();
             $entry->setContentType($contentType);
             $entry->setStatus($request->request->get('status', Entry::STATUS_DRAFT));
-            $entry->setLocale($request->request->get('locale', 'ca'));
             $entry->setAuthor($this->getUser());
 
             /* ── Assignar client actual a l'entrada ── */
@@ -133,7 +178,6 @@ class EntryController extends AbstractController
 
         return $this->render('admin/entry/new.html.twig', [
             'contentType' => $contentType,
-            'locales' => ['ca' => 'Català', 'es' => 'Castellano', 'en' => 'English'],
         ]);
     }
 
@@ -145,6 +189,8 @@ class EntryController extends AbstractController
     #[Route('/{id}/edit', name: 'admin_entry_edit', methods: ['GET', 'POST'])]
     public function edit(Request $request, Entry $entry, EntityManagerInterface $em, MediaService $mediaService, MediaRepository $mediaRepo): Response
     {
+        $this->denyAccessUnlessGranted('ROLE_USUARIO');
+
         /* ── Verificació de propietat ── */
         $this->verifyEntryOwnership($entry);
 
@@ -154,12 +200,7 @@ class EntryController extends AbstractController
             $type = $fv->getFieldDefinition()?->getFieldType();
             $val = $fv->getValue();
 
-            if ($type === FieldDefinition::TYPE_IMAGE && is_numeric($val)) {
-                $m = $mediaRepo->find((int) $val);
-                if ($m) $mediaPaths[$val] = $m->getPath();
-            }
-
-            if ($type === FieldDefinition::TYPE_GALLERY && $val) {
+            if (($type === FieldDefinition::TYPE_IMAGE || $type === FieldDefinition::TYPE_GALLERY) && $val) {
                 foreach (array_filter(explode(',', $val)) as $id) {
                     if (is_numeric($id) && !isset($mediaPaths[$id])) {
                         $m = $mediaRepo->find((int) $id);
@@ -171,14 +212,23 @@ class EntryController extends AbstractController
 
         if ($request->isMethod('POST')) {
             $entry->setStatus($request->request->get('status', Entry::STATUS_DRAFT));
-            $entry->setLocale($request->request->get('locale', 'ca'));
 
             foreach ($entry->getContentType()->getFields() as $fieldDef) {
                 $value = $this->resolveFieldValue($request, $fieldDef, $mediaService);
+                $found = false;
                 foreach ($entry->getFieldValues() as $fv) {
                     if ($fv->getFieldDefinition()->getId() === $fieldDef->getId()) {
                         $fv->setValue($value ?? '');
+                        $found = true;
+                        break;
                     }
+                }
+                if (!$found) {
+                    $newFv = new FieldValue();
+                    $newFv->setFieldDefinition($fieldDef);
+                    $newFv->setValue($value ?? '');
+                    $entry->addFieldValue($newFv);
+                    $em->persist($newFv);
                 }
             }
 
@@ -194,7 +244,6 @@ class EntryController extends AbstractController
         return $this->render('admin/entry/edit.html.twig', [
             'entry' => $entry,
             'contentType' => $entry->getContentType(),
-            'locales' => ['ca' => 'Català', 'es' => 'Castellano', 'en' => 'English'],
             'mediaPaths' => $mediaPaths,
         ]);
     }
@@ -206,6 +255,8 @@ class EntryController extends AbstractController
     #[Route('/{id}/delete', name: 'admin_entry_delete', methods: ['POST'])]
     public function delete(Request $request, Entry $entry, EntityManagerInterface $em): Response
     {
+        $this->denyAccessUnlessGranted('ROLE_USUARIO');
+
         /* ── Verificació de propietat ── */
         $this->verifyEntryOwnership($entry);
 
@@ -246,7 +297,7 @@ class EntryController extends AbstractController
         $currentClient = $this->clientScope->getClient();
 
         if ($currentClient === null) {
-            return; /* Super-admin: accés complet */
+            return; /* Admin: accés complet */
         }
 
         if ($contentType->getClient()?->getId() !== $currentClient->getId()) {
@@ -256,31 +307,28 @@ class EntryController extends AbstractController
         }
     }
 
+    /* -----------------------------------------------------------
+       verifyContentTypeProject — Comprova que el ContentType
+       pertany al projecte actiu o és un tipus base.
+       ----------------------------------------------------------- */
+    private function verifyContentTypeProject(ContentType $contentType, int $projectId): void
+    {
+        $ctProject = $contentType->getProject();
+        if ($ctProject !== null && $ctProject->getId() !== $projectId) {
+            throw $this->createAccessDeniedException(
+                'Aquest tipus de contingut no pertany al projecte actiu.'
+            );
+        }
+    }
+
     private function resolveFieldValue(Request $request, FieldDefinition $fieldDef, MediaService $mediaService): string
     {
         $fieldId = $fieldDef->getId();
         $raw = $request->request->get('field_' . $fieldId, '');
 
-        // ── Image upload ──
-        if ($fieldDef->getFieldType() === FieldDefinition::TYPE_IMAGE) {
-            $file = $request->files->get('field_' . $fieldId . '_file');
-            error_log('VORACMS_DEBUG: field=' . $fieldId . ' file=' . ($file ? 'present' : 'null') . ' raw=' . $raw);
-            if ($file) {
-                try {
-                    error_log('VORACMS_DEBUG: calling upload with file=' . $file->getClientOriginalName() . ' size=' . $file->getSize());
-                    $media = $mediaService->upload($file, $this->getUser());
-                    error_log('VORACMS_DEBUG: upload OK, media_id=' . $media->getId());
-                    return (string) $media->getId();
-                } catch (\Throwable $e) {
-                    error_log('VORACMS_DEBUG: upload ERROR: ' . $e->getMessage());
-                    $this->addFlash('error', 'Error en pujar imatge: ' . $e->getMessage());
-                }
-            }
-            return $raw;
-        }
-
-        // ── Gallery upload ──
-        if ($fieldDef->getFieldType() === FieldDefinition::TYPE_GALLERY) {
+        // ── Image / Gallery upload (multi-image, comma-separated) ──
+        if ($fieldDef->getFieldType() === FieldDefinition::TYPE_IMAGE ||
+            $fieldDef->getFieldType() === FieldDefinition::TYPE_GALLERY) {
             $files = $request->files->all('field_' . $fieldId . '_files') ?? [];
             $existingIds = $raw ? array_filter(explode(',', $raw)) : [];
 
@@ -312,5 +360,44 @@ class EntryController extends AbstractController
         }
 
         return $raw;
+    }
+
+    /* -----------------------------------------------------------
+       ensureActiveProject — Verifica que hi hagi un projecte
+       actiu a sessió. Si no n'hi ha:
+         - 0 projectes → redirect a crear-ne un
+         - 1 projecte  → l'auto-selecciona
+         - 2+ projectes → redirect a la llista per triar
+       Retorna el project_id o null (si cal redirect).
+       ----------------------------------------------------------- */
+    private function ensureActiveProject(Request $request, ?ProjectRepository $projectRepo = null): ?int
+    {
+        $session = $request->getSession();
+        $projectId = $session->get('_project_id');
+
+        if ($projectId !== null) {
+            return (int) $projectId;
+        }
+
+        /* No hi ha projecte a sessió — proveïm d'auto-seleccionar */
+        if ($projectRepo === null) {
+            /* No tenim accés al repositori; deleguem al Dashboard */
+            $projects = $this->clientScope->getClient();
+            return null;
+        }
+
+        $projects = $projectRepo->findActive();
+        $count = count($projects);
+
+        if ($count === 0) {
+            return null; /* Redirect a crear projecte */
+        }
+
+        if ($count === 1) {
+            $session->set('_project_id', $projects[0]->getId());
+            return $projects[0]->getId();
+        }
+
+        return null; /* 2+ projectes — redirect a llista */
     }
 }

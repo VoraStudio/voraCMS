@@ -41,13 +41,6 @@
                     <div class="form-text">Identificador únic per URLs. Es genera automàticament des del nom.</div>
                 </div>
 
-                {# ─── Logo URL ─── #}
-                <div class="col-12">
-                    <label class="form-label" for="logoInput">Logo (URL)</label>
-                    <input type="url" name="logo" class="form-control" id="logoInput" placeholder="https://exemple.com/logo.png">
-                    <div class="form-text">Opcional. URL de la imatge del logo del client.</div>
-                </div>
-
                 {# ─── Active checkbox ─── #}
                 <div class="col-12">
                     <div class="form-check">
@@ -61,21 +54,53 @@
             {# ─── Divider ─── #}
             <hr style="border-color:rgba(255,255,255,0.06);opacity:0.5;">
 
-            {# ─── Info box ─── #}
-            <div style="background: rgba(73,69,255,0.06); border: 1px solid rgba(73,69,255,0.12); border-radius: var(--s-radius); padding: 12px 16px; margin-bottom: 16px; display: flex; align-items: flex-start; gap: 10px;">
-                <i class="bi bi-info-circle" style="color: rgba(73,69,255,0.60); font-size: 1rem; margin-top: 1px;"></i>
+            {# ═══════════════════════════════════════════════════
+               Usuari del client
+               Cada client té exactament 1 usuari. El creem aquí
+               juntament amb el client per no haver de fer-ho
+               des d'una secció separada.
+               ═══════════════════════════════════════════════════ #}
+            <div class="d-flex align-items-center gap-3 mb-4">
+                <div style="width:48px;height:48px;border-radius:14px;background: linear-gradient(135deg, rgba(73,255,150,0.30) 0%, rgba(73,255,150,0.10) 100%); display:flex;align-items:center;justify-content:center; font-size:1.2rem; color: rgba(73,255,150,0.70);">
+                    <i class="bi bi-person-plus"></i>
+                </div>
                 <div>
-                    <span style="color: rgba(255,255,255,0.70); font-size: 0.8rem; font-weight: 500;">Què passa en crear un client?</span>
-                    <p style="color: rgba(255,255,255,0.40); font-size: 0.75rem; margin: 2px 0 0;">
-                        Es crea un espai aïllat amb els seus propis tipus de contingut, entrades, usuaris i mediateca.
-                        Cap client pot veure ni modificar les dades d'un altre.
-                    </p>
+                    <h6 class="mb-0">Usuari</h6>
+                    <span style="color:var(--s-text-secondary);font-size:0.75rem;">Crea l'usuari que gestionarà el contingut d'aquest client</span>
                 </div>
             </div>
 
+            <div class="row g-3 mb-3">
+                {# ─── Email ─── #}
+                <div class="col-md-6">
+                    <label class="form-label" for="userEmailInput">Email *</label>
+                    <input type="email" name="user_email" class="form-control" id="userEmailInput" required placeholder="usuari@exemple.com">
+                </div>
+
+                {# ─── Password ─── #}
+                <div class="col-md-6">
+                    <label class="form-label" for="userPasswordInput">Contrasenya *</label>
+                    <input type="password" name="user_password" class="form-control" id="userPasswordInput" required minlength="6" placeholder="Mínim 6 caràcters">
+                </div>
+
+                {# ─── Rol ─── #}
+                <div class="col-12">
+                    <label class="form-label" for="userRoleSelect">Rol</label>
+                    <select name="user_role" class="form-select" id="userRoleSelect">
+                        <option value="ROLE_USUARIO">Usuari — només edita contingut, no veu seccions</option>
+                        <option value="ROLE_MOD" selected>Usuari Mod — edita + gestiona seccions, sense usuaris</option>
+                        <option value="ROLE_ADMIN">Admin — accés complet al panell</option>
+                    </select>
+                    <div class="form-text">Determina què pot veure i fer l'usuari dins el panell d'administració.</div>
+                </div>
+            </div>
+
+            {# ─── Divider ─── #}
+            <hr style="border-color:rgba(255,255,255,0.06);opacity:0.5;">
+
             {# ─── Submit ─── #}
             <button type="submit" class="btn btn-primary w-100">
-                <i class="bi bi-check-lg me-1"></i> Crear client
+                <span><i class="bi bi-check-lg me-1"></i> Crear client i usuari</span>
             </button>
         </form>
     </div>
@@ -86,9 +111,6 @@
 {% block javascripts %}
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    /* ── Auto-generate slug from name ──
-       Converteix el nom a minúscules, elimina accents,
-       substitueix espais i caràcters especials per guions baixos. */
     var nameInput = document.getElementById('nameInput');
     var slugInput = document.getElementById('slugInput');
 
@@ -96,9 +118,9 @@ document.addEventListener('DOMContentLoaded', function() {
         var slug = this.value
             .toLowerCase()
             .normalize('NFD')
-            .replace(/[\u0300-\u036f]/g, '')   // Elimina accents
-            .replace(/[^a-z0-9]+/g, '_')       // Caràcters no alfanumèrics → _
-            .replace(/^_|_$/g, '');            // Elimina _ inicial i final
+            .replace(/[\u0300-\u036f]/g, '')
+            .replace(/[^a-z0-9]+/g, '_')
+            .replace(/^_|_$/g, '');
         slugInput.value = slug;
     });
 });

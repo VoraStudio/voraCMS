@@ -1,0 +1,17 @@
+{% set roleLabels = {
+    'ROLE_ADMIN':   'Admin',
+    'ROLE_MOD':     'Gestor',
+    'ROLE_USUARIO': 'Usuari',
+} %}
+{% set userRole = app.user.roles|filter(r => r starts with 'ROLE_')|last %}
+
+<div class="s-user-card">
+    <img src="{{ asset('img/logo_blanc.png') }}" alt="Vora Studio" class="s-user-card-avatar">
+    <div class="s-user-card-info">
+        <span class="s-user-card-name">{{ currentClient is defined and currentClient ? currentClient.name : (app.user.name ?? app.user.email) }}</span>
+        <span class="s-user-card-role">{{ roleLabels[userRole] ?? userRole|replace({'ROLE_': ''})|lower }}</span>
+    </div>
+    <a href="{{ path('admin_logout') }}" class="s-user-card-logout" title="Tancar sessió">
+        <i class="bi bi-box-arrow-right"></i>
+    </a>
+</div>

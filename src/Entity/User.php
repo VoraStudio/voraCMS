@@ -46,9 +46,13 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column]
     private ?\DateTimeImmutable $createdAt = null;
 
+    #[ORM\OneToMany(targetEntity: UserProject::class, mappedBy: 'user', orphanRemoval: true, cascade: ['persist', 'remove'])]
+    private Collection $projectPermissions;
+
     public function __construct()
     {
         $this->createdAt = new \DateTimeImmutable();
+        $this->projectPermissions = new ArrayCollection();
     }
 
     public function getId(): ?int { return $this->id; }
@@ -61,7 +65,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function getUserIdentifier(): string { return $this->email; }
 
-    public function getRoles(): array { $roles = $this->roles; $roles[] = 'ROLE_USER'; return array_unique($roles); }
+    public function getRoles(): array { $roles = $this->roles; $roles[] = 'ROLE_USUARIO'; return array_unique($roles); }
     public function setRoles(array $roles): static { $this->roles = $roles; return $this; }
 
     public function getPassword(): ?string { return $this->password; }
@@ -77,6 +81,30 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setClient(?Client $client): static { $this->client = $client; return $this; }
 
     public function getCreatedAt(): ?\DateTimeImmutable { return $this->createdAt; }
+
+    public function getProjectPermissions(): Collection
+    {
+        return $this->projectPermissions;
+    }
+
+    public function addProjectPermission(UserProject $projectPermission): static
+    {
+        if (!$this->projectPermissions->contains($projectPermission)) {
+            $this->projectPermissions->add($projectPermission);
+            $projectPermission->setUser($this);
+        }
+        return $this;
+    }
+
+    public function removeProjectPermission(UserProject $projectPermission): static
+    {
+        if ($this->projectPermissions->removeElement($projectPermission)) {
+            if ($projectPermission->getUser() === $this) {
+                $projectPermission->setUser(null);
+            }
+        }
+        return $this;
+    }
 
     public function eraseCredentials(): void {}
 }

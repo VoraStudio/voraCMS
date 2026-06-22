@@ -18,13 +18,19 @@
                 </div>
 
                 {% if error %}
-                    <div class="alert alert-danger py-2 small">
-                        <i class="bi bi-exclamation-circle me-1"></i>
-                        {{ error.messageKey|trans(error.messageData, 'security') }}
+                    <div class="s-toast-login">
+                        <div class="s-toast-login-icon">
+                            <i class="bi bi-x-lg"></i>
+                        </div>
+                        <div class="s-toast-login-body">
+                            <div class="s-toast-login-label">Error</div>
+                            <div class="s-toast-login-msg">{{ error.messageKey|trans(error.messageData, 'security') }}</div>
+                        </div>
                     </div>
                 {% endif %}
 
                 <form method="post">
+                    <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
                     <div class="mb-3">
                         <label for="email" class="form-label">Email</label>
                         <input type="email" id="email" name="_username" value="{{ last_email }}" class="form-control" required autofocus placeholder="admin@vorastudio.cat">
@@ -33,7 +39,7 @@
                         <label for="password" class="form-label">Contrasenya</label>
                         <input type="password" id="password" name="_password" class="form-control" required placeholder="········">
                     </div>
-                    <button type="submit" class="btn btn-primary w-100">Entrar</button>
+                    <button type="submit" class="btn btn-primary w-100"><span>Entrar</span></button>
                 </form>
             </div>
         </div>

@@ -32,6 +32,9 @@ class Entry
     #[ORM\Column(length: 5, options: ['default' => 'ca'])]
     private ?string $locale = 'ca';
 
+    #[ORM\Column(options: ['default' => true])]
+    private ?bool $active = true;
+
     #[ORM\ManyToOne(targetEntity: User::class)]
     private ?User $author = null;
 
@@ -67,6 +70,9 @@ class Entry
 
     public function getLocale(): ?string { return $this->locale; }
     public function setLocale(string $locale): static { $this->locale = $locale; return $this; }
+
+    public function isActive(): ?bool { return $this->active; }
+    public function setActive(bool $active): static { $this->active = $active; return $this; }
 
     public function getAuthor(): ?User { return $this->author; }
     public function setAuthor(?User $author): static { $this->author = $author; return $this; }

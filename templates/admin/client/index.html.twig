@@ -6,7 +6,7 @@
 {# ─── Topbar Actions ─── #}
 {% block topbar_actions %}
 <a href="{{ path('admin_client_new') }}" class="btn btn-primary btn-sm">
-    <i class="bi bi-plus-lg"></i> Nou client
+    <i class="bi bi-plus-lg"></i> <span>Nou client</span>
 </a>
 {% endblock %}
 
@@ -37,7 +37,7 @@
             <div class="empty-state">
                 <i class="bi bi-building-add"></i>
                 <p>No hi ha cap client encara.</p>
-                <a href="{{ path('admin_client_new') }}" class="btn btn-primary btn-sm">Crear primer client</a>
+                <a href="{{ path('admin_client_new') }}" class="btn btn-primary btn-sm"><span>Crear primer client</span></a>
             </div>
         </div>
     </div>
@@ -105,9 +105,9 @@
                             <a href="{{ path('admin_client_edit', {id: c.id}) }}" class="btn btn-outline-primary btn-sm" title="Editar">
                                 <i class="bi bi-pencil"></i>
                             </a>
-                            <form method="post" action="{{ path('admin_client_delete', {id: c.id}) }}" style="display:inline" onsubmit="return confirm('⚠️ Eliminaràs el client «{{ c.name }}» i TOTES les seves dades (tipus, entrades, usuaris, media). Aquesta acció no es pot desfer. Segur?');">
+                            <form method="post" action="{{ path('admin_client_delete', {id: c.id}) }}" style="display:inline" id="dcl-{{ c.id }}">
                                 <input type="hidden" name="_token" value="{{ csrf_token('delete_client_' ~ c.id) }}">
-                                <button class="btn btn-outline-danger btn-sm" title="Eliminar">
+                                <button type="button" class="btn btn-outline-danger btn-sm" title="Eliminar" onclick="swalConfirm('Eliminaràs el client «{{ c.name }}» i totes les seves dades. Aquesta acció no es pot desfer.',function(){document.getElementById('dcl-{{ c.id }}').submit()})">
                                     <i class="bi bi-trash"></i>
                                 </button>
                             </form>

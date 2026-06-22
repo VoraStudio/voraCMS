@@ -1,11 +1,13 @@
 {% extends 'admin/layout.html.twig' %}
 
-{% block page_title %}Editar: {{ contentType.name }} #{{ entry.id }}{% endblock %}
-
-{% block topbar_actions %}
-<a href="{{ path('admin_entry_by_type', {slug: contentType.slug}) }}" class="btn btn-outline-primary btn-sm">
-    <i class="bi bi-arrow-left"></i> Tornar
-</a>
+{% block page_title %}
+{% set entryTitle = '' %}
+{% for fv in entry.fieldValues|sort((a, b) => a.fieldDefinition.sortOrder <=> b.fieldDefinition.sortOrder) %}
+    {% if fv.fieldDefinition.fieldType in ['text', 'textarea'] and fv.value and not entryTitle %}
+        {% set entryTitle = fv.value %}
+    {% endif %}
+{% endfor %}
+{{ entryTitle ?: (contentType.name ~ ' #' ~ entry.id) }}
 {% endblock %}
 
 {% block stylesheets %}
@@ -14,9 +16,14 @@
 {% endblock %}
 
 {% block content %}
+<div class="s-entry-upload-bar">
+    <a href="{{ path('admin_entry_by_type', {slug: contentType.slug}) }}" class="btn btn-outline-primary btn-sm">
+        <i class="bi bi-arrow-left"></i> Tornar
+    </a>
+</div>
 <div class="card">
     <div class="card-body">
-        <form method="post" id="entryForm" enctype="multipart/form-data">
+        <form method="post" id="entryForm" enctype="multipart/form-data" novalidate>
             <div class="row g-3 mb-3">
                 <div class="col-md-6">
                     <label class="form-label">Estat</label>
@@ -24,14 +31,6 @@
                         <option value="draft" {% if entry.status == 'draft' %}selected{% endif %}>Esborrany</option>
                         <option value="published" {% if entry.status == 'published' %}selected{% endif %}>Publicat</option>
                         <option value="archived" {% if entry.status == 'archived' %}selected{% endif %}>Arxivat</option>
-                    </select>
-                </div>
-                <div class="col-md-6">
-                    <label class="form-label">Idioma</label>
-                    <select name="locale" class="form-select form-select-sm">
-                        {% for code, name in locales %}
-                        <option value="{{ code }}" {% if entry.locale == code %}selected{% endif %}>{{ name }}</option>
-                        {% endfor %}
                     </select>
                 </div>
             </div>
@@ -51,7 +50,7 @@
                 {# Quill editor wrapper #}
                 <div class="quill-wrapper" data-field-id="{{ field.id }}" data-field-name="field_{{ field.id }}">
                     <div class="js-quill-editor" style="min-height:200px;">{{ val|raw }}</div>
-                    <textarea name="field_{{ field.id }}" class="d-none" rows="4">{{ val }}</textarea>
+                    <textarea name="field_{{ field.id }}" class="d-none" rows="4" {% if field.required %}data-required="true"{% endif %}>{{ val }}</textarea>
                 </div>
 
                 {% elseif field.fieldType == 'textarea' %}
@@ -82,25 +81,40 @@
                 <input type="color" name="field_{{ field.id }}" class="form-control form-control-color" value="{{ val ?: '#000000' }}">
 
                 {% elseif field.fieldType == 'image' %}
-                <div class="image-field" data-field-id="{{ field.id }}">
-                    <div class="d-flex gap-2">
-                        <input type="file" name="field_{{ field.id }}_file" class="form-control form-control-sm" accept=".jpg,.jpeg,.webp,.avif">
-                        <button type="button" class="btn btn-outline-primary btn-sm pick-media" data-field="{{ field.id }}" data-multiple="false">
+                <div class="gallery-field" data-field-id="{{ field.id }}">
+                    <div class="d-flex gap-2 mb-2">
+                        <div class="custom-file-input" style="position:relative;flex:1;">
+                            <input type="file" name="field_{{ field.id }}_files[]" id="file_{{ field.id }}" class="d-none" accept=".jpg,.jpeg,.webp,.avif" multiple>
+                            <label for="file_{{ field.id }}" class="form-control s-file-label" style="cursor:pointer;display:flex;align-items:center;gap:8px;">
+                                <i class="bi bi-cloud-upload"></i> <span>Seleccionar fitxers</span>
+                            </label>
+                        </div>
+                        <button type="button" class="btn btn-outline-primary btn-sm pick-media" data-field="{{ field.id }}" data-multiple="true">
                             <i class="bi bi-images"></i>
                         </button>
                     </div>
-                    <input type="hidden" name="field_{{ field.id }}" class="image-value" value="{{ val }}">
-                    <div class="image-preview mt-2 {% if not val %}d-none{% endif %}">
-                        <img src="{{ mediaPaths[val] ?? '' }}" class="rounded" style="max-height:100px;max-width:100%;">
-                        <button type="button" class="btn btn-sm btn-outline-danger remove-image ms-2"><i class="bi bi-x"></i></button>
+                    {% set imageIds = val ? val|split(',') : [] %}
+                    <input type="hidden" name="field_{{ field.id }}" class="gallery-value" value="{{ val }}">
+                    <div class="gallery-previews d-flex gap-2 flex-wrap">
+                        {% for gid in imageIds %}
+                        <div style="position:relative;width:80px;height:80px;border-radius:4px;overflow:hidden;background:var(--s-bg);">
+                            <img src="{{ mediaPaths[gid] ?? '' }}" style="width:100%;height:100%;object-fit:cover;">
+                            <button type="button" class="remove-gallery-item" aria-label="Eliminar" style="position:absolute;top:3px;right:3px;width:18px;height:18px;border-radius:50%;border:none;background:rgba(0,0,0,0.50);color:#fff;font-size:12px;line-height:1;padding:0;cursor:pointer;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity 0.15s;"><i class="bi bi-x" style="font-size:10px;"></i></button>
+                        </div>
+                        {% endfor %}
                     </div>
-                    <small style="color:var(--s-text-secondary);">JPG, WebP o AVIF · Màxim 1MB</small>
+                    <small style="color:var(--s-text-secondary);">JPG, WebP o AVIF · Màxim 1MB cadascuna</small>
                 </div>
 
                 {% elseif field.fieldType == 'gallery' %}
                 <div class="gallery-field" data-field-id="{{ field.id }}">
                     <div class="d-flex gap-2 mb-2">
-                        <input type="file" name="field_{{ field.id }}_files[]" class="form-control form-control-sm" accept=".jpg,.jpeg,.webp,.avif" multiple>
+                        <div class="custom-file-input" style="position:relative;flex:1;">
+                            <input type="file" name="field_{{ field.id }}_files[]" id="file_{{ field.id }}_g" class="d-none" accept=".jpg,.jpeg,.webp,.avif" multiple>
+                            <label for="file_{{ field.id }}_g" class="form-control s-file-label" style="cursor:pointer;display:flex;align-items:center;gap:8px;">
+                                <i class="bi bi-cloud-upload"></i> <span>Seleccionar fitxers</span>
+                            </label>
+                        </div>
                         <button type="button" class="btn btn-outline-primary btn-sm pick-media" data-field="{{ field.id }}" data-multiple="true">
                             <i class="bi bi-images"></i>
                         </button>
@@ -111,7 +125,7 @@
                         {% for gid in galleryIds %}
                         <div style="position:relative;width:80px;height:80px;border-radius:4px;overflow:hidden;background:var(--s-bg);">
                             <img src="{{ mediaPaths[gid] ?? '' }}" style="width:100%;height:100%;object-fit:cover;">
-                            <button type="button" class="btn btn-sm btn-outline-danger remove-gallery-item" style="position:absolute;top:2px;right:2px;padding:0 4px;font-size:10px;line-height:1;"><i class="bi bi-x"></i></button>
+                            <button type="button" class="remove-gallery-item" aria-label="Eliminar" style="position:absolute;top:3px;right:3px;width:18px;height:18px;border-radius:50%;border:none;background:rgba(0,0,0,0.50);color:#fff;font-size:12px;line-height:1;padding:0;cursor:pointer;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity 0.15s;"><i class="bi bi-x" style="font-size:10px;"></i></button>
                         </div>
                         {% endfor %}
                     </div>
@@ -141,7 +155,7 @@
             </div>
 
             <hr class="mt-4" style="border-color:var(--s-card-border);opacity:0.5;">
-            <button type="submit" class="btn btn-primary w-100">Guardar canvis</button>
+            <button type="submit" class="btn btn-primary w-100"><span>Guardar canvis</span></button>
         </form>
     </div>
 </div>
@@ -175,35 +189,7 @@ document.addEventListener('DOMContentLoaded', function () {
         return m ? m[1] : null;
     }
 
-    // ─── Image: preview on file pick ───
-    document.querySelectorAll('.image-field').forEach(function (field) {
-        var fileInput = field.querySelector('input[type="file"]');
-        var preview = field.querySelector('.image-preview');
-        var img = preview.querySelector('img');
-        var hidden = field.querySelector('.image-value');
-
-        fileInput.addEventListener('change', function () {
-            if (this.files && this.files[0]) {
-                var reader = new FileReader();
-                reader.onload = function (e) { img.src = e.target.result; };
-                reader.readAsDataURL(this.files[0]);
-                preview.classList.remove('d-none');
-                hidden.value = '__upload__';
-            }
-        });
-    });
-
-    document.querySelectorAll('.remove-image').forEach(function (btn) {
-        btn.addEventListener('click', function () {
-            var field = this.closest('.image-field');
-            field.querySelector('input[type="file"]').value = '';
-            field.querySelector('.image-preview').classList.add('d-none');
-            field.querySelector('.image-preview img').src = '';
-            field.querySelector('.image-value').value = '';
-        });
-    });
-
-    // ─── Gallery: preview on file pick ───
+    // ─── Gallery / Image: preview on file pick ───
     document.querySelectorAll('.gallery-field input[type="file"]').forEach(function (input) {
         input.addEventListener('change', function () {
             var previews = this.closest('.gallery-field').querySelector('.gallery-previews');
@@ -213,7 +199,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 reader.onload = function (e) {
                     var div = document.createElement('div');
                     div.style.cssText = 'position:relative;width:80px;height:80px;border-radius:4px;overflow:hidden;background:var(--s-bg);';
-                    div.innerHTML = '<img src="' + e.target.result + '" style="width:100%;height:100%;object-fit:cover;"><button type="button" class="btn btn-sm btn-outline-danger remove-gallery-item" style="position:absolute;top:2px;right:2px;padding:0 4px;font-size:10px;line-height:1;"><i class="bi bi-x"></i></button>';
+                    div.innerHTML = '<img src="' + e.target.result + '" style="width:100%;height:100%;object-fit:cover;"><button type="button" class="remove-gallery-item" aria-label="Eliminar" style="position:absolute;top:3px;right:3px;width:18px;height:18px;border-radius:50%;border:none;background:rgba(0,0,0,0.50);color:#fff;font-size:12px;line-height:1;padding:0;cursor:pointer;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity 0.15s;"><i class="bi bi-x" style="font-size:10px;"></i></button>';
                     previews.appendChild(div);
                 };
                 reader.readAsDataURL(file);
@@ -226,7 +212,7 @@ document.addEventListener('DOMContentLoaded', function () {
     document.addEventListener('click', function (e) {
         var btn = e.target.closest('.remove-gallery-item');
         if (btn) {
-            var preview = btn.closest('[style*="position:relative"]');
+            var preview = btn.parentElement;
             var field = btn.closest('.gallery-field');
             var hidden = field.querySelector('.gallery-value');
             var allItems = field.querySelectorAll('.gallery-previews > div');
@@ -242,36 +228,34 @@ document.addEventListener('DOMContentLoaded', function () {
     document.querySelectorAll('.pick-media').forEach(function (btn) {
         btn.addEventListener('click', function () {
             var fieldId = this.dataset.field;
-            var pickerUrl = '{{ path('admin_media_picker') }}?field=' + encodeURIComponent(fieldId);
-            window.open(pickerUrl, 'mediaPicker', 'width=600,height=500');
+            var multiple = this.dataset.multiple === 'true';
+            var pickerUrl = '{{ path('admin_media_picker') }}?field=' + encodeURIComponent(fieldId) + '&multiple=' + multiple;
+            window.open(pickerUrl, 'mediaPicker', 'width=750,height=600');
         });
     });
 
+    function addMediaToGallery(fieldId, mediaId, mediaUrl) {
+        var galField = document.querySelector('.gallery-field[data-field-id="' + fieldId + '"]');
+        if (!galField) return;
+        var previews = galField.querySelector('.gallery-previews');
+        var hidden = galField.querySelector('.gallery-value');
+        var div = document.createElement('div');
+        div.style.cssText = 'position:relative;width:80px;height:80px;border-radius:4px;overflow:hidden;background:var(--s-bg);';
+        div.innerHTML = '<img src="' + mediaUrl + '" style="width:100%;height:100%;object-fit:cover;"><button type="button" class="remove-gallery-item" aria-label="Eliminar" style="position:absolute;top:3px;right:3px;width:18px;height:18px;border-radius:50%;border:none;background:rgba(0,0,0,0.50);color:#fff;font-size:12px;line-height:1;padding:0;cursor:pointer;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity 0.15s;"><i class="bi bi-x" style="font-size:10px;"></i></button>';
+        previews.appendChild(div);
+        var current = hidden.value ? hidden.value.split(',') : [];
+        current.push(mediaId);
+        hidden.value = current.join(',');
+    }
+
     window.addEventListener('message', function (e) {
         if (e.data.type === 'media-pick') {
-            var mediaId = e.data.id;
-            var mediaUrl = e.data.url;
-            var fieldId = e.data.fieldId || e.data.field;
-            // Find the image/gallery field that triggered it
-            var imgField = document.querySelector('.image-field[data-field-id="' + fieldId + '"]');
-            if (imgField) {
-                var preview = imgField.querySelector('.image-preview');
-                preview.querySelector('img').src = mediaUrl;
-                preview.classList.remove('d-none');
-                imgField.querySelector('.image-value').value = mediaId;
-            }
-            var galField = document.querySelector('.gallery-field[data-field-id="' + fieldId + '"]');
-            if (galField) {
-                var previews = galField.querySelector('.gallery-previews');
-                var hidden = galField.querySelector('.gallery-value');
-                var div = document.createElement('div');
-                div.style.cssText = 'position:relative;width:80px;height:80px;border-radius:4px;overflow:hidden;background:var(--s-bg);';
-                div.innerHTML = '<img src="' + mediaUrl + '" style="width:100%;height:100%;object-fit:cover;"><button type="button" class="btn btn-sm btn-outline-danger remove-gallery-item" style="position:absolute;top:2px;right:2px;padding:0 4px;font-size:10px;line-height:1;"><i class="bi bi-x"></i></button>';
-                previews.appendChild(div);
-                var current = hidden.value ? hidden.value.split(',') : [];
-                current.push(mediaId);
-                hidden.value = current.join(',');
-            }
+            addMediaToGallery(e.data.fieldId || e.data.field, e.data.id, e.data.url);
+        }
+        if (e.data.type === 'media-pick-multi') {
+            e.data.items.forEach(function(item) {
+                addMediaToGallery(e.data.fieldId, item.id, item.url);
+            });
         }
     });
 

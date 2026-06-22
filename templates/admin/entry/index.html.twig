@@ -2,13 +2,13 @@
 
 {% block page_title %}{{ contentType.name }}{% endblock %}
 
-{% block topbar_actions %}
-<a href="{{ path('admin_entry_new', {slug: contentType.slug}) }}" class="btn btn-primary btn-sm">
-    <i class="bi bi-plus-lg"></i> Nova entrada
-</a>
-{% endblock %}
-
 {% block content %}
+<div class="s-entry-upload-bar">
+    <a href="{{ path('admin_entry_new', {slug: contentType.slug}) }}" class="btn btn-primary btn-sm">
+        <i class="bi bi-plus-lg"></i> <span>Nova entrada</span>
+    </a>
+</div>
+
 <div class="d-flex align-items-center gap-3 mb-3">
     <span style="color:var(--s-text-secondary);font-size:0.8rem;">
         {{ contentType.entries|length }} entrades · {{ contentType.fields|length }} camps
@@ -26,7 +26,7 @@
                     <th>Data</th>
                     <th>Estat</th>
                     <th>Idioma</th>
-                    <th></th>
+                    <th style="width:140px;"></th>
                 </tr>
             </thead>
             <tbody>
@@ -65,11 +65,18 @@
                         {% endif %}
                     </td>
                     <td>{{ entry.locale|upper }}</td>
-                    <td class="text-end">
-                        <a href="{{ path('admin_entry_edit', {id: entry.id}) }}" class="btn btn-outline-primary btn-sm"><i class="bi bi-pencil"></i></a>
-                        <form method="post" action="{{ path('admin_entry_delete', {id: entry.id}) }}" style="display:inline" onsubmit="return confirm('Segur?');">
+                    <td class="text-end" style="white-space:nowrap;">
+<a href="{{ path('admin_entry_show', {id: entry.id}) }}" class="btn btn-sm btn-outline-primary" title="Veure">
+    <i class="bi bi-eye"></i>
+</a>
+                        <a href="{{ path('admin_entry_edit', {id: entry.id}) }}" class="btn btn-sm btn-outline-secondary" title="Editar">
+                            <i class="bi bi-pencil"></i>
+                        </a>
+                        <form method="post" action="{{ path('admin_entry_delete', {id: entry.id}) }}" style="display:inline" id="del-{{ entry.id }}">
                             <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ entry.id) }}">
-                            <button class="btn btn-outline-danger btn-sm"><i class="bi bi-trash"></i></button>
+                            <button type="button" class="btn btn-sm btn-outline-danger" title="Eliminar" onclick="swalConfirm('Segur que vols eliminar aquesta entrada?',function(){document.getElementById('del-{{ entry.id }}').submit()})">
+                                <i class="bi bi-trash"></i>
+                            </button>
                         </form>
                     </td>
                 </tr>

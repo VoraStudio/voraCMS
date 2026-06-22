@@ -17,6 +17,8 @@
 
 namespace App\Controller\Admin;
 
+use Doctrine\ORM\EntityManagerInterface;
+use App\Entity\Media;
 use App\Repository\MediaRepository;
 use App\Service\ClientScope;
 use App\Service\MediaService;
@@ -78,6 +80,38 @@ class MediaController extends AbstractController
     }
 
     /* -----------------------------------------------------------
+       delete — Elimina un fitxer multimèdia.
+       Scoped al client actual: només es pot eliminar media
+       del propi client.
+       ----------------------------------------------------------- */
+    #[Route('/{id}/delete', name: 'admin_media_delete', methods: ['POST'])]
+    public function delete(Request $request, Media $media, EntityManagerInterface $em): Response
+    {
+        $this->denyAccessUnlessGranted('ROLE_USUARIO');
+
+        $clientId = $this->clientScope->getClientId();
+
+        /* Tenant isolation: si no és super-admin, comprova propietat */
+        if ($clientId !== null && $media->getClient()?->getId() !== $clientId) {
+            throw $this->createAccessDeniedException('No tens permís per eliminar aquesta imatge.');
+        }
+
+        if ($this->isCsrfTokenValid('delete' . $media->getId(), $request->request->get('_token'))) {
+            /* Eliminar el fitxer físic */
+            $filePath = $this->getParameter('kernel.project_dir') . '/public' . $media->getPath();
+            if (file_exists($filePath)) {
+                unlink($filePath);
+            }
+
+            $em->remove($media);
+            $em->flush();
+            $this->addFlash('success', 'Imatge eliminada.');
+        }
+
+        return $this->redirectToRoute('admin_media_index');
+    }
+
+    /* -----------------------------------------------------------
        picker — Modal de selecció de fitxers multimèdia.
        Scoped al client actual igual que index().
        ----------------------------------------------------------- */
@@ -95,6 +129,7 @@ class MediaController extends AbstractController
         return $this->render('admin/media/picker.html.twig', [
             'media' => $media,
             'fieldId' => $request->query->get('field', ''),
+            'multiple' => $request->query->get('multiple', 'false') === 'true',
         ]);
     }
 }

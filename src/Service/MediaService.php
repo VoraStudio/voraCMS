@@ -91,9 +91,15 @@ class MediaService
         $media->setUploadedBy($user);
 
         /* ─── Assignar client a l'entitat Media ─── */
+        /* Si ClientScope retorna null (super-admin), caiem al client de l'usuari */
         $client = $this->clientScope->getClient();
+        if ($client === null && $user !== null) {
+            $client = $user->getClient();
+        }
         if ($client) {
             $media->setClient($client);
+        } else {
+            throw new \RuntimeException('No s\'ha pogut determinar el client per a la pujada.');
         }
 
         $this->em->persist($media);

@@ -1,0 +1,84 @@
+{% extends 'admin/layout.html.twig' %}
+
+{% block page_title %}{{ isNew ? 'Nou projecte' : 'Editar: ' ~ project.name }}{% endblock %}
+
+{% block topbar_actions %}
+<a href="{{ path('admin_projects') }}" class="btn btn-sm"
+   style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:10px;color:rgba(255,255,255,0.50);padding:8px 16px;display:inline-flex;align-items:center;gap:8px;font-size:0.8rem;font-weight:500;text-decoration:none;transition:all 0.25s ease;"
+   onmouseover="this.style.background='rgba(96,165,250,0.10)';this.style.borderColor='rgba(96,165,250,0.20)';this.style.color='rgba(255,255,255,0.80)';"
+   onmouseout="this.style.background='rgba(255,255,255,0.04)';this.style.borderColor='rgba(255,255,255,0.08)';this.style.color='rgba(255,255,255,0.50)';">
+    <i class="bi bi-arrow-left"></i> <span>Tornar</span>
+</a>
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+        <div class="card">
+            <div class="card-body">
+                <form method="post" class="row g-4">
+                    <input type="hidden" name="_token" value="{{ csrf_token('project-edit-' ~ project.id) }}">
+                    {# ─── Nom ─── #}
+                    <div class="col-12">
+                        <label class="form-label">Nom del projecte *</label>
+                        <input type="text" name="name" class="form-control" value="{{ project.name }}" required
+                               placeholder="Ex: Web Corporativa, App Mòbil...">
+                        <small style="color:var(--s-text-secondary);">El nom es convertirà automàticament en slug.</small>
+                    </div>
+
+                    {# ─── Descripció ─── #}
+                    <div class="col-12">
+                        <label class="form-label">Descripció</label>
+                        <textarea name="description" class="form-control" rows="3" placeholder="Què fa aquest projecte?">{{ project.description }}</textarea>
+                    </div>
+
+                    {# ─── Color ─── #}
+                    <div class="col-12">
+                        <label class="form-label">Color del projecte</label>
+                        <div style="display:flex;align-items:center;gap:12px;">
+                            <input type="color" name="color" class="form-control form-control-color" value="{{ project.color ?: '#4945FF' }}" style="width:60px;height:40px;padding:4px;cursor:pointer;">
+                            <span id="colorPreview" style="font-size:0.8rem;color:var(--s-text-secondary);">{{ project.color ?: '#4945FF' }}</span>
+                        </div>
+                        <small style="color:var(--s-text-secondary);">Tria un color per identificar el projecte visualment.</small>
+                    </div>
+
+                    {# ─── Actiu (només edició) ─── #}
+                    {% if not isNew %}
+                    <div class="col-12">
+                        <label class="form-label">Estat</label>
+                        <div class="form-check">
+                            <input type="checkbox" name="active" class="form-check-input" value="1" {% if project.active %}checked{% endif %}>
+                            <label class="form-check-label small">Projecte actiu</label>
+                        </div>
+                    </div>
+
+                    {{ include('admin/project/_permissions.html.twig') }}
+                    {% endif %}
+
+                    <div class="col-12">
+                        <hr style="border-color:var(--s-card-border);opacity:0.5;">
+                        <button type="submit" class="btn btn-primary w-100">
+                            <span>{{ isNew ? 'Crear projecte' : 'Guardar canvis' }}</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    var picker = document.querySelector('input[type="color"][name="color"]');
+    var preview = document.getElementById('colorPreview');
+    if (picker) {
+        picker.addEventListener('input', function () {
+            preview.textContent = this.value;
+        });
+    }
+});
+</script>
+{% endblock %}

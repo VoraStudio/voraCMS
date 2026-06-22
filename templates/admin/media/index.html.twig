@@ -2,24 +2,33 @@
 
 {% block page_title %}Mediateca{% endblock %}
 
-{% block topbar_actions %}
-<button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#uploadModal">
-    <i class="bi bi-cloud-upload"></i> Pujar imatge
-</button>
-{% endblock %}
-
 {% block content %}
+<div class="s-media-upload-bar">
+    <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#uploadModal">
+        <i class="bi bi-cloud-upload"></i> <span>Pujar imatge</span>
+    </button>
+</div>
+
 <div class="row g-3">
     {% for m in media %}
     <div class="col-md-3 col-sm-4 col-6">
         <div class="card h-100">
-            <a href="{{ m.path }}" target="_blank" class="d-block" style="aspect-ratio:16/10;overflow:hidden;background:var(--s-bg);">
-                <img src="{{ m.path }}" alt="{{ m.originalFilename }}" class="w-100 h-100" style="object-fit:cover;">
-            </a>
-            <div class="card-body p-2">
-                <p class="small mb-1 text-truncate" title="{{ m.originalFilename }}">{{ m.originalFilename }}</p>
+            <div class="position-relative">
+                <a href="{{ m.path }}" target="_blank" class="d-block" style="aspect-ratio:16/10;overflow:hidden;background:var(--s-bg);">
+                    <img src="{{ m.path }}" alt="{{ m.originalFilename }}" class="w-100 h-100" style="object-fit:cover;">
+                </a>
+                <button class="s-media-delete" title="Eliminar imatge"
+                    onclick="swalConfirm('Eliminaràs «{{ m.originalFilename }}». Aquesta acció no es pot desfer.',function(){document.getElementById('del-media-{{ m.id }}').submit()})">
+                    <i class="bi bi-trash3"></i>
+                </button>
+                <form method="post" action="{{ path('admin_media_delete', {'id': m.id}) }}" id="del-media-{{ m.id }}" class="d-none">
+                    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ m.id) }}">
+                </form>
+            </div>
+            <div class="s-media-card-body">
+                <p class="s-media-filename text-truncate" title="{{ m.originalFilename }}">{{ m.originalFilename }}</p>
                 <div class="d-flex justify-content-between align-items-center">
-                    <small style="color:var(--s-text-secondary);">{{ m.fileSize|round(0) }} KB</small>
+                    <small style="color:var(--s-text-secondary);">{{ (m.fileSize / 1024)|number_format(2, ',', ' ') }} KB</small>
                     <button class="btn btn-sm btn-outline-primary copy-url" data-url="{{ m.path }}" title="Copiar URL">
                         <i class="bi bi-link-45deg"></i>
                     </button>
@@ -55,7 +64,7 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="submit" class="btn btn-primary w-100" id="uploadBtn">Pujar</button>
+                    <button type="submit" class="btn btn-primary w-100" id="uploadBtn"><span>Pujar</span></button>
                 </div>
             </form>
         </div>
@@ -64,6 +73,7 @@
 {% endblock %}
 
 {% block javascripts %}
+{{ parent() }}
 <script>
 document.getElementById('uploadForm').addEventListener('submit', async function(e) {
     e.preventDefault();
