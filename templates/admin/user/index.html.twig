@@ -63,38 +63,55 @@
                 <td style="padding:12px 18px;text-align:right;white-space:nowrap;">
                     <div style="display:inline-flex;gap:6px;align-items:center;">
 
-                        {# ─── Veure projectes ─── #}
+                        {# ─── Veure projectes (indal: actiu=gradient viu, inactiu=pàlid) ─── #}
+                        {% set proBtnBg = user.active
+                            ? 'background:linear-gradient(135deg,#6366f1,#3b82f6);color:#fff;box-shadow:0 3px 10px rgba(99,102,241,0.35);'
+                            : 'background:linear-gradient(135deg,rgba(99,102,241,0.25),rgba(59,130,246,0.15));color:rgba(148,163,184,0.6);box-shadow:none;' %}
                         <a href="{{ path('admin_projects', {user: user.id}) }}"
-                           class="btn btn-sm"
-                           style="padding:6px 14px;font-size:0.7rem;border-radius:8px;display:inline-flex;align-items:center;gap:6px;background:rgb(96,165,250);color:#fff;border:none;cursor:pointer;text-decoration:none;transition:all 0.2s;font-weight:600;box-shadow:0 2px 8px rgba(96,165,250,0.25);"
-                           onmouseover="this.style.background='rgb(79,140,230)';this.style.boxShadow='0 4px 12px rgba(96,165,250,0.35)';this.style.transform='translateY(-1px)'"
-                           onmouseout="this.style.background='rgb(96,165,250)';this.style.boxShadow='0 2px 8px rgba(96,165,250,0.25)';this.style.transform=''">
+                           class="btn-projects"
+                           data-active="{{ user.active ? '1' : '0' }}"
+                           style="padding:6px 14px;font-size:0.7rem;border-radius:8px;display:inline-flex;align-items:center;gap:6px;border:none;cursor:pointer;text-decoration:none;transition:all 0.25s;font-weight:700;letter-spacing:0.02em;text-transform:uppercase;{{ proBtnBg }}"
+                           onmouseover="this.style.background='linear-gradient(135deg,#4f46e5,#2563eb)';this.style.color='#fff';this.style.boxShadow='0 5px 14px rgba(99,102,241,0.45)';this.style.transform='translateY(-2px)scale(1.03)'"
+                           onmouseout="this.style.transform='';this.style.background='{{ user.active
+                                ? 'linear-gradient(135deg,#6366f1,#3b82f6)'
+                                : 'linear-gradient(135deg,rgba(99,102,241,0.25),rgba(59,130,246,0.15))' }}';this.style.color='{{ user.active ? '#fff' : 'rgba(148,163,184,0.6)' }}';this.style.boxShadow='{{ user.active ? '0 3px 10px rgba(99,102,241,0.35)' : 'none' }}'">
                             <i class="bi bi-folder2-open" style="font-size:0.75rem;"></i>
                             <span>Projectes</span>
                         </a>
 
                         {# ─── Separador ─── #}
-                        <span style="width:1px;height:24px;background:var(--s-card-border);display:inline-block;"></span>
+                        <span style="width:1px;height:26px;background:var(--s-card-border);display:inline-block;"></span>
 
                         {# ─── Toggle active ─── #}
+                        {% set togBg = user.active
+                            ? 'linear-gradient(135deg,#22c55e,#16a34a)'
+                            : 'linear-gradient(135deg,#ef4444,#dc2626)' %}
+                        {% set togShad = user.active
+                            ? 'rgba(34,197,94,0.35)'
+                            : 'rgba(239,68,68,0.35)' %}
+                        {% set togShadHov = user.active
+                            ? 'rgba(34,197,94,0.45)'
+                            : 'rgba(239,68,68,0.45)' %}
                         <form method="post" action="{{ path('admin_user_toggle_active', {id: user.id}) }}" style="display:inline" id="tact-user-{{ user.id }}">
                             <input type="hidden" name="_token" value="{{ csrf_token('toggle-active-' ~ user.id) }}">
                             <button type="submit"
-                                    style="width:34px;height:34px;border-radius:8px;border:none;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;transition:all 0.2s;padding:0;{{ user.active ? 'background:rgba(34,197,94,0.15);color:rgb(34,197,94);' : 'background:rgba(239,83,80,0.15);color:rgb(239,83,80);' }}"
+                                    class="btn-toggle"
+                                    data-active="{{ user.active ? '1' : '0' }}"
+                                    style="width:34px;height:34px;border-radius:8px;border:none;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;transition:all 0.25s;padding:0;background:{{ togBg }};color:#fff;box-shadow:0 3px 8px {{ togShad }};"
                                     title="{{ user.active ? 'Desactivar' : 'Activar' }}"
-                                    {% if app.user.id == user.id %}disabled style="opacity:0.4;cursor:not-allowed;background:transparent;color:var(--s-text-secondary);"{% endif %}
-                                    onmouseover="if(!this.disabled){this.style.transform='scale(1.1)';this.style.boxShadow='0 2px 8px {{ user.active ? 'rgba(34,197,94,0.3)' : 'rgba(239,83,80,0.3)' }}'}"
-                                    onmouseout="if(!this.disabled){this.style.transform='';this.style.boxShadow=''}">
+                                    {% if app.user.id == user.id %}disabled style="opacity:0.3;cursor:not-allowed;background:linear-gradient(135deg,#555,#444);color:#888;box-shadow:none;"{% endif %}
+                                    onmouseover="if(!this.disabled){this.style.transform='scale(1.12)';this.style.boxShadow='0 5px 12px {{ togShadHov }}'}"
+                                    onmouseout="if(!this.disabled){this.style.transform='';this.style.boxShadow='0 3px 8px {{ togShad }}'}">
                                 <i class="bi {{ user.active ? 'bi-toggle2-on' : 'bi-toggle2-off' }}" style="font-size:1.1rem;"></i>
                             </button>
                         </form>
 
                         {# ─── Editar ─── #}
                         <a href="{{ path('admin_user_edit', {id: user.id}) }}"
-                           style="width:34px;height:34px;border-radius:8px;border:none;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;text-decoration:none;transition:all 0.2s;padding:0;background:rgba(96,165,250,0.15);color:rgb(96,165,250);"
+                           style="width:34px;height:34px;border-radius:8px;border:none;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;text-decoration:none;transition:all 0.25s;padding:0;background:linear-gradient(135deg,#6366f1,#3b82f6);color:#fff;box-shadow:0 3px 8px rgba(99,102,241,0.35);"
                            title="Editar"
-                           onmouseover="this.style.background='rgb(96,165,250)';this.style.color='#fff';this.style.transform='scale(1.1)';this.style.boxShadow='0 2px 8px rgba(96,165,250,0.3)'"
-                           onmouseout="this.style.background='rgba(96,165,250,0.15)';this.style.color='rgb(96,165,250)';this.style.transform='';this.style.boxShadow=''">
+                           onmouseover="this.style.background='linear-gradient(135deg,#4f46e5,#2563eb)';this.style.transform='scale(1.12)';this.style.boxShadow='0 5px 12px rgba(99,102,241,0.45)'"
+                           onmouseout="this.style.background='linear-gradient(135deg,#6366f1,#3b82f6)';this.style.transform='';this.style.boxShadow='0 3px 8px rgba(99,102,241,0.35)'">
                             <i class="bi bi-pencil" style="font-size:0.85rem;"></i>
                         </a>
 
@@ -104,13 +121,13 @@
                               onsubmit="return confirm('Segur que vols eliminar aquest usuari?')">
                             <input type="hidden" name="_token" value="{{ csrf_token('delete-user-' ~ user.id) }}">
                             <button type="submit"
-                                    style="width:34px;height:34px;border-radius:8px;border:none;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;transition:all 0.2s;padding:0;background:rgba(239,83,80,0.15);color:rgb(239,83,80);"
+                                    style="width:34px;height:34px;border-radius:8px;border:none;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;transition:all 0.25s;padding:0;background:linear-gradient(135deg,#ef4444,#dc2626);color:#fff;box-shadow:0 3px 8px rgba(239,68,68,0.35);"
                                     title="Eliminar"
                                     {% if app.user.id == user.id or (userProjects[user.id] ?? 0) > 0 %}
-                                    disabled style="opacity:0.3;cursor:not-allowed;background:transparent;color:var(--s-text-secondary);"
+                                    disabled style="opacity:0.3;cursor:not-allowed;background:linear-gradient(135deg,#555,#444);color:#888;box-shadow:none;"
                                     {% endif %}
-                                    onmouseover="if(!this.disabled){this.style.background='rgb(239,83,80)';this.style.color='#fff';this.style.transform='scale(1.1)';this.style.boxShadow='0 2px 8px rgba(239,83,80,0.3)'}"
-                                    onmouseout="if(!this.disabled){this.style.background='rgba(239,83,80,0.15)';this.style.color='rgb(239,83,80)';this.style.transform='';this.style.boxShadow=''}">
+                                    onmouseover="if(!this.disabled){this.style.background='linear-gradient(135deg,#dc2626,#b91c1c)';this.style.transform='scale(1.12)';this.style.boxShadow='0 5px 12px rgba(239,68,68,0.45)'}"
+                                    onmouseout="if(!this.disabled){this.style.background='linear-gradient(135deg,#ef4444,#dc2626)';this.style.transform='';this.style.boxShadow='0 3px 8px rgba(239,68,68,0.35)'}">
                                 <i class="bi bi-trash3" style="font-size:0.85rem;"></i>
                             </button>
                         </form>
