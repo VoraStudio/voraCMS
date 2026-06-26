@@ -2696,7 +2696,8 @@ input[type="time"] {
 /* ─── Required field validation (red border after submit) ─── */
 .cyber-form-input:user-invalid {
   border-color: #EF4444 !important;
-  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15) !important;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.20),
+              0 0 24px rgba(239, 68, 68, 0.08) !important;
 }
 
 .cyber-form-input::placeholder {
@@ -2789,7 +2790,8 @@ input[type="time"] {
 
 [data-theme="light"] .cyber-form-input:user-invalid {
   border-color: #DC2626 !important;
-  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.12) !important;
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.18),
+              0 0 24px rgba(220, 38, 38, 0.06) !important;
 }
 
 [data-theme="light"] .cyber-form-input--select option {
