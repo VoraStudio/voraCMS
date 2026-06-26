@@ -13,33 +13,33 @@
     <table class="s-table" style="width:100%;border-collapse:collapse;">
         <thead>
             <tr style="border-bottom:1px solid var(--s-card-border);font-size:0.7rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--s-text-secondary);">
-                <th style="padding:12px 16px;text-align:left;">Nom</th>
-                <th style="padding:12px 16px;text-align:left;">Email</th>
-                <th style="padding:12px 16px;text-align:left;">Empresa</th>
-                <th style="padding:12px 16px;text-align:center;">Rol</th>
-                <th style="padding:12px 16px;text-align:center;">Projectes</th>
-                <th style="padding:12px 16px;text-align:center;">Actiu</th>
-                <th style="padding:12px 16px;text-align:right;">Accions</th>
+                <th style="padding:14px 18px;text-align:left;">Usuari</th>
+                <th style="padding:14px 18px;text-align:left;">Email</th>
+                <th style="padding:14px 18px;text-align:left;">Empresa</th>
+                <th style="padding:14px 18px;text-align:center;">Rol</th>
+                <th style="padding:14px 18px;text-align:center;">Projectes</th>
+                <th style="padding:14px 18px;text-align:center;">Estat</th>
+                <th style="padding:14px 18px;text-align:right;">Accions</th>
             </tr>
         </thead>
         <tbody>
             {% for user in users %}
             <tr class="{{ user.active ? 'row-active' : 'row-inactive' }}" style="border-bottom:1px solid var(--s-card-border);transition:background 0.15s;"
                 onmouseover="this.style.background='var(--s-hover)'" onmouseout="this.style.background=''">
-                <td style="padding:10px 16px;">
-                    <div style="display:flex;align-items:center;gap:10px;">
-                        <div style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--s-accent-icon),var(--s-accent));display:flex;align-items:center;justify-content:center;color:#fff;font-size:0.75rem;font-weight:600;flex-shrink:0;">
+                <td style="padding:12px 18px;">
+                    <div style="display:flex;align-items:center;gap:12px;">
+                        <div style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--s-accent-icon),var(--s-accent));display:flex;align-items:center;justify-content:center;color:#fff;font-size:0.85rem;font-weight:600;flex-shrink:0;">
                             {{ user.name|first|upper }}
                         </div>
                         <div>
                             <div style="font-size:0.85rem;font-weight:500;color:var(--s-text);">{{ user.name }}</div>
-                            <div style="font-size:0.65rem;color:var(--s-text-secondary);">slug: {{ user.slug }}</div>
+                            <div style="font-size:0.65rem;color:var(--s-text-secondary);">{{ user.slug }}</div>
                         </div>
                     </div>
                 </td>
-                <td style="padding:10px 16px;font-size:0.8rem;color:var(--s-text);">{{ user.email }}</td>
-                <td style="padding:10px 16px;font-size:0.8rem;color:var(--s-text-secondary);">{{ user.company ?: '—' }}</td>
-                <td style="padding:10px 16px;text-align:center;">
+                <td style="padding:12px 18px;font-size:0.8rem;color:var(--s-text);">{{ user.email }}</td>
+                <td style="padding:12px 18px;font-size:0.8rem;color:var(--s-text-secondary);">{{ user.company ?: '—' }}</td>
+                <td style="padding:12px 18px;text-align:center;">
                     {% if 'ROLE_ADMIN' in user.roles %}
                     <span class="badge" style="background:rgba(251,191,36,0.15);color:rgb(251,191,36);font-size:0.6rem;padding:4px 10px;border-radius:20px;">Admin</span>
                     {% elseif 'ROLE_MOD' in user.roles %}
@@ -48,42 +48,73 @@
                     <span class="badge" style="background:rgba(34,197,94,0.15);color:rgb(34,197,94);font-size:0.6rem;padding:4px 10px;border-radius:20px;">Usuari</span>
                     {% endif %}
                 </td>
-                <td style="padding:10px 16px;text-align:center;font-size:0.8rem;color:var(--s-text);">{{ userProjects[user.id] ?? 0 }}</td>
-                <td style="padding:10px 16px;text-align:center;">
+                <td style="padding:12px 18px;text-align:center;font-size:0.8rem;color:var(--s-text);">{{ userProjects[user.id] ?? 0 }}</td>
+                <td style="padding:12px 18px;text-align:center;">
                     {% if user.active %}
-                    <span style="color:rgb(34,197,94);font-size:1rem;">✓</span>
+                    <span style="display:inline-flex;align-items:center;gap:5px;color:rgb(34,197,94);font-size:0.75rem;font-weight:500;">
+                        <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:rgb(34,197,94);"></span> Actiu
+                    </span>
                     {% else %}
-                    <span style="color:rgba(239,83,80,0.60);font-size:1rem;">✗</span>
+                    <span style="display:inline-flex;align-items:center;gap:5px;color:rgba(239,83,80,0.70);font-size:0.75rem;font-weight:500;">
+                        <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:rgba(239,83,80,0.70);"></span> Inactiu
+                    </span>
                     {% endif %}
                 </td>
-                <td style="padding:10px 16px;text-align:right;white-space:nowrap;">
-                    <div style="display:inline-flex;gap:4px;">
+                <td style="padding:12px 18px;text-align:right;white-space:nowrap;">
+                    <div style="display:inline-flex;gap:6px;align-items:center;">
+
+                        {# ─── Veure projectes ─── #}
+                        <a href="{{ path('admin_projects', {user: user.id}) }}"
+                           class="btn btn-sm"
+                           style="padding:6px 12px;font-size:0.7rem;border-radius:8px;display:inline-flex;align-items:center;gap:5px;background:rgba(96,165,250,0.12);color:rgb(96,165,250);border:none;cursor:pointer;text-decoration:none;transition:all 0.15s;font-weight:500;"
+                           onmouseover="this.style.background='rgba(96,165,250,0.20)';this.style.transform='translateY(-1px)'"
+                           onmouseout="this.style.background='rgba(96,165,250,0.12)';this.style.transform=''">
+                            <i class="bi bi-folder2-open" style="font-size:0.75rem;"></i>
+                            <span>Projectes</span>
+                        </a>
+
+                        {# ─── Separador ─── #}
+                        <span style="width:1px;height:20px;background:var(--s-card-border);display:inline-block;"></span>
+
+                        {# ─── Toggle active ─── #}
                         <form method="post" action="{{ path('admin_user_toggle_active', {id: user.id}) }}" style="display:inline" id="tact-user-{{ user.id }}">
                             <input type="hidden" name="_token" value="{{ csrf_token('toggle-active-' ~ user.id) }}">
                             <button type="submit"
-                                    class="btn btn-sm {{ user.active ? 'btn-outline' : 'btn-primary' }}"
-                                    style="padding:4px 10px;font-size:0.7rem;"
+                                    style="width:32px;height:32px;border-radius:8px;border:1px solid var(--s-card-border);background:transparent;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;transition:all 0.15s;color:{{ user.active ? 'rgb(34,197,94)' : 'rgba(239,83,80,0.70)' }};padding:0;"
                                     title="{{ user.active ? 'Desactivar' : 'Activar' }}"
-                                    {% if app.user.id == user.id %}disabled{% endif %}>
-                                {{ user.active ? 'Desactivar' : 'Activar' }}
+                                    {% if app.user.id == user.id %}disabled style="opacity:0.4;cursor:not-allowed;"{% endif %}
+                                    onmouseover="this.style.background='var(--s-hover)';this.style.borderColor='{{ user.active ? 'rgba(34,197,94,0.4)' : 'rgba(239,83,80,0.4)' }}'"
+                                    onmouseout="this.style.background='transparent';this.style.borderColor='var(--s-card-border)'">
+                                <i class="bi {{ user.active ? 'bi-toggle2-on' : 'bi-toggle2-off' }}" style="font-size:1rem;"></i>
                             </button>
                         </form>
+
+                        {# ─── Editar ─── #}
                         <a href="{{ path('admin_user_edit', {id: user.id}) }}"
-                           class="btn btn-sm btn-outline-primary"
-                           style="padding:4px 10px;font-size:0.7rem;">
-                            <i class="bi bi-pencil"></i>
+                           style="width:32px;height:32px;border-radius:8px;border:1px solid var(--s-card-border);background:transparent;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;text-decoration:none;transition:all 0.15s;color:var(--s-text-secondary);padding:0;"
+                           title="Editar"
+                           onmouseover="this.style.background='var(--s-hover)';this.style.borderColor='rgba(96,165,250,0.4)';this.style.color='rgb(96,165,250)'"
+                           onmouseout="this.style.background='transparent';this.style.borderColor='var(--s-card-border)';this.style.color='var(--s-text-secondary)'">
+                            <i class="bi bi-pencil" style="font-size:0.8rem;"></i>
                         </a>
+
+                        {# ─── Eliminar ─── #}
                         <form method="post" action="{{ path('admin_user_delete', {id: user.id}) }}" style="display:inline"
                               id="del-user-{{ user.id }}"
                               onsubmit="return confirm('Segur que vols eliminar aquest usuari?')">
                             <input type="hidden" name="_token" value="{{ csrf_token('delete-user-' ~ user.id) }}">
                             <button type="submit"
-                                    class="btn btn-sm"
-                                    style="padding:4px 10px;font-size:0.7rem;color:rgba(239,83,80,0.70);border-color:rgba(239,83,80,0.15);"
-                                    {% if app.user.id == user.id or (userProjects[user.id] ?? 0) > 0 %}disabled title="{% if app.user.id == user.id %}No pots eliminar-te a tu mateix{% else %}Elimina primer els projectes{% endif %}"{% endif %}>
-                                <i class="bi bi-trash"></i>
+                                    style="width:32px;height:32px;border-radius:8px;border:1px solid var(--s-card-border);background:transparent;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;transition:all 0.15s;color:rgba(239,83,80,0.60);padding:0;"
+                                    title="Eliminar"
+                                    {% if app.user.id == user.id or (userProjects[user.id] ?? 0) > 0 %}
+                                    disabled style="opacity:0.3;cursor:not-allowed;"
+                                    {% endif %}
+                                    onmouseover="if(!this.disabled){this.style.background='rgba(239,83,80,0.10)';this.style.borderColor='rgba(239,83,80,0.3)';this.style.color='rgb(239,83,80)'}"
+                                    onmouseout="if(!this.disabled){this.style.background='transparent';this.style.borderColor='var(--s-card-border)';this.style.color='rgba(239,83,80,0.60)'}">
+                                <i class="bi bi-trash3" style="font-size:0.8rem;"></i>
                             </button>
                         </form>
+
                     </div>
                 </td>
             </tr>

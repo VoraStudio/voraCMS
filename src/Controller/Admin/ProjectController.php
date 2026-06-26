@@ -25,6 +25,7 @@ namespace App\Controller\Admin;
 use App\Entity\Project;
 use App\Entity\User;
 use App\Repository\ProjectRepository;
+use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -37,17 +38,30 @@ class ProjectController extends AbstractController
 {
     /* -----------------------------------------------------------
        index — Llista de projectes.
-       Es mostren com a targetes (cards) per seleccionar-ne un.
+       Si es passa ?user={id}, filtra per usuari (des de la
+       taula d'usuaris).
        ----------------------------------------------------------- */
     #[Route('', name: 'admin_projects')]
-    public function index(ProjectRepository $projectRepo): Response
-    {
+    public function index(
+        Request $request,
+        ProjectRepository $projectRepo,
+        UserRepository $userRepo,
+    ): Response {
         $this->denyAccessUnlessGranted('ROLE_ADMIN');
 
-        $projects = $projectRepo->findActive();
+        $userId = $request->query->getInt('user', 0);
+        $filterUser = null;
+
+        if ($userId > 0) {
+            $filterUser = $userRepo->find($userId);
+            $projects = $projectRepo->findBy(['user' => $filterUser], ['name' => 'ASC']);
+        } else {
+            $projects = $projectRepo->findActive();
+        }
 
         return $this->render('admin/project/index.html.twig', [
             'projects' => $projects,
+            'filterUser' => $filterUser,
         ]);
     }
 

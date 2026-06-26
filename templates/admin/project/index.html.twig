@@ -9,6 +9,23 @@
 {% endblock %}
 
 {% block content %}
+
+{% if filterUser is defined and filterUser %}
+<div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;padding:16px 20px;background:var(--s-card-bg);border:1px solid var(--s-card-border);border-radius:var(--s-radius-lg);">
+    <div style="width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,var(--s-accent-icon),var(--s-accent));display:flex;align-items:center;justify-content:center;color:#fff;font-size:0.9rem;font-weight:600;flex-shrink:0;">
+        {{ filterUser.name|first|upper }}
+    </div>
+    <div style="flex:1;">
+        <div style="font-size:0.7rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--s-text-secondary);margin-bottom:2px;">Projectes de</div>
+        <div style="font-size:0.95rem;font-weight:600;color:var(--s-text);">{{ filterUser.name }}</div>
+    </div>
+    <a href="{{ path('admin_projects') }}" style="padding:6px 14px;border-radius:8px;font-size:0.75rem;text-decoration:none;border:1px solid var(--s-card-border);color:var(--s-text-secondary);background:transparent;transition:all 0.15s;display:inline-flex;align-items:center;gap:6px;"
+       onmouseover="this.style.background='var(--s-hover)'" onmouseout="this.style.background='transparent'">
+        <i class="bi bi-x-lg" style="font-size:0.6rem;"></i> Netejar filtre
+    </a>
+</div>
+{% endif %}
+
 <div class="row g-3">
     {% for project in projects %}
     {% set color = project.color ?: '#4945FF' %}
