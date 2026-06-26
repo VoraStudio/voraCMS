@@ -24,7 +24,7 @@
             </thead>
             <tbody>
             {% for ct in contentTypes %}
-                <tr>
+                <tr class="{{ ct.active ? 'row-active' : 'row-inactive' }}">
                     <td class="text-capitalize fw-semibold">{{ ct.name }}</td>
                     <td><code>{{ ct.slug }}</code></td>
                     <td>{{ ct.fields|length }}</td>
@@ -38,6 +38,12 @@
                     </td>
                     <td class="text-end">
                         <a href="{{ path('admin_content_type_edit', {id: ct.id}) }}" class="btn btn-outline-primary btn-sm"><i class="bi bi-pencil"></i></a>
+                        <form method="post" action="{{ path('admin_content_type_toggle_active', {id: ct.id}) }}" style="display:inline" id="tact-ct-{{ ct.id }}">
+                            <input type="hidden" name="_token" value="{{ csrf_token('toggle-active-' ~ ct.id) }}">
+                            <button type="submit" class="btn btn-sm {{ ct.active ? 'btn-outline-secondary' : 'btn-outline-success' }}" title="{{ ct.active ? 'Desactivar' : 'Activar' }}">
+                                {{ ct.active ? 'Desactivar' : 'Activar' }}
+                            </button>
+                        </form>
                         <form method="post" action="{{ path('admin_content_type_delete', {id: ct.id}) }}" style="display:inline" id="dct-{{ ct.id }}">
                             <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ ct.id) }}">
                             <button type="button" class="btn btn-outline-danger btn-sm" onclick="swalConfirm('Segur que vols eliminar aquest tipus i totes les seves entrades?',function(){document.getElementById('dct-{{ ct.id }}').submit()})"><i class="bi bi-trash"></i></button>

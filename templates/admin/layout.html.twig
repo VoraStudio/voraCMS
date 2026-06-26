@@ -100,13 +100,6 @@
             {% endfor %}
             {% endif %}
 
-            {# ─── Clients link (admin only) ─── #}
-            {% if is_granted('ROLE_ADMIN') %}
-            <a class="s-sidebar-link{% if app.request.get('_route') starts with 'admin_client_' %} active{% endif %}" href="{{ path('admin_client_index') }}">
-                <i class="bi bi-building"></i> Clients
-            </a>
-            {% endif %}
-
         </div>{# ─── /s-sidebar-nav ─── #}
     </nav>
 

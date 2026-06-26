@@ -4,28 +4,26 @@
    DashboardController — Panell principal d'administració.
    Comportament segons el rol:
 
-   - ROLE_ADMIN: panell global amb tots els clients, últims
-     projectes, últimes publicacions i mètriques agregades.
-   - ROLE_MOD / ROLE_USUARIO: veu només el seu client i el
+   - ROLE_ADMIN: panell global amb mètriques agregades.
+   - ROLE_MOD / ROLE_USUARIO: veu només el seu usuari i el
      seu projecte actiu amb les seccions i mètriques.
 
    Admin path:
-     metrics → [ Clients, Proyectos, Publicaciones ]
-     → Últims projectes (amb nom del client)
-     → Últimes publicacions (amb client/tipus)
-     → Fitxes de clients amb mètriques per client
+     metrics → [ Projectes, Publicacions, Visites ]
+     (el comptador de clients es deixa a 0 fins que s'actualitzi
+     la plantilla a la fase de neteja de templates)
    =========================================================== */
 
 namespace App\Controller\Admin;
 
 use App\Entity\Entry;
-use App\Repository\ClientRepository;
+use App\Entity\User;
 use App\Repository\ContentTypeRepository;
 use App\Repository\EntryRepository;
 use App\Repository\MediaRepository;
 use App\Repository\ProjectRepository;
+use App\Repository\UserRepository;
 use App\Repository\VisitRepository;
-use App\Service\ClientScope;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -35,42 +33,30 @@ use Symfony\Component\Routing\Attribute\Route;
 #[Route('/admin')]
 class DashboardController extends AbstractController
 {
-    public function __construct(
-        private readonly ClientScope $clientScope,
-    ) {}
-
     /* -----------------------------------------------------------
        index
        ───────────────────────────────────────────────────────────
-       ADMIN  → panell global amb clients, projectes, publicacions
-       MOD/USUARIO → panell scoped al seu client/projecte actiu
+       ADMIN  → panell global amb projectes, publicacions i visites
+       MOD/USUARIO → panell scoped al seu usuari/projecte actiu
        ----------------------------------------------------------- */
     #[Route('/', name: 'admin_dashboard')]
     public function index(
         Request $request,
         ContentTypeRepository $ctRepo,
         EntryRepository $entryRepo,
-        ClientRepository $clientRepo,
         ProjectRepository $projectRepo,
         MediaRepository $mediaRepo,
         EntityManagerInterface $em,
         VisitRepository $visitRepo,
+        UserRepository $userRepo,
     ): Response {
-        $currentClient = $this->clientScope->getClient();
-        $isAdmin = $this->clientScope->isAdmin();
+        $user = $this->getUser();
+        $isAdmin = $this->isGranted('ROLE_ADMIN');
 
         /* ═══════════════════════════════════════════════════════
-           ADMIN DASHBOARD — Global, tots els clients
+           ADMIN DASHBOARD — Global, tots els usuaris
            ═══════════════════════════════════════════════════════ */
         if ($isAdmin) {
-            $clients = $clientRepo->findBy([], ['name' => 'ASC']);
-
-            /* ── Últims projectes (amb client) ── */
-            $latestProjects = $projectRepo->findLatestActive(6);
-
-            /* ── Últimes publicacions (amb client) ── */
-            $latestPublications = $entryRepo->findLatestPublished(10);
-
             /* ── Total publicacions globals ── */
             $totalPublishedGlobally = (int) $em->createQueryBuilder()
                 ->select('COUNT(e.id)')
@@ -83,35 +69,19 @@ class DashboardController extends AbstractController
             /* ── Visites d'avui ── */
             $totalVisitsToday = $visitRepo->countTodayGlobal();
 
-            /* ── Mètriques per client ── */
-            $clientMetrics = [];
-            foreach ($clients as $client) {
-                $clientMetrics[] = [
-                    'client' => $client,
-                    'projects' => count($client->getProjects()),
-                    'published' => $entryRepo->countPublishedByClient($client->getId()),
-                    'today' => $entryRepo->countTodayByClient($client->getId()),
-                    'visitsToday' => $visitRepo->countTodayByClient($client->getId()),
-                ];
-            }
-
             return $this->render('admin/dashboard.html.twig', [
                 'isAdmin' => true,
-                'latestProjects' => $latestProjects,
-                'latestPublications' => $latestPublications,
-                'clientMetrics' => $clientMetrics,
                 'metrics' => [
-                    'totalClientes' => count($clients),
+                    'totalUsuaris' => $userRepo->count([]),
                     'totalProyectos' => $projectRepo->count([]),
                     'totalPublicaciones' => $totalPublishedGlobally,
                     'totalVisites' => $totalVisitsToday,
                 ],
-                'currentClient' => $currentClient,
             ]);
         }
 
         /* ═══════════════════════════════════════════════════════
-           MOD / USUARIO DASHBOARD — Scoped al seu client
+           MOD / USUARIO DASHBOARD — Scoped al seu usuari
            ═══════════════════════════════════════════════════════ */
         $session = $request->getSession();
         $activeProjectId = $session->get('_project_id');
@@ -154,15 +124,14 @@ class DashboardController extends AbstractController
             }
         }
 
-        $clientId = $this->clientScope->getClientId();
-        $totalMedia = $clientId !== null
-            ? count($mediaRepo->findByClient($clientId))
+        $userId = $user?->getId();
+        $totalMedia = $userId !== null
+            ? count($mediaRepo->findByUser($userId))
             : 0;
 
         return $this->render('admin/dashboard.html.twig', [
             'stats' => $stats,
             'projects' => $projects,
-            'currentClient' => $currentClient,
             'projectToShow' => $projectToShow,
             'activeProject' => $projectToShow,
             'metrics' => [

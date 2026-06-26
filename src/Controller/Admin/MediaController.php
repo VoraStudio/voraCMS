@@ -3,24 +3,22 @@
 /* ===========================================================
    MediaController — Gestió de la mediateca amb tenant isolation.
 
-   El MediaRepository ja té mètodes findByClient i
-   findByClientOrdered que filtren per client_id.
+   El MediaRepository té mètodes findByUser i
+   findByUserOrdered que filtren per user_id.
 
-   Aquí afegim ClientScope per resoldre el client actual
-   i passar-lo al repositori, garantint que cada client
-   només vegi els seus propis fitxers multimèdia.
+   Els usuaris normals només veuen els seus fitxers. Els
+   administradors veuen tots els fitxers.
 
-   Pel mètode upload(), el MediaService ja assigna el
-   client via ClientScope internament, així que no cal
-   modificar-lo aquí.
+   Pel mètode upload(), el MediaService ja assigna l'usuari
+   actual internament.
    =========================================================== */
 
 namespace App\Controller\Admin;
 
 use Doctrine\ORM\EntityManagerInterface;
 use App\Entity\Media;
+use App\Entity\User;
 use App\Repository\MediaRepository;
-use App\Service\ClientScope;
 use App\Service\MediaService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
@@ -32,10 +30,6 @@ use Symfony\Component\Routing\Attribute\Route;
 #[Route('/admin/media')]
 class MediaController extends AbstractController
 {
-    public function __construct(
-        private readonly ClientScope $clientScope,
-    ) {}
-
     /* -----------------------------------------------------------
        index — Llista els fitxers multimèdia del client actual.
        Pel super-admin, mostra tots els fitxers (clientId null).
@@ -43,12 +37,15 @@ class MediaController extends AbstractController
     #[Route('/', name: 'admin_media_index')]
     public function index(MediaRepository $repo): Response
     {
-        $clientId = $this->clientScope->getClientId();
+        $this->denyAccessUnlessGranted('ROLE_USUARIO');
 
-        if ($clientId !== null) {
-            $media = $repo->findByClientOrdered($clientId);
-        } else {
+        if ($this->isGranted('ROLE_ADMIN')) {
             $media = $repo->findBy([], ['createdAt' => 'DESC']);
+        } else {
+            $user = $this->getUser();
+            $media = $user instanceof User
+                ? $repo->findByUserOrdered($user->getId())
+                : [];
         }
 
         return $this->render('admin/media/index.html.twig', [
@@ -66,7 +63,7 @@ class MediaController extends AbstractController
         }
 
         try {
-            /* El MediaService ja assigna el client via ClientScope
+            /* El MediaService ja assigna l'usuari actual
                internament durant el procés d'upload. */
             $media = $mediaService->upload($file, $this->getUser());
             return $this->json([
@@ -89,11 +86,12 @@ class MediaController extends AbstractController
     {
         $this->denyAccessUnlessGranted('ROLE_USUARIO');
 
-        $clientId = $this->clientScope->getClientId();
-
-        /* Tenant isolation: si no és super-admin, comprova propietat */
-        if ($clientId !== null && $media->getClient()?->getId() !== $clientId) {
-            throw $this->createAccessDeniedException('No tens permís per eliminar aquesta imatge.');
+        /* Tenant isolation: només l'owner o ROLE_ADMIN poden esborrar */
+        if (!$this->isGranted('ROLE_ADMIN')) {
+            $user = $this->getUser();
+            if (!$user instanceof User || $media->getUser()?->getId() !== $user->getId()) {
+                throw $this->createAccessDeniedException('No tens permís per eliminar aquesta imatge.');
+            }
         }
 
         if ($this->isCsrfTokenValid('delete' . $media->getId(), $request->request->get('_token'))) {
@@ -118,12 +116,15 @@ class MediaController extends AbstractController
     #[Route('/picker', name: 'admin_media_picker')]
     public function picker(Request $request, MediaRepository $repo): Response
     {
-        $clientId = $this->clientScope->getClientId();
+        $this->denyAccessUnlessGranted('ROLE_USUARIO');
 
-        if ($clientId !== null) {
-            $media = $repo->findByClientOrdered($clientId);
-        } else {
+        if ($this->isGranted('ROLE_ADMIN')) {
             $media = $repo->findBy([], ['createdAt' => 'DESC']);
+        } else {
+            $user = $this->getUser();
+            $media = $user instanceof User
+                ? $repo->findByUserOrdered($user->getId())
+                : [];
         }
 
         return $this->render('admin/media/picker.html.twig', [

@@ -3,7 +3,7 @@
 /* ===========================================================
    DemoFixtures — VoraCMS
    ===========================================================
-   Crea els content types i dades demo per al projecte Victoria Taylor.
+   Crea els content types i dades demo per als projectes base.
    S'executa amb: php bin/console doctrine:fixtures:load
 
    Content types creats:
@@ -17,7 +17,6 @@
 
 namespace App\DataFixtures;
 
-use App\Entity\Client;
 use App\Entity\ContentType;
 use App\Entity\Entry;
 use App\Entity\FieldDefinition;
@@ -30,10 +29,10 @@ class DemoFixtures extends Fixture
 {
     public function load(ObjectManager $manager): void
     {
-        $admin = $manager->getRepository(User::class)->findOneBy(['email' => 'admin@vorastudio.cat']);
-
-        /* ----- Client per defecte ----- */
-        $defaultClient = $manager->getRepository(Client::class)->findOneBy(['slug' => 'default']);
+        $admin = $manager->getRepository(User::class)->findOneBy(['email' => 'admin@vora.es']);
+        if (!$admin instanceof User) {
+            return;
+        }
 
         /* ===========================================================
            1. CONTENT TYPE: NOTÍCIES (slug: noticia)
@@ -46,7 +45,8 @@ class DemoFixtures extends Fixture
         $noticies->setSlug('noticia');
         $noticies->setDescription('Articles i notícies del projecte');
         $noticies->setBase(true);
-        $noticies->setClient($defaultClient);
+        $noticies->setActive(true);
+        $noticies->setUser($admin);
 
         $f1 = new FieldDefinition();
         $f1->setName('Títol');
@@ -101,7 +101,8 @@ class DemoFixtures extends Fixture
         $events->setSlug('event');
         $events->setDescription('Esdeveniments i actes');
         $events->setBase(true);
-        $events->setClient($defaultClient);
+        $events->setActive(true);
+        $events->setUser($admin);
 
         $fe1 = new FieldDefinition();
         $fe1->setName('Títol');
@@ -155,7 +156,8 @@ class DemoFixtures extends Fixture
         $entry->setContentType($noticies);
         $entry->setStatus(Entry::STATUS_PUBLISHED);
         $entry->setAuthor($admin);
-        $entry->setClient($defaultClient);
+        $entry->setUser($admin);
+        $entry->setActive(true);
         $entry->setPublishedAt(new \DateTime());
         $this->addFieldValue($manager, $entry, $f1, 'Exposició d\'Art Contemporani 2026');
         $this->addFieldValue($manager, $entry, $f2, '<p>Gran exposició d\'art contemporani amb obres de diversos artistes internacionals.</p>');
@@ -168,7 +170,8 @@ class DemoFixtures extends Fixture
         $entry2->setContentType($events);
         $entry2->setStatus(Entry::STATUS_PUBLISHED);
         $entry2->setAuthor($admin);
-        $entry2->setClient($defaultClient);
+        $entry2->setUser($admin);
+        $entry2->setActive(true);
         $entry2->setPublishedAt(new \DateTime());
         $this->addFieldValue($manager, $entry2, $fe1, 'Vernisage: Noves mirades');
         $this->addFieldValue($manager, $entry2, $fe2, '<p>Inauguració de la temporada amb una selecció d\'obres en format reduït.</p>');

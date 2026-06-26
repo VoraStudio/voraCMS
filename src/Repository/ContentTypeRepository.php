@@ -58,4 +58,22 @@ class ContentTypeRepository extends ServiceEntityRepository
             ['name' => 'ASC']
         );
     }
+
+    /**
+     * @return ContentType[]
+     */
+    public function findByUser(int $userId, ?bool $active = true): array
+    {
+        $qb = $this->createQueryBuilder('ct')
+            ->andWhere('ct.user = :userId')
+            ->setParameter('userId', $userId)
+            ->orderBy('ct.name', 'ASC');
+
+        if ($active !== null) {
+            $qb->andWhere('ct.active = :active')
+               ->setParameter('active', $active);
+        }
+
+        return $qb->getQuery()->getResult();
+    }
 }

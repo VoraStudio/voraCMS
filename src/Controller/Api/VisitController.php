@@ -2,7 +2,7 @@
 
 /* ===========================================================
    VisitController — Registre de visites des del frontend.
-   POST /api/visit — Desa una visita amb client, entrada i IP.
+   POST /api/visit — Desa una visita amb usuari, entrada i IP.
    =========================================================== */
 
 namespace App\Controller\Api;
@@ -33,12 +33,12 @@ class VisitController extends AbstractController
         }
 
         $entry = $entryRepo->find($data['entry_id']);
-        if (!$entry || !$entry->getClient()) {
+        if (!$entry || !$entry->getUser()) {
             return $this->json(['error' => 'entry not found'], 404);
         }
 
         $visit = new Visit();
-        $visit->setClient($entry->getClient());
+        $visit->setUser($entry->getUser());
         $visit->setEntry($entry);
         $visit->setPath($data['path'] ?? null);
         $visit->setIp($request->getClientIp());

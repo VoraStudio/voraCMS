@@ -4,7 +4,7 @@
    API Auth Controller — VoraCMS
    ══════════════════════════════════════════════════════════════
    /api/auth/login  → gestionat per lexik/jwt-authentication-bundle
-   /api/auth/me     → retorna dades de l'usuari autenticat + client
+   /api/auth/me     → retorna dades de l'usuari autenticat (tenant)
    ══════════════════════════════════════════════════════════════ */
 
 namespace App\Controller\Api;
@@ -26,33 +26,24 @@ class AuthController extends AbstractController
     }
 
     /* ─── ME ─── */
-    /* Retorna id, email, name, roles + client object amb
-       id, name, slug. El client_id ja ve al JWT (Phase 2),
-       així que el frontend pot saber a quin client pertany
-       l'usuari sense necessitat del query parameter. */
+    /* Retorna les dades de l'usuari (ara també és el tenant). */
     #[Route('/me', name: 'api_auth_me', methods: ['GET'])]
     public function me(): JsonResponse
     {
         $user = $this->getUser();
 
-        $data = [
-            'id' => $user->getId(),
-            'email' => $user->getEmail(),
-            'name' => $user->getName(),
-            'roles' => $user->getRoles(),
-        ];
-
-        /* ─── Client info ─── */
-        if ($user instanceof User && $user->getClient()) {
-            $data['client'] = [
-                'id' => $user->getClient()->getId(),
-                'name' => $user->getClient()->getName(),
-                'slug' => $user->getClient()->getSlug(),
-            ];
+        if (!$user instanceof User) {
+            return $this->json(['error' => 'Usuari no autenticat'], 401);
         }
 
         return $this->json([
-            'data' => $data,
+            'data' => [
+                'slug' => $user->getSlug(),
+                'apiToken' => $user->getApiToken(),
+                'company' => $user->getCompany(),
+                'email' => $user->getEmail(),
+                'name' => $user->getName(),
+            ],
         ]);
     }
 }

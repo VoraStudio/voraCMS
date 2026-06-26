@@ -4,27 +4,27 @@
    EntryController — CRUD d'entrades amb tenant isolation.
 
    Cada entrada pertany a un ContentType (que pertany a un
-   Client) i a més té una referència directa client_id
+   usuari) i a més té una referència directa user_id
    (defense in depth del disseny).
 
    Les verificacions de propietat als mètodes edit() i
-   delete() comproven que l'entrada pertany al client
+   delete() comproven que l'entrada pertany a l'usuari
    actual, evitant accessos creuats entre tenants.
 
-   En el mètode new(), assignem l'entrada al client actual
-   obtingut via ClientScope per garantir l'aïllament.
+   En el mètode new(), assignem l'entrada a l'usuari actual
+   obtingut via el context de seguretat.
    =========================================================== */
 
 namespace App\Controller\Admin;
 
 use App\Entity\ContentType;
 use App\Entity\Entry;
-use App\Entity\FieldValue;
 use App\Entity\FieldDefinition;
+use App\Entity\FieldValue;
+use App\Entity\User;
 use App\Repository\ContentTypeRepository;
 use App\Repository\MediaRepository;
 use App\Repository\ProjectRepository;
-use App\Service\ClientScope;
 use App\Service\MediaService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -35,13 +35,9 @@ use Symfony\Component\Routing\Attribute\Route;
 #[Route('/admin/entry')]
 class EntryController extends AbstractController
 {
-    public function __construct(
-        private readonly ClientScope $clientScope,
-    ) {}
-
     /* -----------------------------------------------------------
        byType — Llista les entrades d'un tipus de contingut.
-       Verifica que el ContentType pertany al client actual
+       Verifica que el ContentType pertany a l'usuari actual
        abans de mostrar les entrades.
        ----------------------------------------------------------- */
     #[Route('/type/{slug}', name: 'admin_entry_by_type')]
@@ -129,7 +125,7 @@ class EntryController extends AbstractController
 
     /* -----------------------------------------------------------
        new — Crea una nova entrada dins del ContentType
-       especificat. Assigna el client actual a l'entrada
+       especificat. Assigna l'usuari actual a l'entrada
        (defense in depth) per garantir que sempre pertany
        al tenant correcte, independentment del ContentType.
        ----------------------------------------------------------- */
@@ -151,11 +147,8 @@ class EntryController extends AbstractController
             $entry->setStatus($request->request->get('status', Entry::STATUS_DRAFT));
             $entry->setAuthor($this->getUser());
 
-            /* ── Assignar client actual a l'entrada ── */
-            $currentClient = $this->clientScope->getClient();
-            if ($currentClient !== null) {
-                $entry->setClient($currentClient);
-            }
+            /* ── Assignar usuari actual a l'entrada ── */
+            $entry->setUser($this->getUser());
 
             foreach ($contentType->getFields() as $fieldDef) {
                 $value = $this->resolveFieldValue($request, $fieldDef, $mediaService);
@@ -183,7 +176,7 @@ class EntryController extends AbstractController
 
     /* -----------------------------------------------------------
        edit — Edita una entrada existent.
-       Verifica que l'entrada pertany al client actual abans
+       Verifica que l'entrada pertany a l'usuari actual abans
        de permetre la modificació.
        ----------------------------------------------------------- */
     #[Route('/{id}/edit', name: 'admin_entry_edit', methods: ['GET', 'POST'])]
@@ -270,18 +263,41 @@ class EntryController extends AbstractController
     }
 
     /* -----------------------------------------------------------
-       verifyEntryOwnership — Comprova que l'entrada pertany al
-       client actual. Super-admin bypassa la verificació.
+       toggleActive — Activa/desactiva una entrada.
+       ----------------------------------------------------------- */
+    #[Route('/{id}/toggle-active', name: 'admin_entry_toggle_active', methods: ['POST'])]
+    public function toggleActive(Request $request, Entry $entry, EntityManagerInterface $em): Response
+    {
+        $this->denyAccessUnlessGranted('ROLE_ADMIN');
+
+        if (!$this->isCsrfTokenValid('toggle-active-' . $entry->getId(), $request->request->get('_token'))) {
+            $this->addFlash('error', 'Token de seguretat invàlid.');
+            return $this->redirectToRoute('admin_entry_by_type', ['slug' => $entry->getContentType()->getSlug()]);
+        }
+
+        $entry->setActive(!$entry->isActive());
+        $em->flush();
+
+        $this->addFlash('success', $entry->isActive() ? 'Entrada activada.' : 'Entrada desactivada.');
+        return $this->redirectToRoute('admin_entry_by_type', ['slug' => $entry->getContentType()->getSlug()]);
+    }
+
+    /* -----------------------------------------------------------
+       verifyEntryOwnership — Comprova que l'entrada pertany a
+       l'usuari actual. ROLE_ADMIN bypassa la verificació.
        ----------------------------------------------------------- */
     private function verifyEntryOwnership(Entry $entry): void
     {
-        $currentClient = $this->clientScope->getClient();
-
-        if ($currentClient === null) {
-            return; /* Super-admin: accés complet */
+        if ($this->isGranted('ROLE_ADMIN')) {
+            return;
         }
 
-        if ($entry->getClient()?->getId() !== $currentClient->getId()) {
+        $user = $this->getUser();
+        if (!$user instanceof User) {
+            throw $this->createAccessDeniedException('Usuari no autenticat.');
+        }
+
+        if ($entry->getUser()?->getId() !== $user->getId()) {
             throw $this->createAccessDeniedException(
                 'No tens permís per modificar aquesta entrada.'
             );
@@ -290,17 +306,20 @@ class EntryController extends AbstractController
 
     /* -----------------------------------------------------------
        verifyContentTypeOwnership — Comprova que el ContentType
-       pertany al client actual.
+       pertany a l'usuari actual.
        ----------------------------------------------------------- */
     private function verifyContentTypeOwnership(ContentType $contentType): void
     {
-        $currentClient = $this->clientScope->getClient();
-
-        if ($currentClient === null) {
-            return; /* Admin: accés complet */
+        if ($this->isGranted('ROLE_ADMIN')) {
+            return;
         }
 
-        if ($contentType->getClient()?->getId() !== $currentClient->getId()) {
+        $user = $this->getUser();
+        if (!$user instanceof User) {
+            throw $this->createAccessDeniedException('Usuari no autenticat.');
+        }
+
+        if ($contentType->getUser()?->getId() !== $user->getId()) {
             throw $this->createAccessDeniedException(
                 'No tens permís per accedir a aquest tipus de contingut.'
             );
@@ -381,8 +400,6 @@ class EntryController extends AbstractController
 
         /* No hi ha projecte a sessió — proveïm d'auto-seleccionar */
         if ($projectRepo === null) {
-            /* No tenim accés al repositori; deleguem al Dashboard */
-            $projects = $this->clientScope->getClient();
             return null;
         }
 

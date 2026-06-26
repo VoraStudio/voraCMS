@@ -4,22 +4,22 @@
    ContentTypeController — CRUD de tipus de contingut amb
    tenant isolation + project isolation.
 
-   Cada tipus de contingut (secció) pertany a un projecte dins
-   d'un client. Quan es crea un de nou, s'assigna al projecte
-   actiu de la sessió.
+   Cada tipus de contingut (secció) pertany a un projecte d'un
+   usuari. Quan es crea un de nou, s'assigna a l'usuari actual
+   i al projecte actiu de la sessió.
 
-   Tot i que el repositori ja scopa per client via ClientScope
-   i per projecte via session, afegim verificacions explícites
-   de propietat per defense in depth.
+   El repositori scopa per usuari via UserIdFilter i per
+   projecte via sessió; afegim verificacions explícites de
+   propietat per defense in depth.
    =========================================================== */
 
 namespace App\Controller\Admin;
 
 use App\Entity\ContentType;
 use App\Entity\FieldDefinition;
+use App\Entity\User;
 use App\Repository\ContentTypeRepository;
 use App\Repository\ProjectRepository;
-use App\Service\ClientScope;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -29,10 +29,6 @@ use Symfony\Component\Routing\Attribute\Route;
 #[Route('/admin/content-type')]
 class ContentTypeController extends AbstractController
 {
-    public function __construct(
-        private readonly ClientScope $clientScope,
-    ) {}
-
     /* -----------------------------------------------------------
         index — Llista els tipus de contingut del projecte actiu.
         Requereix MANAGE_CT sobre el projecte (o accés a CT base).
@@ -53,7 +49,6 @@ class ContentTypeController extends AbstractController
 
         return $this->render('admin/content-type/index.html.twig', [
             'contentTypes' => $repo->findActive($projectId),
-            'currentClient' => $this->clientScope->getClient(),
         ]);
     }
 
@@ -83,11 +78,8 @@ class ContentTypeController extends AbstractController
             $ct->setDescription($request->request->get('description'));
             $ct->setActive($request->request->get('active', true));
 
-            /* Assignar client actual */
-            $currentClient = $this->clientScope->getClient();
-            if ($currentClient !== null) {
-                $ct->setClient($currentClient);
-            }
+            /* Assignar usuari actual */
+            $ct->setUser($this->getUser());
 
             /* Assignar al projecte actiu */
             if ($project !== null) {
@@ -202,18 +194,41 @@ class ContentTypeController extends AbstractController
     }
 
     /* -----------------------------------------------------------
-       verifyOwnership — Comprova que el ContentType pertany al
-       client actual.
+       toggleActive — Activa/desactiva un tipus de contingut.
+       ----------------------------------------------------------- */
+    #[Route('/{id}/toggle-active', name: 'admin_content_type_toggle_active', methods: ['POST'])]
+    public function toggleActive(Request $request, ContentType $contentType, EntityManagerInterface $em): Response
+    {
+        $this->denyAccessUnlessGranted('ROLE_ADMIN');
+
+        if (!$this->isCsrfTokenValid('toggle-active-' . $contentType->getId(), $request->request->get('_token'))) {
+            $this->addFlash('error', 'Token de seguretat invàlid.');
+            return $this->redirectToRoute('admin_content_type_index');
+        }
+
+        $contentType->setActive(!$contentType->isActive());
+        $em->flush();
+
+        $this->addFlash('success', $contentType->isActive() ? 'Secció activada.' : 'Secció desactivada.');
+        return $this->redirectToRoute('admin_content_type_index');
+    }
+
+    /* -----------------------------------------------------------
+       verifyOwnership — Comprova que el ContentType pertany a
+       l'usuari actual. ROLE_ADMIN bypassa la verificació.
        ----------------------------------------------------------- */
     private function verifyOwnership(ContentType $contentType): void
     {
-        $currentClient = $this->clientScope->getClient();
-
-        if ($currentClient === null) {
-            return; // Super-admin
+        if ($this->isGranted('ROLE_ADMIN')) {
+            return;
         }
 
-        if ($contentType->getClient()?->getId() !== $currentClient->getId()) {
+        $user = $this->getUser();
+        if (!$user instanceof User) {
+            throw $this->createAccessDeniedException('Usuari no autenticat.');
+        }
+
+        if ($contentType->getUser()?->getId() !== $user->getId()) {
             throw $this->createAccessDeniedException(
                 'No tens permís per modificar aquesta secció.'
             );

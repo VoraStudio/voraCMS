@@ -4,17 +4,12 @@ namespace App\Security\Voter;
 
 use App\Entity\Project;
 use App\Entity\User;
-use App\Repository\UserProjectRepository;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Authorization\Voter\Voter;
 
 class ProjectVoter extends Voter
 {
     public const MANAGE_CT = 'MANAGE_CT';
-
-    public function __construct(
-        private readonly UserProjectRepository $userProjectRepository,
-    ) {}
 
     protected function supports(string $attribute, mixed $subject): bool
     {
@@ -35,19 +30,6 @@ class ProjectVoter extends Voter
             return true;
         }
 
-        $userProject = $this->userProjectRepository->findOneByUserAndProject($user, $project);
-
-        if (in_array('ROLE_MOD', $user->getRoles(), true)) {
-            if ($userProject !== null) {
-                return $userProject->canManageContentTypes();
-            }
-            return true;
-        }
-
-        if ($userProject !== null && $userProject->canManageContentTypes()) {
-            return true;
-        }
-
-        return false;
+        return $project->getUser()?->getId() === $user->getId();
     }
 }

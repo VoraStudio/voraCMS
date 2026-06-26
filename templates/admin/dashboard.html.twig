@@ -7,19 +7,19 @@
 <div class="s-dashboard">
 
 {##}
-{## ─── ADMIN DASHBOARD — Global, tots els clients ─── #}
+{## ─── ADMIN DASHBOARD — Global, tots els usuaris ─── #}
 {##}
 {% if isAdmin is defined and isAdmin %}
 
-    {# ─── Mètriques globals: Clientes · Proyectos · Publicaciones · Visites ─── #}
+    {# ─── Mètriques globals: Usuaris · Projectes · Publicacions · Visites ─── #}
     <div class="row g-3 mb-4" style="position:relative;z-index:1;">
         <div class="col-md-3">
             <div class="s-stat-card" data-anim="metric" style="padding:20px 24px;text-align:center;">
                 <div class="s-stat-label" style="margin-bottom:8px;">
-                    <i class="bi bi-buildings me-1 s-stat-label-icon"></i> Clients
+                    <i class="bi bi-people me-1 s-stat-label-icon"></i> Usuaris
                 </div>
                 <div class="s-stat-value">
-                    {{ metrics.totalClientes }}
+                    {{ metrics.totalUsuaris }}
                 </div>
             </div>
         </div>
@@ -76,7 +76,7 @@
                         {{ project.name }}
                     </h6>
                     <p style="font-size:0.7rem;color:var(--s-text-secondary);margin:0;text-align:center;">
-                        <i class="bi bi-building me-1" style="font-size:0.6rem;"></i>{{ project.client.name }}
+                        <i class="bi bi-person me-1" style="font-size:0.6rem;"></i>{{ project.user.company ?? project.user.name }}
                     </p>
                 </div>
             </div>
@@ -110,10 +110,7 @@
                         {% endif %}
                     </div>
                     <div style="font-size:0.7rem;color:var(--s-text-secondary);margin-top:2px;">
-                        <a href="{{ path('admin_client_edit', {id: entry.client.id}) }}" style="color:var(--s-accent-icon);font-weight:600;text-decoration:none;"
-                           onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">
-                            {{ entry.client.name }}
-                        </a>
+                        <span style="color:var(--s-accent-icon);font-weight:600;">{{ entry.user.name ?? entry.user.email }}</span>
                         <span style="margin:0 6px;opacity:0.3;">·</span>
                         <span>{{ entry.contentType.name }}</span>
                         <span style="margin:0 6px;opacity:0.3;">·</span>
@@ -146,48 +143,8 @@
     </div>
     {% endif %}
 
-    {# ─── Clients amb mètriques ─── #}
-    {% if clientMetrics is not empty %}
-    <div class="mb-4" style="position:relative;z-index:1;">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
-            <h6 style="color:var(--s-accent-icon-soft);font-size:0.75rem;text-transform:uppercase;letter-spacing:0.08em;margin:0;">
-                <i class="bi bi-buildings me-2" style="color:var(--s-accent-icon-soft);"></i>Clients
-            </h6>
-            <a href="{{ path('admin_client_index') }}" class="btn btn-outline-primary btn-sm" style="font-size:0.75rem;padding:6px 14px;min-height:32px;">
-                Gestionar <i class="bi bi-arrow-right ms-1"></i>
-            </a>
-        </div>
-        <div class="row g-3">
-            {% for cm in clientMetrics %}
-            {% set client = cm.client %}
-            <div class="col-md-3">
-                <div style="background:var(--s-card-bg);border:1px solid var(--s-card-border);border-radius:14px;padding:18px;transition:all 300ms ease;cursor:default;"
-                     onmouseover="this.style.borderColor='var(--s-accent-icon-card)';this.style.background='var(--s-hover)';"
-                     onmouseout="this.style.borderColor='var(--s-card-border)';this.style.background='var(--s-card-bg)';">
-                    <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
-                        <div style="width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg, var(--s-accent-icon-card), transparent);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.85rem;color:var(--s-accent-icon);flex-shrink:0;">
-                            {{ client.name|first|upper }}
-                        </div>
-                        <div>
-                            <div style="font-size:0.8rem;font-weight:600;color:var(--s-text);">{{ client.name }}</div>
-                            <code style="font-size:0.65rem;color:var(--s-text-secondary);">{{ client.slug }}</code>
-                        </div>
-                    </div>
-                    <div style="display:flex;gap:10px;font-size:0.7rem;color:var(--s-text-secondary);flex-wrap:wrap;">
-                        <span title="Projectes"><i class="bi bi-folder me-1" style="font-size:0.6rem;"></i> {{ cm.projects }}</span>
-                        <span title="Publicacions"><i class="bi bi-check-circle me-1" style="font-size:0.6rem;"></i> {{ cm.published }}</span>
-                        <span title="Entrades avui"><i class="bi bi-activity me-1" style="font-size:0.6rem;"></i> {{ cm.today }}</span>
-                        <span title="Visites avui"><i class="bi bi-eye me-1" style="font-size:0.6rem;"></i> {{ cm.visitsToday }}</span>
-                    </div>
-                </div>
-            </div>
-            {% endfor %}
-        </div>
-    </div>
-    {% endif %}
-
 {##}
-{## ─── NON-ADMIN DASHBOARD — Scoped al client ─── #}
+{## ─── NON-ADMIN DASHBOARD — Scoped a l'usuari ─── #}
 {##}
 {% else %}
 

@@ -25,13 +25,14 @@
                     <th>Títol</th>
                     <th>Data</th>
                     <th>Estat</th>
+                    <th>Actiu</th>
                     <th>Idioma</th>
-                    <th style="width:140px;"></th>
+                    <th style="width:180px;"></th>
                 </tr>
             </thead>
             <tbody>
             {% for entry in entries %}
-                <tr>
+                <tr class="{{ entry.active ? 'row-active' : 'row-inactive' }}">
                     <td>
                         {% set thumb = thumbnails[entry.id] ?? null %}
                         {% if thumb %}
@@ -64,14 +65,27 @@
                             <span class="badge" style="background:var(--s-danger);color:#fff;">Arxivat</span>
                         {% endif %}
                     </td>
+                    <td>
+                        {% if entry.active %}
+                            <span class="badge bg-success">Sí</span>
+                        {% else %}
+                            <span class="badge bg-secondary">No</span>
+                        {% endif %}
+                    </td>
                     <td>{{ entry.locale|upper }}</td>
                     <td class="text-end" style="white-space:nowrap;">
-<a href="{{ path('admin_entry_show', {id: entry.id}) }}" class="btn btn-sm btn-outline-primary" title="Veure">
-    <i class="bi bi-eye"></i>
-</a>
+                        <a href="{{ path('admin_entry_show', {id: entry.id}) }}" class="btn btn-sm btn-outline-primary" title="Veure">
+                            <i class="bi bi-eye"></i>
+                        </a>
                         <a href="{{ path('admin_entry_edit', {id: entry.id}) }}" class="btn btn-sm btn-outline-secondary" title="Editar">
                             <i class="bi bi-pencil"></i>
                         </a>
+                        <form method="post" action="{{ path('admin_entry_toggle_active', {id: entry.id}) }}" style="display:inline" id="tact-entry-{{ entry.id }}">
+                            <input type="hidden" name="_token" value="{{ csrf_token('toggle-active-' ~ entry.id) }}">
+                            <button type="submit" class="btn btn-sm {{ entry.active ? 'btn-outline-secondary' : 'btn-outline-success' }}" title="{{ entry.active ? 'Desactivar' : 'Activar' }}">
+                                {{ entry.active ? 'Desactivar' : 'Activar' }}
+                            </button>
+                        </form>
                         <form method="post" action="{{ path('admin_entry_delete', {id: entry.id}) }}" style="display:inline" id="del-{{ entry.id }}">
                             <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ entry.id) }}">
                             <button type="button" class="btn btn-sm btn-outline-danger" title="Eliminar" onclick="swalConfirm('Segur que vols eliminar aquesta entrada?',function(){document.getElementById('del-{{ entry.id }}').submit()})">
@@ -82,7 +96,7 @@
                 </tr>
             {% else %}
                 <tr>
-                    <td colspan="7" class="text-center py-4" style="color:var(--s-text-secondary);">No hi ha entrades encara.</td>
+                    <td colspan="8" class="text-center py-4" style="color:var(--s-text-secondary);">No hi ha entrades encara.</td>
                 </tr>
             {% endfor %}
             </tbody>

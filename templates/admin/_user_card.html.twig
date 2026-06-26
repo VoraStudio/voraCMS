@@ -8,7 +8,7 @@
 <div class="s-user-card">
     <img src="{{ asset('img/logo_blanc.png') }}" alt="Vora Studio" class="s-user-card-avatar">
     <div class="s-user-card-info">
-        <span class="s-user-card-name">{{ currentClient is defined and currentClient ? currentClient.name : (app.user.name ?? app.user.email) }}</span>
+        <span class="s-user-card-name">{{ currentUser is defined and currentUser ? currentUser.name : (app.user.name ?? app.user.email) }}</span>
         <span class="s-user-card-role">{{ roleLabels[userRole] ?? userRole|replace({'ROLE_': ''})|lower }}</span>
     </div>
     <a href="{{ path('admin_logout') }}" class="s-user-card-logout" title="Tancar sessió">

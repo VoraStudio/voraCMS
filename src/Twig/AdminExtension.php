@@ -11,14 +11,14 @@
      2. Si existeix → filtrar ContentTypes per aquest projecte
      3. Si no existeix → no mostrar res (forçar selecció)
 
-   Injectem ClientScope i RequestStack per resoldre el context.
+   Injectem Security i RequestStack per resoldre el context.
    =========================================================== */
 
 namespace App\Twig;
 
 use App\Repository\ContentTypeRepository;
 use App\Repository\ProjectRepository;
-use App\Service\ClientScope;
+use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFunction;
@@ -28,7 +28,7 @@ class AdminExtension extends AbstractExtension
     public function __construct(
         private readonly ContentTypeRepository $ctRepo,
         private readonly ProjectRepository $projectRepo,
-        private readonly ClientScope $clientScope,
+        private readonly Security $security,
         private readonly RequestStack $requestStack,
     ) {}
 
@@ -43,13 +43,13 @@ class AdminExtension extends AbstractExtension
     /* -----------------------------------------------------------
        getGlobals — Variables globals disponibles a totes les
        plantilles.
-       - currentClient: el client actual (o null per super-admin)
+       - currentUser: l'usuari actual (o null si no autenticat)
        - activeProject: el projecte actiu seleccionat a sessió
        ----------------------------------------------------------- */
     public function getGlobals(): array
     {
         return [
-            'currentClient' => $this->clientScope->getClient(),
+            'currentUser' => $this->security->getUser(),
             'activeProject' => $this->getActiveProject(),
         ];
     }

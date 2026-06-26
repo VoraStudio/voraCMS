@@ -1,15 +1,15 @@
 <?php
 
 /* ══════════════════════════════════════════════════════════════
-   ProjectController — CRUD de projectes per client.
+   ProjectController — CRUD de projectes.
 
-   Cada client pot tenir un o múltiples projectes. Cada projecte
+   Cada usuari pot tenir un o múltiples projectes. Cada projecte
    agrupa els seus propis tipus de contingut (seccions) i les
    seves entrades.
 
    Flux d'usuari:
-   - 1 projecte → s'auto-selecciona, no veu aquesta pantalla
-   - 2+ projectes → veu targetes amb cada projecte per triar
+    - 1 projecte → s'auto-selecciona, no veu aquesta pantalla
+    - 2+ projectes → veu targetes amb cada projecte per triar
 
    Rutes:
      GET  /admin/projects          → Llista de projectes (cards)
@@ -24,10 +24,7 @@ namespace App\Controller\Admin;
 
 use App\Entity\Project;
 use App\Entity\User;
-use App\Entity\UserProject;
 use App\Repository\ProjectRepository;
-use App\Repository\UserProjectRepository;
-use App\Service\ClientScope;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -38,12 +35,8 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
 #[Route('/admin/projects')]
 class ProjectController extends AbstractController
 {
-    public function __construct(
-        private readonly ClientScope $clientScope,
-    ) {}
-
     /* -----------------------------------------------------------
-       index — Llista de projectes del client actual.
+       index — Llista de projectes.
        Es mostren com a targetes (cards) per seleccionar-ne un.
        ----------------------------------------------------------- */
     #[Route('', name: 'admin_projects')]
@@ -52,11 +45,9 @@ class ProjectController extends AbstractController
         $this->denyAccessUnlessGranted('ROLE_ADMIN');
 
         $projects = $projectRepo->findActive();
-        $currentClient = $this->clientScope->getClient();
 
         return $this->render('admin/project/index.html.twig', [
             'projects' => $projects,
-            'currentClient' => $currentClient,
         ]);
     }
 
@@ -71,9 +62,9 @@ class ProjectController extends AbstractController
     ): Response {
         $this->denyAccessUnlessGranted('ROLE_ADMIN');
 
-        $currentClient = $this->clientScope->getClient();
-        if (!$currentClient) {
-            throw $this->createAccessDeniedException('Cal estar autenticat com a client.');
+        $currentUser = $this->getUser();
+        if (!$currentUser instanceof User) {
+            throw $this->createAccessDeniedException('Cal estar autenticat.');
         }
 
         $project = new Project();
@@ -84,7 +75,7 @@ class ProjectController extends AbstractController
             $project->setDescription($request->request->get('description', ''));
             $project->setColor($request->request->get('color', '#4945FF'));
             $project->setActive(true);
-            $project->setClient($currentClient);
+            $project->setUser($currentUser);
 
             $errors = $validator->validate($project);
             if (count($errors) > 0) {
@@ -106,7 +97,7 @@ class ProjectController extends AbstractController
         return $this->render('admin/project/form.html.twig', [
             'project' => $project,
             'isNew' => true,
-            'currentClient' => $currentClient,
+            'currentUser' => $currentUser,
         ]);
     }
 
@@ -119,20 +110,13 @@ class ProjectController extends AbstractController
         Project $project,
         EntityManagerInterface $em,
         ValidatorInterface $validator,
-        UserProjectRepository $userProjectRepo,
     ): Response {
         $this->denyAccessUnlessGranted('ROLE_ADMIN');
 
-        /* Verifiquem que el projecte pertany al client actual */
-        $currentClient = $this->clientScope->getClient();
-        if ($currentClient && $project->getClient()?->getId() !== $currentClient->getId()) {
-            throw $this->createAccessDeniedException('Aquest projecte no pertany al teu client.');
+        $currentUser = $this->getUser();
+        if (!$currentUser instanceof User) {
+            throw $this->createAccessDeniedException('Cal estar autenticat.');
         }
-
-        $clientUser = $project->getClient()?->getUsers()->first() ?: null;
-        $userProject = $clientUser !== null
-            ? $userProjectRepo->findOneByUserAndProject($clientUser, $project)
-            : null;
 
         if ($request->isMethod('POST')) {
             /* CSRF protection */
@@ -153,8 +137,6 @@ class ProjectController extends AbstractController
                     $this->addFlash('error', $error->getMessage());
                 }
             } else {
-                $this->updateClientPermission($em, $userProjectRepo, $clientUser, $project, $request->request->getBoolean('can_manage_content_types', false));
-
                 $em->flush();
                 $this->addFlash('success', 'Projecte actualitzat.');
                 return $this->redirectToRoute('admin_projects');
@@ -164,9 +146,7 @@ class ProjectController extends AbstractController
         return $this->render('admin/project/form.html.twig', [
             'project' => $project,
             'isNew' => false,
-            'currentClient' => $currentClient,
-            'clientUser' => $clientUser,
-            'userProject' => $userProject,
+            'currentUser' => $currentUser,
         ]);
     }
 
@@ -180,12 +160,6 @@ class ProjectController extends AbstractController
         EntityManagerInterface $em,
     ): Response {
         $this->denyAccessUnlessGranted('ROLE_ADMIN');
-
-        /* Verifiquem propietat */
-        $currentClient = $this->clientScope->getClient();
-        if ($currentClient && $project->getClient()?->getId() !== $currentClient->getId()) {
-            throw $this->createAccessDeniedException('Aquest projecte no pertany al teu client.');
-        }
 
         /* No permetem esborrar si té contingut associat */
         if (count($project->getContentTypes()) > 0) {
@@ -211,34 +185,24 @@ class ProjectController extends AbstractController
         return $this->redirectToRoute('admin_projects');
     }
 
-    private function updateClientPermission(
-        EntityManagerInterface $em,
-        UserProjectRepository $userProjectRepo,
-        ?User $clientUser,
-        Project $project,
-        bool $canManageContentTypes,
-    ): void {
-        if ($clientUser === null) {
-            return;
+    /* -----------------------------------------------------------
+       toggleActive — Activa/desactiva un projecte.
+       ----------------------------------------------------------- */
+    #[Route('/{id}/toggle-active', name: 'admin_project_toggle_active', methods: ['POST'])]
+    public function toggleActive(Request $request, Project $project, EntityManagerInterface $em): Response
+    {
+        $this->denyAccessUnlessGranted('ROLE_ADMIN');
+
+        if (!$this->isCsrfTokenValid('toggle-active-' . $project->getId(), $request->request->get('_token'))) {
+            $this->addFlash('error', 'Token de seguretat invàlid.');
+            return $this->redirectToRoute('admin_projects');
         }
 
-        $userProject = $userProjectRepo->findOneByUserAndProject($clientUser, $project);
+        $project->setActive(!$project->isActive());
+        $em->flush();
 
-        if ($canManageContentTypes) {
-            /* Crear o actualitzar el permís explícit */
-            if ($userProject === null) {
-                $userProject = new UserProject();
-                $userProject->setUser($clientUser);
-                $userProject->setProject($project);
-                $em->persist($userProject);
-            }
-            $userProject->setCanManageContentTypes(true);
-        } else {
-            /* Sense permís explícit → eliminar el row per tornar al comportament per defecte */
-            if ($userProject !== null) {
-                $em->remove($userProject);
-            }
-        }
+        $this->addFlash('success', $project->isActive() ? 'Projecte activat.' : 'Projecte desactivat.');
+        return $this->redirectToRoute('admin_projects');
     }
 
     /* ─── Converteix un text en slug net ─── */
