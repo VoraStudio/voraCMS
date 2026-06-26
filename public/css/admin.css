@@ -2093,161 +2093,388 @@ input[type="time"] {
   padding: 7px 14px;
   font-size: 0.7rem;
   font-weight: 700;
-  letter-spacing: 0.03em;
+  letter-spacing: 0.04em;
   text-transform: uppercase;
   text-decoration: none;
-  border: none;
+  border: 1px solid rgba(148, 163, 184, 0.12);
   border-radius: 8px;
   cursor: pointer;
-  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.30s cubic-bezier(0.34, 1.56, 0.64, 1);
   overflow: hidden;
   white-space: nowrap;
+  background: rgba(148, 163, 184, 0.04);
+  color: rgba(148, 163, 184, 0.7);
+  clip-path: polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%);
+}
+
+/* Tech header decoration line */
+.cyber-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 6px;
+  right: 6px;
+  height: 1.5px;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    rgba(6, 182, 212, 0.40) 30%,
+    rgba(6, 182, 212, 0.60) 50%,
+    rgba(6, 182, 212, 0.40) 70%,
+    transparent 100%
+  );
+  opacity: 0;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  border-radius: 1px;
+  z-index: 2;
 }
 
 .cyber-btn i {
   font-size: 0.75rem;
-}
-
-/* Glow overlay */
-.cyber-btn::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  opacity: 0;
-  transition: opacity 0.3s ease;
-}
-
-.cyber-btn > * {
   position: relative;
   z-index: 1;
 }
 
-/* Projectes button */
+.cyber-btn > *:not(i) {
+  position: relative;
+  z-index: 1;
+}
+
+/* Shimmer sweep overlay */
+.cyber-btn::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(105deg,
+    transparent 30%,
+    rgba(255, 255, 255, 0.06) 45%,
+    rgba(255, 255, 255, 0.10) 50%,
+    rgba(255, 255, 255, 0.06) 55%,
+    transparent 70%
+  );
+  background-size: 200% 100%;
+  background-position: 200% 0;
+  transition: background-position 0s;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.cyber-btn:hover::after {
+  background-position: -200% 0;
+  transition: background-position 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ─── Projectes (active) ─── */
 .cyber-btn--projects {
   background: linear-gradient(135deg, #06B6D4, #0891B2);
   color: #fff;
-  box-shadow: 0 3px 12px rgba(6, 182, 212, 0.25);
+  border-color: rgba(6, 182, 212, 0.30);
+  box-shadow: 0 3px 12px rgba(6, 182, 212, 0.20),
+              0 0 0 1px rgba(6, 182, 212, 0.06) inset;
 }
 
 .cyber-btn--projects::before {
-  background: linear-gradient(135deg, #22D3EE, #06B6D4);
+  opacity: 1;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.50) 30%,
+    rgba(255, 255, 255, 0.70) 50%,
+    rgba(255, 255, 255, 0.50) 70%,
+    transparent 100%
+  );
 }
 
 .cyber-btn--projects:hover {
-  transform: translateY(-2px) scale(1.03);
-  box-shadow: 0 6px 20px rgba(6, 182, 212, 0.40);
+  transform: translateY(-3px) scale(1.03);
+  box-shadow: 0 8px 28px rgba(6, 182, 212, 0.40),
+              0 0 0 1px rgba(6, 182, 212, 0.12) inset,
+              0 0 30px rgba(6, 182, 212, 0.08);
+  border-color: rgba(6, 182, 212, 0.40);
   color: #fff;
-}
-
-.cyber-btn--projects:hover::before {
-  opacity: 1;
 }
 
 .cyber-btn--projects:active {
   transform: translateY(0) scale(0.97);
+  box-shadow: 0 2px 8px rgba(6, 182, 212, 0.20);
 }
 
-/* Projectes inactive (pálido) */
+.cyber-btn--projects::after {
+  background: linear-gradient(105deg,
+    transparent 30%,
+    rgba(255, 255, 255, 0.15) 45%,
+    rgba(255, 255, 255, 0.25) 50%,
+    rgba(255, 255, 255, 0.15) 55%,
+    transparent 70%
+  );
+}
+
+/* ─── Projectes (inactive / pálido) ─── */
 .cyber-btn--projects-inactive {
-  background: linear-gradient(135deg, rgba(6, 182, 212, 0.15), rgba(8, 145, 178, 0.10));
-  color: rgba(148, 163, 184, 0.45);
+  background: linear-gradient(135deg, rgba(6, 182, 212, 0.08), rgba(8, 145, 178, 0.05));
+  color: rgba(148, 163, 184, 0.35);
+  border-color: rgba(148, 163, 184, 0.06);
   box-shadow: none;
 }
 
 .cyber-btn--projects-inactive:hover {
   background: linear-gradient(135deg, #06B6D4, #0891B2);
   color: #fff;
-  box-shadow: 0 3px 12px rgba(6, 182, 212, 0.25);
-  transform: translateY(-2px);
+  border-color: rgba(6, 182, 212, 0.30);
+  box-shadow: 0 6px 20px rgba(6, 182, 212, 0.35);
+  transform: translateY(-3px);
 }
 
-/* Toggle button */
-.cyber-btn--toggle-active,
-.cyber-btn--toggle-inactive {
+.cyber-btn--projects-inactive:hover::before {
+  opacity: 1;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.50) 30%,
+    rgba(255, 255, 255, 0.70) 50%,
+    rgba(255, 255, 255, 0.50) 70%,
+    transparent 100%
+  );
+}
+
+/* ─── Icon buttons base (edit, delete, toggle) ─── */
+.cyber-btn--icon {
   width: 34px;
   height: 34px;
   padding: 0;
   border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(148, 163, 184, 0.10);
+  background: rgba(148, 163, 184, 0.04);
+  color: rgba(148, 163, 184, 0.5);
+  box-shadow: none;
+  clip-path: polygon(3px 0, 100% 0, calc(100% - 3px) 100%, 0 100%);
 }
 
+.cyber-btn--icon i {
+  font-size: 0.85rem;
+  position: relative;
+  z-index: 1;
+}
+
+.cyber-btn--icon::before {
+  opacity: 0;
+}
+
+.cyber-btn--icon::after {
+  background: linear-gradient(105deg,
+    transparent 25%,
+    rgba(255, 255, 255, 0.08) 45%,
+    rgba(255, 255, 255, 0.14) 50%,
+    rgba(255, 255, 255, 0.08) 55%,
+    transparent 75%
+  );
+}
+
+/* ─── Toggle active (green) ─── */
 .cyber-btn--toggle-active {
   background: linear-gradient(135deg, #10B981, #059669);
   color: #fff;
-  box-shadow: 0 3px 10px rgba(16, 185, 129, 0.30);
+  border-color: rgba(16, 185, 129, 0.30);
+  box-shadow: 0 3px 10px rgba(16, 185, 129, 0.20),
+              0 0 0 1px rgba(16, 185, 129, 0.06) inset;
+}
+
+.cyber-btn--toggle-active::before {
+  opacity: 1;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.40) 30%,
+    rgba(255, 255, 255, 0.60) 50%,
+    rgba(255, 255, 255, 0.40) 70%,
+    transparent 100%
+  );
 }
 
 .cyber-btn--toggle-active:hover {
-  transform: scale(1.12);
-  box-shadow: 0 5px 16px rgba(16, 185, 129, 0.45);
+  transform: scale(1.15);
+  box-shadow: 0 6px 20px rgba(16, 185, 129, 0.40),
+              0 0 0 1px rgba(16, 185, 129, 0.12) inset;
+  border-color: rgba(16, 185, 129, 0.45);
 }
 
+.cyber-btn--toggle-active:active {
+  transform: scale(0.93);
+}
+
+/* ─── Toggle inactive (red) ─── */
 .cyber-btn--toggle-inactive {
   background: linear-gradient(135deg, #EF4444, #DC2626);
   color: #fff;
-  box-shadow: 0 3px 10px rgba(239, 68, 68, 0.30);
+  border-color: rgba(239, 68, 68, 0.30);
+  box-shadow: 0 3px 10px rgba(239, 68, 68, 0.20),
+              0 0 0 1px rgba(239, 68, 68, 0.06) inset;
+}
+
+.cyber-btn--toggle-inactive::before {
+  opacity: 1;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.40) 30%,
+    rgba(255, 255, 255, 0.60) 50%,
+    rgba(255, 255, 255, 0.40) 70%,
+    transparent 100%
+  );
 }
 
 .cyber-btn--toggle-inactive:hover {
-  transform: scale(1.12);
-  box-shadow: 0 5px 16px rgba(239, 68, 68, 0.45);
+  transform: scale(1.15);
+  box-shadow: 0 6px 20px rgba(239, 68, 68, 0.40),
+              0 0 0 1px rgba(239, 68, 68, 0.12) inset;
+  border-color: rgba(239, 68, 68, 0.45);
+}
+
+.cyber-btn--toggle-inactive:active {
+  transform: scale(0.93);
 }
 
 .cyber-btn--toggle-disabled {
   background: linear-gradient(135deg, #374151, #4B5563) !important;
-  color: rgba(156, 163, 175, 0.5) !important;
+  color: rgba(156, 163, 175, 0.4) !important;
+  border-color: rgba(148, 163, 184, 0.06) !important;
   box-shadow: none !important;
   cursor: not-allowed !important;
-  opacity: 0.4;
+  opacity: 0.35;
+  clip-path: polygon(3px 0, 100% 0, calc(100% - 3px) 100%, 0 100%);
 }
 
-/* Edit button */
+.cyber-btn--toggle-disabled::before {
+  display: none;
+}
+
+.cyber-btn--toggle-disabled:hover {
+  transform: none !important;
+}
+
+/* ─── Edit button ─── */
 .cyber-btn--edit {
-  width: 34px;
-  height: 34px;
-  padding: 0;
-  border-radius: 8px;
   background: linear-gradient(135deg, #3B82F6, #2563EB);
   color: #fff;
-  box-shadow: 0 3px 10px rgba(59, 130, 246, 0.30);
+  border-color: rgba(59, 130, 246, 0.30);
+  box-shadow: 0 3px 10px rgba(59, 130, 246, 0.20),
+              0 0 0 1px rgba(59, 130, 246, 0.06) inset;
+}
+
+.cyber-btn--edit::before {
+  opacity: 1;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.40) 30%,
+    rgba(255, 255, 255, 0.60) 50%,
+    rgba(255, 255, 255, 0.40) 70%,
+    transparent 100%
+  );
 }
 
 .cyber-btn--edit:hover {
-  transform: scale(1.12);
-  box-shadow: 0 5px 16px rgba(59, 130, 246, 0.45);
+  transform: scale(1.15);
+  box-shadow: 0 6px 20px rgba(59, 130, 246, 0.40),
+              0 0 0 1px rgba(59, 130, 246, 0.12) inset;
+  border-color: rgba(59, 130, 246, 0.45);
   color: #fff;
 }
 
-/* Delete button */
+.cyber-btn--edit:active {
+  transform: scale(0.93);
+}
+
+/* ─── Delete button ─── */
 .cyber-btn--delete {
+  background: linear-gradient(135deg, #EF4444, #DC2626);
+  color: #fff;
+  border-color: rgba(239, 68, 68, 0.30);
+  box-shadow: 0 3px 10px rgba(239, 68, 68, 0.20),
+              0 0 0 1px rgba(239, 68, 68, 0.06) inset;
+}
+
+.cyber-btn--delete::before {
+  opacity: 1;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.40) 30%,
+    rgba(255, 255, 255, 0.60) 50%,
+    rgba(255, 255, 255, 0.40) 70%,
+    transparent 100%
+  );
+}
+
+.cyber-btn--delete:hover {
+  transform: scale(1.15);
+  box-shadow: 0 6px 20px rgba(239, 68, 68, 0.40),
+              0 0 0 1px rgba(239, 68, 68, 0.12) inset;
+  border-color: rgba(239, 68, 68, 0.45);
+  color: #fff;
+}
+
+.cyber-btn--delete:active {
+  transform: scale(0.93);
+}
+
+.cyber-btn--delete-disabled {
   width: 34px;
   height: 34px;
   padding: 0;
   border-radius: 8px;
-  background: linear-gradient(135deg, #EF4444, #DC2626);
-  color: #fff;
-  box-shadow: 0 3px 10px rgba(239, 68, 68, 0.30);
-}
-
-.cyber-btn--delete:hover {
-  transform: scale(1.12);
-  box-shadow: 0 5px 16px rgba(239, 68, 68, 0.45);
-  color: #fff;
-}
-
-.cyber-btn--delete:active,
-.cyber-btn--edit:active,
-.cyber-btn--toggle-active:active,
-.cyber-btn--toggle-inactive:active {
-  transform: scale(0.95);
-}
-
-.cyber-btn--delete-disabled {
   background: linear-gradient(135deg, #374151, #4B5563) !important;
-  color: rgba(156, 163, 175, 0.5) !important;
+  color: rgba(156, 163, 175, 0.4) !important;
+  border-color: rgba(148, 163, 184, 0.06) !important;
   box-shadow: none !important;
   cursor: not-allowed !important;
-  opacity: 0.4;
+  opacity: 0.35;
+  clip-path: polygon(3px 0, 100% 0, calc(100% - 3px) 100%, 0 100%);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cyber-btn--delete-disabled::before,
+.cyber-btn--delete-disabled::after {
+  display: none;
+}
+
+.cyber-btn--delete-disabled:hover {
+  transform: none !important;
+}
+
+/* ─── Cyber Back Button ─── */
+.cyber-btn-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: rgba(148, 163, 184, 0.6);
+  background: rgba(148, 163, 184, 0.06);
+  border: 1px solid rgba(148, 163, 184, 0.10);
+  border-radius: 8px;
+  text-decoration: none;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  clip-path: polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%);
+}
+
+.cyber-btn-back:hover {
+  color: rgba(6, 182, 212, 0.80);
+  background: rgba(6, 182, 212, 0.06);
+  border-color: rgba(6, 182, 212, 0.15);
+  transform: translateX(-3px);
+}
+
+[data-theme="light"] .cyber-btn-back {
+  color: rgba(71, 85, 105, 0.6);
+  border-color: rgba(71, 85, 105, 0.12);
+}
+
+[data-theme="light"] .cyber-btn-back:hover {
+  color: rgba(59, 130, 246, 0.80);
+  border-color: rgba(59, 130, 246, 0.18);
 }
 
 /* ─── Cyber Empty State ─── */
@@ -2369,27 +2596,56 @@ input[type="time"] {
   padding: 14px 24px;
   font-size: 0.88rem;
   font-weight: 700;
-  letter-spacing: 0.03em;
+  letter-spacing: 0.04em;
   text-transform: uppercase;
   color: #fff;
   background: linear-gradient(135deg, #06B6D4, #3B82F6);
-  border: none;
+  border: 1px solid rgba(6, 182, 212, 0.30);
   border-radius: 10px;
   cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 4px 20px rgba(6, 182, 212, 0.30);
+  transition: all 0.30s cubic-bezier(0.34, 1.56, 0.64, 1);
+  box-shadow: 0 4px 20px rgba(6, 182, 212, 0.25),
+              0 0 0 1px rgba(6, 182, 212, 0.06) inset;
   position: relative;
   overflow: hidden;
+  clip-path: polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%);
 }
 
 .cyber-form-submit::before {
   content: '';
   position: absolute;
+  top: 0;
+  left: 8px;
+  right: 8px;
+  height: 1.5px;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.50) 30%,
+    rgba(255, 255, 255, 0.70) 50%,
+    rgba(255, 255, 255, 0.50) 70%,
+    transparent 100%
+  );
+  border-radius: 1px;
+  z-index: 2;
+}
+
+.cyber-form-submit::after {
+  content: '';
+  position: absolute;
   inset: 0;
-  background: linear-gradient(135deg, #22D3EE, #3B82F6, #2563EB);
-  opacity: 0;
-  transition: opacity 0.3s ease;
   border-radius: inherit;
+  background: linear-gradient(105deg,
+    transparent 30%,
+    rgba(255, 255, 255, 0.12) 45%,
+    rgba(255, 255, 255, 0.20) 50%,
+    rgba(255, 255, 255, 0.12) 55%,
+    transparent 70%
+  );
+  background-size: 200% 100%;
+  background-position: 200% 0;
+  transition: background-position 0s;
+  pointer-events: none;
+  z-index: 0;
 }
 
 .cyber-form-submit > * {
@@ -2399,15 +2655,19 @@ input[type="time"] {
 
 .cyber-form-submit:hover {
   transform: translateY(-3px);
-  box-shadow: 0 8px 32px rgba(6, 182, 212, 0.45);
+  box-shadow: 0 10px 36px rgba(6, 182, 212, 0.40),
+              0 0 0 1px rgba(6, 182, 212, 0.12) inset;
+  border-color: rgba(6, 182, 212, 0.50);
 }
 
-.cyber-form-submit:hover::before {
-  opacity: 1;
+.cyber-form-submit:hover::after {
+  background-position: -200% 0;
+  transition: background-position 0.8s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .cyber-form-submit:active {
-  transform: translateY(-1px);
+  transform: translateY(-1px) scale(0.98);
+  box-shadow: 0 2px 8px rgba(6, 182, 212, 0.20);
 }
 
 [data-theme="light"] .cyber-form-input {
@@ -2438,11 +2698,25 @@ input[type="time"] {
 
 [data-theme="light"] .cyber-form-submit {
   background: linear-gradient(135deg, #3B82F6, #2563EB);
-  box-shadow: 0 4px 20px rgba(59, 130, 246, 0.30);
+  border-color: rgba(59, 130, 246, 0.30);
+  box-shadow: 0 4px 20px rgba(59, 130, 246, 0.25),
+              0 0 0 1px rgba(59, 130, 246, 0.06) inset;
+}
+
+[data-theme="light"] .cyber-form-submit::before {
+  background: linear-gradient(90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.50) 30%,
+    rgba(255, 255, 255, 0.70) 50%,
+    rgba(255, 255, 255, 0.50) 70%,
+    transparent 100%
+  );
 }
 
 [data-theme="light"] .cyber-form-submit:hover {
-  box-shadow: 0 8px 32px rgba(59, 130, 246, 0.45);
+  box-shadow: 0 10px 36px rgba(59, 130, 246, 0.40),
+              0 0 0 1px rgba(59, 130, 246, 0.12) inset;
+  border-color: rgba(59, 130, 246, 0.50);
 }
 
 /* ─── Cyber Back Button ─── */
@@ -2478,27 +2752,56 @@ input[type="time"] {
   padding: 10px 20px;
   font-size: 0.75rem;
   font-weight: 700;
-  letter-spacing: 0.03em;
+  letter-spacing: 0.04em;
   text-transform: uppercase;
   color: #fff;
   background: linear-gradient(135deg, #06B6D4, #0891B2);
-  border: none;
+  border: 1px solid rgba(6, 182, 212, 0.35);
   border-radius: 10px;
   text-decoration: none;
-  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 3px 12px rgba(6, 182, 212, 0.25);
+  transition: all 0.30s cubic-bezier(0.34, 1.56, 0.64, 1);
+  box-shadow: 0 3px 14px rgba(6, 182, 212, 0.25),
+              0 0 0 1px rgba(6, 182, 212, 0.06) inset;
   position: relative;
   overflow: hidden;
+  clip-path: polygon(5px 0, 100% 0, calc(100% - 5px) 100%, 0 100%);
 }
 
 .cyber-btn-primary::before {
   content: '';
   position: absolute;
+  top: 0;
+  left: 6px;
+  right: 6px;
+  height: 1.5px;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.50) 30%,
+    rgba(255, 255, 255, 0.70) 50%,
+    rgba(255, 255, 255, 0.50) 70%,
+    transparent 100%
+  );
+  border-radius: 1px;
+  z-index: 2;
+}
+
+.cyber-btn-primary::after {
+  content: '';
+  position: absolute;
   inset: 0;
-  background: linear-gradient(135deg, #22D3EE, #06B6D4);
-  opacity: 0;
-  transition: opacity 0.3s ease;
   border-radius: inherit;
+  background: linear-gradient(105deg,
+    transparent 30%,
+    rgba(255, 255, 255, 0.12) 45%,
+    rgba(255, 255, 255, 0.20) 50%,
+    rgba(255, 255, 255, 0.12) 55%,
+    transparent 70%
+  );
+  background-size: 200% 100%;
+  background-position: 200% 0;
+  transition: background-position 0s;
+  pointer-events: none;
+  z-index: 0;
 }
 
 .cyber-btn-primary > * {
@@ -2507,26 +2810,44 @@ input[type="time"] {
 }
 
 .cyber-btn-primary:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(6, 182, 212, 0.40);
+  transform: translateY(-3px);
+  box-shadow: 0 8px 28px rgba(6, 182, 212, 0.40),
+              0 0 0 1px rgba(6, 182, 212, 0.12) inset;
+  border-color: rgba(6, 182, 212, 0.50);
   color: #fff;
 }
 
-.cyber-btn-primary:hover::before {
-  opacity: 1;
+.cyber-btn-primary:hover::after {
+  background-position: -200% 0;
+  transition: background-position 0.8s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .cyber-btn-primary:active {
   transform: translateY(0) scale(0.97);
+  box-shadow: 0 2px 8px rgba(6, 182, 212, 0.20);
 }
 
 [data-theme="light"] .cyber-btn-primary {
   background: linear-gradient(135deg, #3B82F6, #2563EB);
-  box-shadow: 0 3px 12px rgba(59, 130, 246, 0.25);
+  border-color: rgba(59, 130, 246, 0.35);
+  box-shadow: 0 3px 14px rgba(59, 130, 246, 0.25),
+              0 0 0 1px rgba(59, 130, 246, 0.06) inset;
+}
+
+[data-theme="light"] .cyber-btn-primary::before {
+  background: linear-gradient(90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.50) 30%,
+    rgba(255, 255, 255, 0.70) 50%,
+    rgba(255, 255, 255, 0.50) 70%,
+    transparent 100%
+  );
 }
 
 [data-theme="light"] .cyber-btn-primary:hover {
-  box-shadow: 0 6px 20px rgba(59, 130, 246, 0.40);
+  box-shadow: 0 8px 28px rgba(59, 130, 246, 0.40),
+              0 0 0 1px rgba(59, 130, 246, 0.12) inset;
+  border-color: rgba(59, 130, 246, 0.50);
 }
 
 [data-theme="light"] .cyber-btn-back {
