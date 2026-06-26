@@ -2071,11 +2071,11 @@ input[type="time"] {
 }
 
 .cyber-row.row-inactive {
-  opacity: 1;
+  opacity: 0.55;
 }
 
 .cyber-row.row-inactive:hover {
-  opacity: 1;
+  opacity: 0.75;
 }
 
 .cyber-cell {
@@ -2257,7 +2257,7 @@ input[type="time"] {
 }
 
 .cyber-status-text--inactive {
-  color: rgba(239, 68, 68, 0.60);
+  color: rgb(239, 68, 68);
 }
 
 [data-theme="light"] .cyber-status-text {
@@ -2265,7 +2265,7 @@ input[type="time"] {
 }
 
 [data-theme="light"] .cyber-status-text--inactive {
-  color: rgba(220, 38, 38, 0.60);
+  color: rgb(220, 38, 38);
 }
 
 /* ─── Cyber Action Group ─── */
@@ -3782,7 +3782,7 @@ input[type="time"] {
 
 .row-inactive {
   background-color: rgba(239, 68, 68, 0.03);
-  opacity: 1;
+  opacity: 0.75;
 }
 
 [data-theme="light"] .row-active {
@@ -3791,6 +3791,6 @@ input[type="time"] {
 
 [data-theme="light"] .row-inactive {
   background-color: rgba(239, 68, 68, 0.05);
-  opacity: 1;
+  opacity: 0.75;
 }
 

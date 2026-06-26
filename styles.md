@@ -42,7 +42,7 @@ Todas las normas de diseño UI/UX del panel de administración de VoraCMS.
 ## Filas de tabla
 
 - `.row-active`: fondo `rgba(59, 130, 246, 0.04)` (dark) / `rgba(59, 130, 246, 0.06)` (light) — azul, NO verde.
-- `.row-inactive`: opacidad 1, fondo `rgba(239, 68, 68, 0.03)`.
+- `.row-inactive`: opacidad 0.75, fondo `rgba(239, 68, 68, 0.03)`.
 - Filas con `.cyber-row`: border-radius 12px, glass con `box-shadow`, hover con glow sutil.
 
 ---
