@@ -1754,6 +1754,206 @@ input[type="time"] {
 }
 
 /* ═══════════════════════════════════════════════════
+   ✦ CYBER PREMIUM — Section headers & refinements
+   ═══════════════════════════════════════════════════ */
+
+/* ─── Section Header ─── */
+.cyber-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 24px;
+  padding: 20px 24px;
+  background: rgba(15, 23, 42, 0.40);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(6, 182, 212, 0.08);
+  border-radius: 16px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.20);
+  position: relative;
+  overflow: hidden;
+}
+
+.cyber-section-header::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 0% 50%, rgba(6, 182, 212, 0.04) 0%, transparent 60%);
+  pointer-events: none;
+}
+
+.cyber-section-header-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  position: relative;
+  z-index: 1;
+}
+
+.cyber-section-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.4rem;
+  background: linear-gradient(135deg, rgba(6, 182, 212, 0.12), rgba(59, 130, 246, 0.12));
+  border: 1px solid rgba(6, 182, 212, 0.15);
+  color: #06B6D4;
+  flex-shrink: 0;
+  box-shadow: 0 0 20px rgba(6, 182, 212, 0.06);
+}
+
+.cyber-section-title {
+  font-size: clamp(1rem, 2vw, 1.35rem);
+  font-weight: 700;
+  margin: 0;
+  line-height: 1.25;
+  background: linear-gradient(135deg, #F1F5F9 0%, #94A3B8 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  letter-spacing: -0.03em;
+}
+
+.cyber-section-desc {
+  font-size: 0.78rem;
+  color: rgba(148, 163, 184, 0.5);
+  margin: 2px 0 0 0;
+  font-weight: 400;
+}
+
+.cyber-section-header-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  position: relative;
+  z-index: 1;
+}
+
+.cyber-stat-mini {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 8px 16px;
+  background: rgba(15, 23, 42, 0.50);
+  border-radius: 10px;
+  border: 1px solid rgba(148, 163, 184, 0.06);
+  min-width: 60px;
+}
+
+.cyber-stat-mini-value {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #F1F5F9;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+}
+
+.cyber-stat-mini-value--active {
+  color: #10B981;
+}
+
+.cyber-stat-mini-label {
+  font-size: 0.55rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: rgba(148, 163, 184, 0.4);
+  margin-top: 2px;
+}
+
+/* ─── Cyber Card Table (wrapper for table) ─── */
+.cyber-card--table {
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35),
+              0 0 0 1px rgba(6, 182, 212, 0.04) inset,
+              0 0 60px rgba(6, 182, 212, 0.02);
+}
+
+.cyber-card--table:hover {
+  border-color: rgba(6, 182, 212, 0.20);
+  box-shadow: 0 12px 48px rgba(0, 0, 0, 0.40),
+              0 0 0 1px rgba(6, 182, 212, 0.06) inset,
+              0 0 80px rgba(6, 182, 212, 0.04);
+}
+
+/* ─── Cyber Form Header ─── */
+.cyber-form-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 24px 32px;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.06);
+  background: linear-gradient(135deg, rgba(15, 23, 42, 0.30), transparent);
+}
+
+.cyber-form-header-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  background: linear-gradient(135deg, rgba(6, 182, 212, 0.15), rgba(59, 130, 246, 0.15));
+  border: 1px solid rgba(6, 182, 212, 0.12);
+  color: #06B6D4;
+  flex-shrink: 0;
+}
+
+[data-theme="light"] .cyber-section-header {
+  background: rgba(255, 255, 255, 0.85);
+  border-color: rgba(59, 130, 246, 0.10);
+}
+
+[data-theme="light"] .cyber-section-header::before {
+  background: radial-gradient(ellipse at 0% 50%, rgba(59, 130, 246, 0.03) 0%, transparent 60%);
+}
+
+[data-theme="light"] .cyber-section-icon {
+  background: rgba(59, 130, 246, 0.08);
+  border-color: rgba(59, 130, 246, 0.10);
+  color: #3B82F6;
+}
+
+[data-theme="light"] .cyber-section-title {
+  background: linear-gradient(135deg, #1E293B 0%, #475569 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+[data-theme="light"] .cyber-section-desc {
+  color: rgba(100, 116, 139, 0.6);
+}
+
+[data-theme="light"] .cyber-stat-mini {
+  background: rgba(255, 255, 255, 0.70);
+  border-color: rgba(148, 163, 184, 0.15);
+}
+
+[data-theme="light"] .cyber-stat-mini-value {
+  color: #1E293B;
+}
+
+[data-theme="light"] .cyber-stat-mini-label {
+  color: rgba(100, 116, 139, 0.5);
+}
+
+[data-theme="light"] .cyber-form-header {
+  border-bottom-color: rgba(148, 163, 184, 0.12);
+  background: rgba(255, 255, 255, 0.30);
+}
+
+[data-theme="light"] .cyber-form-header-icon {
+  background: rgba(59, 130, 246, 0.08);
+  border-color: rgba(59, 130, 246, 0.10);
+  color: #3B82F6;
+}
+
+/* ═══════════════════════════════════════════════════
    ⚡ CYBER-MODERN COMPONENTS
    Futuristic glow / glassmorphism design layer
    ═══════════════════════════════════════════════════ */

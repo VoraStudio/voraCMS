@@ -10,8 +10,17 @@
 
 {% block content %}
 <div class="cyber-form-card">
-    <div class="cyber-card" data-anim="cyber-card" style="padding:32px;">
-        <form method="post" action="{{ isNew ? path('admin_user_new') : path('admin_user_edit', {id: user.id}) }}">
+    <div class="cyber-card" data-anim="cyber-card" style="padding:0;overflow:hidden;">
+        <div class="cyber-form-header">
+            <div class="cyber-form-header-icon">
+                <i class="bi {{ isNew ? 'bi-person-plus-fill' : 'bi-person-fill-gear' }}"></i>
+            </div>
+            <div>
+                <h2 class="cyber-section-title">{{ isNew ? 'Nou usuari' : 'Editar usuari' }}</h2>
+                <p class="cyber-section-desc">{{ isNew ? 'Crea un nou usuari al sistema' : 'Modifica les dades de l\'usuari' }}</p>
+            </div>
+        </div>
+        <form method="post" action="{{ isNew ? path('admin_user_new') : path('admin_user_edit', {id: user.id}) }}" style="padding:32px;padding-top:24px;">
 
             {# ─── Nom ─── #}
             <div class="cyber-form-group">

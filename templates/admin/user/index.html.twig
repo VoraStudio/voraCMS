@@ -9,7 +9,28 @@
 {% endblock %}
 
 {% block content %}
-<div class="cyber-card" data-anim="cyber-card" style="padding:0;">
+<div class="cyber-section-header" data-anim="cyber-card">
+    <div class="cyber-section-header-left">
+        <div class="cyber-section-icon">
+            <i class="bi bi-people-fill"></i>
+        </div>
+        <div>
+            <h2 class="cyber-section-title">Usuaris</h2>
+            <p class="cyber-section-desc">Gestiona els usuaris i els seus permisos</p>
+        </div>
+    </div>
+    <div class="cyber-section-header-right">
+        <div class="cyber-stat-mini">
+            <span class="cyber-stat-mini-value">{{ users|length }}</span>
+            <span class="cyber-stat-mini-label">Total</span>
+        </div>
+        <div class="cyber-stat-mini">
+            <span class="cyber-stat-mini-value cyber-stat-mini-value--active">{{ users|filter(u => u.active)|length }}</span>
+            <span class="cyber-stat-mini-label">Actius</span>
+        </div>
+    </div>
+</div>
+<div class="cyber-card cyber-card--table" data-anim="cyber-card" style="padding:0;">
     <table class="cyber-table">
         <thead>
             <tr>
