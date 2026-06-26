@@ -172,7 +172,6 @@ class UserController extends AbstractController
         Request $request,
         User $user,
         EntityManagerInterface $em,
-        ProjectRepository $projectRepo,
     ): Response {
         $this->denyAccessUnlessGranted('ROLE_ADMIN');
 
@@ -181,16 +180,10 @@ class UserController extends AbstractController
             return $this->redirectToRoute('admin_user_index');
         }
 
-        $projectCount = $projectRepo->count(['user' => $user]);
-        if ($projectCount > 0) {
-            $this->addFlash('error', 'No es pot eliminar un usuari amb projectes. Elimina primer els seus projectes.');
-            return $this->redirectToRoute('admin_user_index');
-        }
-
         if ($this->isCsrfTokenValid('delete-user-' . $user->getId(), $request->request->get('_token'))) {
             $em->remove($user);
             $em->flush();
-            $this->addFlash('success', 'Usuari eliminat.');
+            $this->addFlash('success', 'Usuari i totes les seves dades eliminats.');
         }
 
         return $this->redirectToRoute('admin_user_index');

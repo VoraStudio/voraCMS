@@ -36,11 +36,11 @@ class Project
     #[ORM\Column(options: ['default' => true])]
     private ?bool $active = true;
 
-    #[ORM\ManyToOne]
+    #[ORM\ManyToOne(inversedBy: 'projects')]
     #[ORM\JoinColumn(nullable: false)]
     private ?User $user = null;
 
-    #[ORM\OneToMany(targetEntity: ContentType::class, mappedBy: 'project', cascade: ['persist'])]
+    #[ORM\OneToMany(targetEntity: ContentType::class, mappedBy: 'project', cascade: ['persist', 'remove'])]
     private Collection $contentTypes;
 
     #[ORM\Column]
