@@ -100,8 +100,7 @@
                             <button type="button"
                                     class="cyber-btn cyber-btn--icon toggle-btn {{ user.active ? 'cyber-btn--toggle-active' : 'cyber-btn--toggle-inactive' }}"
                                     title="{{ user.active ? 'Desactivar' : 'Activar' }}"
-                                    data-active="{{ user.active ? '1' : '0' }}"
-                                    {% if app.user.id == user.id %}disabled{% endif %}>
+                                    data-active="{{ user.active ? '1' : '0' }}">
                                 <i class="bi {{ user.active ? 'bi-toggle2-on' : 'bi-toggle2-off' }}" style="font-size:1.05rem;"></i>
                             </button>
                         </form>
@@ -118,13 +117,9 @@
                               id="del-user-{{ user.id }}">
                             <input type="hidden" name="_token" value="{{ csrf_token('delete-user-' ~ user.id) }}">
                             <button type="button"
-                                    class="cyber-btn cyber-btn--icon {{ app.user.id == user.id ? 'cyber-btn--delete-disabled' : 'cyber-btn--delete' }}"
+                                    class="cyber-btn cyber-btn--icon cyber-btn--delete"
                                     title="Eliminar"
-                                    {% if app.user.id == user.id %}
-                                    disabled
-                                    {% else %}
-                                    onclick="swalConfirm('Segur que vols eliminar «{{ user.name }}»?<br><small style=\'color:rgba(255,255,255,0.45)\'>S\'eliminaran tots els seus projectes, tipus de contingut i entrades.</small>',function(){document.getElementById('del-user-{{ user.id }}').submit()})"
-                                    {% endif %}>
+                                    onclick="swalConfirm('Segur que vols eliminar «{{ user.name }}»?<br><small style=\'color:rgba(255,255,255,0.45)\'>S\'eliminaran tots els seus projectes, tipus de contingut i entrades.</small>',function(){document.getElementById('del-user-{{ user.id }}').submit()})">
                                 <i class="bi bi-trash3" style="font-size:0.8rem;"></i>
                             </button>
                         </form>
@@ -149,12 +144,10 @@
 {{ parent() }}
 <script>
 (function(){
-  // Init toggle-disabled class on page load
-  document.querySelectorAll('.toggle-btn[disabled]').forEach(function(b){b.classList.add('cyber-btn--toggle-disabled')});
   // Event delegation for all toggle buttons
   document.addEventListener('click',function(e){
     var btn=e.target.closest('.toggle-btn');
-    if(!btn||btn.disabled)return;
+    if(!btn)return;
     var f=btn.closest('form');
     if(!f)return;
     e.preventDefault();

@@ -157,15 +157,6 @@ class UserController extends AbstractController
     {
         $this->denyAccessUnlessGranted('ROLE_ADMIN');
 
-        if ($user === $this->getUser()) {
-            $msg = 'No pots desactivar el teu propi usuari.';
-            if ($request->isXmlHttpRequest()) {
-                return $this->json(['error' => $msg], 403);
-            }
-            $this->addFlash('error', $msg);
-            return $this->redirectToRoute('admin_user_index');
-        }
-
         if (!$this->isCsrfTokenValid('toggle-active-' . $user->getId(), $request->request->get('_token'))) {
             $msg = 'Token invàlid.';
             if ($request->isXmlHttpRequest()) {
@@ -204,11 +195,6 @@ class UserController extends AbstractController
         EntityManagerInterface $em,
     ): Response {
         $this->denyAccessUnlessGranted('ROLE_ADMIN');
-
-        if ($user === $this->getUser()) {
-            $this->addFlash('error', 'No pots eliminar el teu propi usuari.');
-            return $this->redirectToRoute('admin_user_index');
-        }
 
         if ($this->isCsrfTokenValid('delete-user-' . $user->getId(), $request->request->get('_token'))) {
             $em->remove($user);
