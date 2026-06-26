@@ -1,0 +1,73 @@
+{% extends 'admin/layout.html.twig' %}
+
+{% block page_title %}{{ isNew ? 'Nou usuari' : 'Editar usuari' }}{% endblock %}
+
+{% block topbar_actions %}
+<a href="{{ path('admin_user_index') }}" class="btn btn-sm btn-outline-primary">
+    <i class="bi bi-arrow-left"></i> <span>Tornar</span>
+</a>
+{% endblock %}
+
+{% block content %}
+<div style="max-width:600px;margin:0 auto;">
+
+    <div class="s-stat-card" style="padding:32px;">
+        <form method="post" action="{{ isNew ? path('admin_user_new') : path('admin_user_edit', {id: user.id}) }}">
+
+            {# ─── Nom ─── #}
+            <div style="margin-bottom:20px;">
+                <label style="display:block;font-size:0.75rem;font-weight:500;color:var(--s-text-secondary);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.05em;">Nom</label>
+                <input type="text" name="name" value="{{ user.name ?: '' }}" required
+                       class="form-control" placeholder="Nom de l'usuari">
+            </div>
+
+            {# ─── Email ─── #}
+            <div style="margin-bottom:20px;">
+                <label style="display:block;font-size:0.75rem;font-weight:500;color:var(--s-text-secondary);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.05em;">Email</label>
+                <input type="email" name="email" value="{{ user.email ?: '' }}" required
+                       class="form-control" placeholder="email@exemple.com">
+            </div>
+
+            {# ─── Empresa ─── #}
+            <div style="margin-bottom:20px;">
+                <label style="display:block;font-size:0.75rem;font-weight:500;color:var(--s-text-secondary);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.05em;">Empresa</label>
+                <input type="text" name="company" value="{{ user.company ?: '' }}"
+                       class="form-control" placeholder="Nom de l'empresa (opcional)">
+            </div>
+
+            {# ─── Password ─── #}
+            <div style="margin-bottom:20px;">
+                <label style="display:block;font-size:0.75rem;font-weight:500;color:var(--s-text-secondary);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.05em;">
+                    Contrasenya {% if not isNew %}<span style="font-weight:400;text-transform:none;color:var(--s-text-secondary);">(deixar buit per no canviar)</span>{% endif %}
+                </label>
+                <input type="password" name="password" class="form-control"
+                       placeholder="{{ isNew ? 'Contrasenya' : 'Deixar buit = no canviar' }}"
+                       {{ isNew ? 'required' : '' }}>
+            </div>
+
+            {# ─── Rol ─── #}
+            <div style="margin-bottom:20px;">
+                <label style="display:block;font-size:0.75rem;font-weight:500;color:var(--s-text-secondary);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.05em;">Rol</label>
+                <select name="role" class="form-control" style="padding:10px 14px;">
+                    <option value="ROLE_USUARIO" {{ user.roles[0] is defined and user.roles[0] == 'ROLE_USUARIO' ? 'selected' : '' }}>Usuari</option>
+                    <option value="ROLE_MOD" {{ user.roles[0] is defined and user.roles[0] == 'ROLE_MOD' ? 'selected' : '' }}>Moderador</option>
+                    <option value="ROLE_ADMIN" {{ user.roles[0] is defined and user.roles[0] == 'ROLE_ADMIN' ? 'selected' : '' }}>Admin</option>
+                </select>
+            </div>
+
+            {# ─── Actiu ─── #}
+            <div style="margin-bottom:24px;display:flex;align-items:center;gap:10px;">
+                <input type="checkbox" name="active" value="1" id="user-active"
+                       {{ user.id is null or user.active ? 'checked' : '' }}
+                       style="width:18px;height:18px;accent-color:var(--s-accent);">
+                <label for="user-active" style="font-size:0.85rem;color:var(--s-text);cursor:pointer;">Actiu</label>
+            </div>
+
+            {# ─── Submit ─── #}
+            <button type="submit" class="btn btn-primary" style="width:100%;">
+                <i class="bi bi-check-lg"></i> <span>{{ isNew ? 'Crear usuari' : 'Guardar canvis' }}</span>
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}

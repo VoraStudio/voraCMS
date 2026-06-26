@@ -69,6 +69,9 @@
             <a class="s-sidebar-link{% if app.request.get('_route') starts with 'admin_project_' %} active{% endif %}" href="{{ path('admin_projects') }}">
                 <i class="bi bi-folder"></i> Projectes
             </a>
+            <a class="s-sidebar-link{% if app.request.get('_route') starts with 'admin_user_' %} active{% endif %}" href="{{ path('admin_user_index') }}">
+                <i class="bi bi-people"></i> Usuaris
+            </a>
             {% endif %}
 
             {% if activeProject is defined and activeProject %}
