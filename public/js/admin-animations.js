@@ -68,7 +68,7 @@ document.addEventListener('DOMContentLoaded', function () {
     var cyberBtns = gsap.utils.toArray('[data-anim="cyber-btn"]');
     if (cyberBtns.length) {
       tl.from(cyberBtns,
-        { opacity: 0, y: -8, scale: 0.92, duration: 0.3, stagger: 0.06, ease: 'back.out(1.5)', clearProps: 'transform' },
+        { y: -8, scale: 0.92, duration: 0.3, stagger: 0.06, ease: 'back.out(1.5)', clearProps: 'transform' },
         '-=0.1'
       );
     }
@@ -94,11 +94,11 @@ document.addEventListener('DOMContentLoaded', function () {
 
   /* ─── Reduced motion: fade only ─── */
   mm.add('(prefers-reduced-motion: reduce)', function () {
-    var els = document.querySelectorAll(
-      '[data-anim="metric"], [data-anim="card"], [data-anim="cyber-card"], [data-anim="cyber-row"], [data-anim="cyber-btn"], .s-stat-card, .table-hover tbody tr, .s-sidebar-link'
+    var fadeEls = document.querySelectorAll(
+      '[data-anim="metric"], [data-anim="card"], [data-anim="cyber-card"], [data-anim="cyber-row"], .s-stat-card, .table-hover tbody tr, .s-sidebar-link'
     );
-    if (els.length) {
-      gsap.from(els,
+    if (fadeEls.length) {
+      gsap.from(fadeEls,
         { opacity: 0, duration: 0.15, stagger: 0.01, ease: 'none' }
       );
     }
