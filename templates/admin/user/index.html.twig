@@ -2,12 +2,6 @@
 
 {% block page_title %}Usuaris{% endblock %}
 
-{% block topbar_actions %}
-<a href="{{ path('admin_user_new') }}" class="cyber-btn-primary" data-anim="cyber-btn">
-    <i class="bi bi-plus-lg"></i> <span>Nou usuari</span>
-</a>
-{% endblock %}
-
 {% block content %}
 <div class="cyber-section-header" data-anim="cyber-card">
     <div class="cyber-section-header-left">
@@ -29,6 +23,11 @@
             <span class="cyber-stat-mini-label">Actius</span>
         </div>
     </div>
+</div>
+<div style="margin-bottom:16px;">
+    <a href="{{ path('admin_user_new') }}" class="cyber-btn-primary" data-anim="cyber-btn">
+        <i class="bi bi-plus-lg"></i> <span>Nou usuari</span>
+    </a>
 </div>
 <div class="cyber-card cyber-card--table" data-anim="cyber-card" style="padding:0;">
     <table class="cyber-table">
