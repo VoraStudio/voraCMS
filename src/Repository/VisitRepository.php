@@ -32,18 +32,18 @@ class VisitRepository extends ServiceEntityRepository
     }
 
     /* -----------------------------------------------------------
-       countTodayByClient — Total de visites d'avui per client
+       countTodayByUser — Total de visites d'avui per usuari
        ----------------------------------------------------------- */
-    public function countTodayByClient(int $clientId): int
+    public function countTodayByUser(int $userId): int
     {
         $today = new \DateTimeImmutable('today');
 
         return (int) $this->createQueryBuilder('v')
             ->select('COUNT(v.id)')
             ->where('v.visitedAt >= :today')
-            ->andWhere('IDENTITY(v.client) = :clientId')
+            ->andWhere('IDENTITY(v.user) = :userId')
             ->setParameter('today', $today)
-            ->setParameter('clientId', $clientId)
+            ->setParameter('userId', $userId)
             ->getQuery()
             ->getSingleScalarResult();
     }

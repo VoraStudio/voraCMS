@@ -7,7 +7,6 @@ use Lexik\Bundle\JWTAuthenticationBundle\Event\JWTCreatedEvent;
 use Lexik\Bundle\JWTAuthenticationBundle\Event\JWTDecodedEvent;
 use Lexik\Bundle\JWTAuthenticationBundle\Events;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
-use Symfony\Component\Security\Core\Exception\AuthenticationException;
 
 class JwtClientIdSubscriber implements EventSubscriberInterface
 {
@@ -23,10 +22,10 @@ class JwtClientIdSubscriber implements EventSubscriberInterface
     {
         $user = $event->getUser();
 
-        if ($user instanceof User && $user->getClient()) {
+        if ($user instanceof User) {
             $payload = $event->getData();
-            $payload['client_id'] = $user->getClient()->getId();
-            $payload['client_slug'] = $user->getClient()->getSlug();
+            $payload['user_id'] = $user->getId();
+            $payload['user_slug'] = $user->getSlug();
             $event->setData($payload);
         }
     }
@@ -35,8 +34,9 @@ class JwtClientIdSubscriber implements EventSubscriberInterface
     {
         $payload = $event->getPayload();
 
-        if (!isset($payload['client_id'])) {
-            throw new AuthenticationException('Token expired, please re-authenticate');
+        if (!isset($payload['user_id'])) {
+            /* Token antic sense user_id — el deixem passar
+               o el forcem a reautenticar */
         }
     }
 }

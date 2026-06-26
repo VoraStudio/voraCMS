@@ -12,7 +12,7 @@ use App\Repository\VisitRepository;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: VisitRepository::class)]
-#[ORM\Index(columns: ['client_id', 'visited_at'])]
+#[ORM\Index(columns: ['user_id', 'visited_at'])]
 class Visit
 {
     #[ORM\Id]
@@ -22,7 +22,7 @@ class Visit
 
     #[ORM\ManyToOne]
     #[ORM\JoinColumn(nullable: false)]
-    private ?Client $client = null;
+    private ?User $user = null;
 
     #[ORM\ManyToOne]
     private ?Entry $entry = null;
@@ -46,8 +46,8 @@ class Visit
 
     public function getId(): ?int { return $this->id; }
 
-    public function getClient(): ?Client { return $this->client; }
-    public function setClient(?Client $client): static { $this->client = $client; return $this; }
+    public function getUser(): ?User { return $this->user; }
+    public function setUser(?User $user): static { $this->user = $user; return $this; }
 
     public function getEntry(): ?Entry { return $this->entry; }
     public function setEntry(?Entry $entry): static { $this->entry = $entry; return $this; }

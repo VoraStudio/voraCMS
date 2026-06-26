@@ -10,7 +10,7 @@ use Doctrine\ORM\Mapping\UniqueConstraint;
 use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: ContentTypeRepository::class)]
-#[ORM\Table(name: 'content_types', uniqueConstraints: [new UniqueConstraint(name: 'ct_slug_client', columns: ['slug', 'client_id'])])]
+#[ORM\Table(name: 'content_types', uniqueConstraints: [new UniqueConstraint(name: 'ct_slug_user', columns: ['slug', 'user_id'])])]
 class ContentType
 {
     #[ORM\Id]
@@ -35,9 +35,9 @@ class ContentType
     #[ORM\Column(options: ['default' => false])]
     private bool $base = false;
 
-    #[ORM\ManyToOne(inversedBy: 'contentTypes')]
+    #[ORM\ManyToOne]
     #[ORM\JoinColumn(nullable: false)]
-    private ?Client $client = null;
+    private ?User $user = null;
 
     #[ORM\ManyToOne(inversedBy: 'contentTypes')]
     #[ORM\JoinColumn(nullable: true)]
@@ -77,8 +77,8 @@ class ContentType
     public function isBase(): bool { return $this->base; }
     public function setBase(bool $base): static { $this->base = $base; return $this; }
 
-    public function getClient(): ?Client { return $this->client; }
-    public function setClient(?Client $client): static { $this->client = $client; return $this; }
+    public function getUser(): ?User { return $this->user; }
+    public function setUser(?User $user): static { $this->user = $user; return $this; }
 
     public function getProject(): ?Project { return $this->project; }
     public function setProject(?Project $project): static { $this->project = $project; return $this; }

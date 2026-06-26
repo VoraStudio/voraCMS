@@ -5,27 +5,27 @@ namespace App\Filter;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Doctrine\ORM\Query\Filter\SQLFilter;
 
-class ClientIdFilter extends SQLFilter
+class UserIdFilter extends SQLFilter
 {
     public function addFilterConstraint(ClassMetadata $targetEntity, string $targetTableAlias): string
     {
-        if (!$targetEntity->hasField('client_id')) {
+        if (!$targetEntity->hasField('user_id')) {
             return '';
         }
 
         try {
-            $clientId = $this->getParameter('client_id');
+            $userId = $this->getParameter('user_id');
         } catch (\InvalidArgumentException) {
             return '';
         }
 
-        if ($clientId === null || $clientId === '') {
+        if ($userId === null || $userId === '') {
             return '';
         }
 
         $connection = $this->getConnection();
-        $clientId = $connection->quote($clientId);
+        $userId = $connection->quote($userId);
 
-        return sprintf('%s.client_id = %s', $targetTableAlias, $clientId);
+        return sprintf('%s.user_id = %s', $targetTableAlias, $userId);
     }
 }

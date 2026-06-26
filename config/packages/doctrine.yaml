@@ -27,8 +27,8 @@ doctrine:
         controller_resolver:
             auto_mapping: false
         filters:
-            client_id_filter:
-                class: App\Filter\ClientIdFilter
+            user_id_filter:
+                class: App\Filter\UserIdFilter
                 enabled: true
 
 when@test:

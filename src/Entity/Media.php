@@ -42,9 +42,9 @@ class Media
     #[ORM\ManyToOne(targetEntity: User::class)]
     private ?User $uploadedBy = null;
 
-    #[ORM\ManyToOne(inversedBy: 'media')]
+    #[ORM\ManyToOne]
     #[ORM\JoinColumn(nullable: false)]
-    private ?Client $client = null;
+    private ?User $user = null;
 
     #[ORM\Column]
     private ?\DateTimeImmutable $createdAt = null;
@@ -74,8 +74,8 @@ class Media
     public function getUploadedBy(): ?User { return $this->uploadedBy; }
     public function setUploadedBy(?User $uploadedBy): static { $this->uploadedBy = $uploadedBy; return $this; }
 
-    public function getClient(): ?Client { return $this->client; }
-    public function setClient(?Client $client): static { $this->client = $client; return $this; }
+    public function getUser(): ?User { return $this->user; }
+    public function setUser(?User $user): static { $this->user = $user; return $this; }
 
     public function getCreatedAt(): ?\DateTimeImmutable { return $this->createdAt; }
 }

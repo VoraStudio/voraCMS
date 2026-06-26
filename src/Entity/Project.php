@@ -11,7 +11,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: ProjectRepository::class)]
 #[ORM\Table(name: 'projects')]
-#[ORM\UniqueConstraint(name: 'project_slug_client', columns: ['slug', 'client_id'])]
+#[ORM\UniqueConstraint(name: 'project_slug_user', columns: ['slug', 'user_id'])]
 class Project
 {
     #[ORM\Id]
@@ -36,15 +36,12 @@ class Project
     #[ORM\Column(options: ['default' => true])]
     private ?bool $active = true;
 
-    #[ORM\ManyToOne(inversedBy: 'projects')]
+    #[ORM\ManyToOne]
     #[ORM\JoinColumn(nullable: false)]
-    private ?Client $client = null;
+    private ?User $user = null;
 
     #[ORM\OneToMany(targetEntity: ContentType::class, mappedBy: 'project', cascade: ['persist'])]
     private Collection $contentTypes;
-
-    #[ORM\OneToMany(targetEntity: UserProject::class, mappedBy: 'project', orphanRemoval: true, cascade: ['persist', 'remove'])]
-    private Collection $userPermissions;
 
     #[ORM\Column]
     private ?\DateTimeImmutable $createdAt = null;
@@ -52,7 +49,6 @@ class Project
     public function __construct()
     {
         $this->contentTypes = new ArrayCollection();
-        $this->userPermissions = new ArrayCollection();
         $this->createdAt = new \DateTimeImmutable();
     }
 
@@ -73,8 +69,8 @@ class Project
     public function isActive(): ?bool { return $this->active; }
     public function setActive(bool $active): static { $this->active = $active; return $this; }
 
-    public function getClient(): ?Client { return $this->client; }
-    public function setClient(?Client $client): static { $this->client = $client; return $this; }
+    public function getUser(): ?User { return $this->user; }
+    public function setUser(?User $user): static { $this->user = $user; return $this; }
 
     public function getContentTypes(): Collection { return $this->contentTypes; }
     public function addContentType(ContentType $contentType): static
@@ -94,28 +90,4 @@ class Project
     }
 
     public function getCreatedAt(): ?\DateTimeImmutable { return $this->createdAt; }
-
-    public function getUserPermissions(): Collection
-    {
-        return $this->userPermissions;
-    }
-
-    public function addUserPermission(UserProject $userPermission): static
-    {
-        if (!$this->userPermissions->contains($userPermission)) {
-            $this->userPermissions->add($userPermission);
-            $userPermission->setProject($this);
-        }
-        return $this;
-    }
-
-    public function removeUserPermission(UserProject $userPermission): static
-    {
-        if ($this->userPermissions->removeElement($userPermission)) {
-            if ($userPermission->getProject() === $this) {
-                $userPermission->setProject(null);
-            }
-        }
-        return $this;
-    }
 }

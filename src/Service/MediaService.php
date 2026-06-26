@@ -3,12 +3,8 @@
 /* ══════════════════════════════════════════════════════════════
    MediaService — Pujada de fitxers amb tenant isolation
    ══════════════════════════════════════════════════════════════
-   Desa els fitxers a /public/uploads/{clientId}/ en lloc
-   del directori arrel pla. Això aïlla físicament els fitxers
-   per client i evita col·lisions de noms entre tenants.
-
-   Si no hi ha client al ClientScope (cas rar, p.ex. CLI
-   sense --client), fa fallback al directori arrel /uploads/.
+   Desa els fitxers a /public/uploads/{userId}/ per aïllar
+   físicament els fitxers per usuari.
    ══════════════════════════════════════════════════════════════ */
 
 namespace App\Service;
@@ -26,17 +22,12 @@ class MediaService
 
     public function __construct(
         private EntityManagerInterface $em,
-        private ClientScope $clientScope,
         string $projectDir
     ) {
         $this->uploadDir = $projectDir . '/public/uploads';
     }
 
-    /* ─── UPLOAD ─── */
-    /* Puja un fitxer al directori del client actual.
-       Crea el subdirectori /uploads/{clientId}/ si no existeix.
-       Assigna el client a l'entitat Media per a la traçabilitat. */
-    public function upload(UploadedFile $file, ?User $user = null): Media
+    public function upload(UploadedFile $file, User $user): Media
     {
         $extension = strtolower($file->getClientOriginalExtension());
 
@@ -56,51 +47,26 @@ class MediaService
 
         $safeFilename = uniqid() . '_' . time() . '.' . $extension;
 
-        /* ─── Directori per client ─── */
-        $clientId = $this->clientScope->getClientId();
-        if ($clientId !== null) {
-            $clientUploadDir = $this->uploadDir . '/' . $clientId;
-            if (!is_dir($clientUploadDir)) {
-                mkdir($clientUploadDir, 0775, true);
-            }
-        } else {
-            $clientUploadDir = $this->uploadDir;
+        /* ─── Directori per usuari ─── */
+        $userUploadDir = $this->uploadDir . '/' . $user->getId();
+        if (!is_dir($userUploadDir)) {
+            mkdir($userUploadDir, 0775, true);
         }
 
-        /* Capturar abans de move() — el UploadedFile original
-           queda apuntant al temporal que ja no existeix. */
         $originalName = $file->getClientOriginalName();
         $mimeType = $file->getMimeType() ?? 'application/octet-stream';
 
-        $file->move($clientUploadDir, $safeFilename);
+        $file->move($userUploadDir, $safeFilename);
 
         $media = new Media();
         $media->setFilename($safeFilename);
         $media->setOriginalFilename($originalName);
         $media->setExtension($extension);
         $media->setMimeType($mimeType);
-
-        /* ─── Path relativa amb subdirectori de client ─── */
-        if ($clientId !== null) {
-            $media->setPath('/uploads/' . $clientId . '/' . $safeFilename);
-        } else {
-            $media->setPath('/uploads/' . $safeFilename);
-        }
-
+        $media->setPath('/uploads/' . $user->getId() . '/' . $safeFilename);
         $media->setFileSize($fileSize);
         $media->setUploadedBy($user);
-
-        /* ─── Assignar client a l'entitat Media ─── */
-        /* Si ClientScope retorna null (super-admin), caiem al client de l'usuari */
-        $client = $this->clientScope->getClient();
-        if ($client === null && $user !== null) {
-            $client = $user->getClient();
-        }
-        if ($client) {
-            $media->setClient($client);
-        } else {
-            throw new \RuntimeException('No s\'ha pogut determinar el client per a la pujada.');
-        }
+        $media->setUser($user);
 
         $this->em->persist($media);
         $this->em->flush();
