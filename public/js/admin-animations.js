@@ -28,7 +28,7 @@ document.addEventListener('DOMContentLoaded', function () {
       );
     }
 
-    /* ─── 3. Cards de contingut del dashboard (des de baix) ─── */
+    /* ─── 3. Cards de contingut del dashboard ─── */
     var contentCards = gsap.utils.toArray('[data-anim="card"]');
     if (contentCards.length) {
       tl.from(contentCards,
@@ -37,7 +37,7 @@ document.addEventListener('DOMContentLoaded', function () {
       );
     }
 
-    /* ─── 4. Altres targetes (projectes, etc.) ─── */
+    /* ─── 4. Stat cards ─── */
     var statCards = gsap.utils.toArray('.s-stat-card:not([data-anim="metric"]):not([data-anim="card"])');
     if (statCards.length) {
       tl.from(statCards,
@@ -46,16 +46,43 @@ document.addEventListener('DOMContentLoaded', function () {
       );
     }
 
-    /* ─── 5. Table rows ─── */
+    /* ─── 5. Cyber card ─── */
+    var cyberCards = gsap.utils.toArray('[data-anim="cyber-card"]');
+    if (cyberCards.length) {
+      tl.from(cyberCards,
+        { opacity: 0, y: 24, scale: 0.98, duration: 0.5, ease: 'power3.out', clearProps: 'transform' },
+        '-=0.05'
+      );
+    }
+
+    /* ─── 6. Cyber rows (stagger) ─── */
+    var cyberRows = gsap.utils.toArray('[data-anim="cyber-row"]');
+    if (cyberRows.length) {
+      tl.from(cyberRows,
+        { opacity: 0, x: -16, duration: 0.35, stagger: 0.04, ease: 'power2.out', clearProps: 'transform' },
+        '-=0.1'
+      );
+    }
+
+    /* ─── 7. Cyber buttons (topbar actions) ─── */
+    var cyberBtns = gsap.utils.toArray('[data-anim="cyber-btn"]');
+    if (cyberBtns.length) {
+      tl.from(cyberBtns,
+        { opacity: 0, y: -8, scale: 0.92, duration: 0.3, stagger: 0.06, ease: 'back.out(1.5)', clearProps: 'transform' },
+        '-=0.1'
+      );
+    }
+
+    /* ─── 8. Table rows (existing fallback) ─── */
     var tableRows = gsap.utils.toArray('.table-hover tbody tr');
-    if (tableRows.length) {
+    if (tableRows.length && !cyberRows.length) {
       tl.from(tableRows,
         { opacity: 0, y: 10, duration: 0.25, stagger: 0.025, ease: 'power1.out', clearProps: 'transform' },
         '-=0.05'
       );
     }
 
-    /* ─── 6. Media items ─── */
+    /* ─── 9. Media items ─── */
     var mediaItems = gsap.utils.toArray('.row.g-3 > [class*="col-"] .card');
     if (mediaItems.length) {
       tl.from(mediaItems,
@@ -68,7 +95,7 @@ document.addEventListener('DOMContentLoaded', function () {
   /* ─── Reduced motion: fade only ─── */
   mm.add('(prefers-reduced-motion: reduce)', function () {
     var els = document.querySelectorAll(
-      '[data-anim="metric"], [data-anim="card"], .s-stat-card, .table-hover tbody tr, .s-sidebar-link'
+      '[data-anim="metric"], [data-anim="card"], [data-anim="cyber-card"], [data-anim="cyber-row"], [data-anim="cyber-btn"], .s-stat-card, .table-hover tbody tr, .s-sidebar-link'
     );
     if (els.length) {
       gsap.from(els,

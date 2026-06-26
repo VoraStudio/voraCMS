@@ -1753,6 +1753,873 @@ input[type="time"] {
   margin-bottom: 20px;
 }
 
+/* ═══════════════════════════════════════════════════
+   ⚡ CYBER-MODERN COMPONENTS
+   Futuristic glow / glassmorphism design layer
+   ═══════════════════════════════════════════════════ */
+
+/* ─── Cyber Card ─── */
+.cyber-card {
+  background: rgba(15, 23, 42, 0.65);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(6, 182, 212, 0.12);
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35),
+              0 0 0 1px rgba(6, 182, 212, 0.04) inset,
+              0 0 40px rgba(6, 182, 212, 0.03);
+  transition: border-color 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.cyber-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 20% 0%, rgba(6, 182, 212, 0.06) 0%, transparent 60%);
+  pointer-events: none;
+  border-radius: inherit;
+}
+
+.cyber-card:hover {
+  border-color: rgba(6, 182, 212, 0.25);
+  box-shadow: 0 12px 48px rgba(0, 0, 0, 0.45),
+              0 0 0 1px rgba(6, 182, 212, 0.08) inset,
+              0 0 60px rgba(6, 182, 212, 0.06);
+  transform: translateY(-2px);
+}
+
+[data-theme="light"] .cyber-card {
+  background: rgba(255, 255, 255, 0.85);
+  border-color: rgba(59, 130, 246, 0.15);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08),
+              0 0 0 1px rgba(59, 130, 246, 0.04) inset;
+}
+
+[data-theme="light"] .cyber-card::before {
+  background: radial-gradient(ellipse at 20% 0%, rgba(59, 130, 246, 0.04) 0%, transparent 60%);
+}
+
+[data-theme="light"] .cyber-card:hover {
+  border-color: rgba(59, 130, 246, 0.25);
+  box-shadow: 0 12px 48px rgba(0, 0, 0, 0.12),
+              0 0 0 1px rgba(59, 130, 246, 0.08) inset;
+}
+
+/* ─── Cyber Table ─── */
+.cyber-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0 6px;
+}
+
+.cyber-table thead th {
+  padding: 10px 18px;
+  font-size: 0.6rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: rgba(148, 163, 184, 0.6);
+  text-align: left;
+  border: none;
+  background: transparent;
+}
+
+.cyber-table thead th:last-child {
+  text-align: right;
+}
+
+.cyber-table thead th:nth-child(4),
+.cyber-table thead th:nth-child(5),
+.cyber-table thead th:nth-child(6) {
+  text-align: center;
+}
+
+.cyber-row {
+  background: rgba(15, 23, 42, 0.50);
+  backdrop-filter: blur(8px);
+  border-radius: 12px;
+  transition: background 0.25s ease, box-shadow 0.25s ease, transform 0.2s ease;
+  cursor: default;
+  position: relative;
+}
+
+/* Left glow accent on rows */
+.cyber-row::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 8px;
+  bottom: 8px;
+  width: 3px;
+  border-radius: 0 3px 3px 0;
+  background: linear-gradient(180deg, rgba(6, 182, 212, 0.40), rgba(59, 130, 246, 0.20));
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.cyber-row:hover::before {
+  opacity: 1;
+}
+
+.cyber-row:hover {
+  background: rgba(15, 23, 42, 0.75);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.30),
+              0 0 0 1px rgba(6, 182, 212, 0.08);
+  transform: translateX(4px);
+}
+
+.cyber-row.row-inactive {
+  opacity: 0.55;
+}
+
+.cyber-row.row-inactive:hover {
+  opacity: 0.75;
+}
+
+.cyber-cell {
+  padding: 14px 18px;
+  border: none;
+  vertical-align: middle;
+  font-size: 0.82rem;
+  color: rgba(255, 255, 255, 0.82);
+}
+
+.cyber-cell:first-child {
+  border-radius: 12px 0 0 12px;
+}
+
+.cyber-cell:last-child {
+  border-radius: 0 12px 12px 0;
+  text-align: right;
+}
+
+.cyber-cell:nth-child(4),
+.cyber-cell:nth-child(5),
+.cyber-cell:nth-child(6) {
+  text-align: center;
+}
+
+[data-theme="light"] .cyber-row {
+  background: rgba(255, 255, 255, 0.75);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+[data-theme="light"] .cyber-row:hover {
+  background: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08),
+              0 0 0 1px rgba(59, 130, 246, 0.08);
+}
+
+[data-theme="light"] .cyber-row::before {
+  background: linear-gradient(180deg, rgba(59, 130, 246, 0.40), rgba(37, 99, 235, 0.20));
+}
+
+[data-theme="light"] .cyber-cell {
+  color: rgba(15, 23, 42, 0.85);
+}
+
+/* ─── Cyber Avatar (glowing initials) ─── */
+.cyber-avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #fff;
+  flex-shrink: 0;
+  position: relative;
+  background: linear-gradient(135deg, #06B6D4, #3B82F6);
+  box-shadow: 0 2px 12px rgba(6, 182, 212, 0.30);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.cyber-avatar::after {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, rgba(6, 182, 212, 0.30), rgba(59, 130, 246, 0.30));
+  z-index: -1;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.cyber-row:hover .cyber-avatar {
+  transform: scale(1.08);
+  box-shadow: 0 4px 20px rgba(6, 182, 212, 0.45);
+}
+
+.cyber-row:hover .cyber-avatar::after {
+  opacity: 1;
+}
+
+/* ─── Cyber Badge ─── */
+.cyber-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.6rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  border: 1px solid transparent;
+  background: rgba(148, 163, 184, 0.08);
+  color: rgba(148, 163, 184, 0.7);
+}
+
+.cyber-badge--admin {
+  background: rgba(251, 191, 36, 0.10);
+  border-color: rgba(251, 191, 36, 0.15);
+  color: rgb(251, 191, 36);
+}
+
+.cyber-badge--mod {
+  background: rgba(96, 165, 250, 0.10);
+  border-color: rgba(96, 165, 250, 0.15);
+  color: rgb(96, 165, 250);
+}
+
+.cyber-badge--user {
+  background: rgba(34, 197, 94, 0.10);
+  border-color: rgba(34, 197, 94, 0.15);
+  color: rgb(34, 197, 94);
+}
+
+[data-theme="light"] .cyber-badge--admin {
+  background: rgba(251, 191, 36, 0.12);
+  color: rgb(180, 130, 10);
+  border-color: rgba(251, 191, 36, 0.20);
+}
+
+[data-theme="light"] .cyber-badge--mod {
+  background: rgba(59, 130, 246, 0.10);
+  color: rgb(37, 99, 235);
+  border-color: rgba(59, 130, 246, 0.18);
+}
+
+[data-theme="light"] .cyber-badge--user {
+  background: rgba(16, 185, 129, 0.10);
+  color: rgb(5, 150, 105);
+  border-color: rgba(16, 185, 129, 0.18);
+}
+
+/* ─── Cyber Status Dot ─── */
+.cyber-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.cyber-status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+  position: relative;
+}
+
+.cyber-status-dot--active {
+  background: #10B981;
+  box-shadow: 0 0 8px rgba(16, 185, 129, 0.40);
+}
+
+.cyber-status-dot--active::after {
+  content: '';
+  position: absolute;
+  inset: -3px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(16, 185, 129, 0.15);
+  animation: cyber-pulse 2s ease-in-out infinite;
+}
+
+.cyber-status-dot--inactive {
+  background: rgba(239, 68, 68, 0.50);
+  box-shadow: 0 0 6px rgba(239, 68, 68, 0.15);
+}
+
+@keyframes cyber-pulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.5); opacity: 0.3; }
+}
+
+.cyber-status-text {
+  color: rgb(16, 185, 129);
+}
+
+.cyber-status-text--inactive {
+  color: rgba(239, 68, 68, 0.60);
+}
+
+[data-theme="light"] .cyber-status-text {
+  color: rgb(5, 150, 105);
+}
+
+[data-theme="light"] .cyber-status-text--inactive {
+  color: rgba(220, 38, 38, 0.60);
+}
+
+/* ─── Cyber Action Group ─── */
+.cyber-actions {
+  display: inline-flex;
+  gap: 4px;
+  align-items: center;
+}
+
+.cyber-actions-divider {
+  width: 1px;
+  height: 24px;
+  background: rgba(148, 163, 184, 0.12);
+  display: inline-block;
+  margin: 0 4px;
+}
+
+/* ─── Cyber Button ─── */
+.cyber-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 7px 14px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  text-decoration: none;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.cyber-btn i {
+  font-size: 0.75rem;
+}
+
+/* Glow overlay */
+.cyber-btn::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.cyber-btn > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* Projectes button */
+.cyber-btn--projects {
+  background: linear-gradient(135deg, #06B6D4, #0891B2);
+  color: #fff;
+  box-shadow: 0 3px 12px rgba(6, 182, 212, 0.25);
+}
+
+.cyber-btn--projects::before {
+  background: linear-gradient(135deg, #22D3EE, #06B6D4);
+}
+
+.cyber-btn--projects:hover {
+  transform: translateY(-2px) scale(1.03);
+  box-shadow: 0 6px 20px rgba(6, 182, 212, 0.40);
+  color: #fff;
+}
+
+.cyber-btn--projects:hover::before {
+  opacity: 1;
+}
+
+.cyber-btn--projects:active {
+  transform: translateY(0) scale(0.97);
+}
+
+/* Projectes inactive (pálido) */
+.cyber-btn--projects-inactive {
+  background: linear-gradient(135deg, rgba(6, 182, 212, 0.15), rgba(8, 145, 178, 0.10));
+  color: rgba(148, 163, 184, 0.45);
+  box-shadow: none;
+}
+
+.cyber-btn--projects-inactive:hover {
+  background: linear-gradient(135deg, #06B6D4, #0891B2);
+  color: #fff;
+  box-shadow: 0 3px 12px rgba(6, 182, 212, 0.25);
+  transform: translateY(-2px);
+}
+
+/* Toggle button */
+.cyber-btn--toggle-active,
+.cyber-btn--toggle-inactive {
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  border-radius: 8px;
+}
+
+.cyber-btn--toggle-active {
+  background: linear-gradient(135deg, #10B981, #059669);
+  color: #fff;
+  box-shadow: 0 3px 10px rgba(16, 185, 129, 0.30);
+}
+
+.cyber-btn--toggle-active:hover {
+  transform: scale(1.12);
+  box-shadow: 0 5px 16px rgba(16, 185, 129, 0.45);
+}
+
+.cyber-btn--toggle-inactive {
+  background: linear-gradient(135deg, #EF4444, #DC2626);
+  color: #fff;
+  box-shadow: 0 3px 10px rgba(239, 68, 68, 0.30);
+}
+
+.cyber-btn--toggle-inactive:hover {
+  transform: scale(1.12);
+  box-shadow: 0 5px 16px rgba(239, 68, 68, 0.45);
+}
+
+.cyber-btn--toggle-disabled {
+  background: linear-gradient(135deg, #374151, #4B5563) !important;
+  color: rgba(156, 163, 175, 0.5) !important;
+  box-shadow: none !important;
+  cursor: not-allowed !important;
+  opacity: 0.4;
+}
+
+/* Edit button */
+.cyber-btn--edit {
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #3B82F6, #2563EB);
+  color: #fff;
+  box-shadow: 0 3px 10px rgba(59, 130, 246, 0.30);
+}
+
+.cyber-btn--edit:hover {
+  transform: scale(1.12);
+  box-shadow: 0 5px 16px rgba(59, 130, 246, 0.45);
+  color: #fff;
+}
+
+/* Delete button */
+.cyber-btn--delete {
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #EF4444, #DC2626);
+  color: #fff;
+  box-shadow: 0 3px 10px rgba(239, 68, 68, 0.30);
+}
+
+.cyber-btn--delete:hover {
+  transform: scale(1.12);
+  box-shadow: 0 5px 16px rgba(239, 68, 68, 0.45);
+  color: #fff;
+}
+
+.cyber-btn--delete:active,
+.cyber-btn--edit:active,
+.cyber-btn--toggle-active:active,
+.cyber-btn--toggle-inactive:active {
+  transform: scale(0.95);
+}
+
+.cyber-btn--delete-disabled {
+  background: linear-gradient(135deg, #374151, #4B5563) !important;
+  color: rgba(156, 163, 175, 0.5) !important;
+  box-shadow: none !important;
+  cursor: not-allowed !important;
+  opacity: 0.4;
+}
+
+/* ─── Cyber Empty State ─── */
+.cyber-empty {
+  padding: 60px 24px;
+  text-align: center;
+}
+
+.cyber-empty-icon {
+  width: 64px;
+  height: 64px;
+  margin: 0 auto 16px;
+  border-radius: 16px;
+  background: rgba(6, 182, 212, 0.06);
+  border: 1px solid rgba(6, 182, 212, 0.10);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.8rem;
+  color: rgba(6, 182, 212, 0.30);
+}
+
+.cyber-empty-text {
+  font-size: 0.9rem;
+  color: rgba(148, 163, 184, 0.5);
+  margin: 0;
+}
+
+/* ─── Cyber Form ─── */
+.cyber-form-card {
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.cyber-form-group {
+  margin-bottom: 22px;
+}
+
+.cyber-form-label {
+  display: block;
+  font-size: 0.68rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: rgba(148, 163, 184, 0.7);
+  margin-bottom: 8px;
+}
+
+.cyber-form-input {
+  width: 100%;
+  padding: 12px 16px;
+  font-size: 0.88rem;
+  color: rgba(255, 255, 255, 0.85);
+  background: rgba(15, 23, 42, 0.40);
+  border: 1.5px solid rgba(148, 163, 184, 0.12);
+  border-radius: 10px;
+  outline: none;
+  transition: border-color 0.25s ease, box-shadow 0.25s ease, background 0.25s ease;
+  font-family: inherit;
+}
+
+.cyber-form-input:focus {
+  border-color: rgba(6, 182, 212, 0.40);
+  box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.08),
+              0 0 20px rgba(6, 182, 212, 0.04);
+  background: rgba(15, 23, 42, 0.55);
+  color: #fff;
+}
+
+.cyber-form-input::placeholder {
+  color: rgba(148, 163, 184, 0.25);
+}
+
+.cyber-form-input--select {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='rgba(148,163,184,0.5)' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  padding-right: 36px;
+  cursor: pointer;
+}
+
+.cyber-form-input--select option {
+  background: #0F172A;
+  color: rgba(255, 255, 255, 0.85);
+  padding: 8px;
+}
+
+.cyber-form-check {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 24px;
+}
+
+.cyber-form-checkbox {
+  width: 20px;
+  height: 20px;
+  border-radius: 6px;
+  accent-color: #06B6D4;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.cyber-form-checkbox:focus {
+  outline: 2px solid rgba(6, 182, 212, 0.30);
+  outline-offset: 2px;
+}
+
+.cyber-form-check-label {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.80);
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.cyber-form-submit {
+  width: 100%;
+  padding: 14px 24px;
+  font-size: 0.88rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: #fff;
+  background: linear-gradient(135deg, #06B6D4, #3B82F6);
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 20px rgba(6, 182, 212, 0.30);
+  position: relative;
+  overflow: hidden;
+}
+
+.cyber-form-submit::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, #22D3EE, #3B82F6, #2563EB);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  border-radius: inherit;
+}
+
+.cyber-form-submit > * {
+  position: relative;
+  z-index: 1;
+}
+
+.cyber-form-submit:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 32px rgba(6, 182, 212, 0.45);
+}
+
+.cyber-form-submit:hover::before {
+  opacity: 1;
+}
+
+.cyber-form-submit:active {
+  transform: translateY(-1px);
+}
+
+[data-theme="light"] .cyber-form-input {
+  background: rgba(255, 255, 255, 0.80);
+  color: rgba(15, 23, 42, 0.85);
+  border-color: rgba(148, 163, 184, 0.25);
+}
+
+[data-theme="light"] .cyber-form-input:focus {
+  border-color: rgba(59, 130, 246, 0.40);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.10);
+  background: #FFFFFF;
+  color: rgba(15, 23, 42, 0.95);
+}
+
+[data-theme="light"] .cyber-form-input--select option {
+  background: #FFFFFF;
+  color: rgba(15, 23, 42, 0.85);
+}
+
+[data-theme="light"] .cyber-form-label {
+  color: rgba(71, 85, 105, 0.75);
+}
+
+[data-theme="light"] .cyber-form-check-label {
+  color: rgba(15, 23, 42, 0.80);
+}
+
+[data-theme="light"] .cyber-form-submit {
+  background: linear-gradient(135deg, #3B82F6, #2563EB);
+  box-shadow: 0 4px 20px rgba(59, 130, 246, 0.30);
+}
+
+[data-theme="light"] .cyber-form-submit:hover {
+  box-shadow: 0 8px 32px rgba(59, 130, 246, 0.45);
+}
+
+/* ─── Cyber Back Button ─── */
+.cyber-btn-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: rgba(148, 163, 184, 0.6);
+  background: rgba(148, 163, 184, 0.06);
+  border: 1px solid rgba(148, 163, 184, 0.10);
+  border-radius: 8px;
+  text-decoration: none;
+  transition: all 0.25s ease;
+}
+
+.cyber-btn-back:hover {
+  color: rgba(6, 182, 212, 0.80);
+  background: rgba(6, 182, 212, 0.06);
+  border-color: rgba(6, 182, 212, 0.15);
+  transform: translateX(-3px);
+}
+
+/* ─── Cyber Action Bar Button ─── */
+.cyber-btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 20px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: #fff;
+  background: linear-gradient(135deg, #06B6D4, #0891B2);
+  border: none;
+  border-radius: 10px;
+  text-decoration: none;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 3px 12px rgba(6, 182, 212, 0.25);
+  position: relative;
+  overflow: hidden;
+}
+
+.cyber-btn-primary::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, #22D3EE, #06B6D4);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  border-radius: inherit;
+}
+
+.cyber-btn-primary > * {
+  position: relative;
+  z-index: 1;
+}
+
+.cyber-btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(6, 182, 212, 0.40);
+  color: #fff;
+}
+
+.cyber-btn-primary:hover::before {
+  opacity: 1;
+}
+
+.cyber-btn-primary:active {
+  transform: translateY(0) scale(0.97);
+}
+
+[data-theme="light"] .cyber-btn-primary {
+  background: linear-gradient(135deg, #3B82F6, #2563EB);
+  box-shadow: 0 3px 12px rgba(59, 130, 246, 0.25);
+}
+
+[data-theme="light"] .cyber-btn-primary:hover {
+  box-shadow: 0 6px 20px rgba(59, 130, 246, 0.40);
+}
+
+[data-theme="light"] .cyber-btn-back {
+  color: rgba(71, 85, 105, 0.6);
+  border-color: rgba(71, 85, 105, 0.12);
+}
+
+[data-theme="light"] .cyber-btn-back:hover {
+  color: rgba(59, 130, 246, 0.80);
+  border-color: rgba(59, 130, 246, 0.18);
+}
+
+[data-theme="light"] .cyber-empty-icon {
+  background: rgba(59, 130, 246, 0.06);
+  border-color: rgba(59, 130, 246, 0.10);
+  color: rgba(59, 130, 246, 0.30);
+}
+
+[data-theme="light"] .cyber-empty-text {
+  color: rgba(71, 85, 105, 0.5);
+}
+
+/* ─── Responsive Cyber ─── */
+@media (max-width: 768px) {
+  .cyber-table thead {
+    display: none;
+  }
+
+  .cyber-table,
+  .cyber-table tbody,
+  .cyber-table tr,
+  .cyber-table td {
+    display: block;
+  }
+
+  .cyber-row {
+    margin-bottom: 10px;
+    border-radius: 12px;
+    position: relative;
+    padding: 14px 16px;
+  }
+
+  .cyber-cell {
+    padding: 4px 0;
+    text-align: left !important;
+    border-radius: 0 !important;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .cyber-cell:first-child {
+    padding-top: 0;
+  }
+
+  .cyber-cell:last-child {
+    padding-bottom: 0;
+  }
+
+  /* Label-to-left on mobile */
+  .cyber-cell::before {
+    content: attr(data-label);
+    font-size: 0.6rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: rgba(148, 163, 184, 0.4);
+    flex-shrink: 0;
+  }
+
+  .cyber-cell:nth-child(4),
+  .cyber-cell:nth-child(5),
+  .cyber-cell:nth-child(6) {
+    text-align: left !important;
+  }
+
+  .cyber-actions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+
+  .cyber-avatar {
+    width: 32px;
+    height: 32px;
+    font-size: 0.75rem;
+  }
+
+  .cyber-form-card {
+    max-width: 100%;
+  }
+}
+
 /* ───────── Responsive ───────── */
 .s-sidebar-toggle {
   display: none;
