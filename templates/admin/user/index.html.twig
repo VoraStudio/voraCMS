@@ -66,36 +66,36 @@
                         {# ─── Veure projectes ─── #}
                         <a href="{{ path('admin_projects', {user: user.id}) }}"
                            class="btn btn-sm"
-                           style="padding:6px 12px;font-size:0.7rem;border-radius:8px;display:inline-flex;align-items:center;gap:5px;background:rgba(96,165,250,0.12);color:rgb(96,165,250);border:none;cursor:pointer;text-decoration:none;transition:all 0.15s;font-weight:500;"
-                           onmouseover="this.style.background='rgba(96,165,250,0.20)';this.style.transform='translateY(-1px)'"
-                           onmouseout="this.style.background='rgba(96,165,250,0.12)';this.style.transform=''">
+                           style="padding:6px 14px;font-size:0.7rem;border-radius:8px;display:inline-flex;align-items:center;gap:6px;background:rgb(96,165,250);color:#fff;border:none;cursor:pointer;text-decoration:none;transition:all 0.2s;font-weight:600;box-shadow:0 2px 8px rgba(96,165,250,0.25);"
+                           onmouseover="this.style.background='rgb(79,140,230)';this.style.boxShadow='0 4px 12px rgba(96,165,250,0.35)';this.style.transform='translateY(-1px)'"
+                           onmouseout="this.style.background='rgb(96,165,250)';this.style.boxShadow='0 2px 8px rgba(96,165,250,0.25)';this.style.transform=''">
                             <i class="bi bi-folder2-open" style="font-size:0.75rem;"></i>
                             <span>Projectes</span>
                         </a>
 
                         {# ─── Separador ─── #}
-                        <span style="width:1px;height:20px;background:var(--s-card-border);display:inline-block;"></span>
+                        <span style="width:1px;height:24px;background:var(--s-card-border);display:inline-block;"></span>
 
                         {# ─── Toggle active ─── #}
                         <form method="post" action="{{ path('admin_user_toggle_active', {id: user.id}) }}" style="display:inline" id="tact-user-{{ user.id }}">
                             <input type="hidden" name="_token" value="{{ csrf_token('toggle-active-' ~ user.id) }}">
                             <button type="submit"
-                                    style="width:32px;height:32px;border-radius:8px;border:1px solid var(--s-card-border);background:transparent;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;transition:all 0.15s;color:{{ user.active ? 'rgb(34,197,94)' : 'rgba(239,83,80,0.70)' }};padding:0;"
+                                    style="width:34px;height:34px;border-radius:8px;border:none;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;transition:all 0.2s;padding:0;{{ user.active ? 'background:rgba(34,197,94,0.15);color:rgb(34,197,94);' : 'background:rgba(239,83,80,0.15);color:rgb(239,83,80);' }}"
                                     title="{{ user.active ? 'Desactivar' : 'Activar' }}"
-                                    {% if app.user.id == user.id %}disabled style="opacity:0.4;cursor:not-allowed;"{% endif %}
-                                    onmouseover="this.style.background='var(--s-hover)';this.style.borderColor='{{ user.active ? 'rgba(34,197,94,0.4)' : 'rgba(239,83,80,0.4)' }}'"
-                                    onmouseout="this.style.background='transparent';this.style.borderColor='var(--s-card-border)'">
-                                <i class="bi {{ user.active ? 'bi-toggle2-on' : 'bi-toggle2-off' }}" style="font-size:1rem;"></i>
+                                    {% if app.user.id == user.id %}disabled style="opacity:0.4;cursor:not-allowed;background:transparent;color:var(--s-text-secondary);"{% endif %}
+                                    onmouseover="if(!this.disabled){this.style.transform='scale(1.1)';this.style.boxShadow='0 2px 8px {{ user.active ? 'rgba(34,197,94,0.3)' : 'rgba(239,83,80,0.3)' }}'}"
+                                    onmouseout="if(!this.disabled){this.style.transform='';this.style.boxShadow=''}">
+                                <i class="bi {{ user.active ? 'bi-toggle2-on' : 'bi-toggle2-off' }}" style="font-size:1.1rem;"></i>
                             </button>
                         </form>
 
                         {# ─── Editar ─── #}
                         <a href="{{ path('admin_user_edit', {id: user.id}) }}"
-                           style="width:32px;height:32px;border-radius:8px;border:1px solid var(--s-card-border);background:transparent;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;text-decoration:none;transition:all 0.15s;color:var(--s-text-secondary);padding:0;"
+                           style="width:34px;height:34px;border-radius:8px;border:none;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;text-decoration:none;transition:all 0.2s;padding:0;background:rgba(96,165,250,0.15);color:rgb(96,165,250);"
                            title="Editar"
-                           onmouseover="this.style.background='var(--s-hover)';this.style.borderColor='rgba(96,165,250,0.4)';this.style.color='rgb(96,165,250)'"
-                           onmouseout="this.style.background='transparent';this.style.borderColor='var(--s-card-border)';this.style.color='var(--s-text-secondary)'">
-                            <i class="bi bi-pencil" style="font-size:0.8rem;"></i>
+                           onmouseover="this.style.background='rgb(96,165,250)';this.style.color='#fff';this.style.transform='scale(1.1)';this.style.boxShadow='0 2px 8px rgba(96,165,250,0.3)'"
+                           onmouseout="this.style.background='rgba(96,165,250,0.15)';this.style.color='rgb(96,165,250)';this.style.transform='';this.style.boxShadow=''">
+                            <i class="bi bi-pencil" style="font-size:0.85rem;"></i>
                         </a>
 
                         {# ─── Eliminar ─── #}
@@ -104,14 +104,14 @@
                               onsubmit="return confirm('Segur que vols eliminar aquest usuari?')">
                             <input type="hidden" name="_token" value="{{ csrf_token('delete-user-' ~ user.id) }}">
                             <button type="submit"
-                                    style="width:32px;height:32px;border-radius:8px;border:1px solid var(--s-card-border);background:transparent;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;transition:all 0.15s;color:rgba(239,83,80,0.60);padding:0;"
+                                    style="width:34px;height:34px;border-radius:8px;border:none;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;transition:all 0.2s;padding:0;background:rgba(239,83,80,0.15);color:rgb(239,83,80);"
                                     title="Eliminar"
                                     {% if app.user.id == user.id or (userProjects[user.id] ?? 0) > 0 %}
-                                    disabled style="opacity:0.3;cursor:not-allowed;"
+                                    disabled style="opacity:0.3;cursor:not-allowed;background:transparent;color:var(--s-text-secondary);"
                                     {% endif %}
-                                    onmouseover="if(!this.disabled){this.style.background='rgba(239,83,80,0.10)';this.style.borderColor='rgba(239,83,80,0.3)';this.style.color='rgb(239,83,80)'}"
-                                    onmouseout="if(!this.disabled){this.style.background='transparent';this.style.borderColor='var(--s-card-border)';this.style.color='rgba(239,83,80,0.60)'}">
-                                <i class="bi bi-trash3" style="font-size:0.8rem;"></i>
+                                    onmouseover="if(!this.disabled){this.style.background='rgb(239,83,80)';this.style.color='#fff';this.style.transform='scale(1.1)';this.style.boxShadow='0 2px 8px rgba(239,83,80,0.3)'}"
+                                    onmouseout="if(!this.disabled){this.style.background='rgba(239,83,80,0.15)';this.style.color='rgb(239,83,80)';this.style.transform='';this.style.boxShadow=''}">
+                                <i class="bi bi-trash3" style="font-size:0.85rem;"></i>
                             </button>
                         </form>
 
