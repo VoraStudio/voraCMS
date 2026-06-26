@@ -2071,11 +2071,11 @@ input[type="time"] {
 }
 
 .cyber-row.row-inactive {
-  opacity: 0.55;
+  opacity: 1;
 }
 
 .cyber-row.row-inactive:hover {
-  opacity: 0.75;
+  opacity: 1;
 }
 
 .cyber-cell {
@@ -3782,7 +3782,7 @@ input[type="time"] {
 
 .row-inactive {
   background-color: rgba(239, 68, 68, 0.03);
-  opacity: 0.75;
+  opacity: 1;
 }
 
 [data-theme="light"] .row-active {
@@ -3791,6 +3791,6 @@ input[type="time"] {
 
 [data-theme="light"] .row-inactive {
   background-color: rgba(239, 68, 68, 0.05);
-  opacity: 0.75;
+  opacity: 1;
 }
 
