@@ -51,16 +51,24 @@ class ProjectController extends AbstractController
 
         $userId = $request->query->getInt('user', 0);
         $filterUser = null;
+        $mainProject = null;
+        $otherProjects = [];
 
         if ($userId > 0) {
             $filterUser = $userRepo->find($userId);
-            $projects = $projectRepo->findBy(['user' => $filterUser], ['name' => 'ASC']);
+            $projects = $projectRepo->findBy(['user' => $filterUser], ['id' => 'DESC']);
+            if (!empty($projects)) {
+                $mainProject = $projects[0];
+                $otherProjects = array_slice($projects, 1);
+            }
         } else {
             $projects = $projectRepo->findActive();
         }
 
         return $this->render('admin/project/index.html.twig', [
             'projects' => $projects,
+            'mainProject' => $mainProject,
+            'otherProjects' => $otherProjects,
             'filterUser' => $filterUser,
         ]);
     }
