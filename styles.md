@@ -42,7 +42,7 @@ Todas las normas de diseño UI/UX del panel de administración de VoraCMS.
 ## Filas de tabla
 
 - `.row-active`: fondo `rgba(59, 130, 246, 0.04)` (dark) / `rgba(59, 130, 246, 0.06)` (light) — azul, NO verde.
-- `.row-inactive`: opacidad 0.75, fondo `rgba(239, 68, 68, 0.03)`.
+- `.row-inactive`: opacidad 0.75, fondo `rgba(239, 68, 68, 0.03)`. El texto "Inactiu" usa color sólido `rgb(239,68,68)` (no opacidad reducida).
 - Filas con `.cyber-row`: border-radius 12px, glass con `box-shadow`, hover con glow sutil.
 
 ---
@@ -71,3 +71,12 @@ Todas las normas de diseño UI/UX del panel de administración de VoraCMS.
 - Glow rojo dark: `box-shadow: 0 0 0 3px rgba(239,68,68,0.20), 0 0 24px rgba(239,68,68,0.08)`
 - Glow rojo light: `box-shadow: 0 0 0 3px rgba(220,38,38,0.25), 0 0 28px rgba(220,38,38,0.12)`
 - No requiere JavaScript, es CSS nativo con `:user-invalid`
+
+---
+
+## Toggle activar/desactivar usuarios
+
+- Vía AJAX (fetch + JSON), sin recarga de página
+- Al hacer click: envía POST, servidor actualiza y devuelve JSON
+- JS actualiza: botón (clase, icono, title), fila (row-active/row-inactive), celda de estado (Actiu/Inactiu)
+- El admin puede activarse/desactivarse y eliminarse a sí mismo sin restricciones
