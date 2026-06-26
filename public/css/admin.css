@@ -2314,8 +2314,8 @@ input[type="time"] {
   position: absolute;
   inset: 0;
   border-radius: 10px;
-  padding: 2px;
-  background: linear-gradient(135deg, rgba(148,163,184,0.08), rgba(148,163,184,0.03));
+  padding: 3px;
+  background: linear-gradient(135deg, rgba(148,163,184,0.12), rgba(148,163,184,0.04));
   -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   -webkit-mask-composite: xor;
@@ -2341,65 +2341,65 @@ input[type="time"] {
 
 /* ─── Projectes (active) ─── cyan neon frame ─── */
 .cyber-btn--projects {
-  color: #22D3EE;
+  color: #67E8F9;
   background: rgba(2, 6, 23, 0.40);
   backdrop-filter: blur(8px);
-  box-shadow: 0 0 24px rgba(6, 182, 212, 0.04);
+  box-shadow: 0 0 32px rgba(6, 182, 212, 0.12);
 }
 
 .cyber-btn--projects::before {
-  background: linear-gradient(135deg, rgba(6, 182, 212, 0.70), rgba(6, 182, 212, 0.20));
+  background: linear-gradient(135deg, rgba(6, 182, 212, 0.95), rgba(6, 182, 212, 0.40));
 }
 
 .cyber-btn--projects i {
-  color: #22D3EE;
+  color: #67E8F9;
 }
 
 .cyber-btn--projects:hover {
   transform: translateY(-3px) scale(1.03);
-  color: #67E8F9;
+  color: #A5F3FC;
   background: rgba(2, 6, 23, 0.55);
-  box-shadow: 0 0 44px rgba(6, 182, 212, 0.18),
-              0 0 40px rgba(6, 182, 212, 0.04);
+  box-shadow: 0 0 60px rgba(6, 182, 212, 0.35),
+              0 0 80px rgba(6, 182, 212, 0.10);
 }
 
 .cyber-btn--projects:hover::before {
-  background: linear-gradient(135deg, rgba(6, 182, 212, 0.95), rgba(59, 130, 246, 0.50));
+  background: linear-gradient(135deg, rgba(6, 182, 212, 1.0), rgba(59, 130, 246, 0.70));
 }
 
 .cyber-btn--projects:active {
   transform: translateY(0) scale(0.97);
-  box-shadow: 0 0 16px rgba(6, 182, 212, 0.08);
+  box-shadow: 0 0 24px rgba(6, 182, 212, 0.15);
 }
 
 /* ─── Projectes (inactive / muted) ─── */
 .cyber-btn--projects-inactive {
-  color: rgba(148, 163, 184, 0.25);
+  color: rgba(148, 163, 184, 0.30);
   background: rgba(2, 6, 23, 0.20);
   box-shadow: none;
 }
 
 .cyber-btn--projects-inactive i {
-  color: rgba(148, 163, 184, 0.20);
+  color: rgba(148, 163, 184, 0.25);
 }
 
 .cyber-btn--projects-inactive::before {
-  background: linear-gradient(135deg, rgba(148, 163, 184, 0.06), rgba(148, 163, 184, 0.02));
+  background: linear-gradient(135deg, rgba(148, 163, 184, 0.10), rgba(148, 163, 184, 0.03));
 }
 
 .cyber-btn--projects-inactive:hover {
   background: rgba(2, 6, 23, 0.40);
-  color: #22D3EE;
-  box-shadow: 0 0 32px rgba(6, 182, 212, 0.12);
+  color: #67E8F9;
+  box-shadow: 0 0 40px rgba(6, 182, 212, 0.20);
   transform: translateY(-3px);
 }
 
 .cyber-btn--projects-inactive:hover i {
-  color: #22D3EE;
+  color: #67E8F9;
 }
 
 .cyber-btn--projects-inactive:hover::before {
-  background: linear-gradient(135deg, rgba(6, 182, 212, 0.70), rgba(6, 182, 212, 0.20));
+  background: linear-gradient(135deg, rgba(6, 182, 212, 0.90), rgba(6, 182, 212, 0.35));
 }
 
 /* ─── Icon buttons base (toggle, edit, delete) ─── */
@@ -2430,8 +2430,8 @@ input[type="time"] {
   position: absolute;
   inset: 0;
   border-radius: 10px;
-  padding: 2px;
-  background: linear-gradient(135deg, rgba(148,163,184,0.08), rgba(148,163,184,0.03));
+  padding: 2.5px;
+  background: linear-gradient(135deg, rgba(148,163,184,0.12), rgba(148,163,184,0.04));
   -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   -webkit-mask-composite: xor;
@@ -2442,66 +2442,66 @@ input[type="time"] {
 
 /* ─── Toggle active ─── green neon frame ─── */
 .cyber-btn--toggle-active {
-  color: #34D399;
+  color: #6EE7B7;
   background: rgba(2, 6, 23, 0.40);
-  box-shadow: 0 0 24px rgba(16, 185, 129, 0.04);
+  box-shadow: 0 0 32px rgba(16, 185, 129, 0.12);
 }
 
 .cyber-btn--toggle-active i {
-  color: #34D399;
+  color: #6EE7B7;
 }
 
 .cyber-btn--toggle-active::before {
-  background: linear-gradient(135deg, rgba(16, 185, 129, 0.70), rgba(16, 185, 129, 0.20));
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.95), rgba(16, 185, 129, 0.40));
 }
 
 .cyber-btn--toggle-active:hover {
   transform: scale(1.15);
-  color: #6EE7B7;
+  color: #A7F3D0;
   background: rgba(2, 6, 23, 0.55);
-  box-shadow: 0 0 44px rgba(16, 185, 129, 0.20),
-              0 0 40px rgba(16, 185, 129, 0.06);
+  box-shadow: 0 0 60px rgba(16, 185, 129, 0.35),
+              0 0 80px rgba(16, 185, 129, 0.10);
 }
 
 .cyber-btn--toggle-active:hover::before {
-  background: linear-gradient(135deg, rgba(16, 185, 129, 0.95), rgba(16, 185, 129, 0.40));
+  background: linear-gradient(135deg, rgba(16, 185, 129, 1.0), rgba(16, 185, 129, 0.60));
 }
 
 .cyber-btn--toggle-active:active {
   transform: scale(0.93);
-  box-shadow: 0 0 16px rgba(16, 185, 129, 0.08);
+  box-shadow: 0 0 24px rgba(16, 185, 129, 0.15);
 }
 
 /* ─── Toggle inactive ─── red neon frame ─── */
 .cyber-btn--toggle-inactive {
-  color: #F87171;
+  color: #FCA5A5;
   background: rgba(2, 6, 23, 0.40);
-  box-shadow: 0 0 24px rgba(239, 68, 68, 0.04);
+  box-shadow: 0 0 32px rgba(239, 68, 68, 0.12);
 }
 
 .cyber-btn--toggle-inactive i {
-  color: #F87171;
+  color: #FCA5A5;
 }
 
 .cyber-btn--toggle-inactive::before {
-  background: linear-gradient(135deg, rgba(239, 68, 68, 0.70), rgba(239, 68, 68, 0.20));
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.95), rgba(239, 68, 68, 0.40));
 }
 
 .cyber-btn--toggle-inactive:hover {
   transform: scale(1.15);
-  color: #FCA5A5;
+  color: #FECACA;
   background: rgba(2, 6, 23, 0.55);
-  box-shadow: 0 0 44px rgba(239, 68, 68, 0.20),
-              0 0 40px rgba(239, 68, 68, 0.06);
+  box-shadow: 0 0 60px rgba(239, 68, 68, 0.35),
+              0 0 80px rgba(239, 68, 68, 0.10);
 }
 
 .cyber-btn--toggle-inactive:hover::before {
-  background: linear-gradient(135deg, rgba(239, 68, 68, 0.95), rgba(239, 68, 68, 0.40));
+  background: linear-gradient(135deg, rgba(239, 68, 68, 1.0), rgba(239, 68, 68, 0.60));
 }
 
 .cyber-btn--toggle-inactive:active {
   transform: scale(0.93);
-  box-shadow: 0 0 16px rgba(239, 68, 68, 0.08);
+  box-shadow: 0 0 24px rgba(239, 68, 68, 0.15);
 }
 
 /* ─── Toggle disabled ─── */
@@ -2526,7 +2526,7 @@ input[type="time"] {
 }
 
 .cyber-btn--toggle-disabled::before {
-  background: linear-gradient(135deg, rgba(148, 163, 184, 0.04), rgba(148, 163, 184, 0.01));
+  background: linear-gradient(135deg, rgba(148, 163, 184, 0.06), rgba(148, 163, 184, 0.02));
 }
 
 .cyber-btn--toggle-disabled:hover {
@@ -2535,66 +2535,66 @@ input[type="time"] {
 
 /* ─── Edit button ─── blue neon frame ─── */
 .cyber-btn--edit {
-  color: #60A5FA;
+  color: #93C5FD;
   background: rgba(2, 6, 23, 0.40);
-  box-shadow: 0 0 24px rgba(59, 130, 246, 0.04);
+  box-shadow: 0 0 32px rgba(59, 130, 246, 0.12);
 }
 
 .cyber-btn--edit i {
-  color: #60A5FA;
+  color: #93C5FD;
 }
 
 .cyber-btn--edit::before {
-  background: linear-gradient(135deg, rgba(59, 130, 246, 0.70), rgba(59, 130, 246, 0.20));
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.95), rgba(59, 130, 246, 0.40));
 }
 
 .cyber-btn--edit:hover {
   transform: scale(1.15);
-  color: #93C5FD;
+  color: #BFDBFE;
   background: rgba(2, 6, 23, 0.55);
-  box-shadow: 0 0 44px rgba(59, 130, 246, 0.20),
-              0 0 40px rgba(59, 130, 246, 0.06);
+  box-shadow: 0 0 60px rgba(59, 130, 246, 0.35),
+              0 0 80px rgba(59, 130, 246, 0.10);
 }
 
 .cyber-btn--edit:hover::before {
-  background: linear-gradient(135deg, rgba(59, 130, 246, 0.95), rgba(59, 130, 246, 0.40));
+  background: linear-gradient(135deg, rgba(59, 130, 246, 1.0), rgba(59, 130, 246, 0.60));
 }
 
 .cyber-btn--edit:active {
   transform: scale(0.93);
-  box-shadow: 0 0 16px rgba(59, 130, 246, 0.08);
+  box-shadow: 0 0 24px rgba(59, 130, 246, 0.15);
 }
 
 /* ─── Delete button ─── rose neon frame ─── */
 .cyber-btn--delete {
-  color: #FB7185;
+  color: #FDA4AF;
   background: rgba(2, 6, 23, 0.40);
-  box-shadow: 0 0 24px rgba(225, 29, 72, 0.04);
+  box-shadow: 0 0 32px rgba(225, 29, 72, 0.12);
 }
 
 .cyber-btn--delete i {
-  color: #FB7185;
+  color: #FDA4AF;
 }
 
 .cyber-btn--delete::before {
-  background: linear-gradient(135deg, rgba(225, 29, 72, 0.70), rgba(225, 29, 72, 0.20));
+  background: linear-gradient(135deg, rgba(225, 29, 72, 0.95), rgba(225, 29, 72, 0.40));
 }
 
 .cyber-btn--delete:hover {
   transform: scale(1.15);
-  color: #FDA4AF;
+  color: #FECDD3;
   background: rgba(2, 6, 23, 0.55);
-  box-shadow: 0 0 44px rgba(225, 29, 72, 0.20),
-              0 0 40px rgba(225, 29, 72, 0.06);
+  box-shadow: 0 0 60px rgba(225, 29, 72, 0.35),
+              0 0 80px rgba(225, 29, 72, 0.10);
 }
 
 .cyber-btn--delete:hover::before {
-  background: linear-gradient(135deg, rgba(225, 29, 72, 0.95), rgba(225, 29, 72, 0.40));
+  background: linear-gradient(135deg, rgba(225, 29, 72, 1.0), rgba(225, 29, 72, 0.60));
 }
 
 .cyber-btn--delete:active {
   transform: scale(0.93);
-  box-shadow: 0 0 16px rgba(225, 29, 72, 0.08);
+  box-shadow: 0 0 24px rgba(225, 29, 72, 0.15);
 }
 
 /* ─── Delete disabled ─── */
@@ -2619,7 +2619,7 @@ input[type="time"] {
 }
 
 .cyber-btn--delete-disabled::before {
-  background: linear-gradient(135deg, rgba(148, 163, 184, 0.04), rgba(148, 163, 184, 0.01));
+  background: linear-gradient(135deg, rgba(148, 163, 184, 0.06), rgba(148, 163, 184, 0.02));
 }
 
 .cyber-btn--delete-disabled:hover {
@@ -2753,11 +2753,11 @@ input[type="time"] {
   transition: all 0.30s cubic-bezier(0.34, 1.56, 0.64, 1);
   position: relative;
   overflow: hidden;
-  color: #22D3EE;
+  color: #67E8F9;
   background: rgba(2, 6, 23, 0.40);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
-  box-shadow: 0 0 40px rgba(6, 182, 212, 0.06);
+  box-shadow: 0 0 40px rgba(6, 182, 212, 0.15);
 }
 
 .cyber-form-submit::before {
@@ -2765,8 +2765,8 @@ input[type="time"] {
   position: absolute;
   inset: 0;
   border-radius: 12px;
-  padding: 2px;
-  background: linear-gradient(135deg, rgba(6, 182, 212, 0.60), rgba(59, 130, 246, 0.30));
+  padding: 3px;
+  background: linear-gradient(135deg, rgba(6, 182, 212, 0.90), rgba(59, 130, 246, 0.50));
   -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   -webkit-mask-composite: xor;
@@ -2782,19 +2782,19 @@ input[type="time"] {
 
 .cyber-form-submit:hover {
   transform: translateY(-3px);
-  color: #67E8F9;
+  color: #A5F3FC;
   background: rgba(2, 6, 23, 0.55);
-  box-shadow: 0 0 60px rgba(6, 182, 212, 0.20),
-              0 0 40px rgba(6, 182, 212, 0.06);
+  box-shadow: 0 0 60px rgba(6, 182, 212, 0.35),
+              0 0 80px rgba(6, 182, 212, 0.10);
 }
 
 .cyber-form-submit:hover::before {
-  background: linear-gradient(135deg, rgba(6, 182, 212, 0.90), rgba(59, 130, 246, 0.50));
+  background: linear-gradient(135deg, rgba(6, 182, 212, 1.0), rgba(59, 130, 246, 0.70));
 }
 
 .cyber-form-submit:active {
   transform: translateY(-1px) scale(0.98);
-  box-shadow: 0 0 20px rgba(6, 182, 212, 0.08);
+  box-shadow: 0 0 24px rgba(6, 182, 212, 0.15);
 }
 
 [data-theme="light"] .cyber-form-input {
@@ -2827,7 +2827,7 @@ input[type="time"] {
   color: #2563EB;
   background: rgba(255, 255, 255, 0.60);
   backdrop-filter: blur(8px);
-  box-shadow: 0 0 40px rgba(59, 130, 246, 0.06);
+  box-shadow: 0 0 40px rgba(59, 130, 246, 0.15);
 }
 
 [data-theme="light"] .cyber-form-submit i {
@@ -2835,18 +2835,18 @@ input[type="time"] {
 }
 
 [data-theme="light"] .cyber-form-submit::before {
-  background: linear-gradient(135deg, rgba(59, 130, 246, 0.60), rgba(37, 99, 235, 0.30));
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.90), rgba(37, 99, 235, 0.50));
 }
 
 [data-theme="light"] .cyber-form-submit:hover {
   color: #3B82F6;
   background: rgba(255, 255, 255, 0.80);
-  box-shadow: 0 0 60px rgba(59, 130, 246, 0.18),
-              0 0 40px rgba(59, 130, 246, 0.06);
+  box-shadow: 0 0 60px rgba(59, 130, 246, 0.35),
+              0 0 80px rgba(59, 130, 246, 0.10);
 }
 
 [data-theme="light"] .cyber-form-submit:hover::before {
-  background: linear-gradient(135deg, rgba(59, 130, 246, 0.90), rgba(37, 99, 235, 0.50));
+  background: linear-gradient(135deg, rgba(59, 130, 246, 1.0), rgba(37, 99, 235, 0.70));
 }
 
 /* ─── Cyber Back Button ─── */
@@ -2877,8 +2877,8 @@ input[type="time"] {
   position: absolute;
   inset: 0;
   border-radius: 10px;
-  padding: 1.5px;
-  background: linear-gradient(135deg, rgba(148,163,184,0.10), rgba(148,163,184,0.03));
+  padding: 2.5px;
+  background: linear-gradient(135deg, rgba(148,163,184,0.14), rgba(148,163,184,0.05));
   -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   -webkit-mask-composite: xor;
@@ -2888,15 +2888,15 @@ input[type="time"] {
 }
 
 .cyber-btn-back:hover {
-  color: #22D3EE;
+  color: #67E8F9;
   background: rgba(2, 6, 23, 0.45);
   backdrop-filter: blur(6px);
-  box-shadow: 0 0 32px rgba(6, 182, 212, 0.12);
+  box-shadow: 0 0 40px rgba(6, 182, 212, 0.22);
   transform: translateX(-4px);
 }
 
 .cyber-btn-back:hover::before {
-  background: linear-gradient(135deg, rgba(6, 182, 212, 0.70), rgba(6, 182, 212, 0.15));
+  background: linear-gradient(135deg, rgba(6, 182, 212, 0.90), rgba(6, 182, 212, 0.30));
 }
 
 /* ─── Cyber Action Bar Button ─── Neon Frame ─── */
@@ -2915,15 +2915,15 @@ input[type="time"] {
   transition: all 0.30s cubic-bezier(0.34, 1.56, 0.64, 1);
   position: relative;
   overflow: hidden;
-  color: #22D3EE;
+  color: #67E8F9;
   background: rgba(2, 6, 23, 0.40);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
-  box-shadow: 0 0 40px rgba(6, 182, 212, 0.06);
+  box-shadow: 0 0 40px rgba(6, 182, 212, 0.15);
 }
 
 .cyber-btn-primary i {
-  color: #22D3EE;
+  color: #67E8F9;
   transition: color 0.25s ease;
 }
 
@@ -2932,8 +2932,8 @@ input[type="time"] {
   position: absolute;
   inset: 0;
   border-radius: 12px;
-  padding: 2px;
-  background: linear-gradient(135deg, rgba(6, 182, 212, 0.60), rgba(59, 130, 246, 0.30));
+  padding: 3px;
+  background: linear-gradient(135deg, rgba(6, 182, 212, 0.90), rgba(59, 130, 246, 0.50));
   -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   -webkit-mask-composite: xor;
@@ -2949,30 +2949,30 @@ input[type="time"] {
 
 .cyber-btn-primary:hover {
   transform: translateY(-3px);
-  color: #67E8F9;
+  color: #A5F3FC;
   background: rgba(2, 6, 23, 0.55);
-  box-shadow: 0 0 60px rgba(6, 182, 212, 0.20),
-              0 0 40px rgba(6, 182, 212, 0.06);
+  box-shadow: 0 0 60px rgba(6, 182, 212, 0.35),
+              0 0 80px rgba(6, 182, 212, 0.10);
 }
 
 .cyber-btn-primary:hover::before {
-  background: linear-gradient(135deg, rgba(6, 182, 212, 0.90), rgba(59, 130, 246, 0.50));
+  background: linear-gradient(135deg, rgba(6, 182, 212, 1.0), rgba(59, 130, 246, 0.70));
 }
 
 .cyber-btn-primary:hover i {
-  color: #67E8F9;
+  color: #A5F3FC;
 }
 
 .cyber-btn-primary:active {
   transform: translateY(0) scale(0.97);
-  box-shadow: 0 0 20px rgba(6, 182, 212, 0.08);
+  box-shadow: 0 0 24px rgba(6, 182, 212, 0.15);
 }
 
 [data-theme="light"] .cyber-btn-primary {
   color: #2563EB;
   background: rgba(255, 255, 255, 0.60);
   backdrop-filter: blur(8px);
-  box-shadow: 0 0 40px rgba(59, 130, 246, 0.06);
+  box-shadow: 0 0 40px rgba(59, 130, 246, 0.15);
 }
 
 [data-theme="light"] .cyber-btn-primary i {
@@ -2980,14 +2980,14 @@ input[type="time"] {
 }
 
 [data-theme="light"] .cyber-btn-primary::before {
-  background: linear-gradient(135deg, rgba(59, 130, 246, 0.60), rgba(37, 99, 235, 0.30));
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.90), rgba(37, 99, 235, 0.50));
 }
 
 [data-theme="light"] .cyber-btn-primary:hover {
   color: #3B82F6;
   background: rgba(255, 255, 255, 0.80);
-  box-shadow: 0 0 60px rgba(59, 130, 246, 0.18),
-              0 0 40px rgba(59, 130, 246, 0.06);
+  box-shadow: 0 0 60px rgba(59, 130, 246, 0.35),
+              0 0 80px rgba(59, 130, 246, 0.10);
 }
 
 [data-theme="light"] .cyber-btn-primary:hover i {
@@ -2995,7 +2995,7 @@ input[type="time"] {
 }
 
 [data-theme="light"] .cyber-btn-primary:hover::before {
-  background: linear-gradient(135deg, rgba(59, 130, 246, 0.90), rgba(37, 99, 235, 0.50));
+  background: linear-gradient(135deg, rgba(59, 130, 246, 1.0), rgba(37, 99, 235, 0.70));
 }
 
 [data-theme="light"] .cyber-btn-back {
@@ -3006,17 +3006,17 @@ input[type="time"] {
 }
 
 [data-theme="light"] .cyber-btn-back::before {
-  background: linear-gradient(135deg, rgba(148, 163, 184, 0.20), rgba(148, 163, 184, 0.05));
+  background: linear-gradient(135deg, rgba(148, 163, 184, 0.25), rgba(148, 163, 184, 0.08));
 }
 
 [data-theme="light"] .cyber-btn-back:hover {
   color: #2563EB;
   background: rgba(255, 255, 255, 0.75);
-  box-shadow: 0 0 32px rgba(59, 130, 246, 0.12);
+  box-shadow: 0 0 40px rgba(59, 130, 246, 0.22);
 }
 
 [data-theme="light"] .cyber-btn-back:hover::before {
-  background: linear-gradient(135deg, rgba(59, 130, 246, 0.60), rgba(59, 130, 246, 0.15));
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.85), rgba(59, 130, 246, 0.30));
 }
 
 [data-theme="light"] .cyber-empty-icon {
