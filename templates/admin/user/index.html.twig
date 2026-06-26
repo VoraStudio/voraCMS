@@ -98,11 +98,10 @@
                         <form method="post" action="{{ path('admin_user_toggle_active', {id: user.id}) }}" style="display:inline" id="tact-user-{{ user.id }}">
                             <input type="hidden" name="_token" value="{{ csrf_token('toggle-active-' ~ user.id) }}">
                             <button type="button"
-                                    class="cyber-btn cyber-btn--icon {{ user.active ? 'cyber-btn--toggle-active' : 'cyber-btn--toggle-inactive' }}"
+                                    class="cyber-btn cyber-btn--icon toggle-btn {{ user.active ? 'cyber-btn--toggle-active' : 'cyber-btn--toggle-inactive' }}"
                                     title="{{ user.active ? 'Desactivar' : 'Activar' }}"
                                     data-active="{{ user.active ? '1' : '0' }}"
-                                    {% if app.user.id == user.id %}disabled class="cyber-btn cyber-btn--icon cyber-btn--toggle-disabled"{% endif %}
-                                    onclick="var f=this.closest('form'),btn=this;fetch(f.action,{method:'POST',body:new FormData(f)}).then(function(r){return r.json()}).then(function(d){if(d.error)return;var a=d.active;btn.className='cyber-btn cyber-btn--icon '+(a?'cyber-btn--toggle-active':'cyber-btn--toggle-inactive');btn.title=a?'Desactivar':'Activar';btn.dataset.active=a?'1':'0';btn.querySelector('i').className='bi '+(a?'bi-toggle2-on':'bi-toggle2-off');var row=btn.closest('tr');row.className='cyber-row '+(a?'row-active':'row-inactive');row.querySelector('[data-label=\"Estat\"]').innerHTML=a?'<span class=\"cyber-status\"><span class=\"cyber-status-dot cyber-status-dot--active\"></span><span class=\"cyber-status-text\">Actiu</span></span>':'<span class=\"cyber-status\"><span class=\"cyber-status-dot cyber-status-dot--inactive\"></span><span class=\"cyber-status-text cyber-status-text--inactive\">Inactiu</span></span>';})">
+                                    {% if app.user.id == user.id %}disabled{% endif %}>
                                 <i class="bi {{ user.active ? 'bi-toggle2-on' : 'bi-toggle2-off' }}" style="font-size:1.05rem;"></i>
                             </button>
                         </form>
@@ -144,4 +143,42 @@
         </tbody>
     </table>
 </div>
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+<script>
+(function(){
+  // Init toggle-disabled class on page load
+  document.querySelectorAll('.toggle-btn[disabled]').forEach(function(b){b.classList.add('cyber-btn--toggle-disabled')});
+  // Event delegation for all toggle buttons
+  document.addEventListener('click',function(e){
+    var btn=e.target.closest('.toggle-btn');
+    if(!btn||btn.disabled)return;
+    var f=btn.closest('form');
+    if(!f)return;
+    e.preventDefault();
+    fetch(f.action,{method:'POST',body:new FormData(f)})
+      .then(function(r){return r.json()})
+      .then(function(d){
+        if(d.error)return;
+        var a=d.active;
+        btn.className='cyber-btn cyber-btn--icon toggle-btn '+(a?'cyber-btn--toggle-active':'cyber-btn--toggle-inactive');
+        btn.title=a?'Desactivar':'Activar';
+        btn.dataset.active=a?'1':'0';
+        btn.querySelector('i').className='bi '+(a?'bi-toggle2-on':'bi-toggle2-off');
+        var row=btn.closest('tr');
+        if(row){
+          row.className='cyber-row '+(a?'row-active':'row-inactive');
+          var cell=row.querySelector('[data-label="Estat"]');
+          if(cell){
+            cell.innerHTML=a
+              ?'<span class="cyber-status"><span class="cyber-status-dot cyber-status-dot--active"></span><span class="cyber-status-text">Actiu</span></span>'
+              :'<span class="cyber-status"><span class="cyber-status-dot cyber-status-dot--inactive"></span><span class="cyber-status-text cyber-status-text--inactive">Inactiu</span></span>';
+          }
+        }
+      });
+  });
+})();
+</script>
 {% endblock %}
