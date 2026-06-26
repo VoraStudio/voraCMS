@@ -98,18 +98,18 @@
                         <form method="post" action="{{ path('admin_user_toggle_active', {id: user.id}) }}" style="display:inline" id="tact-user-{{ user.id }}">
                             <input type="hidden" name="_token" value="{{ csrf_token('toggle-active-' ~ user.id) }}">
                             <button type="submit"
-                                    class="cyber-btn {{ user.active ? 'cyber-btn--toggle-active' : 'cyber-btn--toggle-inactive' }}"
+                                    class="cyber-btn cyber-btn--icon {{ user.active ? 'cyber-btn--toggle-active' : 'cyber-btn--toggle-inactive' }}"
                                     title="{{ user.active ? 'Desactivar' : 'Activar' }}"
                                     data-active="{{ user.active ? '1' : '0' }}"
-                                    {% if app.user.id == user.id %}disabled class="cyber-btn cyber-btn--toggle-disabled"{% endif %}>
+                                    {% if app.user.id == user.id %}disabled class="cyber-btn cyber-btn--icon cyber-btn--toggle-disabled"{% endif %}>
                                 <i class="bi {{ user.active ? 'bi-toggle2-on' : 'bi-toggle2-off' }}" style="font-size:1.05rem;"></i>
                             </button>
                         </form>
 
                         {# ─── Editar ─── #}
-                        <a href="{{ path('admin_user_edit', {id: user.id}) }}"
-                           class="cyber-btn cyber-btn--edit"
-                           title="Editar">
+                            <a href="{{ path('admin_user_edit', {id: user.id}) }}"
+                               class="cyber-btn cyber-btn--icon cyber-btn--edit"
+                               title="Editar">
                             <i class="bi bi-pencil" style="font-size:0.8rem;"></i>
                         </a>
 
@@ -119,7 +119,7 @@
                               onsubmit="return confirm('Segur que vols eliminar aquest usuari?')">
                             <input type="hidden" name="_token" value="{{ csrf_token('delete-user-' ~ user.id) }}">
                             <button type="submit"
-                                    class="cyber-btn {{ (app.user.id == user.id or (userProjects[user.id] ?? 0) > 0) ? 'cyber-btn--delete-disabled' : 'cyber-btn--delete' }}"
+                                    class="cyber-btn cyber-btn--icon {{ (app.user.id == user.id or (userProjects[user.id] ?? 0) > 0) ? 'cyber-btn--delete-disabled' : 'cyber-btn--delete' }}"
                                     title="Eliminar"
                                     {% if app.user.id == user.id or (userProjects[user.id] ?? 0) > 0 %}
                                     disabled

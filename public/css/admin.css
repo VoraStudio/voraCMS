@@ -2314,7 +2314,7 @@ input[type="time"] {
   position: absolute;
   inset: 0;
   border-radius: 10px;
-  padding: 3px;
+  padding: 2px;
   background: linear-gradient(135deg, rgba(148,163,184,0.12), rgba(148,163,184,0.04));
   -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
@@ -2341,30 +2341,30 @@ input[type="time"] {
 
 /* ─── Projectes (active) ─── cyan neon frame ─── */
 .cyber-btn--projects {
-  color: #67E8F9;
+  color: #A5F3FC;
   background: rgba(2, 6, 23, 0.40);
   backdrop-filter: blur(8px);
-  box-shadow: 0 0 32px rgba(6, 182, 212, 0.12);
+  box-shadow: 0 0 48px rgba(6, 182, 212, 0.25);
 }
 
 .cyber-btn--projects::before {
-  background: linear-gradient(135deg, rgba(6, 182, 212, 0.95), rgba(6, 182, 212, 0.40));
+  background: linear-gradient(135deg, rgb(6, 182, 212), rgba(6, 182, 212, 0.50));
 }
 
 .cyber-btn--projects i {
-  color: #67E8F9;
+  color: #A5F3FC;
 }
 
 .cyber-btn--projects:hover {
   transform: translateY(-3px) scale(1.03);
-  color: #A5F3FC;
+  color: #fff;
   background: rgba(2, 6, 23, 0.55);
-  box-shadow: 0 0 60px rgba(6, 182, 212, 0.35),
-              0 0 80px rgba(6, 182, 212, 0.10);
+  box-shadow: 0 0 100px rgba(6, 182, 212, 0.55),
+              0 0 160px rgba(6, 182, 212, 0.20);
 }
 
 .cyber-btn--projects:hover::before {
-  background: linear-gradient(135deg, rgba(6, 182, 212, 1.0), rgba(59, 130, 246, 0.70));
+  background: linear-gradient(135deg, rgb(6, 182, 212), rgb(59, 130, 246));
 }
 
 .cyber-btn--projects:active {
@@ -2374,13 +2374,13 @@ input[type="time"] {
 
 /* ─── Projectes (inactive / muted) ─── */
 .cyber-btn--projects-inactive {
-  color: rgba(148, 163, 184, 0.30);
+  color: rgba(148, 163, 184, 0.40);
   background: rgba(2, 6, 23, 0.20);
   box-shadow: none;
 }
 
 .cyber-btn--projects-inactive i {
-  color: rgba(148, 163, 184, 0.25);
+  color: rgba(148, 163, 184, 0.30);
 }
 
 .cyber-btn--projects-inactive::before {
@@ -2389,17 +2389,17 @@ input[type="time"] {
 
 .cyber-btn--projects-inactive:hover {
   background: rgba(2, 6, 23, 0.40);
-  color: #67E8F9;
-  box-shadow: 0 0 40px rgba(6, 182, 212, 0.20);
+  color: #A5F3FC;
+  box-shadow: 0 0 48px rgba(6, 182, 212, 0.25);
   transform: translateY(-3px);
 }
 
 .cyber-btn--projects-inactive:hover i {
-  color: #67E8F9;
+  color: #A5F3FC;
 }
 
 .cyber-btn--projects-inactive:hover::before {
-  background: linear-gradient(135deg, rgba(6, 182, 212, 0.90), rgba(6, 182, 212, 0.35));
+  background: linear-gradient(135deg, rgb(6, 182, 212), rgba(6, 182, 212, 0.50));
 }
 
 /* ─── Icon buttons base (toggle, edit, delete) ─── */
@@ -2430,7 +2430,7 @@ input[type="time"] {
   position: absolute;
   inset: 0;
   border-radius: 10px;
-  padding: 2.5px;
+  padding: 1.5px;
   background: linear-gradient(135deg, rgba(148,163,184,0.12), rgba(148,163,184,0.04));
   -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
@@ -2442,29 +2442,29 @@ input[type="time"] {
 
 /* ─── Toggle active ─── green neon frame ─── */
 .cyber-btn--toggle-active {
-  color: #6EE7B7;
+  color: #A7F3D0;
   background: rgba(2, 6, 23, 0.40);
-  box-shadow: 0 0 32px rgba(16, 185, 129, 0.12);
+  box-shadow: 0 0 48px rgba(16, 185, 129, 0.25);
 }
 
 .cyber-btn--toggle-active i {
-  color: #6EE7B7;
+  color: #A7F3D0;
 }
 
 .cyber-btn--toggle-active::before {
-  background: linear-gradient(135deg, rgba(16, 185, 129, 0.95), rgba(16, 185, 129, 0.40));
+  background: linear-gradient(135deg, rgb(16, 185, 129), rgba(16, 185, 129, 0.50));
 }
 
 .cyber-btn--toggle-active:hover {
   transform: scale(1.15);
-  color: #A7F3D0;
+  color: #fff;
   background: rgba(2, 6, 23, 0.55);
-  box-shadow: 0 0 60px rgba(16, 185, 129, 0.35),
-              0 0 80px rgba(16, 185, 129, 0.10);
+  box-shadow: 0 0 100px rgba(16, 185, 129, 0.55),
+              0 0 160px rgba(16, 185, 129, 0.20);
 }
 
 .cyber-btn--toggle-active:hover::before {
-  background: linear-gradient(135deg, rgba(16, 185, 129, 1.0), rgba(16, 185, 129, 0.60));
+  background: linear-gradient(135deg, rgb(16, 185, 129), rgb(52, 211, 153));
 }
 
 .cyber-btn--toggle-active:active {
@@ -2474,29 +2474,29 @@ input[type="time"] {
 
 /* ─── Toggle inactive ─── red neon frame ─── */
 .cyber-btn--toggle-inactive {
-  color: #FCA5A5;
+  color: #FECACA;
   background: rgba(2, 6, 23, 0.40);
-  box-shadow: 0 0 32px rgba(239, 68, 68, 0.12);
+  box-shadow: 0 0 48px rgba(239, 68, 68, 0.25);
 }
 
 .cyber-btn--toggle-inactive i {
-  color: #FCA5A5;
+  color: #FECACA;
 }
 
 .cyber-btn--toggle-inactive::before {
-  background: linear-gradient(135deg, rgba(239, 68, 68, 0.95), rgba(239, 68, 68, 0.40));
+  background: linear-gradient(135deg, rgb(239, 68, 68), rgba(239, 68, 68, 0.50));
 }
 
 .cyber-btn--toggle-inactive:hover {
   transform: scale(1.15);
-  color: #FECACA;
+  color: #fff;
   background: rgba(2, 6, 23, 0.55);
-  box-shadow: 0 0 60px rgba(239, 68, 68, 0.35),
-              0 0 80px rgba(239, 68, 68, 0.10);
+  box-shadow: 0 0 100px rgba(239, 68, 68, 0.55),
+              0 0 160px rgba(239, 68, 68, 0.20);
 }
 
 .cyber-btn--toggle-inactive:hover::before {
-  background: linear-gradient(135deg, rgba(239, 68, 68, 1.0), rgba(239, 68, 68, 0.60));
+  background: linear-gradient(135deg, rgb(239, 68, 68), rgb(248, 113, 113));
 }
 
 .cyber-btn--toggle-inactive:active {
@@ -2535,29 +2535,29 @@ input[type="time"] {
 
 /* ─── Edit button ─── blue neon frame ─── */
 .cyber-btn--edit {
-  color: #93C5FD;
+  color: #BFDBFE;
   background: rgba(2, 6, 23, 0.40);
-  box-shadow: 0 0 32px rgba(59, 130, 246, 0.12);
+  box-shadow: 0 0 48px rgba(59, 130, 246, 0.25);
 }
 
 .cyber-btn--edit i {
-  color: #93C5FD;
+  color: #BFDBFE;
 }
 
 .cyber-btn--edit::before {
-  background: linear-gradient(135deg, rgba(59, 130, 246, 0.95), rgba(59, 130, 246, 0.40));
+  background: linear-gradient(135deg, rgb(59, 130, 246), rgba(59, 130, 246, 0.50));
 }
 
 .cyber-btn--edit:hover {
   transform: scale(1.15);
-  color: #BFDBFE;
+  color: #fff;
   background: rgba(2, 6, 23, 0.55);
-  box-shadow: 0 0 60px rgba(59, 130, 246, 0.35),
-              0 0 80px rgba(59, 130, 246, 0.10);
+  box-shadow: 0 0 100px rgba(59, 130, 246, 0.55),
+              0 0 160px rgba(59, 130, 246, 0.20);
 }
 
 .cyber-btn--edit:hover::before {
-  background: linear-gradient(135deg, rgba(59, 130, 246, 1.0), rgba(59, 130, 246, 0.60));
+  background: linear-gradient(135deg, rgb(59, 130, 246), rgb(96, 165, 250));
 }
 
 .cyber-btn--edit:active {
@@ -2567,29 +2567,29 @@ input[type="time"] {
 
 /* ─── Delete button ─── rose neon frame ─── */
 .cyber-btn--delete {
-  color: #FDA4AF;
+  color: #FECDD3;
   background: rgba(2, 6, 23, 0.40);
-  box-shadow: 0 0 32px rgba(225, 29, 72, 0.12);
+  box-shadow: 0 0 48px rgba(225, 29, 72, 0.25);
 }
 
 .cyber-btn--delete i {
-  color: #FDA4AF;
+  color: #FECDD3;
 }
 
 .cyber-btn--delete::before {
-  background: linear-gradient(135deg, rgba(225, 29, 72, 0.95), rgba(225, 29, 72, 0.40));
+  background: linear-gradient(135deg, rgb(225, 29, 72), rgba(225, 29, 72, 0.50));
 }
 
 .cyber-btn--delete:hover {
   transform: scale(1.15);
-  color: #FECDD3;
+  color: #fff;
   background: rgba(2, 6, 23, 0.55);
-  box-shadow: 0 0 60px rgba(225, 29, 72, 0.35),
-              0 0 80px rgba(225, 29, 72, 0.10);
+  box-shadow: 0 0 100px rgba(225, 29, 72, 0.55),
+              0 0 160px rgba(225, 29, 72, 0.20);
 }
 
 .cyber-btn--delete:hover::before {
-  background: linear-gradient(135deg, rgba(225, 29, 72, 1.0), rgba(225, 29, 72, 0.60));
+  background: linear-gradient(135deg, rgb(225, 29, 72), rgb(251, 113, 133));
 }
 
 .cyber-btn--delete:active {
@@ -2753,11 +2753,11 @@ input[type="time"] {
   transition: all 0.30s cubic-bezier(0.34, 1.56, 0.64, 1);
   position: relative;
   overflow: hidden;
-  color: #67E8F9;
+  color: #A5F3FC;
   background: rgba(2, 6, 23, 0.40);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
-  box-shadow: 0 0 40px rgba(6, 182, 212, 0.15);
+  box-shadow: 0 0 48px rgba(6, 182, 212, 0.25);
 }
 
 .cyber-form-submit::before {
@@ -2765,8 +2765,8 @@ input[type="time"] {
   position: absolute;
   inset: 0;
   border-radius: 12px;
-  padding: 3px;
-  background: linear-gradient(135deg, rgba(6, 182, 212, 0.90), rgba(59, 130, 246, 0.50));
+  padding: 2px;
+  background: linear-gradient(135deg, rgb(6, 182, 212), rgb(59, 130, 246));
   -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   -webkit-mask-composite: xor;
@@ -2782,14 +2782,14 @@ input[type="time"] {
 
 .cyber-form-submit:hover {
   transform: translateY(-3px);
-  color: #A5F3FC;
+  color: #fff;
   background: rgba(2, 6, 23, 0.55);
-  box-shadow: 0 0 60px rgba(6, 182, 212, 0.35),
-              0 0 80px rgba(6, 182, 212, 0.10);
+  box-shadow: 0 0 100px rgba(6, 182, 212, 0.55),
+              0 0 160px rgba(6, 182, 212, 0.20);
 }
 
 .cyber-form-submit:hover::before {
-  background: linear-gradient(135deg, rgba(6, 182, 212, 1.0), rgba(59, 130, 246, 0.70));
+  background: linear-gradient(135deg, rgb(6, 182, 212), rgb(59, 130, 246));
 }
 
 .cyber-form-submit:active {
@@ -2823,30 +2823,173 @@ input[type="time"] {
   color: rgba(15, 23, 42, 0.80);
 }
 
+/* ─── Light Mode: Solid gradients, no border ─── */
+[data-theme="light"] .cyber-btn {
+  color: rgba(71, 85, 105, 0.75);
+  background: linear-gradient(135deg, #F8FAFC, #E2E8F0);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+}
+
+[data-theme="light"] .cyber-btn::before {
+  display: none;
+}
+
+[data-theme="light"] .cyber-btn i {
+  color: rgba(71, 85, 105, 0.55);
+}
+
+[data-theme="light"] .cyber-btn:hover {
+  background: linear-gradient(135deg, #E2E8F0, #CBD5E1);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+[data-theme="light"] .cyber-btn--projects {
+  color: #fff;
+  background: linear-gradient(135deg, #7DD3FC, #0E7490);
+  box-shadow: none;
+}
+
+[data-theme="light"] .cyber-btn--projects i {
+  color: #fff;
+}
+
+[data-theme="light"] .cyber-btn--projects:hover {
+  background: linear-gradient(135deg, #38BDF8, #155E75);
+  box-shadow: 0 4px 24px rgba(14, 116, 144, 0.35);
+  color: #fff;
+}
+
+[data-theme="light"] .cyber-btn--projects-inactive {
+  color: rgba(71, 85, 105, 0.45);
+  background: linear-gradient(135deg, #F8FAFC, #E2E8F0);
+}
+
+[data-theme="light"] .cyber-btn--projects-inactive i {
+  color: rgba(71, 85, 105, 0.35);
+}
+
+[data-theme="light"] .cyber-btn--projects-inactive:hover {
+  background: linear-gradient(135deg, #7DD3FC, #0E7490);
+  color: #fff;
+  box-shadow: 0 4px 24px rgba(14, 116, 144, 0.35);
+}
+
+[data-theme="light"] .cyber-btn--projects-inactive:hover i {
+  color: #fff;
+}
+
+[data-theme="light"] .cyber-btn--toggle-active {
+  color: #fff;
+  background: linear-gradient(135deg, #86EFAC, #047857);
+  box-shadow: none;
+}
+
+[data-theme="light"] .cyber-btn--toggle-active i {
+  color: #fff;
+}
+
+[data-theme="light"] .cyber-btn--toggle-active:hover {
+  background: linear-gradient(135deg, #4ADE80, #065F46);
+  box-shadow: 0 4px 24px rgba(4, 120, 87, 0.35);
+  color: #fff;
+}
+
+[data-theme="light"] .cyber-btn--toggle-inactive {
+  color: #fff;
+  background: linear-gradient(135deg, #FCA5A5, #B91C1C);
+  box-shadow: none;
+}
+
+[data-theme="light"] .cyber-btn--toggle-inactive i {
+  color: #fff;
+}
+
+[data-theme="light"] .cyber-btn--toggle-inactive:hover {
+  background: linear-gradient(135deg, #F87171, #991B1B);
+  box-shadow: 0 4px 24px rgba(185, 28, 28, 0.35);
+  color: #fff;
+}
+
+[data-theme="light"] .cyber-btn--edit {
+  color: #fff;
+  background: linear-gradient(135deg, #93C5FD, #1E40AF);
+  box-shadow: none;
+}
+
+[data-theme="light"] .cyber-btn--edit i {
+  color: #fff;
+}
+
+[data-theme="light"] .cyber-btn--edit:hover {
+  background: linear-gradient(135deg, #60A5FA, #1E3A8A);
+  box-shadow: 0 4px 24px rgba(30, 64, 175, 0.35);
+  color: #fff;
+}
+
+[data-theme="light"] .cyber-btn--delete {
+  color: #fff;
+  background: linear-gradient(135deg, #FDA4AF, #9F1239);
+  box-shadow: none;
+}
+
+[data-theme="light"] .cyber-btn--delete i {
+  color: #fff;
+}
+
+[data-theme="light"] .cyber-btn--delete:hover {
+  background: linear-gradient(135deg, #FB7185, #881337);
+  box-shadow: 0 4px 24px rgba(159, 18, 57, 0.35);
+  color: #fff;
+}
+
+[data-theme="light"] .cyber-btn--toggle-disabled {
+  background: linear-gradient(135deg, #F1F5F9, #CBD5E1) !important;
+  color: rgba(148, 163, 184, 0.35) !important;
+  box-shadow: none !important;
+  opacity: 0.45;
+}
+
+[data-theme="light"] .cyber-btn--toggle-disabled i {
+  color: rgba(148, 163, 184, 0.35) !important;
+}
+
+[data-theme="light"] .cyber-btn--delete-disabled {
+  background: linear-gradient(135deg, #F1F5F9, #CBD5E1) !important;
+  color: rgba(148, 163, 184, 0.35) !important;
+  box-shadow: none !important;
+  opacity: 0.45;
+}
+
+[data-theme="light"] .cyber-btn--delete-disabled i {
+  color: rgba(148, 163, 184, 0.35) !important;
+}
+
 [data-theme="light"] .cyber-form-submit {
-  color: #2563EB;
-  background: rgba(255, 255, 255, 0.60);
-  backdrop-filter: blur(8px);
-  box-shadow: 0 0 40px rgba(59, 130, 246, 0.15);
+  color: #fff;
+  background: linear-gradient(135deg, #7DD3FC 0%, #06B6D4 50%, #2563EB 100%);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  box-shadow: none;
 }
 
 [data-theme="light"] .cyber-form-submit i {
-  color: #2563EB;
+  color: #fff;
 }
 
 [data-theme="light"] .cyber-form-submit::before {
-  background: linear-gradient(135deg, rgba(59, 130, 246, 0.90), rgba(37, 99, 235, 0.50));
+  display: none;
 }
 
 [data-theme="light"] .cyber-form-submit:hover {
-  color: #3B82F6;
-  background: rgba(255, 255, 255, 0.80);
-  box-shadow: 0 0 60px rgba(59, 130, 246, 0.35),
-              0 0 80px rgba(59, 130, 246, 0.10);
+  color: #fff;
+  background: linear-gradient(135deg, #38BDF8 0%, #0891B2 50%, #3B82F6 100%);
+  box-shadow: 0 6px 28px rgba(37, 99, 235, 0.30);
 }
 
-[data-theme="light"] .cyber-form-submit:hover::before {
-  background: linear-gradient(135deg, rgba(59, 130, 246, 1.0), rgba(37, 99, 235, 0.70));
+[data-theme="light"] .cyber-form-submit:active {
+  box-shadow: none;
 }
 
 /* ─── Cyber Back Button ─── */
@@ -2877,7 +3020,7 @@ input[type="time"] {
   position: absolute;
   inset: 0;
   border-radius: 10px;
-  padding: 2.5px;
+  padding: 2px;
   background: linear-gradient(135deg, rgba(148,163,184,0.14), rgba(148,163,184,0.05));
   -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
@@ -2888,15 +3031,15 @@ input[type="time"] {
 }
 
 .cyber-btn-back:hover {
-  color: #67E8F9;
+  color: #A5F3FC;
   background: rgba(2, 6, 23, 0.45);
   backdrop-filter: blur(6px);
-  box-shadow: 0 0 40px rgba(6, 182, 212, 0.22);
+  box-shadow: 0 0 60px rgba(6, 182, 212, 0.30);
   transform: translateX(-4px);
 }
 
 .cyber-btn-back:hover::before {
-  background: linear-gradient(135deg, rgba(6, 182, 212, 0.90), rgba(6, 182, 212, 0.30));
+  background: linear-gradient(135deg, rgb(6, 182, 212), rgba(6, 182, 212, 0.40));
 }
 
 /* ─── Cyber Action Bar Button ─── Neon Frame ─── */
@@ -2915,15 +3058,15 @@ input[type="time"] {
   transition: all 0.30s cubic-bezier(0.34, 1.56, 0.64, 1);
   position: relative;
   overflow: hidden;
-  color: #67E8F9;
+  color: #A5F3FC;
   background: rgba(2, 6, 23, 0.40);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
-  box-shadow: 0 0 40px rgba(6, 182, 212, 0.15);
+  box-shadow: 0 0 48px rgba(6, 182, 212, 0.25);
 }
 
 .cyber-btn-primary i {
-  color: #67E8F9;
+  color: #A5F3FC;
   transition: color 0.25s ease;
 }
 
@@ -2932,8 +3075,8 @@ input[type="time"] {
   position: absolute;
   inset: 0;
   border-radius: 12px;
-  padding: 3px;
-  background: linear-gradient(135deg, rgba(6, 182, 212, 0.90), rgba(59, 130, 246, 0.50));
+  padding: 2px;
+  background: linear-gradient(135deg, rgb(6, 182, 212), rgb(59, 130, 246));
   -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   -webkit-mask-composite: xor;
@@ -2949,18 +3092,18 @@ input[type="time"] {
 
 .cyber-btn-primary:hover {
   transform: translateY(-3px);
-  color: #A5F3FC;
+  color: #fff;
   background: rgba(2, 6, 23, 0.55);
-  box-shadow: 0 0 60px rgba(6, 182, 212, 0.35),
-              0 0 80px rgba(6, 182, 212, 0.10);
+  box-shadow: 0 0 100px rgba(6, 182, 212, 0.55),
+              0 0 160px rgba(6, 182, 212, 0.20);
 }
 
 .cyber-btn-primary:hover::before {
-  background: linear-gradient(135deg, rgba(6, 182, 212, 1.0), rgba(59, 130, 246, 0.70));
+  background: linear-gradient(135deg, rgb(6, 182, 212), rgb(59, 130, 246));
 }
 
 .cyber-btn-primary:hover i {
-  color: #A5F3FC;
+  color: #fff;
 }
 
 .cyber-btn-primary:active {
@@ -2969,54 +3112,47 @@ input[type="time"] {
 }
 
 [data-theme="light"] .cyber-btn-primary {
-  color: #2563EB;
-  background: rgba(255, 255, 255, 0.60);
-  backdrop-filter: blur(8px);
-  box-shadow: 0 0 40px rgba(59, 130, 246, 0.15);
+  color: #fff;
+  background: linear-gradient(135deg, #7DD3FC 0%, #06B6D4 50%, #2563EB 100%);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  box-shadow: none;
 }
 
 [data-theme="light"] .cyber-btn-primary i {
-  color: #2563EB;
+  color: #fff;
 }
 
 [data-theme="light"] .cyber-btn-primary::before {
-  background: linear-gradient(135deg, rgba(59, 130, 246, 0.90), rgba(37, 99, 235, 0.50));
+  display: none;
 }
 
 [data-theme="light"] .cyber-btn-primary:hover {
-  color: #3B82F6;
-  background: rgba(255, 255, 255, 0.80);
-  box-shadow: 0 0 60px rgba(59, 130, 246, 0.35),
-              0 0 80px rgba(59, 130, 246, 0.10);
+  color: #fff;
+  background: linear-gradient(135deg, #38BDF8 0%, #0891B2 50%, #3B82F6 100%);
+  box-shadow: 0 6px 28px rgba(37, 99, 235, 0.30);
 }
 
 [data-theme="light"] .cyber-btn-primary:hover i {
-  color: #3B82F6;
-}
-
-[data-theme="light"] .cyber-btn-primary:hover::before {
-  background: linear-gradient(135deg, rgba(59, 130, 246, 1.0), rgba(37, 99, 235, 0.70));
+  color: #fff;
 }
 
 [data-theme="light"] .cyber-btn-back {
-  color: rgba(71, 85, 105, 0.6);
-  background: rgba(255, 255, 255, 0.50);
-  backdrop-filter: blur(6px);
+  color: rgba(71, 85, 105, 0.70);
+  background: linear-gradient(135deg, #F1F5F9, #E2E8F0);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
   box-shadow: none;
 }
 
 [data-theme="light"] .cyber-btn-back::before {
-  background: linear-gradient(135deg, rgba(148, 163, 184, 0.25), rgba(148, 163, 184, 0.08));
+  display: none;
 }
 
 [data-theme="light"] .cyber-btn-back:hover {
   color: #2563EB;
-  background: rgba(255, 255, 255, 0.75);
-  box-shadow: 0 0 40px rgba(59, 130, 246, 0.22);
-}
-
-[data-theme="light"] .cyber-btn-back:hover::before {
-  background: linear-gradient(135deg, rgba(59, 130, 246, 0.85), rgba(59, 130, 246, 0.30));
+  background: linear-gradient(135deg, #E2E8F0, #CBD5E1);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
 }
 
 [data-theme="light"] .cyber-empty-icon {
