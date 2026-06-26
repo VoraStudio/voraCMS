@@ -36,7 +36,7 @@
 
   /* Inputs */
   --s-input-bg: rgba(255, 255, 255, 0.06);
-  --s-input-border: rgba(255, 255, 255, 0.10);
+  --s-input-border: rgba(255, 255, 255, 0.18);
   --s-input-focus: rgba(140, 190, 255, 0.50);
 
   /* Status */
@@ -1768,7 +1768,7 @@ input[type="time"] {
   background: rgba(15, 23, 42, 0.40);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(6, 182, 212, 0.08);
+  border: 1px solid rgba(6, 182, 212, 0.15);
   border-radius: 16px;
   box-shadow: 0 4px 24px rgba(0, 0, 0, 0.20);
   position: relative;
@@ -1885,7 +1885,7 @@ input[type="time"] {
   align-items: center;
   gap: 16px;
   padding: 24px 32px;
-  border-bottom: 1px solid rgba(148, 163, 184, 0.06);
+  border-bottom: 1px solid rgba(148, 163, 184, 0.12);
   background: linear-gradient(135deg, rgba(15, 23, 42, 0.30), transparent);
 }
 
@@ -1898,14 +1898,14 @@ input[type="time"] {
   justify-content: center;
   font-size: 1.2rem;
   background: linear-gradient(135deg, rgba(6, 182, 212, 0.15), rgba(59, 130, 246, 0.15));
-  border: 1px solid rgba(6, 182, 212, 0.12);
+  border: 1px solid rgba(6, 182, 212, 0.20);
   color: #06B6D4;
   flex-shrink: 0;
 }
 
 [data-theme="light"] .cyber-section-header {
   background: rgba(255, 255, 255, 0.85);
-  border-color: rgba(59, 130, 246, 0.10);
+  border-color: rgba(59, 130, 246, 0.15);
 }
 
 [data-theme="light"] .cyber-section-header::before {
@@ -1943,7 +1943,7 @@ input[type="time"] {
 }
 
 [data-theme="light"] .cyber-form-header {
-  border-bottom-color: rgba(148, 163, 184, 0.12);
+  border-bottom-color: rgba(148, 163, 184, 0.20);
   background: rgba(255, 255, 255, 0.30);
 }
 
@@ -1963,10 +1963,10 @@ input[type="time"] {
   background: rgba(15, 23, 42, 0.65);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(6, 182, 212, 0.12);
+  border: 1px solid rgba(6, 182, 212, 0.22);
   border-radius: 16px;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35),
-              0 0 0 1px rgba(6, 182, 212, 0.04) inset,
+              0 0 0 1px rgba(6, 182, 212, 0.06) inset,
               0 0 40px rgba(6, 182, 212, 0.03);
   transition: border-color 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease;
   position: relative;
@@ -1983,18 +1983,18 @@ input[type="time"] {
 }
 
 .cyber-card:hover {
-  border-color: rgba(6, 182, 212, 0.25);
+  border-color: rgba(6, 182, 212, 0.35);
   box-shadow: 0 12px 48px rgba(0, 0, 0, 0.45),
-              0 0 0 1px rgba(6, 182, 212, 0.08) inset,
+              0 0 0 1px rgba(6, 182, 212, 0.10) inset,
               0 0 60px rgba(6, 182, 212, 0.06);
   transform: translateY(-2px);
 }
 
 [data-theme="light"] .cyber-card {
   background: rgba(255, 255, 255, 0.85);
-  border-color: rgba(59, 130, 246, 0.15);
+  border-color: rgba(59, 130, 246, 0.25);
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08),
-              0 0 0 1px rgba(59, 130, 246, 0.04) inset;
+              0 0 0 1px rgba(59, 130, 246, 0.06) inset;
 }
 
 [data-theme="light"] .cyber-card::before {
@@ -2002,9 +2002,9 @@ input[type="time"] {
 }
 
 [data-theme="light"] .cyber-card:hover {
-  border-color: rgba(59, 130, 246, 0.25);
+  border-color: rgba(59, 130, 246, 0.35);
   box-shadow: 0 12px 48px rgba(0, 0, 0, 0.12),
-              0 0 0 1px rgba(59, 130, 246, 0.08) inset;
+              0 0 0 1px rgba(59, 130, 246, 0.10) inset;
 }
 
 /* ─── Cyber Table ─── */
@@ -2678,7 +2678,7 @@ input[type="time"] {
   font-size: 0.88rem;
   color: rgba(255, 255, 255, 0.85);
   background: rgba(15, 23, 42, 0.40);
-  border: 1.5px solid rgba(148, 163, 184, 0.12);
+  border: 1.5px solid rgba(148, 163, 184, 0.25);
   border-radius: 10px;
   outline: none;
   transition: border-color 0.25s ease, box-shadow 0.25s ease, background 0.25s ease;
@@ -2686,7 +2686,7 @@ input[type="time"] {
 }
 
 .cyber-form-input:focus {
-  border-color: rgba(6, 182, 212, 0.40);
+  border-color: rgba(6, 182, 212, 0.55);
   box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.08),
               0 0 20px rgba(6, 182, 212, 0.04);
   background: rgba(15, 23, 42, 0.55);
@@ -2798,11 +2798,11 @@ input[type="time"] {
 [data-theme="light"] .cyber-form-input {
   background: rgba(255, 255, 255, 0.80);
   color: rgba(15, 23, 42, 0.85);
-  border-color: rgba(148, 163, 184, 0.25);
+  border-color: rgba(148, 163, 184, 0.35);
 }
 
 [data-theme="light"] .cyber-form-input:focus {
-  border-color: rgba(59, 130, 246, 0.40);
+  border-color: rgba(59, 130, 246, 0.55);
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.10);
   background: #FFFFFF;
   color: rgba(15, 23, 42, 0.95);
