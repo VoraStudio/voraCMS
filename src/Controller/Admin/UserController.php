@@ -30,15 +30,22 @@ class UserController extends AbstractController
        index — Llista d'usuaris.
        ----------------------------------------------------------- */
     #[Route('', name: 'admin_user_index')]
-    public function index(UserRepository $userRepo, ProjectRepository $projectRepo): Response
+    public function index(UserRepository $userRepo, EntityManagerInterface $em): Response
     {
         $this->denyAccessUnlessGranted('ROLE_ADMIN');
 
         $users = $userRepo->findBy([], ['name' => 'ASC']);
 
+        // Single query: project counts per user (evita N+1).
+        $sub = $em->createQuery(
+            "SELECT IDENTITY(p.user) AS user_id, COUNT(p.id) AS cnt
+             FROM App\Entity\Project p
+             GROUP BY p.user"
+        )->getResult();
+
         $userProjects = [];
-        foreach ($users as $user) {
-            $userProjects[$user->getId()] = $projectRepo->count(['user' => $user]);
+        foreach ($sub as $row) {
+            $userProjects[(int) $row['user_id']] = (int) $row['cnt'];
         }
 
         return $this->render('admin/user/index.html.twig', [
@@ -143,10 +150,10 @@ class UserController extends AbstractController
     }
 
     /* -----------------------------------------------------------
-       toggleActive — Activar/desactivar usuari.
+       toggleActive — Activar/desactivar usuari (DQL directe, sense flush).
        ----------------------------------------------------------- */
     #[Route('/{id}/toggle-active', name: 'admin_user_toggle_active', methods: ['POST'])]
-    public function toggleActive(User $user, EntityManagerInterface $em): Response
+    public function toggleActive(Request $request, User $user, EntityManagerInterface $em): Response
     {
         $this->denyAccessUnlessGranted('ROLE_ADMIN');
 
@@ -155,10 +162,19 @@ class UserController extends AbstractController
             return $this->redirectToRoute('admin_user_index');
         }
 
-        $user->setActive(!$user->isActive());
-        $em->flush();
+        if (!$this->isCsrfTokenValid('toggle-active-' . $user->getId(), $request->request->get('_token'))) {
+            $this->addFlash('error', 'Token invàlid.');
+            return $this->redirectToRoute('admin_user_index');
+        }
 
-        $msg = $user->isActive() ? 'Usuari activat.' : 'Usuari desactivat.';
+        $newState = !$user->isActive();
+
+        $em->createQuery('UPDATE App\Entity\User u SET u.active = :active WHERE u.id = :id')
+            ->setParameter('active', $newState)
+            ->setParameter('id', $user->getId())
+            ->execute();
+
+        $msg = $newState ? 'Usuari activat.' : 'Usuari desactivat.';
         $this->addFlash('success', $msg);
 
         return $this->redirectToRoute('admin_user_index');
