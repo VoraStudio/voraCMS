@@ -2030,9 +2030,9 @@ input[type="time"] {
   text-align: right;
 }
 
-.cyber-table thead th:nth-child(4),
 .cyber-table thead th:nth-child(5),
-.cyber-table thead th:nth-child(6) {
+.cyber-table thead th:nth-child(6),
+.cyber-table thead th:nth-child(7) {
   text-align: center;
 }
 
@@ -2095,9 +2095,9 @@ input[type="time"] {
   text-align: right;
 }
 
-.cyber-cell:nth-child(4),
 .cyber-cell:nth-child(5),
-.cyber-cell:nth-child(6) {
+.cyber-cell:nth-child(6),
+.cyber-cell:nth-child(7) {
   text-align: center;
 }
 
@@ -2790,8 +2790,8 @@ input[type="time"] {
 
 [data-theme="light"] .cyber-form-input:user-invalid {
   border-color: #DC2626 !important;
-  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.18),
-              0 0 24px rgba(220, 38, 38, 0.06) !important;
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.25),
+              0 0 28px rgba(220, 38, 38, 0.12) !important;
 }
 
 [data-theme="light"] .cyber-form-input--select option {
@@ -3157,9 +3157,9 @@ input[type="time"] {
     flex-shrink: 0;
   }
 
-  .cyber-cell:nth-child(4),
   .cyber-cell:nth-child(5),
-  .cyber-cell:nth-child(6) {
+  .cyber-cell:nth-child(6),
+  .cyber-cell:nth-child(7) {
     text-align: left !important;
   }
 

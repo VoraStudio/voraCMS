@@ -150,7 +150,7 @@ class UserController extends AbstractController
     }
 
     /* -----------------------------------------------------------
-       toggleActive — Activar/desactivar usuari (DQL directe, sense flush).
+       toggleActive — Activar/desactivar usuari (AJAX o POST).
        ----------------------------------------------------------- */
     #[Route('/{id}/toggle-active', name: 'admin_user_toggle_active', methods: ['POST'])]
     public function toggleActive(Request $request, User $user, EntityManagerInterface $em): Response
@@ -158,12 +158,20 @@ class UserController extends AbstractController
         $this->denyAccessUnlessGranted('ROLE_ADMIN');
 
         if ($user === $this->getUser()) {
-            $this->addFlash('error', 'No pots desactivar el teu propi usuari.');
+            $msg = 'No pots desactivar el teu propi usuari.';
+            if ($request->isXmlHttpRequest()) {
+                return $this->json(['error' => $msg], 403);
+            }
+            $this->addFlash('error', $msg);
             return $this->redirectToRoute('admin_user_index');
         }
 
         if (!$this->isCsrfTokenValid('toggle-active-' . $user->getId(), $request->request->get('_token'))) {
-            $this->addFlash('error', 'Token invàlid.');
+            $msg = 'Token invàlid.';
+            if ($request->isXmlHttpRequest()) {
+                return $this->json(['error' => $msg], 400);
+            }
+            $this->addFlash('error', $msg);
             return $this->redirectToRoute('admin_user_index');
         }
 
@@ -174,9 +182,15 @@ class UserController extends AbstractController
             ->setParameter('id', $user->getId())
             ->execute();
 
+        if ($request->isXmlHttpRequest()) {
+            return $this->json([
+                'active' => $newState,
+                'msg' => $newState ? 'Usuari activat.' : 'Usuari desactivat.',
+            ]);
+        }
+
         $msg = $newState ? 'Usuari activat.' : 'Usuari desactivat.';
         $this->addFlash('success', $msg);
-
         return $this->redirectToRoute('admin_user_index');
     }
 
