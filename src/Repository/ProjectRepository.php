@@ -24,6 +24,19 @@ class ProjectRepository extends ServiceEntityRepository
             ->getResult();
     }
 
+    /**
+     * @return Project[] All projects ordered by user name then project name.
+     */
+    public function findAllOrderedByUser(): array
+    {
+        return $this->createQueryBuilder('p')
+            ->leftJoin('p.user', 'u')
+            ->addOrderBy('u.name', 'ASC')
+            ->addOrderBy('p.name', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
+
     public function findLatestActive(int $limit = 6): array
     {
         return $this->createQueryBuilder('p')

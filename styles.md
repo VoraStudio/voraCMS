@@ -4,25 +4,42 @@ Todas las normas de diseño UI/UX del panel de administración de VoraCMS.
 
 ---
 
-## Botones — Neon Frame (dark) + Gradient Solid (light)
+## Botones
 
-- **Dark mode**: fondo glass oscuro `rgba(2, 6, 23, 0.40)` con borde degradado de 2px mediante máscara CSS (`-webkit-mask` + `mask-composite: exclude`). Texto/icono en color neón (no blanco). Sin clip-path, sin LED line, sin backdrop-filter en disabled.
-- **Light mode**: degradado sólido del color del botón (claro → oscuro), texto blanco, SIN borde (`::before { display: none }`), con `box-shadow` sutil 0 2px 8px.
-- **Icon buttons**: siempre con clase `cyber-btn--icon` (36x36, padding 0, border 1.5px).
-- **Text buttons**: padding 7px 14px, border 2px.
-- **Hover**: color/texto a `#fff`, glow intenso `0 0 100px rgba(color, 0.55) + 0 0 160px rgba(color, 0.20)`.
-- **Form submit y btn-primary**: degradado sólido cyan→azul, texto blanco, top LED line, shine sweep al hover. En light: gradiente azul más claro.
-- **Disabled**: opacidad 0.85, fondo `rgba(148,163,184,0.18)`, texto `rgba(148,163,184,0.65)`, borde `rgba(148,163,184,0.25)`. En light: fondo gris `#E2E8F0 → #CBD5E1`, texto `rgba(100,116,139,0.50)`.
+### Botones de acción (icono) — Minimalist Corporate
 
-### Paleta de colores neón por variante
+Estilo para CRUD actions en tablas: toggle, editar, borrar.
 
-| Variante | Color borde/texto (dark) | Gradient light |
+- **Icon buttons**: clase `cyber-btn--icon` (34×34, padding 0, border-radius 8px).
+- **Default**: fondo transparente, icono color neutro mutado `rgba(148,163,184,0.85)` (dark) / `rgba(100,116,139,0.85)` (light). Sin bordes, sin glows, sin glass.
+- **Hover**: background `rgba(color, 0.08)` + color semántico del icono. Sin glow, sin transform.
+- **Active**: background `rgba(color, 0.14)`.
+- **Toggle active**: icono verde sutil `rgba(34,197,94,0.90)` por defecto (indica estado ON).
+
+### Botones de texto (con label) — Neon Frame (dark) + Gradient Solid (light)
+
+- **Dark mode**: fondo glass oscuro `rgba(2, 6, 23, 0.40)` con borde degradado de 2px mediante máscara CSS.
+- **Light mode**: degradado sólido, texto blanco, sin borde, `box-shadow` sutil.
+- **Text buttons**: padding 7px 14px, border-radius 10px.
+- **Hover**: color/texto a `#fff`, glow intenso.
+- **Disabled**: opacidad 0.85.
+
+### Form submit y btn-primary
+
+Degradado sólido cyan→azul, texto blanco, top LED line, shine sweep al hover. En light: gradiente azul más claro.
+
+### Paleta de colores por variante
+
+| Variante | Color icono (dark) | Color hover bg |
+|---|---|---|
+| Toggle active | Green `rgba(34, 197, 94, 0.90)` | `rgba(34, 197, 94, 0.08)` |
+| Toggle inactive | Muted `rgba(148, 163, 184, 0.85)` | `rgba(239, 68, 68, 0.08)` |
+| Edit | Muted `rgba(148, 163, 184, 0.85)` | `rgba(59, 130, 246, 0.08)` |
+| Delete | Muted `rgba(148, 163, 184, 0.85)` | `rgba(239, 68, 68, 0.08)` |
+
+| Variante (neón) | Color texto/borde (dark) | Gradient light |
 |---|---|---|
 | Projects / primary / submit | Cyan `rgb(6, 182, 212)` | `#7DD3FC → #0E7490` |
-| Toggle active | Green `rgb(34, 197, 94)` | `#86EFAC → #16A34A` |
-| Toggle inactive | Red `rgb(239, 68, 68)` | `#FCA5A5 → #DC2626` |
-| Edit | Blue `rgb(59, 130, 246)` | `#93C5FD → #2563EB` |
-| Delete | Rose `rgb(225, 29, 72)` | `#FDA4AF → #BE123C` |
 
 ---
 
@@ -42,7 +59,7 @@ Todas las normas de diseño UI/UX del panel de administración de VoraCMS.
 ## Filas de tabla
 
 - `.row-active`: fondo `rgba(59, 130, 246, 0.04)` (dark) / `rgba(59, 130, 246, 0.06)` (light) — azul, NO verde.
-- `.row-inactive`: opacidad 0.75, fondo `rgba(239, 68, 68, 0.03)`. El texto "Inactiu" usa color sólido `rgb(239,68,68)` (no opacidad reducida).
+- `.row-inactive`: opacidad 0.55, fondo `rgba(239, 68, 68, 0.10)` (dark) / `rgba(239, 68, 68, 0.12)` (light). Celdas (excepto estado) con opacidad 0.20. El texto "Inactiu" usa color sólido `rgb(239,68,68)` (no opacidad reducida).
 - Filas con `.cyber-row`: border-radius 12px, glass con `box-shadow`, hover con glow sutil.
 
 ---

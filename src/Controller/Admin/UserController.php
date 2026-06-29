@@ -10,6 +10,7 @@
 
 namespace App\Controller\Admin;
 
+use App\Entity\Project;
 use App\Entity\User;
 use App\Repository\ProjectRepository;
 use App\Repository\UserRepository;
@@ -95,6 +96,18 @@ class UserController extends AbstractController
             } else {
                 $em->persist($user);
                 $em->flush();
+
+                /* Crear projecte per defecte per l'usuari */
+                $defaultProject = new Project();
+                $defaultProject->setName('Web Principal');
+                $defaultProject->setSlug('web-principal');
+                $defaultProject->setDescription('Projecte per defecte');
+                $defaultProject->setColor('#787878');
+                $defaultProject->setActive(true);
+                $defaultProject->setUser($user);
+                $em->persist($defaultProject);
+                $em->flush();
+
                 $this->addFlash('success', 'Usuari creat correctament.');
                 return $this->redirectToRoute('admin_user_index');
             }
@@ -123,6 +136,12 @@ class UserController extends AbstractController
             $user->setEmail($request->request->get('email', $user->getEmail()));
             $user->setName($request->request->get('name', $user->getName()));
             $user->setCompany($request->request->get('company', $user->getCompany()) ?: null);
+
+            $slug = $request->request->get('slug', '');
+            if (!empty($slug)) {
+                $user->setSlug($slug);
+            }
+
             $user->setRoles([$request->request->get('role', 'ROLE_USUARIO')]);
             $user->setActive($request->request->getBoolean('active', $user->isActive()));
 

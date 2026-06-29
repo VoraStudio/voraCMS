@@ -3,10 +3,7 @@
 {% block page_title %}{{ isNew ? 'Nou projecte' : 'Editar: ' ~ project.name }}{% endblock %}
 
 {% block topbar_actions %}
-<a href="{{ path('admin_projects') }}" class="btn btn-sm"
-   style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:10px;color:rgba(255,255,255,0.50);padding:8px 16px;display:inline-flex;align-items:center;gap:8px;font-size:0.8rem;font-weight:500;text-decoration:none;transition:all 0.25s ease;"
-   onmouseover="this.style.background='rgba(96,165,250,0.10)';this.style.borderColor='rgba(96,165,250,0.20)';this.style.color='rgba(255,255,255,0.80)';"
-   onmouseout="this.style.background='rgba(255,255,255,0.04)';this.style.borderColor='rgba(255,255,255,0.08)';this.style.color='rgba(255,255,255,0.50)';">
+<a href="{{ path('admin_projects') }}" class="cyber-btn-back">
     <i class="bi bi-arrow-left"></i> <span>Tornar</span>
 </a>
 {% endblock %}
@@ -18,6 +15,22 @@
             <div class="card-body">
                 <form method="post" class="row g-4">
                     <input type="hidden" name="_token" value="{{ csrf_token('project-edit-' ~ project.id) }}">
+
+                    {# ─── Usuari (només admin) ─── #}
+                    {% if users is defined and users|length > 0 %}
+                    <div class="col-12">
+                        <label class="form-label">Usuari propietari *</label>
+                        <select name="user_id" class="form-control" required>
+                            {% for u in users %}
+                                <option value="{{ u.id }}" {% if (isNew and u.id == currentUser.id) or (not isNew and project.user and u.id == project.user.id) %}selected{% endif %}>
+                                    {{ u.name }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                        <small style="color:var(--s-text-secondary);">L'usuari al qual pertany aquest projecte.</small>
+                    </div>
+                    {% endif %}
+
                     {# ─── Nom ─── #}
                     <div class="col-12">
                         <label class="form-label">Nom del projecte *</label>

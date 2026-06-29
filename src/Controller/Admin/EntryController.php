@@ -271,12 +271,22 @@ class EntryController extends AbstractController
         $this->denyAccessUnlessGranted('ROLE_ADMIN');
 
         if (!$this->isCsrfTokenValid('toggle-active-' . $entry->getId(), $request->request->get('_token'))) {
+            if ($request->isXmlHttpRequest()) {
+                return $this->json(['error' => 'Token de seguretat invàlid.'], 400);
+            }
             $this->addFlash('error', 'Token de seguretat invàlid.');
             return $this->redirectToRoute('admin_entry_by_type', ['slug' => $entry->getContentType()->getSlug()]);
         }
 
         $entry->setActive(!$entry->isActive());
         $em->flush();
+
+        if ($request->isXmlHttpRequest()) {
+            return $this->json([
+                'active' => $entry->isActive(),
+                'message' => $entry->isActive() ? 'Entrada activada.' : 'Entrada desactivada.',
+            ]);
+        }
 
         $this->addFlash('success', $entry->isActive() ? 'Entrada activada.' : 'Entrada desactivada.');
         return $this->redirectToRoute('admin_entry_by_type', ['slug' => $entry->getContentType()->getSlug()]);

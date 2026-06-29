@@ -1,0 +1,92 @@
+{% extends 'admin/layout.html.twig' %}
+
+{% block page_title %}{{ project.name }}{% endblock %}
+
+{% block topbar_actions %}
+<div style="display:flex;gap:8px;align-items:center;">
+    <a href="{{ path('admin_project_edit', {id: project.id}) }}" class="cyber-btn cyber-btn--icon cyber-btn--edit" title="Editar projecte">
+        <i class="bi bi-pencil"></i>
+    </a>
+    <a href="{{ path('admin_content_type_new') }}" class="cyber-btn-primary" data-anim="cyber-btn">
+        <i class="bi bi-plus-lg"></i> <span>Nova secció</span>
+    </a>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="s-project-show">
+
+    {# ─── Project header ─── #}
+    {% set color = project.color ?: '#06B6D4' %}
+    <div class="cyber-section-header" data-anim="cyber-card" style="margin-bottom:24px;">
+        <div class="cyber-section-header-left">
+            <div style="width:12px;height:12px;border-radius:50%;background:{{ color }};flex-shrink:0;"></div>
+            <div>
+                <h2 class="cyber-section-title">{{ project.name }}</h2>
+                {% if project.description %}
+                <p class="cyber-section-desc">{{ project.description }}</p>
+                {% endif %}
+            </div>
+        </div>
+        <div class="cyber-section-header-right">
+            <div class="cyber-stat-mini">
+                <span class="cyber-stat-mini-value">{{ stats|length }}</span>
+                <span class="cyber-stat-mini-label">Seccions</span>
+            </div>
+            <div class="cyber-stat-mini">
+                {% set totalEntries = stats|reduce((carry, s) => carry + s.total, 0) %}
+                <span class="cyber-stat-mini-value">{{ totalEntries }}</span>
+                <span class="cyber-stat-mini-label">Entrades</span>
+            </div>
+            {% if project.user %}
+            <div class="cyber-stat-mini" style="margin-left:4px;">
+                <span class="cyber-stat-mini-label" style="font-size:0.6rem;">{{ project.user.name }}</span>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    {# ─── Content Type Cards ─── #}
+    {% if stats is empty %}
+    <div class="text-center py-5" style="color:var(--s-text-secondary);">
+        <div style="font-size:3rem;color:rgba(148,163,184,0.15);margin-bottom:12px;">
+            <i class="bi bi-folder-plus"></i>
+        </div>
+        <p style="font-size:0.9rem;margin-bottom:16px;">Aquest projecte no té seccions encara.</p>
+        <a href="{{ path('admin_content_type_new') }}" class="cyber-btn-primary">
+            <i class="bi bi-plus-lg"></i> <span>Crear primera secció</span>
+        </a>
+    </div>
+    {% else %}
+    {% set cardIcons = ['bi-file-text', 'bi-calendar-event', 'bi-person', 'bi-image', 'bi-link', 'bi-star', 'bi-geo-alt', 'bi-chat-dots'] %}
+    <div class="row g-3">
+        {% for stat in stats %}
+        {% set icon = cardIcons[loop.index0 % cardIcons|length] %}
+        <div class="col-md-4">
+            <div class="s-stat-card" data-anim="card" style="cursor:pointer;"
+                 onclick="window.location='{{ path('admin_entry_by_type', {slug: stat.type.slug}) }}'">
+                <div class="s-stat-card-icon">
+                    <i class="bi {{ icon }}"></i>
+                </div>
+                <h6 class="text-capitalize mb-2">{{ stat.type.name }}</h6>
+                <div class="s-stat-numbers mb-3" style="gap:32px;">
+                    <div>
+                        <div class="s-stat-label">Entrades</div>
+                        <div class="s-stat-value">{{ stat.total }}</div>
+                    </div>
+                    <div>
+                        <div class="s-stat-label">Publicacions</div>
+                        <div class="s-stat-value s-stat-value--success">{{ stat.published }}</div>
+                    </div>
+                </div>
+                <a href="{{ path('admin_entry_by_type', {slug: stat.type.slug}) }}" class="s-stat-btn" onclick="event.stopPropagation();">
+                    <i class="bi bi-arrow-right-circle me-1"></i> Gestionar entrades
+                </a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+</div>
+{% endblock %}

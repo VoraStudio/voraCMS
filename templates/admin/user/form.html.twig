@@ -43,6 +43,14 @@
                        class="cyber-form-input" placeholder="Nom de l'empresa (opcional)">
             </div>
 
+            {# ─── Slug ─── #}
+            <div class="cyber-form-group">
+                <label class="cyber-form-label">Slug <span style="font-weight:400;text-transform:none;color:var(--s-text-secondary);">(identificador únic)</span></label>
+                <input type="text" name="slug" value="{{ user.slug ?: '' }}"
+                       class="cyber-form-input" placeholder="slug-de-l-usuari"
+                       {{ isNew ? 'readonly style="opacity:0.5;" title="Es genera automàticament des de l\'empresa"' : '' }}>
+            </div>
+
             {# ─── Password ─── #}
             <div class="cyber-form-group">
                 <label class="cyber-form-label">

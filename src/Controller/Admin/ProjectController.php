@@ -24,6 +24,8 @@ namespace App\Controller\Admin;
 
 use App\Entity\Project;
 use App\Entity\User;
+use App\Repository\ContentTypeRepository;
+use App\Repository\EntryRepository;
 use App\Repository\ProjectRepository;
 use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
@@ -62,7 +64,7 @@ class ProjectController extends AbstractController
                 $otherProjects = array_slice($projects, 1);
             }
         } else {
-            $projects = $projectRepo->findActive();
+            $projects = $projectRepo->findAllOrderedByUser();
         }
 
         return $this->render('admin/project/index.html.twig', [
@@ -74,13 +76,52 @@ class ProjectController extends AbstractController
     }
 
     /* -----------------------------------------------------------
-       new — Mostra el formulari de creació d'un nou projecte.
-       ----------------------------------------------------------- */
+        show — Vista detall d'un projecte amb les seves seccions.
+        Mostra cards per cada ContentType (ex: Eventos, Noticias)
+        amb el nombre d'entrades i accés a gestió.
+        ----------------------------------------------------------- */
+    #[Route('/{id}', name: 'admin_project_show', methods: ['GET'])]
+    public function show(
+        int $id,
+        Request $request,
+        ProjectRepository $projectRepo,
+        ContentTypeRepository $ctRepo,
+        EntryRepository $entryRepo,
+    ): Response {
+        $this->denyAccessUnlessGranted('ROLE_ADMIN');
+
+        $project = $projectRepo->find($id);
+        if (!$project) {
+            throw $this->createNotFoundException('Projecte no trobat');
+        }
+
+        $request->getSession()->set('_project_id', $project->getId());
+
+        $contentTypes = $ctRepo->findActive($project->getId());
+        $stats = [];
+        foreach ($contentTypes as $ct) {
+            $stats[] = [
+                'type' => $ct,
+                'total' => count($ct->getEntries()),
+                'published' => count($entryRepo->findPublishedByType($ct->getSlug())),
+            ];
+        }
+
+        return $this->render('admin/project/show.html.twig', [
+            'project' => $project,
+            'stats' => $stats,
+        ]);
+    }
+
+    /* -----------------------------------------------------------
+        new — Mostra el formulari de creació d'un nou projecte.
+        ----------------------------------------------------------- */
     #[Route('/new', name: 'admin_project_new', methods: ['GET', 'POST'])]
     public function new(
         Request $request,
         EntityManagerInterface $em,
         ValidatorInterface $validator,
+        UserRepository $userRepo,
     ): Response {
         $this->denyAccessUnlessGranted('ROLE_ADMIN');
 
@@ -90,6 +131,7 @@ class ProjectController extends AbstractController
         }
 
         $project = new Project();
+        $users = $userRepo->findBy([], ['name' => 'ASC']);
 
         if ($request->isMethod('POST')) {
             $project->setName($request->request->get('name', ''));
@@ -97,7 +139,10 @@ class ProjectController extends AbstractController
             $project->setDescription($request->request->get('description', ''));
             $project->setColor($request->request->get('color', '#4945FF'));
             $project->setActive(true);
-            $project->setUser($currentUser);
+
+            $targetUserId = $request->request->getInt('user_id', $currentUser->getId());
+            $targetUser = $userRepo->find($targetUserId) ?: $currentUser;
+            $project->setUser($targetUser);
 
             $errors = $validator->validate($project);
             if (count($errors) > 0) {
@@ -120,6 +165,7 @@ class ProjectController extends AbstractController
             'project' => $project,
             'isNew' => true,
             'currentUser' => $currentUser,
+            'users' => $users,
         ]);
     }
 
@@ -132,6 +178,7 @@ class ProjectController extends AbstractController
         Project $project,
         EntityManagerInterface $em,
         ValidatorInterface $validator,
+        UserRepository $userRepo,
     ): Response {
         $this->denyAccessUnlessGranted('ROLE_ADMIN');
 
@@ -139,6 +186,8 @@ class ProjectController extends AbstractController
         if (!$currentUser instanceof User) {
             throw $this->createAccessDeniedException('Cal estar autenticat.');
         }
+
+        $users = $userRepo->findBy([], ['name' => 'ASC']);
 
         if ($request->isMethod('POST')) {
             /* CSRF protection */
@@ -152,6 +201,14 @@ class ProjectController extends AbstractController
             $project->setDescription($request->request->get('description', ''));
             $project->setColor($request->request->get('color', $project->getColor() ?? '#4945FF'));
             $project->setActive((bool) $request->request->get('active', true));
+
+            $targetUserId = $request->request->getInt('user_id');
+            if ($targetUserId > 0) {
+                $targetUser = $userRepo->find($targetUserId);
+                if ($targetUser) {
+                    $project->setUser($targetUser);
+                }
+            }
 
             $errors = $validator->validate($project);
             if (count($errors) > 0) {
@@ -169,6 +226,7 @@ class ProjectController extends AbstractController
             'project' => $project,
             'isNew' => false,
             'currentUser' => $currentUser,
+            'users' => $users,
         ]);
     }
 

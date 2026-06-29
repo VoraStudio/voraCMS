@@ -77,6 +77,9 @@ class DashboardController extends AbstractController
                     'totalPublicaciones' => $totalPublishedGlobally,
                     'totalVisites' => $totalVisitsToday,
                 ],
+                'latestUsers' => $userRepo->findBy([], ['createdAt' => 'DESC'], 5),
+                'latestProjects' => $projectRepo->findBy([], ['createdAt' => 'DESC'], 5),
+                'latestContentTypes' => $ctRepo->findBy([], ['createdAt' => 'DESC'], 5),
             ]);
         }
 
@@ -144,9 +147,11 @@ class DashboardController extends AbstractController
     }
 
     /* -----------------------------------------------------------
-       switchProject — Canvia el projecte actiu a sessió.
-       GET /admin/switch-project/{id} → redirect al dashboard
-       ----------------------------------------------------------- */
+        switchProject — Canvia el projecte actiu a sessió.
+        GET /admin/switch-project/{id}
+          - ROLE_ADMIN → project show (cards de seccions)
+          - ROLE_MOD/USUARIO → dashboard scoped
+        ----------------------------------------------------------- */
     #[Route('/switch-project/{id}', name: 'admin_switch_project')]
     public function switchProject(int $id, Request $request, ProjectRepository $projectRepo): Response
     {
@@ -157,6 +162,10 @@ class DashboardController extends AbstractController
         }
 
         $request->getSession()->set('_project_id', $project->getId());
+
+        if ($this->isGranted('ROLE_ADMIN')) {
+            return $this->redirectToRoute('admin_project_show', ['id' => $project->getId()]);
+        }
 
         return $this->redirectToRoute('admin_dashboard');
     }
