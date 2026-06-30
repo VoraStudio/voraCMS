@@ -268,7 +268,8 @@ class EntryController extends AbstractController
     #[Route('/{id}/toggle-active', name: 'admin_entry_toggle_active', methods: ['POST'])]
     public function toggleActive(Request $request, Entry $entry, EntityManagerInterface $em): Response
     {
-        $this->denyAccessUnlessGranted('ROLE_ADMIN');
+        $this->denyAccessUnlessGranted('ROLE_USUARIO');
+        $this->verifyEntryOwnership($entry);
 
         if (!$this->isCsrfTokenValid('toggle-active-' . $entry->getId(), $request->request->get('_token'))) {
             if ($request->isXmlHttpRequest()) {
@@ -392,32 +393,49 @@ class EntryController extends AbstractController
     }
 
     /* -----------------------------------------------------------
-       ensureActiveProject — Verifica que hi hagi un projecte
-       actiu a sessió. Si no n'hi ha:
-         - 0 projectes → redirect a crear-ne un
-         - 1 projecte  → l'auto-selecciona
-         - 2+ projectes → redirect a la llista per triar
-       Retorna el project_id o null (si cal redirect).
-       ----------------------------------------------------------- */
+        ensureActiveProject — Verifica que hi hagi un projecte
+        actiu a sessió.
+          - Valida que el projecte a sessió sigui del user actual
+          - Si no n'hi ha, auto-selecciona (scoped a l'usuari)
+          - 0 projectes → redirect a crear-ne un
+          - 1 projecte  → l'auto-selecciona
+          - 2+ projectes → redirect a llista per triar
+        Retorna el project_id o null (si cal redirect).
+        ----------------------------------------------------------- */
     private function ensureActiveProject(Request $request, ?ProjectRepository $projectRepo = null): ?int
     {
         $session = $request->getSession();
         $projectId = $session->get('_project_id');
+        $user = $this->getUser();
+
+        /* Si hi ha projecte a sessió, validar que pertany a l'usuari */
+        if ($projectId !== null && $projectRepo !== null && !$this->isGranted('ROLE_ADMIN') && $user instanceof User) {
+            $project = $projectRepo->find($projectId);
+            if (!$project || $project->getUser()?->getId() !== $user->getId()) {
+                $session->remove('_project_id');
+                $projectId = null;
+            }
+        }
 
         if ($projectId !== null) {
             return (int) $projectId;
         }
 
-        /* No hi ha projecte a sessió — proveïm d'auto-seleccionar */
+        /* No hi ha projecte — auto-seleccionar scoped a l'usuari */
         if ($projectRepo === null) {
             return null;
         }
 
-        $projects = $projectRepo->findActive();
+        if (!$this->isGranted('ROLE_ADMIN') && $user instanceof User) {
+            $projects = $projectRepo->findBy(['user' => $user, 'active' => true], ['id' => 'DESC']);
+        } else {
+            $projects = $projectRepo->findActive();
+        }
+
         $count = count($projects);
 
         if ($count === 0) {
-            return null; /* Redirect a crear projecte */
+            return null;
         }
 
         if ($count === 1) {

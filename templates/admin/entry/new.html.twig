@@ -8,7 +8,7 @@
 {% endblock %}
 
 {% block topbar_actions %}
-<a href="{{ path('admin_entry_by_type', {slug: contentType.slug}) }}" class="cyber-btn-back">
+<a href="{{ path('admin_entry_by_type', {slug: contentType.slug}) }}" class="cyber-btn cyber-btn--projects">
     <i class="bi bi-arrow-left"></i> <span>Tornar</span>
 </a>
 {% endblock %}
@@ -21,8 +21,9 @@
                 <div class="col-md-6">
                     <label class="form-label">Estat</label>
                     <select name="status" class="form-select form-select-sm">
-                        <option value="draft">Esborrany</option>
-                        <option value="published">Publicar</option>
+                        <option value="draft">No publicat</option>
+                        <option value="published">Publicat</option>
+                        <option value="archived">Arxivat</option>
                     </select>
                 </div>
             </div>

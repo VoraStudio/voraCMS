@@ -18,17 +18,21 @@
     ]
 } %}
 
-<a href="{{ path('admin_projects') }}" class="cyber-btn-back cyber-btn-back--inline" title="Tornar a tots els projectes">
+{% if is_granted('ROLE_ADMIN') %}
+<a href="{{ path('admin_projects') }}" class="cyber-btn cyber-btn--projects cyber-btn-back--inline" title="Tornar a tots els projectes">
     <i class="bi bi-arrow-left"></i> <span>Tornar a Projectes</span>
 </a>
+{% endif %}
 
 {% if mainProject %}
+{% if is_granted('ROLE_ADMIN') %}
 <div class="project-actions-bar">
     <a href="{{ path('admin_switch_project', {id: mainProject.id, _redirect: path('admin_content_type_new')}) }}"
        class="cyber-btn-primary cyber-btn--compact">
         <i class="bi bi-plus-lg"></i> <span>Nova secció</span>
     </a>
 </div>
+{% endif %}
     {% set color = mainProject.color ?: '#06B6D4' %}
     <div class="cyber-card project-main-card" data-anim="cyber-card">
         <div class="project-main-card__info">
@@ -39,12 +43,11 @@
             </div>
         </div>
         <div class="project-main-card__actions">
+            {% if is_granted('ROLE_ADMIN') %}
             <a href="{{ path('admin_project_edit', {id: mainProject.id}) }}" class="cyber-btn cyber-btn--icon cyber-btn--edit" title="Editar projecte">
                 <i class="bi bi-pencil"></i>
             </a>
-            <a href="{{ path('admin_switch_project', {id: mainProject.id}) }}" class="cyber-btn-primary cyber-btn--compact">
-                <i class="bi bi-arrow-right-circle"></i> <span>Obrir</span>
-            </a>
+            {% endif %}
         </div>
     </div>
 
@@ -52,8 +55,9 @@
         {% for ct in mainProject.contentTypes %}
         {% set icon = 'bi-file-earmark' %}
         {% set entriesCount = ct.entries|length %}
+        {% set ctLink = path('admin_switch_project', {id: mainProject.id, _redirect: path('admin_entry_by_type', {slug: ct.slug})}) %}
         <div class="col-md-6 col-lg-4">
-            <div class="cyber-card project-content-card" data-anim="cyber-card" data-link="{{ path('admin_entry_by_type', {slug: ct.slug}) }}">
+            <div class="cyber-card project-content-card" data-anim="cyber-card" data-link="{{ ctLink }}">
                 <div class="project-content-card__header">
                     <div class="cyber-section-icon project-content-card__section-icon">
                         <i class="bi {{ icon }}"></i>
@@ -68,7 +72,7 @@
                     <p class="project-content-card__desc">{{ ct.description }}</p>
                     {% endif %}
                 </div>
-                <a href="{{ path('admin_entry_by_type', {slug: ct.slug}) }}" class="cyber-btn cyber-btn--projects project-content-card__btn">
+                <a href="{{ ctLink }}" class="cyber-btn cyber-btn--projects project-content-card__btn">
                     <i class="bi bi-eye"></i> <span>Veure entrades</span>
                 </a>
             </div>
@@ -80,9 +84,11 @@
                     <i class="bi bi-layers"></i>
                 </div>
                 <p class="field-help-text field-help-text--action">Aquest projecte no té seccions encara</p>
+                {% if is_granted('ROLE_ADMIN') %}
                 <a href="{{ path('admin_switch_project', {id: mainProject.id}) }}" class="cyber-btn-primary cyber-btn--compact">
                     <i class="bi bi-plus-lg"></i> <span>Crear secció</span>
                 </a>
+                {% endif %}
             </div>
         </div>
         {% endfor %}
@@ -93,13 +99,13 @@
 <h4 class="cyber-section-label">
     <i class="bi bi-folder2-open"></i> Altres projectes
 </h4>
-<div class="row g-3 project-cards-grid">
+<div class="project-other-list">
     {% for project in otherProjects %}
     {% set color = project.color ?: '#4945FF' %}
-    <div class="col-md-6 col-lg-4">
-        <div class="cyber-card project-other-card project-other-card--border" data-anim="cyber-card"
+    <div class="project-other-wrapper">
+        <div class="cyber-card project-other-card project-other-card--border project-expand-header" data-anim="cyber-card"
              style="--project-border-clr:{{ color }};"
-             data-link="{{ path('admin_switch_project', {id: project.id}) }}">
+             data-project-expand="{{ project.id }}">
             <div class="project-other-card__inner">
                 <div class="project-other-icon project-other-icon--dynamic" style="--icon-clr:{{ color }};">
                     <i class="bi bi-folder2-open"></i>
@@ -110,7 +116,46 @@
                         {{ project.contentTypes|length }} seccions · {{ project.contentTypes|reduce((carry, ct) => carry + ct.entries|length, 0) }} entrades
                     </div>
                 </div>
-                <i class="bi bi-chevron-right project-other-arrow"></i>
+                <div class="project-expand-indicator">
+                    <span class="project-expand-label">Mostra</span>
+                    <i class="bi bi-chevron-down project-expand-arrow"></i>
+                </div>
+            </div>
+        </div>
+        <div class="project-expand-body" id="project-expand-{{ project.id }}">
+            <div class="row g-3 project-cards-grid project-cards-grid--mb">
+                {% for ct in project.contentTypes %}
+                {% set entriesCount = ct.entries|length %}
+                {% set ctLink = path('admin_switch_project', {id: project.id, _redirect: path('admin_entry_by_type', {slug: ct.slug})}) %}
+                <div class="col-md-6 col-lg-4">
+                    <div class="cyber-card project-content-card" data-anim="cyber-card" data-link="{{ ctLink }}">
+                        <div class="project-content-card__header">
+                            <div class="cyber-section-icon project-content-card__section-icon">
+                                <i class="bi bi-file-earmark"></i>
+                            </div>
+                            <span class="cyber-badge cyber-badge--compact {{ entriesCount > 0 ? 'cyber-badge--mod' : '' }}">
+                                {{ entriesCount }} entrades
+                            </span>
+                        </div>
+                        <div class="project-content-card__body">
+                            <h3 class="project-content-card__title">{{ ct.name }}</h3>
+                            {% if ct.description %}
+                            <p class="project-content-card__desc">{{ ct.description }}</p>
+                            {% endif %}
+                        </div>
+                        <a href="{{ ctLink }}" class="cyber-btn cyber-btn--projects project-content-card__btn">
+                            <i class="bi bi-eye"></i> <span>Veure entrades</span>
+                        </a>
+                    </div>
+                </div>
+                {% else %}
+                <div class="col-12">
+                    <div class="cyber-card cyber-card--empty" data-anim="cyber-card">
+                        <div class="cyber-empty-icon--xl"><i class="bi bi-layers"></i></div>
+                        <p class="field-help-text field-help-text--action">Aquest projecte no té seccions encara</p>
+                    </div>
+                </div>
+                {% endfor %}
             </div>
         </div>
     </div>
@@ -118,8 +163,15 @@
 </div>
 {% endif %}
 
-{% elseif projects is defined %}
-{# ─── All projects view (grouped by client) ─── #}
+{% if not mainProject and otherProjects is empty %}
+<div class="cyber-card cyber-card--empty-lg" data-anim="cyber-card">
+    <div class="cyber-empty-icon"><i class="bi bi-folder-plus"></i></div>
+    <p class="cyber-empty-text">No tens cap projecte assignat</p>
+</div>
+{% endif %}
+
+{% elseif projects is defined and is_granted('ROLE_ADMIN') %}
+{# ─── All projects view (grouped by client) — admin only ─── #}
 {% include 'admin/components/_section_header.html.twig' with {
     title: 'Projectes',
     description: 'Gestiona els projectes i el seu contingut',
@@ -245,4 +297,32 @@
 {% endfor %}
 {% endif %}
 
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var headers = document.querySelectorAll('.project-expand-header');
+  headers.forEach(function (header) {
+    header.addEventListener('click', function (e) {
+      var target = e.target.closest('a, button, form');
+      if (target) return;
+
+      var id = header.getAttribute('data-project-expand');
+      var body = document.getElementById('project-expand-' + id);
+      if (!body) return;
+
+      var isOpen = body.classList.contains('is-open');
+      body.classList.toggle('is-open');
+      header.classList.toggle('is-expanded');
+
+      var label = header.querySelector('.project-expand-label');
+      if (label) {
+        label.textContent = isOpen ? 'Mostra' : 'Amaga';
+      }
+    });
+  });
+});
+</script>
 {% endblock %}

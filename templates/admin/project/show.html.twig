@@ -4,10 +4,12 @@
 
 {% block topbar_actions %}
 <div class="topbar-actions-group">
-    <a href="{{ path('admin_project_edit', {id: project.id}) }}" class="cyber-btn cyber-btn--icon cyber-btn--edit" title="Editar projecte">
-        <i class="bi bi-pencil"></i>
+    {% if is_granted('ROLE_ADMIN') %}
+    <a href="{{ path('admin_project_edit', {id: project.id}) }}" class="cyber-btn cyber-btn--projects" title="Editar projecte">
+        <i class="bi bi-pencil"></i> <span>Editar projecte</span>
     </a>
-    <a href="{{ path('admin_projects') }}" class="cyber-btn-back">
+    {% endif %}
+    <a href="{{ path('admin_projects') }}" class="cyber-btn cyber-btn--projects">
         <i class="bi bi-arrow-left"></i> <span>Tornar a Projectes</span>
     </a>
 </div>
@@ -76,13 +78,14 @@
                 <th>Data</th>
                 <th>Descripció</th>
                 <th>Estat</th>
+                <th>Actiu</th>
                 <th>Accions</th>
             </tr>
         </thead>
         <tbody>
         {% if entries is empty %}
             <tr>
-                <td colspan="6" class="cyber-empty">
+                <td colspan="7" class="cyber-empty">
                     <div class="cyber-empty-icon"><i class="bi bi-file-earmark-text"></i></div>
                     <p class="cyber-empty-text">No hi ha entrades</p>
                     <a href="{{ path('admin_entry_new', {slug: ct.slug}) }}" class="cyber-btn-primary cyber-btn--action">
@@ -141,19 +144,27 @@
                     {% endif %}
                 </td>
                 <td class="cyber-cell" data-label="Estat">
-                    {% if entry.status == 'published' %}
-                    <span class="cyber-badge cyber-badge--published">Publicat</span>
-                    {% elseif entry.status == 'draft' %}
-                    <span class="cyber-badge cyber-badge--draft">No publicat</span>
-                    {% else %}
-                    <span class="cyber-badge cyber-badge--archived">Arxivat</span>
-                    {% endif %}
+                    <span class="cyber-status">
+                        {% if entry.status == 'published' %}
+                            <span class="cyber-status-dot cyber-status-dot--active"></span>
+                            <span class="cyber-status-text">Publicat</span>
+                        {% elseif entry.status == 'draft' %}
+                            <span class="cyber-status-dot cyber-status-dot--draft"></span>
+                            <span class="cyber-status-text--draft">No publicat</span>
+                        {% else %}
+                            <span class="cyber-status-dot cyber-status-dot--archived"></span>
+                            <span class="cyber-status-text--archived">Arxivat</span>
+                        {% endif %}
+                    </span>
+                </td>
+                <td class="cyber-cell cyber-cell--status" data-label="Actiu">
+                    {% include 'admin/components/_status.html.twig' with {active: entry.active} %}
                 </td>
                 <td class="cyber-cell" data-label="Accions">
                     <div class="cyber-actions">
                         <a href="{{ path('admin_entry_show', {id: entry.id}) }}"
-                           class="cyber-btn cyber-btn--icon" title="Veure">
-                            <i class="bi bi-eye"></i>
+                           class="cyber-btn cyber-btn--projects" title="Veure">
+                            <i class="bi bi-eye"></i> <span>Veure</span>
                         </a>
                         <span class="cyber-actions-divider"></span>
                         {% include 'admin/components/_toggle_btn.html.twig' with {

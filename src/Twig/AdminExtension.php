@@ -21,9 +21,10 @@ use App\Repository\ProjectRepository;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Twig\Extension\AbstractExtension;
+use Twig\Extension\GlobalsInterface;
 use Twig\TwigFunction;
 
-class AdminExtension extends AbstractExtension
+class AdminExtension extends AbstractExtension implements GlobalsInterface
 {
     public function __construct(
         private readonly ContentTypeRepository $ctRepo,

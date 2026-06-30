@@ -18,7 +18,7 @@ class ApiGuideController extends AbstractController
     #[Route('', name: 'admin_api_guide')]
     public function index(): Response
     {
-        $this->denyAccessUnlessGranted('ROLE_USUARIO');
+        $this->denyAccessUnlessGranted('ROLE_ADMIN');
 
         return $this->render('admin/api-guide.html.twig');
     }

@@ -3,7 +3,7 @@
 {% block page_title %}Tipus per defecte{% endblock %}
 
 {% block topbar_actions %}
-<a href="{{ path('admin_base_content_new') }}" class="cyber-btn-primary" data-anim="cyber-btn">
+<a href="{{ path('admin_base_content_new') }}" class="cyber-btn cyber-btn--projects" data-anim="cyber-btn">
     <i class="bi bi-plus-lg"></i> <span>Nova plantilla</span>
 </a>
 {% endblock %}
@@ -12,12 +12,21 @@
 
 {% include 'admin/components/_section_header.html.twig' with {
     title: 'Tipus per defecte',
-    description: 'Plantilles base que es clonen automàticament en crear un projecte nou',
+    description: 'Plantilles base disponibles. Les que tenen "Auto clonar" actiu es clonen automàticament en crear un projecte nou',
     icon: 'bi-layers-fill',
     stats: [
         {value: templates|length, label: 'Plantilles'}
     ]
 } %}
+
+<div class="cyber-tabs mb-4">
+    <a href="{{ path('admin_content_type_index') }}" class="cyber-tab">
+        <i class="bi bi-layers-fill"></i> Tipus del projecte
+    </a>
+    <a href="{{ path('admin_base_content_index') }}" class="cyber-tab cyber-tab--active">
+        <i class="bi bi-window-stack"></i> Plantilles globals
+    </a>
+</div>
 
 <div class="cyber-card cyber-card--table cyber-card--flush" data-anim="cyber-card">
     <table class="cyber-table">
@@ -26,6 +35,7 @@
                 <th>Nom</th>
                 <th>Tipo</th>
                 <th>Camps</th>
+                <th>Auto clonar</th>
                 <th>Actiu</th>
                 <th>Accions</th>
             </tr>
@@ -39,13 +49,16 @@
                 </td>
                 <td class="cyber-cell cyber-cell--numeric">{{ ct.fields|length }}</td>
                 <td class="cyber-cell cyber-cell--status">
+                    {% include 'admin/components/_status.html.twig' with {active: ct.autoClone} %}
+                </td>
+                <td class="cyber-cell cyber-cell--status">
                     {% include 'admin/components/_status.html.twig' with {active: ct.active} %}
                 </td>
                 <td class="cyber-cell" data-label="Accions">
                     <div class="cyber-actions">
                         <a href="{{ path('admin_base_content_show', {id: ct.id}) }}"
-                           class="cyber-btn cyber-btn--icon cyber-btn--view" title="Veure">
-                            <i class="bi bi-eye"></i>
+                           class="cyber-btn cyber-btn--projects" title="Veure">
+                            <i class="bi bi-eye"></i> <span>Veure</span>
                         </a>
 
                         <span class="cyber-actions-divider"></span>
@@ -66,7 +79,7 @@
             </tr>
         {% else %}
             <tr>
-                <td colspan="5" class="cyber-cell text-center py-4">
+                <td colspan="6" class="cyber-cell text-center py-4">
                     <p class="field-help-text field-help-text--action">No hi ha plantilles base</p>
                 </td>
             </tr>

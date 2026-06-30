@@ -3,7 +3,7 @@
 {% block page_title %}Tipus de contingut{% endblock %}
 
 {% block topbar_actions %}
-<a href="{{ path('admin_content_type_new') }}" class="cyber-btn-primary" data-anim="cyber-btn">
+<a href="{{ path('admin_content_type_new') }}" class="cyber-btn cyber-btn--projects" data-anim="cyber-btn">
     <i class="bi bi-plus-lg"></i> <span>Nou tipus</span>
 </a>
 {% endblock %}
@@ -19,6 +19,15 @@
         {value: contentTypes|filter(ct => ct.active)|length, label: 'Actius', modifier: 'active'}
     ]
 } %}
+
+<div class="cyber-tabs mb-4">
+    <a href="{{ path('admin_content_type_index') }}" class="cyber-tab cyber-tab--active">
+        <i class="bi bi-layers-fill"></i> Tipus del projecte
+    </a>
+    <a href="{{ path('admin_base_content_index') }}" class="cyber-tab">
+        <i class="bi bi-window-stack"></i> Plantilles globals
+    </a>
+</div>
 
 <div class="cyber-card cyber-card--table cyber-card--flush" data-anim="cyber-card">
     <table class="cyber-table">

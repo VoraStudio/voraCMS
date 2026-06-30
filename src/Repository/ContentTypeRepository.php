@@ -27,8 +27,8 @@ class ContentTypeRepository extends ServiceEntityRepository
             ->setParameter('slug', $slug);
 
         if ($projectId !== null) {
-            $qb->andWhere('IDENTITY(ct.project) = :projectId')
-                ->setParameter('projectId', $projectId);
+            $qb->andWhere('ct.project = :project')
+                ->setParameter('project', $projectId);
         }
 
         return $qb->getQuery()->getOneOrNullResult();
@@ -42,8 +42,8 @@ class ContentTypeRepository extends ServiceEntityRepository
             ->orderBy('ct.name', 'ASC');
 
         if ($projectId !== null) {
-            $qb->andWhere('IDENTITY(ct.project) = :projectId')
-                ->setParameter('projectId', $projectId);
+            $qb->andWhere('ct.project = :project')
+                ->setParameter('project', $projectId);
         } else {
             $qb->andWhere('ct.project IS NULL')
                 ->andWhere('ct.base = :base')
@@ -80,6 +80,22 @@ class ContentTypeRepository extends ServiceEntityRepository
             ->where('ct.base = :base')
             ->andWhere('ct.project IS NULL')
             ->setParameter('base', true)
+            ->orderBy('ct.name', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
+
+    /**
+     * @return ContentType[]
+     */
+    public function findAutoCloneTemplates(): array
+    {
+        return $this->createQueryBuilder('ct')
+            ->where('ct.base = :base')
+            ->andWhere('ct.project IS NULL')
+            ->andWhere('ct.autoClone = :autoClone')
+            ->setParameter('base', true)
+            ->setParameter('autoClone', true)
             ->orderBy('ct.name', 'ASC')
             ->getQuery()
             ->getResult();

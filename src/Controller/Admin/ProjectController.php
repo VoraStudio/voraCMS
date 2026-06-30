@@ -42,18 +42,39 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
 class ProjectController extends AbstractController
 {
     /* -----------------------------------------------------------
-       index — Llista de projectes.
-       Si es passa ?user={id}, filtra per usuari (des de la
-       taula d'usuaris).
-       ----------------------------------------------------------- */
+        index — Llista de projectes.
+        - Admin: veu tots els projectes agrupats per client.
+        - Usuari normal: veu només els seus projectes en mode targeta.
+        ----------------------------------------------------------- */
     #[Route('', name: 'admin_projects')]
     public function index(
         Request $request,
         ProjectRepository $projectRepo,
         UserRepository $userRepo,
     ): Response {
-        $this->denyAccessUnlessGranted('ROLE_ADMIN');
+        $this->denyAccessUnlessGranted('ROLE_USUARIO');
 
+        $currentUser = $this->getUser();
+        $isAdmin = $this->isGranted('ROLE_ADMIN');
+
+        /* Per a no-admin, forcem filtre per usuari actual */
+        if (!$isAdmin && $currentUser instanceof User) {
+            $filterUser = $currentUser;
+            $projects = $projectRepo->findBy(['user' => $filterUser], ['id' => 'DESC']);
+            $mainProject = $projects[0] ?? null;
+            $otherProjects = array_slice($projects, 1);
+            $protectedProjectIds = $this->computeProtectedIds($projects);
+
+            return $this->render('admin/project/index.html.twig', [
+                'projects' => $projects,
+                'mainProject' => $mainProject,
+                'otherProjects' => $otherProjects,
+                'filterUser' => $filterUser,
+                'protectedProjectIds' => $protectedProjectIds,
+            ]);
+        }
+
+        /* Admin: vista completa amb ?user filter */
         $userId = $request->query->getInt('user', 0);
         $filterUser = null;
         $mainProject = null;
@@ -70,21 +91,7 @@ class ProjectController extends AbstractController
             $projects = $projectRepo->findAllOrderedByUser();
         }
 
-        /* Compute projectes que NO es poden eliminar (únics del seu usuari) */
-        $userCounts = [];
-        foreach ($projects as $p) {
-            $uid = $p->getUser()?->getId();
-            if ($uid !== null) {
-                $userCounts[$uid] = ($userCounts[$uid] ?? 0) + 1;
-            }
-        }
-        $protectedProjectIds = [];
-        foreach ($projects as $p) {
-            $uid = $p->getUser()?->getId();
-            if ($uid !== null && ($userCounts[$uid] ?? 0) === 1) {
-                $protectedProjectIds[] = $p->getId();
-            }
-        }
+        $protectedProjectIds = $this->computeProtectedIds($projects);
 
         return $this->render('admin/project/index.html.twig', [
             'projects' => $projects,
@@ -93,6 +100,26 @@ class ProjectController extends AbstractController
             'filterUser' => $filterUser,
             'protectedProjectIds' => $protectedProjectIds,
         ]);
+    }
+
+    /** Compute project IDs that are protected (sole project of their user) */
+    private function computeProtectedIds(array $projects): array
+    {
+        $userCounts = [];
+        foreach ($projects as $p) {
+            $uid = $p->getUser()?->getId();
+            if ($uid !== null) {
+                $userCounts[$uid] = ($userCounts[$uid] ?? 0) + 1;
+            }
+        }
+        $ids = [];
+        foreach ($projects as $p) {
+            $uid = $p->getUser()?->getId();
+            if ($uid !== null && ($userCounts[$uid] ?? 0) === 1) {
+                $ids[] = $p->getId();
+            }
+        }
+        return $ids;
     }
 
     /* -----------------------------------------------------------
@@ -109,11 +136,19 @@ class ProjectController extends AbstractController
         EntryRepository $entryRepo,
         MediaRepository $mediaRepo,
     ): Response {
-        $this->denyAccessUnlessGranted('ROLE_ADMIN');
+        $this->denyAccessUnlessGranted('ROLE_USUARIO');
 
         $project = $projectRepo->find($id);
         if (!$project) {
             throw $this->createNotFoundException('Projecte no trobat');
+        }
+
+        /* Només el propietari o admin poden veure el projecte */
+        $currentUser = $this->getUser();
+        if (!$this->isGranted('ROLE_ADMIN') && $currentUser instanceof User) {
+            if ($project->getUser()?->getId() !== $currentUser->getId()) {
+                throw $this->createAccessDeniedException('No tens accés a aquest projecte.');
+            }
         }
 
         $request->getSession()->set('_project_id', $project->getId());
@@ -197,8 +232,8 @@ class ProjectController extends AbstractController
                 $em->persist($project);
                 $em->flush();
 
-                /* Clonar plantilles base al projecte */
-                $baseTemplates = $ctRepo->findBaseTemplates();
+                /* Clonar plantilles base al projecte (només autoClone) */
+                $baseTemplates = $ctRepo->findAutoCloneTemplates();
                 foreach ($baseTemplates as $template) {
                     $ct = new ContentType();
                     $ct->setName($template->getName());

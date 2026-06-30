@@ -33,30 +33,18 @@
 
             {# ─── Project selector / current project ─── #}
             {% set sidebarTypes = admin_content_types() %}
-            {% if is_granted('ROLE_ADMIN') %}
             <a class="s-sidebar-link{% if app.request.get('_route') starts with 'admin_project_' %} active{% endif %}" href="{{ path('admin_projects') }}">
                 <i class="bi bi-folder"></i> Projectes
             </a>
+            {% if is_granted('ROLE_ADMIN') %}
             <a class="s-sidebar-link{% if app.request.get('_route') starts with 'admin_user_' %} active{% endif %}" href="{{ path('admin_user_index') }}">
                 <i class="bi bi-people"></i> Usuaris
             </a>
-            <div class="s-sidebar-section">Content Type</div>
-            <a class="s-sidebar-link{% if app.request.get('_route') starts with 'admin_base_content_' %} active{% endif %}" href="{{ path('admin_base_content_index') }}">
-                <i class="bi bi-layers-fill"></i> Tipus per defecte
-            </a>
             {% endif %}
 
-            {% if activeProject is defined and activeProject %}
-            <div class="s-sidebar-section s-sidebar-section--indented">
-                <span class="s-sidebar-section__subtitle">
-                    {{ activeProject.name }}
-                </span>
-            </div>
-            {% endif %}
-
-            {# ─── Seccions (gestió de tipus de contingut) ─── #}
-            {% if activeProject is defined and activeProject and is_granted('MANAGE_CT', activeProject) %}
-            <a class="s-sidebar-link{% if app.request.get('_route') starts with 'admin_content_type_' %} active{% endif %}" href="{{ path('admin_content_type_index') }}">
+            {# ─── Seccions (gestió de tipus de contingut i plantilles globals) ─── #}
+            {% if activeProject is defined and activeProject and is_granted('ROLE_ADMIN') %}
+            <a class="s-sidebar-link{% if app.request.get('_route') starts with 'admin_content_type_' or app.request.get('_route') starts with 'admin_base_content_' %} active{% endif %}" href="{{ path('admin_content_type_index') }}">
                 <i class="bi bi-layers-fill"></i> Tipus de contingut
             </a>
             {% endif %}
@@ -67,7 +55,13 @@
 
             {# ─── Si hi ha projecte actiu → mostrem les seves seccions ─── #}
             {% if sidebarTypes is not empty %}
-            <div class="s-sidebar-section">Continguts</div>
+            <div class="s-sidebar-section">
+                {% if activeProject is defined and activeProject %}
+                    {{ activeProject.name }}
+                {% else %}
+                    Continguts
+                {% endif %}
+            </div>
             {% for ct in sidebarTypes %}
             <a class="s-sidebar-link text-capitalize{% if app.request.get('slug') == ct.slug %} active{% endif %}" href="{{ path('admin_entry_by_type', {slug: ct.slug}) }}">
                 <i class="bi bi-file-text"></i> {{ ct.name }}
@@ -75,10 +69,12 @@
             {% endfor %}
             {% endif %}
 
+            {% if is_granted('ROLE_ADMIN') %}
             <div class="s-sidebar-section">Desenvolupador</div>
             <a class="s-sidebar-link{% if app.request.get('_route') == 'admin_api_guide' %} active{% endif %}" href="{{ path('admin_api_guide') }}">
                 <i class="bi bi-code-slash"></i> Guia API
             </a>
+            {% endif %}
 
         </div>{# ─── /s-sidebar-nav ─── #}
     </nav>

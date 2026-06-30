@@ -12,10 +12,10 @@
 
 {% block topbar_actions %}
 <div class="topbar-actions-group">
-    <a href="{{ path('admin_entry_edit', {id: entry.id}) }}" class="cyber-btn-primary cyber-btn--compact">
-        <i class="bi bi-pencil"></i> <span>Editar</span>
+    <a href="{{ path('admin_entry_edit', {id: entry.id}) }}" class="cyber-btn cyber-btn--projects">
+        <i class="bi bi-pencil"></i> <span>Editar entrada</span>
     </a>
-    <a href="{{ path('admin_entry_by_type', {slug: contentType.slug}) }}" class="cyber-btn-back">
+    <a href="{{ path('admin_entry_by_type', {slug: contentType.slug}) }}" class="cyber-btn cyber-btn--projects">
         <i class="bi bi-arrow-left"></i> <span>Tornar</span>
     </a>
 </div>
@@ -36,13 +36,18 @@
                 <div>
                     <div class="s-field-label">Estat</div>
                     <div>
-                        {% if entry.status == 'published' %}
-                            <span class="badge bg-success">Publicat</span>
-                        {% elseif entry.status == 'draft' %}
-                            <span class="badge bg-secondary">Esborrany</span>
-                        {% else %}
-                            <span class="badge badge--archived">Arxivat</span>
-                        {% endif %}
+                        <span class="cyber-status">
+                            {% if entry.status == 'published' %}
+                                <span class="cyber-status-dot cyber-status-dot--active"></span>
+                                <span class="cyber-status-text">Publicat</span>
+                            {% elseif entry.status == 'draft' %}
+                                <span class="cyber-status-dot cyber-status-dot--draft"></span>
+                                <span class="cyber-status-text--draft">No publicat</span>
+                            {% else %}
+                                <span class="cyber-status-dot cyber-status-dot--archived"></span>
+                                <span class="cyber-status-text--archived">Arxivat</span>
+                            {% endif %}
+                        </span>
                     </div>
                 </div>
                 <div>

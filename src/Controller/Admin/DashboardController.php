@@ -89,59 +89,65 @@ class DashboardController extends AbstractController
         $session = $request->getSession();
         $activeProjectId = $session->get('_project_id');
 
-        $projects = $projectRepo->findActive();
+        $projects = $isAdmin
+            ? $projectRepo->findActive()
+            : $projectRepo->findBy(['user' => $user, 'active' => true]);
         $totalProjects = count($projects);
 
         if ($totalProjects === 0) {
             return $this->redirectToRoute('admin_project_new');
         }
 
-        /* ── ContentTypes i mètriques ── */
-        $stats = [];
-        $totalEntries = 0;
-        $totalPublished = 0;
-        $projectToShow = null;
-
-        if ($totalProjects === 1) {
-            $pid = $projects[0]->getId();
-            $session->set('_project_id', $pid);
-            $projectToShow = $projects[0];
-        } elseif ($activeProjectId !== null) {
-            $projectToShow = $projectRepo->find($activeProjectId);
-        } else {
-            $pid = $projects[0]->getId();
-            $session->set('_project_id', $pid);
-            $projectToShow = $projects[0];
+        // Establecer el primer proyecto activo si no hay ninguno en sesión
+        if ($activeProjectId === null) {
+            $session->set('_project_id', $projects[0]->getId());
+            $activeProjectId = $projects[0]->getId();
         }
 
-        if ($projectToShow !== null) {
-            $contentTypes = $ctRepo->findActive($projectToShow->getId());
-            foreach ($contentTypes as $ct) {
-                $stats[] = [
-                    'type' => $ct,
-                    'total' => count($ct->getEntries()),
-                    'published' => count($entryRepo->findPublishedByType($ct->getSlug())),
-                ];
-                $totalEntries += end($stats)['total'];
-                $totalPublished += end($stats)['published'];
+        /* ── Mètriques de cada projecte del usuari ── */
+        $projectsData = [];
+        $globalEntries = 0;
+        $globalPublished = 0;
+
+        foreach ($projects as $p) {
+            $projEntries = 0;
+            $projPublished = 0;
+
+            foreach ($p->getContentTypes() as $ct) {
+                if ($ct->isActive()) {
+                    $projEntries += count($ct->getEntries());
+                    foreach ($ct->getEntries() as $entry) {
+                        if ($entry->getStatus() === Entry::STATUS_PUBLISHED) {
+                            $projPublished++;
+                        }
+                    }
+                }
             }
+
+            $projectsData[] = [
+                'project' => $p,
+                'totalSections' => count($p->getContentTypes()),
+                'totalEntries' => $projEntries,
+                'totalPublished' => $projPublished,
+            ];
+
+            $globalEntries += $projEntries;
+            $globalPublished += $projPublished;
         }
 
-        $userId = $user?->getId();
+        $userId = $user?? null ? $user->getId() : null;
         $totalMedia = $userId !== null
             ? count($mediaRepo->findByUser($userId))
             : 0;
 
         return $this->render('admin/dashboard.html.twig', [
-            'stats' => $stats,
-            'projects' => $projects,
-            'projectToShow' => $projectToShow,
-            'activeProject' => $projectToShow,
+            'projectsData' => $projectsData,
+            'activeProjectId' => $activeProjectId,
             'metrics' => [
-                'totalEntries' => $totalEntries,
-                'totalPublished' => $totalPublished,
+                'totalEntries' => $globalEntries,
+                'totalPublished' => $globalPublished,
                 'totalMedia' => $totalMedia,
-                'totalProjects' => max($totalProjects, 1),
+                'totalProjects' => $totalProjects,
             ],
         ]);
     }
@@ -164,14 +170,10 @@ class DashboardController extends AbstractController
         $request->getSession()->set('_project_id', $project->getId());
 
         $redirect = $request->query->get('_redirect');
-        if ($redirect && $this->isGranted('ROLE_ADMIN')) {
+        if ($redirect && str_starts_with($redirect, '/admin/')) {
             return $this->redirect($redirect);
         }
 
-        if ($this->isGranted('ROLE_ADMIN')) {
-            return $this->redirectToRoute('admin_project_show', ['id' => $project->getId()]);
-        }
-
-        return $this->redirectToRoute('admin_dashboard');
+        return $this->redirectToRoute('admin_project_show', ['id' => $project->getId()]);
     }
 }

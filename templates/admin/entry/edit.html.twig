@@ -16,7 +16,7 @@
 {% endblock %}
 
 {% block topbar_actions %}
-<a href="{{ path('admin_entry_by_type', {slug: contentType.slug}) }}" class="cyber-btn-back">
+<a href="{{ path('admin_entry_by_type', {slug: contentType.slug}) }}" class="cyber-btn cyber-btn--projects">
     <i class="bi bi-arrow-left"></i> <span>Tornar</span>
 </a>
 {% endblock %}
@@ -29,7 +29,7 @@
                 <div class="col-md-6">
                     <label class="form-label">Estat</label>
                     <select name="status" class="form-select form-select-sm">
-                        <option value="draft" {% if entry.status == 'draft' %}selected{% endif %}>Esborrany</option>
+                        <option value="draft" {% if entry.status == 'draft' %}selected{% endif %}>No publicat</option>
                         <option value="published" {% if entry.status == 'published' %}selected{% endif %}>Publicat</option>
                         <option value="archived" {% if entry.status == 'archived' %}selected{% endif %}>Arxivat</option>
                     </select>

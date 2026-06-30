@@ -3,7 +3,7 @@
 {% block page_title %}Nova plantilla base{% endblock %}
 
 {% block topbar_actions %}
-<a href="{{ path('admin_base_content_index') }}" class="cyber-btn-back">
+<a href="{{ path('admin_base_content_index') }}" class="cyber-btn cyber-btn--projects">
     <i class="bi bi-arrow-left"></i> <span>Tornar</span>
 </a>
 {% endblock %}
@@ -76,6 +76,22 @@
                     </div>
                 </div>
             </div>
+
+            <hr class="form-divider my-4">
+
+            <div class="cyber-form-group mb-4">
+                <div class="cyber-form-check">
+                    <input type="checkbox" name="autoClone" class="cyber-form-checkbox" value="1" checked id="autoClone">
+                    <label class="cyber-form-check-label" for="autoClone">
+                        <strong>Auto clonar</strong> en crear projectes nous
+                    </label>
+                </div>
+                <p class="field-help-text" style="margin-top: 4px; margin-left: 28px;">Si està actiu, aquesta plantilla es clonarà automàticament a cada projecte nou.</p>
+            </div>
+
+            <hr class="form-divider my-4">
+
+            {% include 'admin/base-content/_project_selector.html.twig' %}
 
             <hr class="form-divider my-4">
             <button type="submit" class="cyber-form-submit mt-2" data-anim="cyber-btn">

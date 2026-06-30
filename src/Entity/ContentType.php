@@ -35,6 +35,9 @@ class ContentType
     #[ORM\Column(options: ['default' => false])]
     private bool $base = false;
 
+    #[ORM\Column(options: ['default' => true])]
+    private bool $autoClone = true;
+
     #[ORM\ManyToOne]
     #[ORM\JoinColumn(nullable: false)]
     private ?User $user = null;
@@ -76,6 +79,9 @@ class ContentType
 
     public function isBase(): bool { return $this->base; }
     public function setBase(bool $base): static { $this->base = $base; return $this; }
+
+    public function isAutoClone(): bool { return $this->autoClone; }
+    public function setAutoClone(bool $autoClone): static { $this->autoClone = $autoClone; return $this; }
 
     public function getUser(): ?User { return $this->user; }
     public function setUser(?User $user): static { $this->user = $user; return $this; }

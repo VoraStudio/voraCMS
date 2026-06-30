@@ -31,7 +31,7 @@ class ContentTypeController extends AbstractController
 {
     /* -----------------------------------------------------------
         index — Llista els tipus de contingut del projecte actiu.
-        Requereix MANAGE_CT sobre el projecte (o accés a CT base).
+        Requereix ROLE_ADMIN.
         ----------------------------------------------------------- */
     #[Route('/', name: 'admin_content_type_index')]
     public function index(
@@ -39,13 +39,8 @@ class ContentTypeController extends AbstractController
         ProjectRepository $projectRepo,
         Request $request,
     ): Response {
-        $this->denyAccessUnlessGranted('ROLE_USUARIO');
+        $this->denyAccessUnlessGranted('ROLE_ADMIN');
         $projectId = $request->getSession()->get('_project_id');
-        $project = $projectId ? $projectRepo->find($projectId) : null;
-
-        if ($project !== null) {
-            $this->denyAccessUnlessGranted('MANAGE_CT', $project);
-        }
 
         return $this->render('admin/content-type/index.html.twig', [
             'contentTypes' => $repo->findActive($projectId),
@@ -54,7 +49,7 @@ class ContentTypeController extends AbstractController
 
     /* -----------------------------------------------------------
         new — Crea un nou tipus de contingut dins del projecte
-        actiu de la sessió. Requereix MANAGE_CT sobre el projecte.
+        actiu de la sessió. Requereix ROLE_ADMIN.
         ----------------------------------------------------------- */
     #[Route('/new', name: 'admin_content_type_new', methods: ['GET', 'POST'])]
     public function new(
@@ -62,14 +57,13 @@ class ContentTypeController extends AbstractController
         EntityManagerInterface $em,
         ProjectRepository $projectRepo,
     ): Response {
+        $this->denyAccessUnlessGranted('ROLE_ADMIN');
         $projectId = $request->getSession()->get('_project_id');
         $project = $projectId ? $projectRepo->find($projectId) : null;
 
         if ($project === null) {
             throw $this->createAccessDeniedException('Cal seleccionar un projecte per crear un tipus de contingut.');
         }
-
-        $this->denyAccessUnlessGranted('MANAGE_CT', $project);
 
         if ($request->isMethod('POST')) {
             $ct = new ContentType();
@@ -124,14 +118,7 @@ class ContentTypeController extends AbstractController
         ContentType $contentType,
         EntityManagerInterface $em,
     ): Response {
-        $project = $contentType->getProject();
-        if ($project !== null) {
-            $this->denyAccessUnlessGranted('MANAGE_CT', $project);
-        } else {
-            $this->denyAccessUnlessGranted('ROLE_ADMIN');
-        }
-
-        /* Verificació de propietat */
+        $this->denyAccessUnlessGranted('ROLE_ADMIN');
         $this->verifyOwnership($contentType);
 
         if ($request->isMethod('POST')) {
@@ -177,12 +164,7 @@ class ContentTypeController extends AbstractController
     #[Route('/{id}/delete', name: 'admin_content_type_delete', methods: ['POST'])]
     public function delete(Request $request, ContentType $contentType, EntityManagerInterface $em): Response
     {
-        $project = $contentType->getProject();
-        if ($project !== null) {
-            $this->denyAccessUnlessGranted('MANAGE_CT', $project);
-        } else {
-            $this->denyAccessUnlessGranted('ROLE_ADMIN');
-        }
+        $this->denyAccessUnlessGranted('ROLE_ADMIN');
         $this->verifyOwnership($contentType);
 
         if ($this->isCsrfTokenValid('delete' . $contentType->getId(), $request->request->get('_token'))) {
