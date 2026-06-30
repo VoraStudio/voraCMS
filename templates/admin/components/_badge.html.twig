@@ -1,0 +1,2 @@
+{# _badge.html.twig — cyber-badge with optional modifier (admin, mod, user, published, draft, archived) #}
+<span class="cyber-badge{% if modifier is defined %} cyber-badge--{{ modifier }}{% endif %}">{{ text }}</span>

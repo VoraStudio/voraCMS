@@ -22,10 +22,13 @@
 
 namespace App\Controller\Admin;
 
+use App\Entity\ContentType;
+use App\Entity\FieldDefinition;
 use App\Entity\Project;
 use App\Entity\User;
 use App\Repository\ContentTypeRepository;
 use App\Repository\EntryRepository;
+use App\Repository\MediaRepository;
 use App\Repository\ProjectRepository;
 use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
@@ -67,11 +70,28 @@ class ProjectController extends AbstractController
             $projects = $projectRepo->findAllOrderedByUser();
         }
 
+        /* Compute projectes que NO es poden eliminar (únics del seu usuari) */
+        $userCounts = [];
+        foreach ($projects as $p) {
+            $uid = $p->getUser()?->getId();
+            if ($uid !== null) {
+                $userCounts[$uid] = ($userCounts[$uid] ?? 0) + 1;
+            }
+        }
+        $protectedProjectIds = [];
+        foreach ($projects as $p) {
+            $uid = $p->getUser()?->getId();
+            if ($uid !== null && ($userCounts[$uid] ?? 0) === 1) {
+                $protectedProjectIds[] = $p->getId();
+            }
+        }
+
         return $this->render('admin/project/index.html.twig', [
             'projects' => $projects,
             'mainProject' => $mainProject,
             'otherProjects' => $otherProjects,
             'filterUser' => $filterUser,
+            'protectedProjectIds' => $protectedProjectIds,
         ]);
     }
 
@@ -80,13 +100,14 @@ class ProjectController extends AbstractController
         Mostra cards per cada ContentType (ex: Eventos, Noticias)
         amb el nombre d'entrades i accés a gestió.
         ----------------------------------------------------------- */
-    #[Route('/{id}', name: 'admin_project_show', methods: ['GET'])]
+    #[Route('/{id}', name: 'admin_project_show', requirements: ['id' => '\d+'], methods: ['GET'])]
     public function show(
         int $id,
         Request $request,
         ProjectRepository $projectRepo,
         ContentTypeRepository $ctRepo,
         EntryRepository $entryRepo,
+        MediaRepository $mediaRepo,
     ): Response {
         $this->denyAccessUnlessGranted('ROLE_ADMIN');
 
@@ -98,18 +119,38 @@ class ProjectController extends AbstractController
         $request->getSession()->set('_project_id', $project->getId());
 
         $contentTypes = $ctRepo->findActive($project->getId());
-        $stats = [];
+        $sections = [];
         foreach ($contentTypes as $ct) {
-            $stats[] = [
+            $entries = $ct->getEntries();
+            $thumbnails = [];
+            foreach ($entries as $entry) {
+                $thumb = null;
+                foreach ($entry->getFieldValues() as $fv) {
+                    $type = $fv->getFieldDefinition()?->getFieldType();
+                    $val = $fv->getValue();
+                    if (($type === FieldDefinition::TYPE_IMAGE || $type === FieldDefinition::TYPE_GALLERY) && $val) {
+                        $ids = array_filter(explode(',', $val));
+                        if (!empty($ids) && is_numeric($ids[0])) {
+                            $media = $mediaRepo->find((int) $ids[0]);
+                            if ($media) { $thumb = $media->getPath(); break; }
+                        }
+                    }
+                }
+                $thumbnails[$entry->getId()] = $thumb;
+            }
+
+            $sections[] = [
                 'type' => $ct,
-                'total' => count($ct->getEntries()),
+                'entries' => $entries,
+                'thumbnails' => $thumbnails,
+                'total' => count($entries),
                 'published' => count($entryRepo->findPublishedByType($ct->getSlug())),
             ];
         }
 
         return $this->render('admin/project/show.html.twig', [
             'project' => $project,
-            'stats' => $stats,
+            'sections' => $sections,
         ]);
     }
 
@@ -122,6 +163,7 @@ class ProjectController extends AbstractController
         EntityManagerInterface $em,
         ValidatorInterface $validator,
         UserRepository $userRepo,
+        ContentTypeRepository $ctRepo,
     ): Response {
         $this->denyAccessUnlessGranted('ROLE_ADMIN');
 
@@ -132,6 +174,8 @@ class ProjectController extends AbstractController
 
         $project = new Project();
         $users = $userRepo->findBy([], ['name' => 'ASC']);
+
+        $preselectUserId = $request->query->getInt('user', 0);
 
         if ($request->isMethod('POST')) {
             $project->setName($request->request->get('name', ''));
@@ -153,6 +197,32 @@ class ProjectController extends AbstractController
                 $em->persist($project);
                 $em->flush();
 
+                /* Clonar plantilles base al projecte */
+                $baseTemplates = $ctRepo->findBaseTemplates();
+                foreach ($baseTemplates as $template) {
+                    $ct = new ContentType();
+                    $ct->setName($template->getName());
+                    $ct->setSlug($template->getSlug());
+                    $ct->setDescription($template->getDescription());
+                    $ct->setActive(true);
+                    $ct->setBase(false);
+                    $ct->setUser($targetUser);
+                    $ct->setProject($project);
+
+                    foreach ($template->getFields() as $field) {
+                        $fd = new FieldDefinition();
+                        $fd->setName($field->getName());
+                        $fd->setSlug($field->getSlug());
+                        $fd->setFieldType($field->getFieldType());
+                        $fd->setRequired($field->isRequired());
+                        $fd->setSortOrder($field->getSortOrder());
+                        $ct->addField($fd);
+                    }
+
+                    $em->persist($ct);
+                }
+                $em->flush();
+
                 /* Seleccionem el projecte acabat de crear */
                 $request->getSession()->set('_project_id', $project->getId());
 
@@ -166,6 +236,7 @@ class ProjectController extends AbstractController
             'isNew' => true,
             'currentUser' => $currentUser,
             'users' => $users,
+            'preselectUserId' => $preselectUserId,
         ]);
     }
 
@@ -231,19 +302,22 @@ class ProjectController extends AbstractController
     }
 
     /* -----------------------------------------------------------
-       delete — Elimina un projecte (només si no té contingut).
+       delete — Elimina un projecte amb totes les seves seccions.
+       No permet eliminar si és l'únic projecte de l'usuari.
        ----------------------------------------------------------- */
     #[Route('/{id}/delete', name: 'admin_project_delete', methods: ['POST'])]
     public function delete(
         Request $request,
         Project $project,
         EntityManagerInterface $em,
+        ProjectRepository $projectRepo,
     ): Response {
         $this->denyAccessUnlessGranted('ROLE_ADMIN');
 
-        /* No permetem esborrar si té contingut associat */
-        if (count($project->getContentTypes()) > 0) {
-            $this->addFlash('error', 'No es pot eliminar un projecte amb seccions. Elimina primer les seccions.');
+        /* No permetem esborrar si és l'únic projecte del seu usuari */
+        $user = $project->getUser();
+        if ($user && $projectRepo->countByUser($user) <= 1) {
+            $this->addFlash('error', 'No es pot eliminar l\'únic projecte de l\'usuari.');
             return $this->redirectToRoute('admin_projects');
         }
 
@@ -253,6 +327,7 @@ class ProjectController extends AbstractController
             return $this->redirectToRoute('admin_projects');
         }
 
+        /* El cascading de Doctrine s'encarrega de seccions i entrades */
         $em->remove($project);
         $em->flush();
 

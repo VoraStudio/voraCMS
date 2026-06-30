@@ -1,0 +1,6 @@
+{# _quill_field.html.twig — Quill richtext wrapper with hidden textarea
+   Params: fieldId, value (optional initial content), required #}
+<div class="quill-wrapper" data-field-id="{{ fieldId }}" data-field-name="field_{{ fieldId }}">
+    <div class="js-quill-editor quill-editor-min-height">{{ value|default('')|raw }}</div>
+    <textarea name="field_{{ fieldId }}" class="d-none" rows="4"{% if required %} data-required="true"{% endif %}>{{ value|default('') }}</textarea>
+</div>

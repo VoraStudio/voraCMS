@@ -1,0 +1,5 @@
+{# _status.html.twig — active/inactive status dot + text #}
+<span class="cyber-status">
+    <span class="cyber-status-dot {% if active %}cyber-status-dot--active{% else %}cyber-status-dot--inactive{% endif %}"></span>
+    <span class="cyber-status-text{% if not active %} cyber-status-text--inactive{% endif %}">{{ active ? 'Actiu' : 'Inactiu' }}</span>
+</span>

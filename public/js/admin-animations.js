@@ -11,13 +11,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     var tl = gsap.timeline();
 
-    /* ─── 1. Sidebar links ─── */
-    var sidebarLinks = gsap.utils.toArray('.s-sidebar-link');
-    if (sidebarLinks.length) {
-      tl.from(sidebarLinks,
-        { opacity: 0, x: -14, duration: 0.25, stagger: 0.025, ease: 'power2.out', clearProps: 'transform' }
-      );
-    }
+
 
     /* ─── 2. Mètriques del dashboard (stagger lent) ─── */
     var metricCards = gsap.utils.toArray('[data-anim="metric"]');
@@ -95,7 +89,7 @@ document.addEventListener('DOMContentLoaded', function () {
   /* ─── Reduced motion: fade only ─── */
   mm.add('(prefers-reduced-motion: reduce)', function () {
     var fadeEls = document.querySelectorAll(
-      '[data-anim="metric"], [data-anim="card"], [data-anim="cyber-card"], [data-anim="cyber-row"], .s-stat-card, .table-hover tbody tr, .s-sidebar-link'
+      '[data-anim="metric"], [data-anim="card"], [data-anim="cyber-card"], [data-anim="cyber-row"], .s-stat-card, .table-hover tbody tr'
     );
     if (fadeEls.length) {
       gsap.from(fadeEls,

@@ -1,0 +1,11 @@
+{# _toggle_btn.html.twig — toggle active/inactive button form with AJAX support
+   Params: formId, csrfToken, route, active (bool) #}
+<form method="post" action="{{ route }}" class="cyber-form--inline" id="{{ formId }}">
+    <input type="hidden" name="_token" value="{{ csrfToken }}">
+    <button type="button"
+            class="cyber-btn cyber-btn--icon toggle-btn {{ active ? 'cyber-btn--toggle-active' : 'cyber-btn--toggle-inactive' }}"
+            title="{{ active ? 'Desactivar' : 'Activar' }}"
+            data-active="{{ active ? '1' : '0' }}">
+        <i class="bi {{ active ? 'bi-toggle2-on' : 'bi-toggle2-off' }}"></i>
+    </button>
+</form>

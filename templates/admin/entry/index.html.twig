@@ -2,43 +2,35 @@
 
 {% block page_title %}{{ contentType.name }}{% endblock %}
 
-{% block content %}
-<div class="cyber-section-header" data-anim="cyber-card">
-    <div class="cyber-section-header-left">
-        <div class="cyber-section-icon">
-            <i class="bi bi-file-text"></i>
-        </div>
-        <div>
-            <h2 class="cyber-section-title">{{ contentType.name }}</h2>
-            <p class="cyber-section-desc">{{ contentType.description ?: 'Gestiona les entrades d\'aquesta secció' }}</p>
-        </div>
-    </div>
-    <div class="cyber-section-header-right">
-        <div class="cyber-stat-mini">
-            <span class="cyber-stat-mini-value">{{ entries|length }}</span>
-            <span class="cyber-stat-mini-label">Total</span>
-        </div>
-        <div class="cyber-stat-mini">
-            <span class="cyber-stat-mini-value cyber-stat-mini-value--active">{{ entries|filter(e => e.active)|length }}</span>
-            <span class="cyber-stat-mini-label">Actius</span>
-        </div>
-    </div>
-</div>
-
-<div class="cyber-content-actions">
-    <a href="{{ path('admin_entry_new', {slug: contentType.slug}) }}" class="cyber-btn-primary" data-anim="cyber-btn">
-        <i class="bi bi-plus-lg"></i> <span>Nova entrada</span>
+{% block topbar_actions %}
+<div class="topbar-actions-group">
+    <a href="{{ path('admin_entry_new', {slug: contentType.slug}) }}" class="cyber-btn-primary cyber-btn--compact">
+        <i class="bi bi-plus-lg"></i> <span>Nova Entrada</span>
+    </a>
+    <a href="{{ path('admin_project_show', {id: contentType.project.id}) }}" class="cyber-btn cyber-btn--projects" title="Tornar al projecte">
+        <i class="bi bi-folder2-open"></i> <span>Tornar al projecte</span>
     </a>
 </div>
+{% endblock %}
 
-<div class="cyber-card cyber-card--table" data-anim="cyber-card" style="padding:0;">
+{% block content %}
+{% include 'admin/components/_section_header.html.twig' with {
+    title: contentType.name,
+    description: contentType.description ?: 'Gestiona les entrades d\'aquesta secció',
+    icon: 'bi-file-text',
+    stats: [
+        {value: entries|length, label: 'Total'},
+        {value: entries|filter(e => e.active)|length, label: 'Actius', modifier: 'active'}
+    ]
+} %}
+
+<div class="cyber-card cyber-card--table cyber-card--flush" data-anim="cyber-card">
     <table class="cyber-table">
         <thead>
             <tr>
                 <th>Títol</th>
                 <th>Data</th>
                 <th>Estat</th>
-                <th>Actiu</th>
                 <th>Idioma</th>
                 <th>Accions</th>
             </tr>
@@ -54,92 +46,74 @@
 
             <tr class="cyber-row {{ entry.active ? 'row-active' : 'row-inactive' }}" data-anim="cyber-row">
                 <td class="cyber-cell" data-label="Títol">
-                    <div style="display:flex;align-items:center;gap:10px;">
+                    <div class="cyber-cell__content">
                         {% set thumb = thumbnails[entry.id] ?? null %}
                         {% if thumb %}
-                            <img src="{{ thumb }}" alt="" style="width:32px;height:32px;object-fit:cover;border-radius:8px;flex-shrink:0;">
+                            <img src="{{ thumb }}" alt="" class="cyber-cell__thumb">
                         {% else %}
-                            <div style="width:32px;height:32px;border-radius:8px;background:rgba(148,163,184,0.08);display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--s-text-secondary);font-size:0.65rem;">
+                            <div class="cyber-cell__icon-placeholder">
                                 <i class="bi bi-file-text"></i>
                             </div>
                         {% endif %}
                         <div>
-                            <div style="font-size:0.82rem;font-weight:600;color:var(--s-text);line-height:1.3;">
+                            <div class="cyber-cell__title">
                                 {% if title %}
                                     {{ title|length > 50 ? title|slice(0, 50) ~ '...' : title }}
                                 {% else %}
-                                    <span style="color:var(--s-text-secondary);font-style:italic;">Sense títol</span>
+                                    <span class="cyber-cell__placeholder">Sense títol</span>
                                 {% endif %}
                             </div>
-                            <div style="font-size:0.62rem;color:var(--s-text-secondary);margin-top:1px;">ID {{ entry.id }}</div>
+                            <div class="cyber-cell__subtitle">ID {{ entry.id }}</div>
                         </div>
                     </div>
                 </td>
-                <td class="cyber-cell" data-label="Data" style="font-size:0.78rem;color:var(--s-text-secondary);white-space:nowrap;">
+                <td class="cyber-cell cyber-cell--date" data-label="Data">
                     {{ entry.createdAt|date('d/m/Y H:i') }}
                 </td>
                 <td class="cyber-cell" data-label="Estat">
                     {% if entry.status == 'published' %}
-                    <span class="cyber-badge" style="background:rgba(34,197,94,0.15);color:rgb(34,197,94);">Publicat</span>
+                    <span class="cyber-badge cyber-badge--published">Publicat</span>
                     {% elseif entry.status == 'draft' %}
-                    <span class="cyber-badge" style="background:rgba(148,163,184,0.12);color:var(--s-text-secondary);">Esborrany</span>
+                    <span class="cyber-badge cyber-badge--draft">No publicat</span>
                     {% else %}
-                    <span class="cyber-badge" style="background:rgba(239,68,68,0.12);color:rgb(239,68,68);">Arxivat</span>
+                    <span class="cyber-badge cyber-badge--archived">Arxivat</span>
                     {% endif %}
                 </td>
-                <td class="cyber-cell cyber-cell--status" data-label="Actiu">
-                    {% if entry.active %}
-                    <span class="cyber-status">
-                        <span class="cyber-status-dot cyber-status-dot--active"></span>
-                        <span class="cyber-status-text">Actiu</span>
-                    </span>
-                    {% else %}
-                    <span class="cyber-status">
-                        <span class="cyber-status-dot cyber-status-dot--inactive"></span>
-                        <span class="cyber-status-text cyber-status-text--inactive">Inactiu</span>
-                    </span>
-                    {% endif %}
-                </td>
-                <td class="cyber-cell" data-label="Idioma" style="font-size:0.8rem;font-weight:600;color:var(--s-text);letter-spacing:0.02em;">
+                <td class="cyber-cell cyber-cell--locale" data-label="Idioma">
                     {{ entry.locale|upper }}
                 </td>
                 <td class="cyber-cell" data-label="Accions">
                     <div class="cyber-actions">
                         <a href="{{ path('admin_entry_show', {id: entry.id}) }}"
-                           class="cyber-btn cyber-btn--icon"
+                           class="cyber-btn cyber-btn--icon cyber-btn--view"
                            title="Veure">
-                            <i class="bi bi-eye" style="font-size:0.85rem;"></i>
+                            <i class="bi bi-eye"></i>
                         </a>
 
                         <span class="cyber-actions-divider"></span>
 
-                        {# ─── Toggle active ─── #}
-                        <form method="post" action="{{ path('admin_entry_toggle_active', {id: entry.id}) }}" style="display:inline" id="tact-entry-{{ entry.id }}">
-                            <input type="hidden" name="_token" value="{{ csrf_token('toggle-active-' ~ entry.id) }}">
-                            <button type="button"
-                                    class="cyber-btn cyber-btn--icon toggle-btn {{ entry.active ? 'cyber-btn--toggle-active' : 'cyber-btn--toggle-inactive' }}"
-                                    title="{{ entry.active ? 'Desactivar' : 'Activar' }}"
-                                    data-active="{{ entry.active ? '1' : '0' }}">
-                                <i class="bi {{ entry.active ? 'bi-toggle2-on' : 'bi-toggle2-off' }}" style="font-size:1.05rem;"></i>
-                            </button>
-                        </form>
+                        {% include 'admin/components/_toggle_btn.html.twig' with {
+                            formId: 'tact-entry-' ~ entry.id,
+                            csrfToken: csrf_token('toggle-active-' ~ entry.id),
+                            route: path('admin_entry_toggle_active', {id: entry.id}),
+                            active: entry.active
+                        } %}
 
-                        {# ─── Editar ─── #}
                         <a href="{{ path('admin_entry_edit', {id: entry.id}) }}"
                            class="cyber-btn cyber-btn--icon cyber-btn--edit"
                            title="Editar">
-                            <i class="bi bi-pencil" style="font-size:0.8rem;"></i>
+                            <i class="bi bi-pencil"></i>
                         </a>
 
-                        {# ─── Eliminar ─── #}
-                        <form method="post" action="{{ path('admin_entry_delete', {id: entry.id}) }}" style="display:inline"
+                        <form method="post" action="{{ path('admin_entry_delete', {id: entry.id}) }}" class="cyber-form--inline"
                               id="del-entry-{{ entry.id }}">
                             <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ entry.id) }}">
                             <button type="button"
                                     class="cyber-btn cyber-btn--icon cyber-btn--delete"
                                     title="Eliminar"
-                                    onclick="swalConfirm('Segur que vols eliminar aquesta entrada?',function(){document.getElementById('del-entry-{{ entry.id }}').submit()})">
-                                <i class="bi bi-trash3" style="font-size:0.8rem;"></i>
+                                    data-confirm="Segur que vols eliminar aquesta entrada?"
+                                    data-form="del-entry-{{ entry.id }}">
+                                <i class="bi bi-trash3"></i>
                             </button>
                         </form>
                     </div>
@@ -147,10 +121,10 @@
             </tr>
             {% else %}
             <tr>
-                <td colspan="6" class="cyber-empty">
+                <td colspan="5" class="cyber-empty">
                     <div class="cyber-empty-icon"><i class="bi bi-file-text"></i></div>
                     <p class="cyber-empty-text">No hi ha entrades encara</p>
-                    <a href="{{ path('admin_entry_new', {slug: contentType.slug}) }}" class="cyber-btn-primary" style="margin-top:12px;display:inline-flex;">
+                    <a href="{{ path('admin_entry_new', {slug: contentType.slug}) }}" class="cyber-btn-primary cyber-btn--action">
                         <i class="bi bi-plus-lg"></i> <span>Crear primera entrada</span>
                     </a>
                 </td>
@@ -159,39 +133,4 @@
         </tbody>
     </table>
 </div>
-{% endblock %}
-
-{% block javascripts %}
-{{ parent() }}
-<script>
-(function(){
-  document.addEventListener('click',function(e){
-    var btn=e.target.closest('.toggle-btn');
-    if(!btn)return;
-    var f=btn.closest('form');
-    if(!f)return;
-    e.preventDefault();
-    fetch(f.action,{method:'POST',body:new FormData(f),headers:{'X-Requested-With':'XMLHttpRequest'}})
-      .then(function(r){return r.json()})
-      .then(function(d){
-        if(d.error)return;
-        var a=d.active;
-        btn.className='cyber-btn cyber-btn--icon toggle-btn '+(a?'cyber-btn--toggle-active':'cyber-btn--toggle-inactive');
-        btn.title=a?'Desactivar':'Activar';
-        btn.dataset.active=a?'1':'0';
-        btn.querySelector('i').className='bi '+(a?'bi-toggle2-on':'bi-toggle2-off');
-        var row=btn.closest('tr');
-        if(row){
-          row.className='cyber-row '+(a?'row-active':'row-inactive');
-          var cell=row.querySelector('[data-label="Actiu"]');
-          if(cell){
-            cell.innerHTML=a
-              ?'<span class="cyber-status"><span class="cyber-status-dot cyber-status-dot--active"></span><span class="cyber-status-text">Actiu</span></span>'
-              :'<span class="cyber-status"><span class="cyber-status-dot cyber-status-dot--inactive"></span><span class="cyber-status-text cyber-status-text--inactive">Inactiu</span></span>';
-          }
-        }
-      });
-  });
-})();
-</script>
 {% endblock %}

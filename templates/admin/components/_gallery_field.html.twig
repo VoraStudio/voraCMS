@@ -1,0 +1,26 @@
+{# _gallery_field.html.twig — reusable gallery/image field
+   Params: fieldId, fieldType ('image'|'gallery'), value, mediaPaths, required #}
+<div class="gallery-field" data-field-id="{{ fieldId }}">
+    <div class="d-flex gap-2 mb-2">
+        <div class="custom-file-input gallery-file-input">
+            <input type="file" name="field_{{ fieldId }}_files[]" id="file_{{ fieldId }}{% if fieldType == 'gallery' %}_g{% endif %}" class="d-none" accept=".jpg,.jpeg,.webp,.avif" multiple>
+            <label for="file_{{ fieldId }}{% if fieldType == 'gallery' %}_g{% endif %}" class="form-control s-file-label">
+                <i class="bi bi-cloud-upload"></i> <span>Seleccionar fitxers</span>
+            </label>
+        </div>
+        <button type="button" class="btn btn-outline-primary btn-sm pick-media" data-field="{{ fieldId }}" data-multiple="true">
+            <i class="bi bi-images"></i>
+        </button>
+    </div>
+    {% set itemIds = value ? value|split(',') : [] %}
+    <input type="hidden" name="field_{{ fieldId }}" class="gallery-value" value="{{ value }}">
+    <div class="gallery-previews d-flex gap-2 flex-wrap">
+        {% for gid in itemIds %}
+        <div class="gallery-thumb">
+            <img src="{{ mediaPaths[gid] ?? '' }}" alt="">
+            <button type="button" class="remove-gallery-item" aria-label="Eliminar" style="position:absolute;top:3px;right:3px;width:18px;height:18px;border-radius:50%;border:none;background:rgba(0,0,0,0.50);color:#fff;font-size:12px;line-height:1;padding:0;cursor:pointer;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity 0.15s;"><i class="bi bi-x" style="font-size:10px;"></i></button>
+        </div>
+        {% endfor %}
+    </div>
+    <small class="field-help-text">JPG, WebP o AVIF · Màxim 1MB cadascuna</small>
+</div>

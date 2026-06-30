@@ -12,6 +12,7 @@
 namespace App\DataFixtures;
 
 use App\Entity\ContentType;
+use App\Entity\FieldDefinition;
 use App\Entity\Project;
 use App\Entity\User;
 use App\Service\SlugGenerator;
@@ -56,9 +57,9 @@ class AppFixtures extends Fixture
 
         /* ----- Projecte base: admin ----- */
         $landings = new Project();
-        $landings->setName('Landings');
-        $landings->setSlug('landings');
-        $landings->setDescription('Projecte base de landings');
+        $landings->setName('Web');
+        $landings->setSlug('web');
+        $landings->setDescription('Projecte base de la web');
         $landings->setColor('#4945FF');
         $landings->setActive(true);
         $landings->setUser($admin);
@@ -74,29 +75,107 @@ class AppFixtures extends Fixture
         $webPrincipal->setUser($palmito);
         $manager->persist($webPrincipal);
 
-        /* ----- ContentTypes per a cada projecte ----- */
-        foreach ([$landings, $webPrincipal] as $project) {
-            $noticies = new ContentType();
-            $noticies->setName('Noticies');
-            $noticies->setSlug('noticies');
-            $noticies->setDescription('Notícies i actualitzacions');
-            $noticies->setActive(true);
-            $noticies->setBase(true);
-            $noticies->setUser($project->getUser());
-            $noticies->setProject($project);
-            $manager->persist($noticies);
+        /* ----- Plantilles base (es clonen en crear projecte) ----- */
+        $noticies = $this->createNoticiesTemplate($admin);
+        $manager->persist($noticies);
 
-            $events = new ContentType();
-            $events->setName('Events');
-            $events->setSlug('events');
-            $events->setDescription('Esdeveniments i actes');
-            $events->setActive(true);
-            $events->setBase(true);
-            $events->setUser($project->getUser());
-            $events->setProject($project);
-            $manager->persist($events);
+        $events = $this->createEventsTemplate($admin);
+        $manager->persist($events);
+
+        /* ----- ContentTypes per als projectes existents (clonant plantilles) ----- */
+        foreach ([$landings, $webPrincipal] as $project) {
+            $ctNoticies = $this->cloneTemplate($noticies, $project, $manager);
+            $ctEvents = $this->cloneTemplate($events, $project, $manager);
+            $manager->persist($ctNoticies);
+            $manager->persist($ctEvents);
         }
 
         $manager->flush();
+    }
+
+    private function createNoticiesTemplate(User $admin): ContentType
+    {
+        $ct = new ContentType();
+        $ct->setName('Notícies');
+        $ct->setSlug('noticia');
+        $ct->setDescription('Articles i notícies del projecte');
+        $ct->setBase(true);
+        $ct->setActive(true);
+        $ct->setUser($admin);
+
+        $fields = [
+            ['Títol', 'titul', 'text', true, 0],
+            ['Descripció', 'descripcio', 'richtext', true, 1],
+            ['Data', 'data', 'date', false, 2],
+            ['Ubicació', 'location', 'text', false, 3],
+            ['Imatge', 'imatge', 'image', false, 4],
+        ];
+
+        foreach ($fields as $f) {
+            $fd = new FieldDefinition();
+            $fd->setName($f[0]);
+            $fd->setSlug($f[1]);
+            $fd->setFieldType($f[2]);
+            $fd->setRequired($f[3]);
+            $fd->setSortOrder($f[4]);
+            $ct->addField($fd);
+        }
+
+        return $ct;
+    }
+
+    private function createEventsTemplate(User $admin): ContentType
+    {
+        $ct = new ContentType();
+        $ct->setName('Events');
+        $ct->setSlug('event');
+        $ct->setDescription('Esdeveniments i actes');
+        $ct->setBase(true);
+        $ct->setActive(true);
+        $ct->setUser($admin);
+
+        $fields = [
+            ['Títol', 'titul', 'text', true, 0],
+            ['Subtítol', 'subtitol', 'text', false, 1],
+            ['Descripció', 'descripcio', 'richtext', true, 2],
+            ['Data', 'data', 'date', true, 3],
+            ['Ubicació', 'location', 'text', false, 4],
+        ];
+
+        foreach ($fields as $f) {
+            $fd = new FieldDefinition();
+            $fd->setName($f[0]);
+            $fd->setSlug($f[1]);
+            $fd->setFieldType($f[2]);
+            $fd->setRequired($f[3]);
+            $fd->setSortOrder($f[4]);
+            $ct->addField($fd);
+        }
+
+        return $ct;
+    }
+
+    private function cloneTemplate(ContentType $template, Project $project, ObjectManager $manager): ContentType
+    {
+        $ct = new ContentType();
+        $ct->setName($template->getName());
+        $ct->setSlug($template->getSlug());
+        $ct->setDescription($template->getDescription());
+        $ct->setActive(true);
+        $ct->setBase(false);
+        $ct->setUser($project->getUser());
+        $ct->setProject($project);
+
+        foreach ($template->getFields() as $field) {
+            $fd = new FieldDefinition();
+            $fd->setName($field->getName());
+            $fd->setSlug($field->getSlug());
+            $fd->setFieldType($field->getFieldType());
+            $fd->setRequired($field->isRequired());
+            $fd->setSortOrder($field->getSortOrder());
+            $ct->addField($fd);
+        }
+
+        return $ct;
     }
 }

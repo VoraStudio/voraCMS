@@ -27,7 +27,7 @@ class ContentTypeRepository extends ServiceEntityRepository
             ->setParameter('slug', $slug);
 
         if ($projectId !== null) {
-            $qb->andWhere('IDENTITY(ct.project) = :projectId OR ct.project IS NULL')
+            $qb->andWhere('IDENTITY(ct.project) = :projectId')
                 ->setParameter('projectId', $projectId);
         }
 
@@ -42,10 +42,12 @@ class ContentTypeRepository extends ServiceEntityRepository
             ->orderBy('ct.name', 'ASC');
 
         if ($projectId !== null) {
-            $qb->andWhere('IDENTITY(ct.project) = :projectId OR ct.project IS NULL')
+            $qb->andWhere('IDENTITY(ct.project) = :projectId')
                 ->setParameter('projectId', $projectId);
         } else {
-            $qb->andWhere('ct.project IS NULL');
+            $qb->andWhere('ct.project IS NULL')
+                ->andWhere('ct.base = :base')
+                ->setParameter('base', false);
         }
 
         return $qb->getQuery()->getResult();
@@ -57,6 +59,30 @@ class ContentTypeRepository extends ServiceEntityRepository
             ['user' => $user, 'base' => true],
             ['name' => 'ASC']
         );
+    }
+
+    /**
+     * @return ContentType[]
+     */
+    public function findLatestWithProject(int $limit = 5): array
+    {
+        return $this->createQueryBuilder('ct')
+            ->where('ct.project IS NOT NULL')
+            ->orderBy('ct.createdAt', 'DESC')
+            ->setMaxResults($limit)
+            ->getQuery()
+            ->getResult();
+    }
+
+    public function findBaseTemplates(): array
+    {
+        return $this->createQueryBuilder('ct')
+            ->where('ct.base = :base')
+            ->andWhere('ct.project IS NULL')
+            ->setParameter('base', true)
+            ->orderBy('ct.name', 'ASC')
+            ->getQuery()
+            ->getResult();
     }
 
     /**

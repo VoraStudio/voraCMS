@@ -3,90 +3,189 @@
 {% block page_title %}{{ project.name }}{% endblock %}
 
 {% block topbar_actions %}
-<div style="display:flex;gap:8px;align-items:center;">
+<div class="topbar-actions-group">
     <a href="{{ path('admin_project_edit', {id: project.id}) }}" class="cyber-btn cyber-btn--icon cyber-btn--edit" title="Editar projecte">
         <i class="bi bi-pencil"></i>
     </a>
-    <a href="{{ path('admin_content_type_new') }}" class="cyber-btn-primary" data-anim="cyber-btn">
-        <i class="bi bi-plus-lg"></i> <span>Nova secció</span>
+    <a href="{{ path('admin_projects') }}" class="cyber-btn-back">
+        <i class="bi bi-arrow-left"></i> <span>Tornar a Projectes</span>
     </a>
 </div>
 {% endblock %}
 
 {% block content %}
-<div class="s-project-show">
 
-    {# ─── Project header ─── #}
-    {% set color = project.color ?: '#06B6D4' %}
-    <div class="cyber-section-header" data-anim="cyber-card" style="margin-bottom:24px;">
-        <div class="cyber-section-header-left">
-            <div style="width:12px;height:12px;border-radius:50%;background:{{ color }};flex-shrink:0;"></div>
+{% set totalSections = sections|length %}
+{% set totalEntries = sections|reduce((carry, s) => carry + s.total, 0) %}
+
+{% include 'admin/components/_section_header.html.twig' with {
+    title: project.name,
+    description: project.description ?: '',
+    icon: 'bi-folder2-open',
+    stats: [
+        {value: totalSections, label: 'Seccions'},
+        {value: totalEntries, label: 'Entrades'}
+    ]
+} %}
+
+{% if sections is empty %}
+<div class="cyber-card cyber-card--empty-lg" data-anim="cyber-card">
+    <div class="cyber-empty-icon--xxl">
+        <i class="bi bi-folder-plus"></i>
+    </div>
+    <p class="cyber-empty-text--lg">Aquest projecte no té seccions encara.</p>
+    <a href="{{ path('admin_content_type_new') }}" class="cyber-btn-primary">
+        <i class="bi bi-plus-lg"></i> <span>Crear primera secció</span>
+    </a>
+</div>
+{% else %}
+{% for section in sections %}
+{% set ct = section.type %}
+{% set entries = section.entries %}
+{% set thumbnails = section.thumbnails %}
+
+<div class="cyber-card cyber-card--table cyber-card--flush cyber-card--mb cyber-card--section" data-anim="cyber-card">
+
+    <div class="cyber-card-section__hd">
+        <div class="cyber-card-section__hd-info">
+            <div class="cyber-card-section__hd-icon">
+                <i class="bi bi-file-earmark-text"></i>
+            </div>
             <div>
-                <h2 class="cyber-section-title">{{ project.name }}</h2>
-                {% if project.description %}
-                <p class="cyber-section-desc">{{ project.description }}</p>
+                <div class="cyber-card-section__hd-title text-capitalize">{{ ct.name }}</div>
+                {% if ct.description %}
+                <div class="cyber-card-section__hd-desc">{{ ct.description }}</div>
                 {% endif %}
             </div>
         </div>
-        <div class="cyber-section-header-right">
-            <div class="cyber-stat-mini">
-                <span class="cyber-stat-mini-value">{{ stats|length }}</span>
-                <span class="cyber-stat-mini-label">Seccions</span>
-            </div>
-            <div class="cyber-stat-mini">
-                {% set totalEntries = stats|reduce((carry, s) => carry + s.total, 0) %}
-                <span class="cyber-stat-mini-value">{{ totalEntries }}</span>
-                <span class="cyber-stat-mini-label">Entrades</span>
-            </div>
-            {% if project.user %}
-            <div class="cyber-stat-mini" style="margin-left:4px;">
-                <span class="cyber-stat-mini-label" style="font-size:0.6rem;">{{ project.user.name }}</span>
-            </div>
-            {% endif %}
+        <div class="cyber-card-section__hd-actions">
+            <a href="{{ path('admin_entry_new', {slug: ct.slug}) }}" class="cyber-btn-primary cyber-btn--compact">
+                <i class="bi bi-plus-lg"></i> <span>Nova</span>
+            </a>
+            <a href="{{ path('admin_entry_by_type', {slug: ct.slug}) }}" class="cyber-btn cyber-btn--projects">
+                <i class="bi bi-eye"></i> <span>Veure totes</span>
+            </a>
         </div>
     </div>
 
-    {# ─── Content Type Cards ─── #}
-    {% if stats is empty %}
-    <div class="text-center py-5" style="color:var(--s-text-secondary);">
-        <div style="font-size:3rem;color:rgba(148,163,184,0.15);margin-bottom:12px;">
-            <i class="bi bi-folder-plus"></i>
-        </div>
-        <p style="font-size:0.9rem;margin-bottom:16px;">Aquest projecte no té seccions encara.</p>
-        <a href="{{ path('admin_content_type_new') }}" class="cyber-btn-primary">
-            <i class="bi bi-plus-lg"></i> <span>Crear primera secció</span>
-        </a>
-    </div>
-    {% else %}
-    {% set cardIcons = ['bi-file-text', 'bi-calendar-event', 'bi-person', 'bi-image', 'bi-link', 'bi-star', 'bi-geo-alt', 'bi-chat-dots'] %}
-    <div class="row g-3">
-        {% for stat in stats %}
-        {% set icon = cardIcons[loop.index0 % cardIcons|length] %}
-        <div class="col-md-4">
-            <div class="s-stat-card" data-anim="card" style="cursor:pointer;"
-                 onclick="window.location='{{ path('admin_entry_by_type', {slug: stat.type.slug}) }}'">
-                <div class="s-stat-card-icon">
-                    <i class="bi {{ icon }}"></i>
-                </div>
-                <h6 class="text-capitalize mb-2">{{ stat.type.name }}</h6>
-                <div class="s-stat-numbers mb-3" style="gap:32px;">
-                    <div>
-                        <div class="s-stat-label">Entrades</div>
-                        <div class="s-stat-value">{{ stat.total }}</div>
+    <table class="cyber-table">
+        <thead>
+            <tr>
+                <th>Títol</th>
+                <th>Client</th>
+                <th>Data</th>
+                <th>Descripció</th>
+                <th>Estat</th>
+                <th>Accions</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% if entries is empty %}
+            <tr>
+                <td colspan="6" class="cyber-empty">
+                    <div class="cyber-empty-icon"><i class="bi bi-file-earmark-text"></i></div>
+                    <p class="cyber-empty-text">No hi ha entrades</p>
+                    <a href="{{ path('admin_entry_new', {slug: ct.slug}) }}" class="cyber-btn-primary cyber-btn--action">
+                        <i class="bi bi-plus-lg"></i> <span>Crear primera entrada</span>
+                    </a>
+                </td>
+            </tr>
+        {% else %}
+        {% for entry in entries %}
+            {% set title = '' %}
+            {% set excerpt = '' %}
+            {% for fv in entry.fieldValues|sort((a, b) => a.fieldDefinition.sortOrder <=> b.fieldDefinition.sortOrder) %}
+                {% if fv.fieldDefinition.fieldType in ['text', 'textarea'] and fv.value %}
+                    {% if not title %}
+                        {% set title = fv.value %}
+                    {% elseif not excerpt %}
+                        {% set excerpt = fv.value|length > 100 ? fv.value|slice(0, 100) ~ '...' : fv.value %}
+                    {% endif %}
+                {% endif %}
+            {% endfor %}
+
+            <tr class="cyber-row {{ entry.active ? 'row-active' : 'row-inactive' }}" data-anim="cyber-row">
+                <td class="cyber-cell" data-label="Títol">
+                    <div class="cyber-cell__content">
+                        {% set thumb = thumbnails[entry.id] ?? null %}
+                        {% if thumb %}
+                            <img src="{{ thumb }}" alt="" class="cyber-cell__thumb">
+                        {% else %}
+                            <div class="cyber-cell__icon-placeholder">
+                                <i class="bi bi-file-earmark-text"></i>
+                            </div>
+                        {% endif %}
+                        <div>
+                            <div class="cyber-cell__title">
+                                {% if title %}
+                                    {{ title|length > 50 ? title|slice(0, 50) ~ '...' : title }}
+                                {% else %}
+                                    <span class="cyber-cell__placeholder">Sense títol</span>
+                                {% endif %}
+                            </div>
+                            <div class="cyber-cell__subtitle">ID {{ entry.id }}</div>
+                        </div>
                     </div>
-                    <div>
-                        <div class="s-stat-label">Publicacions</div>
-                        <div class="s-stat-value s-stat-value--success">{{ stat.published }}</div>
+                </td>
+                <td class="cyber-cell" data-label="Client">
+                    {{ entry.author ? entry.author.name : (entry.user ? entry.user.name : '-') }}
+                </td>
+                <td class="cyber-cell cyber-cell--date" data-label="Data">
+                    {{ entry.createdAt|date('d/m/Y H:i') }}
+                </td>
+                <td class="cyber-cell cyber-cell--desc" data-label="Descripció">
+                    {% if excerpt %}
+                        <span class="cyber-cell__excerpt">{{ excerpt }}</span>
+                    {% else %}
+                        <span class="cyber-cell__placeholder">—</span>
+                    {% endif %}
+                </td>
+                <td class="cyber-cell" data-label="Estat">
+                    {% if entry.status == 'published' %}
+                    <span class="cyber-badge cyber-badge--published">Publicat</span>
+                    {% elseif entry.status == 'draft' %}
+                    <span class="cyber-badge cyber-badge--draft">No publicat</span>
+                    {% else %}
+                    <span class="cyber-badge cyber-badge--archived">Arxivat</span>
+                    {% endif %}
+                </td>
+                <td class="cyber-cell" data-label="Accions">
+                    <div class="cyber-actions">
+                        <a href="{{ path('admin_entry_show', {id: entry.id}) }}"
+                           class="cyber-btn cyber-btn--icon" title="Veure">
+                            <i class="bi bi-eye"></i>
+                        </a>
+                        <span class="cyber-actions-divider"></span>
+                        {% include 'admin/components/_toggle_btn.html.twig' with {
+                            formId: 'tact-entry-' ~ entry.id,
+                            csrfToken: csrf_token('toggle-active-' ~ entry.id),
+                            route: path('admin_entry_toggle_active', {id: entry.id}),
+                            active: entry.active
+                        } %}
+                        <a href="{{ path('admin_entry_edit', {id: entry.id}) }}"
+                           class="cyber-btn cyber-btn--icon cyber-btn--edit" title="Editar">
+                            <i class="bi bi-pencil"></i>
+                        </a>
+                        <form method="post" action="{{ path('admin_entry_delete', {id: entry.id}) }}" class="cyber-form--inline"
+                              id="del-entry-{{ entry.id }}">
+                            <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ entry.id) }}">
+                            <button type="button"
+                                    class="cyber-btn cyber-btn--icon cyber-btn--delete"
+                                    title="Eliminar"
+                                    data-confirm="Segur que vols eliminar aquesta entrada?"
+                                    data-form="del-entry-{{ entry.id }}">
+                                <i class="bi bi-trash3"></i>
+                            </button>
+                        </form>
                     </div>
-                </div>
-                <a href="{{ path('admin_entry_by_type', {slug: stat.type.slug}) }}" class="s-stat-btn" onclick="event.stopPropagation();">
-                    <i class="bi bi-arrow-right-circle me-1"></i> Gestionar entrades
-                </a>
-            </div>
-        </div>
+                </td>
+            </tr>
         {% endfor %}
-    </div>
-    {% endif %}
-
+        {% endif %}
+        </tbody>
+    </table>
 </div>
+{% endfor %}
+{% endif %}
+
 {% endblock %}

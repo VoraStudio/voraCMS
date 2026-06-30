@@ -10,7 +10,7 @@ use Doctrine\ORM\Mapping\UniqueConstraint;
 use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: ContentTypeRepository::class)]
-#[ORM\Table(name: 'content_types', uniqueConstraints: [new UniqueConstraint(name: 'ct_slug_user', columns: ['slug', 'user_id'])])]
+#[ORM\Table(name: 'content_types', uniqueConstraints: [new UniqueConstraint(name: 'ct_slug_project', columns: ['slug', 'project_id'])])]
 class ContentType
 {
     #[ORM\Id]

@@ -43,6 +43,12 @@ class SectionController extends AbstractController
             'slug' => $ct->getSlug(),
             'description' => $ct->getDescription(),
             'isActive' => $ct->isActive(),
+            'fields' => array_map(static fn ($fd) => [
+                'name' => $fd->getName(),
+                'slug' => $fd->getSlug(),
+                'type' => $fd->getFieldType(),
+                'required' => $fd->isRequired(),
+            ], $ct->getFields()->toArray()),
         ], $sections);
 
         return $this->json(['data' => $data]);

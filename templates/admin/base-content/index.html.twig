@@ -1,0 +1,78 @@
+{% extends 'admin/layout.html.twig' %}
+
+{% block page_title %}Tipus per defecte{% endblock %}
+
+{% block topbar_actions %}
+<a href="{{ path('admin_base_content_new') }}" class="cyber-btn-primary" data-anim="cyber-btn">
+    <i class="bi bi-plus-lg"></i> <span>Nova plantilla</span>
+</a>
+{% endblock %}
+
+{% block content %}
+
+{% include 'admin/components/_section_header.html.twig' with {
+    title: 'Tipus per defecte',
+    description: 'Plantilles base que es clonen automàticament en crear un projecte nou',
+    icon: 'bi-layers-fill',
+    stats: [
+        {value: templates|length, label: 'Plantilles'}
+    ]
+} %}
+
+<div class="cyber-card cyber-card--table cyber-card--flush" data-anim="cyber-card">
+    <table class="cyber-table">
+        <thead>
+            <tr>
+                <th>Nom</th>
+                <th>Tipo</th>
+                <th>Camps</th>
+                <th>Actiu</th>
+                <th>Accions</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for ct in templates %}
+            <tr class="cyber-row {{ ct.active ? 'row-active' : 'row-inactive' }}">
+                <td class="cyber-cell text-capitalize fw-semibold">{{ ct.name }}</td>
+                <td class="cyber-cell">
+                    <span class="cyber-badge" style="background: rgba(6, 182, 212, 0.1); border-color: rgba(6, 182, 212, 0.15); color: #06b6d4;">{{ ct.slug|upper }}</span>
+                </td>
+                <td class="cyber-cell cyber-cell--numeric">{{ ct.fields|length }}</td>
+                <td class="cyber-cell cyber-cell--status">
+                    {% include 'admin/components/_status.html.twig' with {active: ct.active} %}
+                </td>
+                <td class="cyber-cell" data-label="Accions">
+                    <div class="cyber-actions">
+                        <a href="{{ path('admin_base_content_show', {id: ct.id}) }}"
+                           class="cyber-btn cyber-btn--icon cyber-btn--view" title="Veure">
+                            <i class="bi bi-eye"></i>
+                        </a>
+
+                        <span class="cyber-actions-divider"></span>
+
+                        <a href="{{ path('admin_base_content_edit', {id: ct.id}) }}"
+                           class="cyber-btn cyber-btn--icon cyber-btn--edit" title="Editar">
+                            <i class="bi bi-pencil"></i>
+                        </a>
+
+                        <form method="post" action="{{ path('admin_base_content_delete', {id: ct.id}) }}" class="cyber-form--inline" id="del-base-content-{{ ct.id }}">
+                            <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ ct.id) }}">
+                            <button type="button" class="cyber-btn cyber-btn--icon cyber-btn--delete" title="Eliminar" data-confirm="Segur que vols eliminar aquesta plantilla base?" data-form="del-base-content-{{ ct.id }}">
+                                <i class="bi bi-trash3"></i>
+                            </button>
+                        </form>
+                    </div>
+                </td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="5" class="cyber-cell text-center py-4">
+                    <p class="field-help-text field-help-text--action">No hi ha plantilles base</p>
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% endblock %}

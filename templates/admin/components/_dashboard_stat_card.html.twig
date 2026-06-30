@@ -1,0 +1,8 @@
+{# _dashboard_stat_card.html.twig — stat card with icon, label, value, optional link/success modifier
+   Params: icon, label, value, modifier? #}
+<div class="s-stat-card" data-anim="metric">
+    <div class="s-stat-label s-stat-label--metric">
+        <i class="bi {{ icon }} me-1 s-stat-label-icon"></i> {{ label }}
+    </div>
+    <div class="s-stat-value{% if modifier is defined %} s-stat-value--{{ modifier }}{% endif %}">{{ value }}</div>
+</div>

@@ -11,12 +11,14 @@
 {% endblock %}
 
 {% block topbar_actions %}
-<a href="{{ path('admin_entry_by_type', {slug: contentType.slug}) }}" class="btn btn-outline-primary btn-sm">
-    <i class="bi bi-arrow-left"></i> Tornar
-</a>
-<a href="{{ path('admin_entry_edit', {id: entry.id}) }}" class="btn btn-primary btn-sm">
-    <i class="bi bi-pencil"></i> <span>Editar</span>
-</a>
+<div class="topbar-actions-group">
+    <a href="{{ path('admin_entry_edit', {id: entry.id}) }}" class="cyber-btn-primary cyber-btn--compact">
+        <i class="bi bi-pencil"></i> <span>Editar</span>
+    </a>
+    <a href="{{ path('admin_entry_by_type', {slug: contentType.slug}) }}" class="cyber-btn-back">
+        <i class="bi bi-arrow-left"></i> <span>Tornar</span>
+    </a>
+</div>
 {% endblock %}
 
 {% block content %}
@@ -26,10 +28,10 @@
     {# ─── Metadata card ─── #}
     <div class="col-12">
         <div class="card">
-            <div class="card-body" style="display:flex;flex-wrap:wrap;gap:24px;padding:20px 28px;">
+            <div class="card-body s-field-list">
                 <div>
                     <div class="s-field-label">ID</div>
-                    <div style="color:var(--s-text);">{{ entry.id }}</div>
+                    <div class="s-field-value">{{ entry.id }}</div>
                 </div>
                 <div>
                     <div class="s-field-label">Estat</div>
@@ -39,22 +41,22 @@
                         {% elseif entry.status == 'draft' %}
                             <span class="badge bg-secondary">Esborrany</span>
                         {% else %}
-                            <span class="badge" style="background:var(--s-danger);color:#fff;">Arxivat</span>
+                            <span class="badge badge--archived">Arxivat</span>
                         {% endif %}
                     </div>
                 </div>
                 <div>
                     <div class="s-field-label">Idioma</div>
-                    <div style="color:var(--s-text);">{{ entry.locale|upper }}</div>
+                    <div class="s-field-value">{{ entry.locale|upper }}</div>
                 </div>
                 <div>
                     <div class="s-field-label">Data creació</div>
-                    <div style="color:var(--s-text);">{{ entry.createdAt|date('d/m/Y H:i') }}</div>
+                    <div class="s-field-value">{{ entry.createdAt|date('d/m/Y H:i') }}</div>
                 </div>
                 {% if entry.publishedAt %}
                 <div>
                     <div class="s-field-label">Publicat</div>
-                    <div style="color:var(--s-text);">{{ entry.publishedAt|date('d/m/Y H:i') }}</div>
+                    <div class="s-field-value">{{ entry.publishedAt|date('d/m/Y H:i') }}</div>
                 </div>
                 {% endif %}
             </div>
@@ -68,53 +70,53 @@
     {% if raw is not empty %}
     <div class="col-12">
         <div class="card">
-            <div class="card-body" style="padding:20px 28px;">
+            <div class="card-body s-field-card-body">
                 <div class="s-field-label">{{ def.name }}</div>
 
                 {% if def.fieldType == 'text' %}
-                    <div style="color:var(--s-text);font-size:1.1rem;">{{ raw }}</div>
+                    <div class="s-field-value s-field-value--large">{{ raw }}</div>
 
                 {% elseif def.fieldType == 'textarea' %}
-                    <div style="color:var(--s-text);white-space:pre-wrap;line-height:1.6;">{{ raw }}</div>
+                    <div class="s-field-value s-field-value--textarea">{{ raw }}</div>
 
                 {% elseif def.fieldType == 'richtext' %}
-                    <div style="color:var(--s-text);line-height:1.7;">{{ raw|raw }}</div>
+                    <div class="s-field-value s-field-value--richtext">{{ raw|raw }}</div>
 
                 {% elseif def.fieldType == 'image' or def.fieldType == 'gallery' %}
-                    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px;">
+                    <div class="s-field-gallery">
                     {% for id in raw|split(',') %}
                         {% set imgPath = mediaPaths[id] ?? null %}
                         {% if imgPath %}
-                            <img src="{{ imgPath }}" alt="" style="width:100%;aspect-ratio:1;object-fit:cover;border-radius:8px;display:block;">
+                            <img src="{{ imgPath }}" alt="" class="s-field-gallery__img">
                         {% endif %}
                     {% endfor %}
                     </div>
 
                 {% elseif def.fieldType == 'boolean' %}
-                    <div style="color:{{ raw ? 'rgb(76,175,80)' : 'var(--s-text-secondary)' }};">
+                    <div class="s-field-value--boolean" style="--field-boolean-clr:{{ raw ? 'rgb(76,175,80)' : 'var(--s-text-secondary)' }};">
                         {{ raw ? 'Sí' : 'No' }}
                     </div>
 
                 {% elseif def.fieldType == 'date' %}
-                    <div style="color:var(--s-text);">{{ raw }}</div>
+                    <div class="s-field-value">{{ raw }}</div>
 
                 {% elseif def.fieldType == 'datetime' %}
-                    <div style="color:var(--s-text);">{{ raw }}</div>
+                    <div class="s-field-value">{{ raw }}</div>
 
                 {% elseif def.fieldType == 'number' %}
-                    <div style="color:var(--s-text);">{{ raw }}</div>
+                    <div class="s-field-value">{{ raw }}</div>
 
                 {% elseif def.fieldType == 'location' %}
                     {% set parts = raw|split(',') %}
-                    <div style="color:var(--s-text);">
+                    <div class="s-field-value">
                         Lat: {{ parts[0] ?? '—' }}, Lng: {{ parts[1] ?? '—' }}
                     </div>
 
                 {% elseif def.fieldType == 'youtube' %}
-                    <div style="color:var(--s-text-secondary);font-family:monospace;font-size:0.85rem;">{{ raw }}</div>
+                    <div class="s-field-value--youtube">{{ raw }}</div>
 
                 {% else %}
-                    <div style="color:var(--s-text);">{{ raw }}</div>
+                    <div class="s-field-value">{{ raw }}</div>
                 {% endif %}
             </div>
         </div>
@@ -123,7 +125,7 @@
     {% else %}
     <div class="col-12">
         <div class="card">
-            <div class="card-body text-center py-5" style="color:var(--s-text-secondary);">
+            <div class="card-body text-center py-5 s-field-empty">
                 Aquesta entrada no té contingut.
             </div>
         </div>

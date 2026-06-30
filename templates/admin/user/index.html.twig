@@ -3,33 +3,21 @@
 {% block page_title %}Usuaris{% endblock %}
 
 {% block content %}
-<div class="cyber-section-header" data-anim="cyber-card">
-    <div class="cyber-section-header-left">
-        <div class="cyber-section-icon">
-            <i class="bi bi-people-fill"></i>
-        </div>
-        <div>
-            <h2 class="cyber-section-title">Usuaris</h2>
-            <p class="cyber-section-desc">Gestiona els usuaris i els seus permisos</p>
-        </div>
-    </div>
-    <div class="cyber-section-header-right">
-        <div class="cyber-stat-mini">
-            <span class="cyber-stat-mini-value">{{ users|length }}</span>
-            <span class="cyber-stat-mini-label">Total</span>
-        </div>
-        <div class="cyber-stat-mini">
-            <span class="cyber-stat-mini-value cyber-stat-mini-value--active">{{ users|filter(u => u.active)|length }}</span>
-            <span class="cyber-stat-mini-label">Actius</span>
-        </div>
-    </div>
-</div>
+{% include 'admin/components/_section_header.html.twig' with {
+    title: 'Usuaris',
+    description: 'Gestiona els usuaris i els seus permisos',
+    icon: 'bi-people-fill',
+    stats: [
+        {value: users|length, label: 'Total'},
+        {value: users|filter(u => u.active)|length, label: 'Actius', modifier: 'active'}
+    ]
+} %}
 <div class="cyber-content-actions">
     <a href="{{ path('admin_user_new') }}" class="cyber-btn-primary" data-anim="cyber-btn">
         <i class="bi bi-plus-lg"></i> <span>Nou usuari</span>
     </a>
 </div>
-<div class="cyber-card cyber-card--table" data-anim="cyber-card" style="padding:0;">
+<div class="cyber-card cyber-card--table cyber-card--flush" data-anim="cyber-card">
     <table class="cyber-table">
         <thead>
             <tr>
@@ -46,16 +34,16 @@
             {% for user in users %}
             <tr class="cyber-row {{ user.active ? 'row-active' : 'row-inactive' }}" data-anim="cyber-row">
                 <td class="cyber-cell" data-label="Usuari">
-                    <div style="display:flex;align-items:center;gap:12px;">
+                    <div class="cyber-cell__user-info">
                         <div class="cyber-avatar">{{ user.name|first|upper }}</div>
                         <div>
-                            <div style="font-size:0.82rem;font-weight:600;color:var(--s-text);line-height:1.3;">{{ user.name }}</div>
-                            <div style="font-size:0.62rem;color:var(--s-text-secondary);margin-top:1px;">{{ user.slug }}</div>
+                            <div class="cyber-cell__title">{{ user.name }}</div>
+                            <div class="cyber-cell__subtitle">{{ user.slug }}</div>
                         </div>
                     </div>
                 </td>
-                <td class="cyber-cell" data-label="Email" style="font-size:0.8rem;color:var(--s-text);">{{ user.email }}</td>
-                <td class="cyber-cell" data-label="Empresa" style="font-size:0.78rem;color:var(--s-text-secondary);">{{ user.company ?: '—' }}</td>
+                <td class="cyber-cell cyber-cell--email" data-label="Email">{{ user.email }}</td>
+                <td class="cyber-cell cyber-cell--company" data-label="Empresa">{{ user.company ?: '—' }}</td>
                 <td class="cyber-cell" data-label="Rol">
                     {% if 'ROLE_ADMIN' in user.roles %}
                     <span class="cyber-badge cyber-badge--admin">Admin</span>
@@ -65,24 +53,13 @@
                     <span class="cyber-badge cyber-badge--user">Usuari</span>
                     {% endif %}
                 </td>
-                <td class="cyber-cell" data-label="Projectes" style="font-size:0.85rem;font-weight:600;color:var(--s-text);letter-spacing:-0.01em;">{{ userProjects[user.id] ?? 0 }}</td>
+                <td class="cyber-cell cyber-cell--project-count" data-label="Projectes">{{ userProjects[user.id] ?? 0 }}</td>
                 <td class="cyber-cell cyber-cell--status" data-label="Estat">
-                    {% if user.active %}
-                    <span class="cyber-status">
-                        <span class="cyber-status-dot cyber-status-dot--active"></span>
-                        <span class="cyber-status-text">Actiu</span>
-                    </span>
-                    {% else %}
-                    <span class="cyber-status">
-                        <span class="cyber-status-dot cyber-status-dot--inactive"></span>
-                        <span class="cyber-status-text cyber-status-text--inactive">Inactiu</span>
-                    </span>
-                    {% endif %}
+                    {% include 'admin/components/_status.html.twig' with {active: user.active} %}
                 </td>
                 <td class="cyber-cell" data-label="Accions">
                     <div class="cyber-actions">
 
-                        {# ─── Veure projectes ─── #}
                         <a href="{{ path('admin_projects', {user: user.id}) }}"
                            class="cyber-btn {{ user.active ? 'cyber-btn--projects' : 'cyber-btn--projects-inactive' }}"
                            title="Veure projectes"
@@ -93,33 +70,28 @@
 
                         <span class="cyber-actions-divider"></span>
 
-                        {# ─── Toggle active ─── #}
-                        <form method="post" action="{{ path('admin_user_toggle_active', {id: user.id}) }}" style="display:inline" id="tact-user-{{ user.id }}">
-                            <input type="hidden" name="_token" value="{{ csrf_token('toggle-active-' ~ user.id) }}">
-                            <button type="button"
-                                    class="cyber-btn cyber-btn--icon toggle-btn {{ user.active ? 'cyber-btn--toggle-active' : 'cyber-btn--toggle-inactive' }}"
-                                    title="{{ user.active ? 'Desactivar' : 'Activar' }}"
-                                    data-active="{{ user.active ? '1' : '0' }}">
-                                <i class="bi {{ user.active ? 'bi-toggle2-on' : 'bi-toggle2-off' }}" style="font-size:1.05rem;"></i>
-                            </button>
-                        </form>
+                        {% include 'admin/components/_toggle_btn.html.twig' with {
+                            formId: 'tact-user-' ~ user.id,
+                            csrfToken: csrf_token('toggle-active-' ~ user.id),
+                            route: path('admin_user_toggle_active', {id: user.id}),
+                            active: user.active
+                        } %}
 
-                        {# ─── Editar ─── #}
-                            <a href="{{ path('admin_user_edit', {id: user.id}) }}"
-                               class="cyber-btn cyber-btn--icon cyber-btn--edit"
-                               title="Editar">
-                            <i class="bi bi-pencil" style="font-size:0.8rem;"></i>
+                        <a href="{{ path('admin_user_edit', {id: user.id}) }}"
+                           class="cyber-btn cyber-btn--icon cyber-btn--edit"
+                           title="Editar">
+                            <i class="bi bi-pencil"></i>
                         </a>
 
-                        {# ─── Eliminar ─── #}
-                        <form method="post" action="{{ path('admin_user_delete', {id: user.id}) }}" style="display:inline"
+                        <form method="post" action="{{ path('admin_user_delete', {id: user.id}) }}" class="cyber-form--inline"
                               id="del-user-{{ user.id }}">
                             <input type="hidden" name="_token" value="{{ csrf_token('delete-user-' ~ user.id) }}">
                             <button type="button"
                                     class="cyber-btn cyber-btn--icon cyber-btn--delete"
                                     title="Eliminar"
-                                    onclick="swalConfirm('Segur que vols eliminar «{{ user.name }}»?<br><small style=\'color:rgba(255,255,255,0.45)\'>S\'eliminaran tots els seus projectes, tipus de contingut i entrades.</small>',function(){document.getElementById('del-user-{{ user.id }}').submit()})">
-                                <i class="bi bi-trash3" style="font-size:0.8rem;"></i>
+                                    data-confirm="Segur que vols eliminar «{{ user.name }}»?<br><small style='color:rgba(255,255,255,0.45)'>S'eliminaran tots els seus projectes, tipus de contingut i entrades.</small>"
+                                    data-form="del-user-{{ user.id }}">
+                                <i class="bi bi-trash3"></i>
                             </button>
                         </form>
 
@@ -137,40 +109,4 @@
         </tbody>
     </table>
 </div>
-{% endblock %}
-
-{% block javascripts %}
-{{ parent() }}
-<script>
-(function(){
-  // Event delegation for all toggle buttons
-  document.addEventListener('click',function(e){
-    var btn=e.target.closest('.toggle-btn');
-    if(!btn)return;
-    var f=btn.closest('form');
-    if(!f)return;
-    e.preventDefault();
-    fetch(f.action,{method:'POST',body:new FormData(f),headers:{'X-Requested-With':'XMLHttpRequest'}})
-      .then(function(r){return r.json()})
-      .then(function(d){
-        if(d.error)return;
-        var a=d.active;
-        btn.className='cyber-btn cyber-btn--icon toggle-btn '+(a?'cyber-btn--toggle-active':'cyber-btn--toggle-inactive');
-        btn.title=a?'Desactivar':'Activar';
-        btn.dataset.active=a?'1':'0';
-        btn.querySelector('i').className='bi '+(a?'bi-toggle2-on':'bi-toggle2-off');
-        var row=btn.closest('tr');
-        if(row){
-          row.className='cyber-row '+(a?'row-active':'row-inactive');
-          var cell=row.querySelector('[data-label="Estat"]');
-          if(cell){
-            cell.innerHTML=a
-              ?'<span class="cyber-status"><span class="cyber-status-dot cyber-status-dot--active"></span><span class="cyber-status-text">Actiu</span></span>'
-              :'<span class="cyber-status"><span class="cyber-status-dot cyber-status-dot--inactive"></span><span class="cyber-status-text cyber-status-text--inactive">Inactiu</span></span>';
-          }
-        }
-      });
-  });
-})();
-</script>
 {% endblock %}

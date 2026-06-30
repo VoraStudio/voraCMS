@@ -1,9 +1,9 @@
 {% extends 'admin/layout.html.twig' %}
 
-{% block page_title %}Nou tipus de contingut{% endblock %}
+{% block page_title %}Editar: {{ template.name }}{% endblock %}
 
 {% block topbar_actions %}
-<a href="{{ path('admin_content_type_index') }}" class="cyber-btn-back">
+<a href="{{ path('admin_base_content_index') }}" class="cyber-btn-back">
     <i class="bi bi-arrow-left"></i> <span>Tornar</span>
 </a>
 {% endblock %}
@@ -13,11 +13,11 @@
     <div class="cyber-card cyber-card--flush" data-anim="cyber-card">
         <div class="cyber-form-header">
             <div class="cyber-form-header-icon">
-                <i class="bi bi-plus-circle"></i>
+                <i class="bi bi-window-stack"></i>
             </div>
             <div>
-                <h2 class="cyber-section-title">Nou tipus de contingut</h2>
-                <p class="cyber-section-desc">Defineix un nou tipus de contingut amb els seus camps personalitzats</p>
+                <h2 class="cyber-section-title">Editar plantilla: {{ template.name }}</h2>
+                <p class="cyber-section-desc">Gestiona la configuració i els camps d'aquesta plantilla base</p>
             </div>
         </div>
 
@@ -25,52 +25,48 @@
             <div class="row mb-3">
                 <div class="col-md-6 mb-3 mb-md-0">
                     <div class="cyber-form-group mb-0">
-                        <label class="cyber-form-label">Nom del tipus *</label>
-                        <input type="text" name="name" class="cyber-form-input" id="nameInput" required placeholder="Notícies, Events...">
+                        <label class="cyber-form-label">Nom de la plantilla</label>
+                        <input type="text" name="name" class="cyber-form-input" value="{{ template.name }}" required>
                     </div>
                 </div>
                 <div class="col-md-6">
                     <div class="cyber-form-group mb-0">
-                        <label class="cyber-form-label">Slug * <span class="cyber-form-label__hint">(identificador únic)</span></label>
-                        <input type="text" name="slug" class="cyber-form-input" id="slugInput" required placeholder="noticies, events...">
+                        <label class="cyber-form-label">Slug <span class="cyber-form-label__hint">(identificador únic)</span></label>
+                        <input type="text" class="cyber-form-input cyber-form-input--readonly" value="{{ template.slug }}" disabled>
                     </div>
                 </div>
             </div>
 
-            <div class="cyber-form-group mb-3">
+            <div class="cyber-form-group mb-4">
                 <label class="cyber-form-label">Descripció</label>
-                <textarea name="description" class="cyber-form-input" rows="2" placeholder="Escriu una descripció del tipus..."></textarea>
-            </div>
-
-            <div class="cyber-form-check mb-4">
-                <input type="checkbox" name="active" class="cyber-form-checkbox" id="ct-active" checked value="1">
-                <label class="cyber-form-check-label small" for="ct-active">Tipus de contingut actiu</label>
+                <textarea name="description" class="cyber-form-input" rows="2" placeholder="Escriu una descripció de la plantilla...">{{ template.description }}</textarea>
             </div>
 
             <hr class="form-divider my-4">
 
             <div class="d-flex justify-content-between align-items-center mb-3">
-                <label class="cyber-form-label mb-0" style="font-size: 0.75rem;">Camps del tipus</label>
+                <label class="cyber-form-label mb-0" style="font-size: 0.75rem;">Camps de la plantilla</label>
                 <button type="button" class="cyber-btn cyber-btn--compact" id="addFieldBtn" style="background: rgba(6, 182, 212, 0.1); border: 1px solid rgba(6, 182, 212, 0.2); color: #06b6d4;">
                     <i class="bi bi-plus-lg"></i> <span style="font-size: 0.72rem; font-weight: 600; text-transform: uppercase;">Afegir camp</span>
                 </button>
             </div>
 
             <div id="fieldsContainer">
+                {% for field in template.fields %}
                 <div class="s-field-group row g-2 field-row align-items-center mb-3">
                     <div class="col-md-4">
-                        <input type="text" name="field_name[]" class="cyber-form-input" placeholder="Nom del camp">
+                        <input type="text" name="field_name[]" class="cyber-form-input" value="{{ field.name }}" placeholder="Nom del camp">
                     </div>
                     <div class="col-md-3">
                         <select name="field_type[]" class="cyber-form-input cyber-form-input--select">
                             {% for type in fieldTypes %}
-                            <option value="{{ type }}">{{ type }}</option>
+                            <option value="{{ type }}" {% if field.fieldType == type %}selected{% endif %}>{{ type }}</option>
                             {% endfor %}
                         </select>
                     </div>
                     <div class="col-md-3 d-flex align-items-center">
                         <div class="cyber-form-check mb-0">
-                            <input type="checkbox" name="field_required[]" class="cyber-form-checkbox" value="1">
+                            <input type="checkbox" name="field_required[]" class="cyber-form-checkbox" {% if field.required %}checked{% endif %} value="1">
                             <span class="cyber-form-check-label small">Requerit</span>
                         </div>
                     </div>
@@ -80,11 +76,12 @@
                         </button>
                     </div>
                 </div>
+                {% endfor %}
             </div>
 
             <hr class="form-divider my-4">
             <button type="submit" class="cyber-form-submit mt-2" data-anim="cyber-btn">
-                <i class="bi bi-check-lg"></i> <span>Crear tipus</span>
+                <i class="bi bi-check-lg"></i> <span>Guardar canvis</span>
             </button>
         </form>
     </div>

@@ -1,0 +1,5 @@
+{# _stat_mini.html.twig — mini stat with value, label, optional active modifier #}
+<div class="cyber-stat-mini">
+    <span class="cyber-stat-mini-value{% if modifier is defined %} cyber-stat-mini-value--{{ modifier }}{% endif %}">{{ value }}</span>
+    <span class="cyber-stat-mini-label">{{ label }}</span>
+</div>

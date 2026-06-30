@@ -10,7 +10,7 @@
 
 {% block content %}
 <div class="cyber-form-card">
-    <div class="cyber-card" data-anim="cyber-card" style="padding:0;overflow:hidden;">
+    <div class="cyber-card cyber-card--flush" data-anim="cyber-card">
         <div class="cyber-form-header">
             <div class="cyber-form-header-icon">
                 <i class="bi {{ isNew ? 'bi-person-plus-fill' : 'bi-person-fill-gear' }}"></i>
@@ -20,48 +20,42 @@
                 <p class="cyber-section-desc">{{ isNew ? 'Crea un nou usuari al sistema' : 'Modifica les dades de l\'usuari' }}</p>
             </div>
         </div>
-        <form method="post" action="{{ isNew ? path('admin_user_new') : path('admin_user_edit', {id: user.id}) }}" style="padding:32px;padding-top:24px;">
+        <form method="post" action="{{ isNew ? path('admin_user_new') : path('admin_user_edit', {id: user.id}) }}" class="cyber-form-body">
 
-            {# ─── Nom ─── #}
             <div class="cyber-form-group">
                 <label class="cyber-form-label">Nom</label>
                 <input type="text" name="name" value="{{ user.name ?: '' }}" required
                        class="cyber-form-input" placeholder="Nom de l'usuari">
             </div>
 
-            {# ─── Email ─── #}
             <div class="cyber-form-group">
                 <label class="cyber-form-label">Email</label>
                 <input type="email" name="email" value="{{ user.email ?: '' }}" required
                        class="cyber-form-input" placeholder="email@exemple.com">
             </div>
 
-            {# ─── Empresa ─── #}
             <div class="cyber-form-group">
                 <label class="cyber-form-label">Empresa</label>
                 <input type="text" name="company" value="{{ user.company ?: '' }}"
                        class="cyber-form-input" placeholder="Nom de l'empresa (opcional)">
             </div>
 
-            {# ─── Slug ─── #}
             <div class="cyber-form-group">
-                <label class="cyber-form-label">Slug <span style="font-weight:400;text-transform:none;color:var(--s-text-secondary);">(identificador únic)</span></label>
+                <label class="cyber-form-label">Slug <span class="cyber-form-label__hint">(identificador únic)</span></label>
                 <input type="text" name="slug" value="{{ user.slug ?: '' }}"
                        class="cyber-form-input" placeholder="slug-de-l-usuari"
-                       {{ isNew ? 'readonly style="opacity:0.5;" title="Es genera automàticament des de l\'empresa"' : '' }}>
+                       {{ isNew ? 'readonly class="cyber-form-input cyber-form-input--readonly" title="Es genera automàticament des de l\'empresa"' : '' }}>
             </div>
 
-            {# ─── Password ─── #}
             <div class="cyber-form-group">
                 <label class="cyber-form-label">
-                    Contrasenya {% if not isNew %}<span style="font-weight:400;text-transform:none;color:var(--s-text-secondary);">(deixar buit per no canviar)</span>{% endif %}
+                    Contrasenya {% if not isNew %}<span class="cyber-form-label__hint">(deixar buit per no canviar)</span>{% endif %}
                 </label>
                 <input type="password" name="password" class="cyber-form-input"
                        placeholder="{{ isNew ? 'Contrasenya' : 'Deixar buit = no canviar' }}"
                        {{ isNew ? 'required' : '' }}>
             </div>
 
-            {# ─── Rol ─── #}
             <div class="cyber-form-group">
                 <label class="cyber-form-label">Rol</label>
                 <select name="role" class="cyber-form-input cyber-form-input--select">
@@ -71,7 +65,6 @@
                 </select>
             </div>
 
-            {# ─── Actiu ─── #}
             <div class="cyber-form-check">
                 <input type="checkbox" name="active" value="1" id="user-active"
                        class="cyber-form-checkbox"
@@ -79,7 +72,6 @@
                 <label for="user-active" class="cyber-form-check-label">Actiu</label>
             </div>
 
-            {# ─── Submit ─── #}
             <button type="submit" class="cyber-form-submit" data-anim="cyber-btn">
                 <i class="bi bi-check-lg"></i> <span>{{ isNew ? 'Crear usuari' : 'Guardar canvis' }}</span>
             </button>

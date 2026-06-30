@@ -1,0 +1,25 @@
+{# _section_header.html.twig — reusable cyber-section-header pattern
+   Params: title, description, icon, stats (array of {value, label, modifier?}) #}
+<div class="cyber-section-header" data-anim="cyber-card">
+    <div class="cyber-section-header-left">
+        <div class="cyber-section-icon">
+            <i class="bi {{ icon|default('bi-file-text') }}"></i>
+        </div>
+        <div>
+            <h2 class="cyber-section-title">{{ title }}</h2>
+            {% if description is defined and description %}
+            <p class="cyber-section-desc">{{ description }}</p>
+            {% endif %}
+        </div>
+    </div>
+    {% if stats is defined and stats is not empty %}
+    <div class="cyber-section-header-right">
+        {% for stat in stats %}
+        <div class="cyber-stat-mini">
+            <span class="cyber-stat-mini-value{% if stat.modifier is defined %} cyber-stat-mini-value--{{ stat.modifier }}{% endif %}">{{ stat.value }}</span>
+            <span class="cyber-stat-mini-label">{{ stat.label }}</span>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+</div>

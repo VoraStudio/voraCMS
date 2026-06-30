@@ -2,97 +2,85 @@
 
 {% block page_title %}{{ filterUser is defined and filterUser ? filterUser.name : 'Projectes' }}{% endblock %}
 
-{% block topbar_actions %}
-<a href="{{ path('admin_project_new') }}" class="cyber-btn-primary" data-anim="cyber-btn">
-    <i class="bi bi-plus-lg"></i> <span>Nou projecte</span>
-</a>
-{% endblock %}
+{% block topbar_actions %}{% endblock %}
 
 {% block content %}
 
 {# ─── User filter header ─── #}
 {% if filterUser is defined and filterUser %}
-<div class="cyber-section-header" data-anim="cyber-card" style="margin-bottom:24px;">
-    <div class="cyber-section-header-left">
-        <div class="cyber-section-icon">
-            <i class="bi bi-person-fill"></i>
-        </div>
-        <div>
-            <h2 class="cyber-section-title">{{ filterUser.name }}</h2>
-            <p class="cyber-section-desc">Projectes i seccions</p>
-        </div>
-    </div>
-    <div class="cyber-section-header-right">
-        <div class="cyber-stat-mini">
-            <span class="cyber-stat-mini-value">{{ mainProject ? mainProject.contentTypes|length : 0 }}</span>
-            <span class="cyber-stat-mini-label">Seccions</span>
-        </div>
-        <div class="cyber-stat-mini">
-            <span class="cyber-stat-mini-value">{{ otherProjects|length }}</span>
-            <span class="cyber-stat-mini-label">Projectes</span>
-        </div>
-        <a href="{{ path('admin_projects') }}" class="cyber-btn-back" style="margin-left:8px;" title="Tornar a tots els projectes">
-            <i class="bi bi-x-lg"></i> <span>Netejar</span>
-        </a>
-    </div>
-</div>
+{% include 'admin/components/_section_header.html.twig' with {
+    title: filterUser.name,
+    description: 'Projectes i seccions',
+    icon: 'bi-person-fill',
+    stats: [
+        {value: mainProject ? mainProject.contentTypes|length : 0, label: 'Seccions'},
+        {value: otherProjects|length, label: 'Projectes'}
+    ]
+} %}
+
+<a href="{{ path('admin_projects') }}" class="cyber-btn-back cyber-btn-back--inline" title="Tornar a tots els projectes">
+    <i class="bi bi-arrow-left"></i> <span>Tornar a Projectes</span>
+</a>
 
 {% if mainProject %}
-    {# ─── Main project section header ─── #}
+<div class="project-actions-bar">
+    <a href="{{ path('admin_switch_project', {id: mainProject.id, _redirect: path('admin_content_type_new')}) }}"
+       class="cyber-btn-primary cyber-btn--compact">
+        <i class="bi bi-plus-lg"></i> <span>Nova secció</span>
+    </a>
+</div>
     {% set color = mainProject.color ?: '#06B6D4' %}
-    <div class="cyber-card" data-anim="cyber-card" style="padding:20px 24px;margin-bottom:24px;display:flex;align-items:center;justify-content:space-between;gap:16px;">
-        <div style="display:flex;align-items:center;gap:12px;">
-            <div style="width:8px;height:8px;border-radius:50%;background:{{ color }};flex-shrink:0;"></div>
+    <div class="cyber-card project-main-card" data-anim="cyber-card">
+        <div class="project-main-card__info">
+            <div class="cyber-color-dot cyber-color-dot--dynamic" style="--dot-bg:{{ color }};"></div>
             <div>
-                <div style="font-size:0.65rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--s-text-secondary);opacity:0.75;margin-bottom:1px;">Projecte principal</div>
-                <div style="font-size:0.95rem;font-weight:600;color:var(--s-text);">{{ mainProject.name }}</div>
+                <div class="project-main-card__label">Projecte principal</div>
+                <div class="project-main-card__name">{{ mainProject.name }}</div>
             </div>
         </div>
-        <div style="display:flex;gap:8px;">
+        <div class="project-main-card__actions">
             <a href="{{ path('admin_project_edit', {id: mainProject.id}) }}" class="cyber-btn cyber-btn--icon cyber-btn--edit" title="Editar projecte">
                 <i class="bi bi-pencil"></i>
             </a>
-            <a href="{{ path('admin_switch_project', {id: mainProject.id}) }}" class="cyber-btn-primary" style="padding:8px 16px;font-size:0.7rem;">
+            <a href="{{ path('admin_switch_project', {id: mainProject.id}) }}" class="cyber-btn-primary cyber-btn--compact">
                 <i class="bi bi-arrow-right-circle"></i> <span>Obrir</span>
             </a>
         </div>
     </div>
 
-    {# ─── Content type cards ─── #}
-    <div class="row g-3 project-cards-grid" style="margin-bottom:32px;">
+    <div class="row g-3 project-cards-grid project-cards-grid--mb">
         {% for ct in mainProject.contentTypes %}
         {% set icon = 'bi-file-earmark' %}
         {% set entriesCount = ct.entries|length %}
         <div class="col-md-6 col-lg-4">
-            <div class="cyber-card project-content-card" data-anim="cyber-card" style="cursor:pointer;padding:24px 24px 20px;display:flex;flex-direction:column;"
-                 onclick="window.location='{{ path('admin_entry_by_type', {slug: ct.slug}) }}'">
-                <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:16px;flex-shrink:0;">
-                    <div class="cyber-section-icon" style="width:48px;height:48px;border-radius:14px;font-size:1.2rem;margin:0;">
+            <div class="cyber-card project-content-card" data-anim="cyber-card" data-link="{{ path('admin_entry_by_type', {slug: ct.slug}) }}">
+                <div class="project-content-card__header">
+                    <div class="cyber-section-icon project-content-card__section-icon">
                         <i class="bi {{ icon }}"></i>
                     </div>
-                    <span class="cyber-badge {{ entriesCount > 0 ? 'cyber-badge--mod' : '' }}" style="font-size:0.6rem;flex-shrink:0;">
+                    <span class="cyber-badge cyber-badge--compact {{ entriesCount > 0 ? 'cyber-badge--mod' : '' }}">
                         {{ entriesCount }} entrades
                     </span>
                 </div>
-                <div style="flex:1;display:flex;flex-direction:column;">
-                    <h3 style="font-size:0.95rem;font-weight:700;margin:0 0 4px;color:var(--s-text);">{{ ct.name }}</h3>
+                <div class="project-content-card__body">
+                    <h3 class="project-content-card__title">{{ ct.name }}</h3>
                     {% if ct.description %}
-                    <p style="font-size:0.75rem;color:var(--s-text-secondary);margin:0;line-height:1.4;flex:1;">{{ ct.description }}</p>
+                    <p class="project-content-card__desc">{{ ct.description }}</p>
                     {% endif %}
                 </div>
-                <a href="{{ path('admin_entry_by_type', {slug: ct.slug}) }}" class="cyber-btn cyber-btn--projects" style="font-size:0.6rem;padding:5px 12px;margin-top:12px;flex-shrink:0;align-self:flex-start;">
+                <a href="{{ path('admin_entry_by_type', {slug: ct.slug}) }}" class="cyber-btn cyber-btn--projects project-content-card__btn">
                     <i class="bi bi-eye"></i> <span>Veure entrades</span>
                 </a>
             </div>
         </div>
         {% else %}
         <div class="col-12">
-            <div class="cyber-card" data-anim="cyber-card" style="text-align:center;padding:40px 24px;">
-                <div style="font-size:2.5rem;color:rgba(148,163,184,0.15);margin-bottom:12px;">
+            <div class="cyber-card cyber-card--empty" data-anim="cyber-card">
+                <div class="cyber-empty-icon--xl">
                     <i class="bi bi-layers"></i>
                 </div>
-                <p style="color:var(--s-text-secondary);font-size:0.85rem;margin:0 0 16px;">Aquest projecte no té seccions encara</p>
-                <a href="{{ path('admin_switch_project', {id: mainProject.id}) }}" class="cyber-btn-primary" style="font-size:0.7rem;padding:8px 16px;">
+                <p class="field-help-text field-help-text--action">Aquest projecte no té seccions encara</p>
+                <a href="{{ path('admin_switch_project', {id: mainProject.id}) }}" class="cyber-btn-primary cyber-btn--compact">
                     <i class="bi bi-plus-lg"></i> <span>Crear secció</span>
                 </a>
             </div>
@@ -101,29 +89,28 @@
     </div>
 {% endif %}
 
-{# ─── Other projects ─── #}
 {% if otherProjects|length > 0 %}
-<h4 style="font-size:0.7rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--s-text-secondary);opacity:0.75;margin:0 0 14px;">
-    <i class="bi bi-folder2-open" style="margin-right:6px;"></i> Altres projectes
+<h4 class="cyber-section-label">
+    <i class="bi bi-folder2-open"></i> Altres projectes
 </h4>
 <div class="row g-3 project-cards-grid">
     {% for project in otherProjects %}
     {% set color = project.color ?: '#4945FF' %}
     <div class="col-md-6 col-lg-4">
-        <div class="cyber-card project-other-card" data-anim="cyber-card"
-             style="cursor:pointer;padding:20px 24px;border-left:3px solid {{ color }};display:flex;align-items:center;"
-             onclick="window.location='{{ path('admin_switch_project', {id: project.id}) }}'">
-            <div style="display:flex;align-items:center;gap:14px;width:100%;">
-                <div class="project-other-icon" style="width:42px;height:42px;border-radius:12px;background:rgba(148,163,184,0.08);display:flex;align-items:center;justify-content:center;flex-shrink:0;color:{{ color }};font-size:1.2rem;">
+        <div class="cyber-card project-other-card project-other-card--border" data-anim="cyber-card"
+             style="--project-border-clr:{{ color }};"
+             data-link="{{ path('admin_switch_project', {id: project.id}) }}">
+            <div class="project-other-card__inner">
+                <div class="project-other-icon project-other-icon--dynamic" style="--icon-clr:{{ color }};">
                     <i class="bi bi-folder2-open"></i>
                 </div>
-                <div style="flex:1;min-width:0;">
-                    <div class="project-other-name" style="font-size:0.9rem;font-weight:600;color:var(--s-text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ project.name }}</div>
-                    <div style="font-size:0.65rem;color:var(--s-text-secondary);margin-top:3px;">
+                <div class="project-other-card__body">
+                    <div class="project-other-name">{{ project.name }}</div>
+                    <div class="project-other-info">
                         {{ project.contentTypes|length }} seccions · {{ project.contentTypes|reduce((carry, ct) => carry + ct.entries|length, 0) }} entrades
                     </div>
                 </div>
-                <i class="bi bi-chevron-right" style="color:rgba(148,163,184,0.3);font-size:0.9rem;"></i>
+                <i class="bi bi-chevron-right project-other-arrow"></i>
             </div>
         </div>
     </div>
@@ -133,27 +120,15 @@
 
 {% elseif projects is defined %}
 {# ─── All projects view (grouped by client) ─── #}
-<div class="cyber-section-header" data-anim="cyber-card">
-    <div class="cyber-section-header-left">
-        <div class="cyber-section-icon">
-            <i class="bi bi-folder2-open"></i>
-        </div>
-        <div>
-            <h2 class="cyber-section-title">Projectes</h2>
-            <p class="cyber-section-desc">Gestiona els projectes i el seu contingut</p>
-        </div>
-    </div>
-    <div class="cyber-section-header-right">
-        <div class="cyber-stat-mini">
-            <span class="cyber-stat-mini-value">{{ projects|length }}</span>
-            <span class="cyber-stat-mini-label">Total</span>
-        </div>
-        <div class="cyber-stat-mini">
-            <span class="cyber-stat-mini-value cyber-stat-mini-value--active">{{ projects|filter(p => p.active)|length }}</span>
-            <span class="cyber-stat-mini-label">Actius</span>
-        </div>
-    </div>
-</div>
+{% include 'admin/components/_section_header.html.twig' with {
+    title: 'Projectes',
+    description: 'Gestiona els projectes i el seu contingut',
+    icon: 'bi-folder2-open',
+    stats: [
+        {value: projects|length, label: 'Total'},
+        {value: projects|filter(p => p.active)|length, label: 'Actius', modifier: 'active'}
+    ]
+} %}
 
 {% set currentUserId = -1 %}
 {% for project in projects %}
@@ -163,73 +138,70 @@
   {% set currentUserId = pid %}
   {% if not loop.first %}</tbody></table></div>{% endif %}
 
-  {# ─── Client group header ─── #}
-  <div class="cyber-card cyber-card--table" data-anim="cyber-card" style="padding:0;overflow:hidden;margin-bottom:24px;">
-    <div style="padding:12px 20px;border-bottom:1px solid rgba(148,163,184,0.08);display:flex;align-items:center;justify-content:space-between;">
-      <div style="display:flex;align-items:center;gap:10px;">
-        <div class="cyber-avatar" style="width:28px;height:28px;font-size:0.65rem;">{{ project.user ? project.user.name|first|upper : '?' }}</div>
+  <div class="cyber-card cyber-card--table cyber-card--flush cyber-card--mb" data-anim="cyber-card">
+    <div class="client-group-header">
+      <div class="client-group-header__info">
+        <div class="cyber-avatar client-group-header__avatar">{{ project.user ? project.user.name|first|upper : '?' }}</div>
         <div>
-          <span style="font-size:0.82rem;font-weight:700;color:var(--s-text);">{{ project.user ? project.user.name : 'Sense client' }}</span>
+          <span class="client-group-header__name">{{ project.user ? project.user.name : 'Sense client' }}</span>
           {% if project.user %}
-          <span style="font-size:0.6rem;color:var(--s-text-secondary);margin-left:8px;">{{ project.user.email }}</span>
+          <span class="client-group-header__email">{{ project.user.email }}</span>
           {% endif %}
         </div>
       </div>
-      <span style="font-size:0.72rem;font-weight:600;color:var(--s-text-secondary);opacity:0.9;letter-spacing:0.05em;">
-        {{ projects|filter(p => (p.user ? p.user.id : 0) == pid)|length }} projectes
-      </span>
+      <div class="client-group-header__actions">
+        <span class="client-group-header__count">
+          {{ projects|filter(p => (p.user ? p.user.id : 0) == pid)|length }} projectes
+        </span>
+        {% if project.user %}
+        <a href="{{ path('admin_project_new', {user: project.user.id}) }}"
+           class="cyber-btn cyber-btn--projects" title="Nou projecte per a {{ project.user.name }}">
+          <i class="bi bi-plus-lg"></i><span>Nou projecte</span>
+        </a>
+        {% endif %}
+      </div>
     </div>
     <table class="cyber-table cyber-table--projects">
       <thead>
         <tr>
-          <th style="width: 35%;">Projecte</th>
-          <th style="width: 12%;">Seccions</th>
-          <th style="width: 12%;">Entrades</th>
-          <th style="width: 15%;">Estat</th>
-          <th style="width: 26%;">Accions</th>
+          <th>Projecte</th>
+          <th>Seccions</th>
+          <th>Entrades</th>
+          <th>Estat</th>
+          <th>Accions</th>
         </tr>
       </thead>
       <tbody>
 {% endif %}
 
         {% set color = project.color ?: '#4945FF' %}
-        <tr class="cyber-row {{ project.active ? 'row-active' : 'row-inactive' }}" data-anim="cyber-row" style="cursor:pointer;" onclick="window.location='{{ path('admin_switch_project', {id: project.id}) }}'">
+        <tr class="cyber-row {{ project.active ? 'row-active' : 'row-inactive' }}" data-anim="cyber-row" data-link="{{ path('admin_switch_project', {id: project.id}) }}">
           <td class="cyber-cell" data-label="Projecte">
-            <div style="display:flex;align-items:center;gap:10px;">
-              <div style="width:8px;height:8px;border-radius:50%;background:{{ color }};flex-shrink:0;"></div>
+            <div class="cyber-cell__project-info">
+            <div class="cyber-color-dot cyber-color-dot--dynamic" style="--dot-bg:{{ color }};"></div>
               <div>
-                <div class="table-project-name" style="font-size:0.82rem;font-weight:600;color:var(--s-text);">{{ project.name }}</div>
-                <div style="font-size:0.62rem;color:var(--s-text-secondary);margin-top:1px;">{{ project.slug }}</div>
+                <div class="table-project-name">{{ project.name }}</div>
+                <div class="table-project-slug">{{ project.slug }}</div>
               </div>
             </div>
           </td>
-          <td class="cyber-cell" data-label="Seccions" style="font-size:0.85rem;font-weight:600;color:var(--s-text);">
+          <td class="cyber-cell cyber-cell--numeric" data-label="Seccions">
             {{ project.contentTypes|length }}
           </td>
-          <td class="cyber-cell" data-label="Entrades" style="font-size:0.85rem;font-weight:600;color:var(--s-text);">
+          <td class="cyber-cell cyber-cell--numeric" data-label="Entrades">
             {{ project.contentTypes|reduce((carry, ct) => carry + ct.entries|length, 0) }}
           </td>
           <td class="cyber-cell cyber-cell--status" data-label="Estat">
-            {% if project.active %}
-            <span class="cyber-status">
-              <span class="cyber-status-dot cyber-status-dot--active"></span>
-              <span class="cyber-status-text">Actiu</span>
-            </span>
-            {% else %}
-            <span class="cyber-status">
-              <span class="cyber-status-dot cyber-status-dot--inactive"></span>
-              <span class="cyber-status-text cyber-status-text--inactive">Inactiu</span>
-            </span>
-            {% endif %}
+            {% include 'admin/components/_status.html.twig' with {active: project.active} %}
           </td>
-          <td class="cyber-cell" data-label="Accions" onclick="event.stopPropagation();">
+          <td class="cyber-cell cyber-cell--actions" data-label="Accions">
             <div class="cyber-actions">
               <a href="{{ path('admin_switch_project', {id: project.id}) }}"
                  class="cyber-btn cyber-btn--projects" title="Obrir projecte">
                 <i class="bi bi-arrow-right-circle"></i><span>Obrir</span>
               </a>
               <span class="cyber-actions-divider"></span>
-              <form method="post" action="{{ path('admin_project_toggle_active', {id: project.id}) }}" style="display:inline" id="tact-project-{{ project.id }}">
+              <form method="post" action="{{ path('admin_project_toggle_active', {id: project.id}) }}" class="cyber-form--inline" id="tact-project-{{ project.id }}">
                 <input type="hidden" name="_token" value="{{ csrf_token('toggle-active-' ~ project.id) }}">
                 <button type="submit"
                         class="cyber-btn cyber-btn--icon {{ project.active ? 'cyber-btn--toggle-active' : 'cyber-btn--toggle-inactive' }}"
@@ -241,20 +213,21 @@
                  class="cyber-btn cyber-btn--icon cyber-btn--edit" title="Editar">
                 <i class="bi bi-pencil"></i>
               </a>
-              {% if project.contentTypes|length == 0 %}
-              <form method="post" action="{{ path('admin_project_delete', {id: project.id}) }}" style="display:inline" id="del-project-{{ project.id }}">
+              {% if project.id in protectedProjectIds|default([]) %}
+              <button type="button" class="cyber-btn cyber-btn--icon cyber-btn--delete-disabled"
+                      title="No es pot eliminar l'únic projecte de l'usuari" disabled>
+                <i class="bi bi-trash3"></i>
+              </button>
+              {% else %}
+              <form method="post" action="{{ path('admin_project_delete', {id: project.id}) }}" class="cyber-form--inline" id="del-project-{{ project.id }}">
                 <input type="hidden" name="_token" value="{{ csrf_token('delete-project-' ~ project.id) }}">
-                <button type="submit"
+                <button type="button"
                         class="cyber-btn cyber-btn--icon cyber-btn--delete" title="Eliminar"
-                        onclick="return confirm('Segur que vols eliminar el projecte «{{ project.name }}»?')">
+                        data-confirm="Segur que vols eliminar el projecte «{{ project.name }}» i totes les seves seccions i entrades?"
+                        data-form="del-project-{{ project.id }}">
                   <i class="bi bi-trash3"></i>
                 </button>
               </form>
-              {% else %}
-              <button type="button" class="cyber-btn cyber-btn--icon cyber-btn--delete-disabled"
-                      title="Elimina primer les seccions" disabled>
-                <i class="bi bi-trash3"></i>
-              </button>
               {% endif %}
             </div>
           </td>
@@ -262,10 +235,10 @@
 
 {% if loop.last %}</tbody></table></div>{% endif %}
 {% else %}
-<div class="cyber-card" data-anim="cyber-card" style="padding:60px 24px;text-align:center;">
+<div class="cyber-card cyber-card--empty-lg" data-anim="cyber-card">
     <div class="cyber-empty-icon"><i class="bi bi-folder-plus"></i></div>
     <p class="cyber-empty-text">No hi ha projectes</p>
-    <a href="{{ path('admin_project_new') }}" class="cyber-btn-primary" style="margin-top:16px;display:inline-flex;">
+    <a href="{{ path('admin_project_new') }}" class="cyber-btn-primary cyber-btn--action">
         <i class="bi bi-plus-lg"></i> <span>Crear projecte</span>
     </a>
 </div>

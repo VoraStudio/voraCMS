@@ -79,7 +79,7 @@ class DashboardController extends AbstractController
                 ],
                 'latestUsers' => $userRepo->findBy([], ['createdAt' => 'DESC'], 5),
                 'latestProjects' => $projectRepo->findBy([], ['createdAt' => 'DESC'], 5),
-                'latestContentTypes' => $ctRepo->findBy([], ['createdAt' => 'DESC'], 5),
+                'latestContentTypes' => $ctRepo->findLatestWithProject(5),
             ]);
         }
 
@@ -162,6 +162,11 @@ class DashboardController extends AbstractController
         }
 
         $request->getSession()->set('_project_id', $project->getId());
+
+        $redirect = $request->query->get('_redirect');
+        if ($redirect && $this->isGranted('ROLE_ADMIN')) {
+            return $this->redirect($redirect);
+        }
 
         if ($this->isGranted('ROLE_ADMIN')) {
             return $this->redirectToRoute('admin_project_show', ['id' => $project->getId()]);
