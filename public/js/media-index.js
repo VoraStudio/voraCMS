@@ -66,6 +66,70 @@
       });
     });
 
+    /* ═══════════════════════════════════════════════════
+       Media Browser — acordeó per projecte (single-open per client)
+       ═══════════════════════════════════════════════════ */
+    var browser = document.getElementById('mediaBrowser');
+    if (browser) {
+      /* Per cada client, gestionar els seus projectes independentment */
+      var clientCards = browser.querySelectorAll('.media-client-card');
+
+      clientCards.forEach(function (client) {
+        var projectCards = client.querySelectorAll('.media-project-card');
+
+        function closeAllProjects (skip) {
+          projectCards.forEach(function (pc) {
+            if (pc !== skip) {
+              pc.classList.remove('media-project-card--open');
+              var h = pc.querySelector('.media-project-card__header');
+              if (h) { h.setAttribute('aria-expanded', 'false'); }
+            }
+          });
+        }
+
+        function openProject (pc) {
+          pc.classList.add('media-project-card--open');
+          var h = pc.querySelector('.media-project-card__header');
+          if (h) { h.setAttribute('aria-expanded', 'true'); }
+        }
+
+        projectCards.forEach(function (pc) {
+          var header = pc.querySelector('.media-project-card__header');
+          if (!header) { return; }
+
+          header.addEventListener('click', function (e) {
+            e.stopPropagation();
+            var isOpen = pc.classList.contains('media-project-card--open');
+            if (isOpen) {
+              closeAllProjects();
+            } else {
+              closeAllProjects();
+              openProject(pc);
+            }
+          });
+
+          /* Keyboard: Enter / Space */
+          header.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              header.click();
+            }
+          });
+        });
+      });
+
+      /* Click outside → close all project cards across all clients */
+      document.addEventListener('click', function (e) {
+        if (!browser.contains(e.target)) {
+          browser.querySelectorAll('.media-project-card--open').forEach(function (pc) {
+            pc.classList.remove('media-project-card--open');
+            var h = pc.querySelector('.media-project-card__header');
+            if (h) { h.setAttribute('aria-expanded', 'false'); }
+          });
+        }
+      });
+    }
+
   });
 
 })();

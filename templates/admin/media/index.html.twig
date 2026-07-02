@@ -9,10 +9,91 @@
     </button>
 </div>
 
+{% if groupedMode %}
+{# ─── Admin: per client (fix) → projecte (acordeó) ─── #}
+<div class="media-browser" id="mediaBrowser">
+    {% for group in media %}
+    <div class="cyber-card cyber-card--mb media-client-card">
+        {# ─── Card de client (fixa, no expandible) ─── #}
+        <div class="media-client-card__header">
+            <div class="media-client-card__header-left">
+                <div class="media-client-card__avatar">{{ group.company|first|upper }}</div>
+                <div class="media-client-card__info">
+                    <span class="media-client-card__name">{{ group.company }}</span>
+                </div>
+            </div>
+        </div>
+
+        {# ─── Projectes dins del client (acordeons) ─── #}
+        <div class="media-client-card__body">
+            {% for pk, proj in group.projects %}
+            <div class="media-project-card" data-project-id="{{ proj.project ? proj.project.id : '' }}">
+                <div class="media-project-card__header" role="button" tabindex="0" aria-expanded="false">
+                    <div class="media-project-card__header-left">
+                        {% if proj.color %}
+                        <span class="media-project-card__dot" style="background:{{ proj.color }}"></span>
+                        {% endif %}
+                        <span class="media-project-card__name">{{ proj.label }}</span>
+                    </div>
+                    <div class="media-project-card__header-right">
+                        <span class="media-project-card__count">{{ proj.count }} fitxer{% if proj.count != 1 %}s{% endif %}</span>
+                        <i class="bi bi-chevron-down media-project-card__arrow"></i>
+                    </div>
+                </div>
+                <div class="media-project-card__body">
+                    <div class="row g-3">
+                        {% for m in proj.items %}
+                        <div class="col-md-3 col-sm-4 col-6">
+                            <div class="cyber-card cyber-card--flush card h-100">
+                                <div class="position-relative">
+                                    <a href="{{ m.path }}" target="_blank" class="d-block s-media-thumb">
+                                        <img src="{{ m.path }}" alt="{{ m.originalFilename }}" class="w-100 h-100 s-media-img">
+                                    </a>
+                                    <button class="s-media-delete" title="Eliminar imatge"
+                                        data-confirm="Eliminaràs «{{ m.originalFilename }}». Aquesta acció no es pot desfer."
+                                        data-form="del-media-{{ m.id }}">
+                                        <i class="bi bi-trash3"></i>
+                                    </button>
+                                    <form method="post" action="{{ path('admin_media_delete', {'id': m.id}) }}" id="del-media-{{ m.id }}" class="d-none">
+                                        <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ m.id) }}">
+                                    </form>
+                                </div>
+                                <div class="s-media-card-body">
+                                    <p class="s-media-filename text-truncate" title="{{ m.originalFilename }}">{{ m.originalFilename }}</p>
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <small class="s-media-size">{{ (m.fileSize / 1024)|number_format(2, ',', ' ') }} KB</small>
+                                        <button class="cyber-btn--icon copy-url" data-url="{{ m.path }}" title="Copiar URL">
+                                            <i class="bi bi-link-45deg"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% else %}
+                        <div class="col-12 text-center py-3 s-media-size">
+                            <p>No hi ha imatges en aquest projecte.</p>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% else %}
+    <div class="text-center py-5 s-media-size">
+        <i class="bi bi-images display-4"></i>
+        <p class="mt-2">No hi ha imatges encara.</p>
+    </div>
+    {% endfor %}
+</div>
+
+{% else %}
+{# ─── Usuari normal: vista plana ─── #}
 <div class="row g-3">
     {% for m in media %}
     <div class="col-md-3 col-sm-4 col-6">
-        <div class="card h-100">
+        <div class="cyber-card cyber-card--flush card h-100">
             <div class="position-relative">
                 <a href="{{ m.path }}" target="_blank" class="d-block s-media-thumb">
                     <img src="{{ m.path }}" alt="{{ m.originalFilename }}" class="w-100 h-100 s-media-img">
@@ -30,7 +111,7 @@
                 <p class="s-media-filename text-truncate" title="{{ m.originalFilename }}">{{ m.originalFilename }}</p>
                 <div class="d-flex justify-content-between align-items-center">
                     <small class="s-media-size">{{ (m.fileSize / 1024)|number_format(2, ',', ' ') }} KB</small>
-                    <button class="btn btn-sm btn-outline-primary copy-url" data-url="{{ m.path }}" title="Copiar URL">
+                    <button class="cyber-btn--icon copy-url" data-url="{{ m.path }}" title="Copiar URL">
                         <i class="bi bi-link-45deg"></i>
                     </button>
                 </div>
@@ -44,6 +125,7 @@
     </div>
     {% endfor %}
 </div>
+{% endif %}
 
 {# ─── Upload Modal ─── #}
 <div class="modal fade" id="uploadModal" tabindex="-1">
@@ -60,6 +142,23 @@
                         <input type="file" name="file" class="form-control" accept=".jpg,.jpeg,.webp,.avif" required>
                         <small class="field-help-text">JPG, WebP o AVIF · Màxim 1MB</small>
                     </div>
+                    {% if groupedMode and projectGroups|length > 0 %}
+                    <div class="mb-3">
+                        <label class="form-label" for="uploadProject">Projecte</label>
+                        <select name="project_id" id="uploadProject" class="form-select">
+                            <option value="">Sense projecte</option>
+                            {% for company, users in projectGroups %}
+                            {% for userLabel, projects in users %}
+                            <optgroup label="{{ company }} — {{ userLabel }}">
+                                {% for p in projects %}
+                                <option value="{{ p.id }}">{{ p.name }}</option>
+                                {% endfor %}
+                            </optgroup>
+                            {% endfor %}
+                            {% endfor %}
+                        </select>
+                    </div>
+                    {% endif %}
                     <div id="uploadPreview" class="text-center d-none">
                         <img src="" class="img-fluid rounded upload-preview-img">
                     </div>
@@ -75,5 +174,5 @@
 
 {% block javascripts %}
 {{ parent() }}
-<script src="{{ asset('js/media-index.js') }}"></script>
+<script src="{{ asset('js/media-index.js') }}?v=1.2"></script>
 {% endblock %}

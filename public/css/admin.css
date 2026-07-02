@@ -525,7 +525,7 @@ body {
 /* ─── Media Card Body ─── */
 .s-media-card-body {
   flex: 1 1 auto;
-  padding: 6px 10px 10px;
+  padding: 12px 14px 14px;
 }
 
 .s-media-filename {
@@ -537,16 +537,26 @@ body {
     "Segoe UI",
     Roboto,
     sans-serif;
-  font-size: 0.82rem;
-  font-weight: 500;
+  font-size: 0.85rem;
+  font-weight: 600;
   letter-spacing: -0.01em;
-  color: rgba(255, 255, 255, 0.88);
-  margin-bottom: 4px;
+  color: var(--s-text);
+  margin-bottom: 6px;
   line-height: 1.3;
 }
 
-[data-theme="light"] .s-media-filename {
-  color: rgba(0, 0, 0, 0.82);
+.copy-url {
+  color: rgba(148, 163, 184, 0.85);
+  transition: all 0.18s ease;
+}
+
+.copy-url:hover {
+  background: var(--s-hover) !important;
+  color: var(--s-accent, #06b6d4) !important;
+}
+
+.copy-url:hover i {
+  color: var(--s-accent, #06b6d4) !important;
 }
 
 .s-footer {
@@ -913,6 +923,11 @@ body {
 .form-control option {
   color: #111;
   background: #f5f5f5;
+}
+
+.form-select optgroup {
+  color: #111;
+  font-weight: 600;
 }
 
 .form-select option:disabled {
@@ -4520,6 +4535,7 @@ input[type="time"] {
   --s-text-secondary: rgba(0, 0, 0, 0.72);
 
   /* Accent / Icon colors (light mode → indigo) */
+  --s-accent: #4945ff;
   --s-accent-icon: rgba(73, 69, 255, 0.7);
   --s-accent-icon-soft: rgba(73, 69, 255, 0.55);
   --s-accent-icon-card: rgba(73, 69, 255, 0.15);
@@ -4945,6 +4961,10 @@ input[type="time"] {
 [data-theme="light"] .form-select option {
   color: #1a1a2e;
   background: #ffffff;
+}
+
+[data-theme="light"] .form-select optgroup {
+  color: #1a1a2e;
 }
 
 [data-theme="light"] .form-control:disabled,
@@ -6373,6 +6393,158 @@ input[type="time"] {
   border-bottom-color: #ffffff !important;
 }
 
+/* ═══════════════════════════════════════════════════
+   Media Browser — per client (fix) → projecte (acordeó)
+   ═══════════════════════════════════════════════════ */
 
+/* ─── Client card (fixa) ─── */
+.media-client-card {
+  overflow: hidden;
+}
 
+.media-client-card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 20px;
+  background: rgba(255, 255, 255, 0.02);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
 
+.media-client-card__header-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.media-client-card__avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  color: #fff;
+  font-size: 0.85rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.media-client-card__name {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--s-text);
+  letter-spacing: -0.01em;
+}
+
+.media-client-card__body {
+  padding: 12px 20px 4px;
+}
+
+/* ─── Project card (acordeó) ─── */
+.media-project-card {
+  margin-bottom: 8px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: rgba(255, 255, 255, 0.01);
+  overflow: hidden;
+}
+
+.media-project-card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  cursor: pointer;
+  user-select: none;
+  transition: background 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.media-project-card__header:hover {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.media-project-card__header:focus-visible {
+  outline: 2px solid var(--s-accent);
+  outline-offset: -2px;
+}
+
+.media-project-card__header-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.media-project-card__dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.media-project-card__name {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--s-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.media-project-card__header-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.media-project-card__count {
+  font-size: 0.75rem;
+  color: var(--s-text-secondary);
+  white-space: nowrap;
+}
+
+.media-project-card__arrow {
+  font-size: 0.82rem;
+  color: var(--s-text-secondary);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.media-project-card--open .media-project-card__arrow {
+  transform: rotate(180deg);
+}
+
+.media-project-card__body {
+  max-height: 0;
+  overflow: hidden;
+  padding: 0 16px;
+  transition:
+    max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+    padding 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.media-project-card--open .media-project-card__body {
+  max-height: 2000px;
+  padding: 0 16px 16px;
+}
+
+[data-theme="light"] .media-client-card__header {
+  background: rgba(0, 0, 0, 0.02);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+[data-theme="light"] .media-project-card {
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  background: rgba(0, 0, 0, 0.01);
+}
+
+[data-theme="light"] .media-project-card__header:hover {
+  background: rgba(0, 0, 0, 0.02);
+}
+
+[data-theme="light"] .media-client-card__avatar {
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+}

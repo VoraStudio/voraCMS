@@ -21,10 +21,12 @@ use App\Entity\ContentType;
 use App\Entity\Entry;
 use App\Entity\FieldDefinition;
 use App\Entity\FieldValue;
+use App\Entity\Project;
 use App\Entity\User;
 use App\Repository\ContentTypeRepository;
 use App\Repository\MediaRepository;
 use App\Repository\ProjectRepository;
+use App\Service\EntrySerializer;
 use App\Service\MediaService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -124,6 +126,33 @@ class EntryController extends AbstractController
     }
 
     /* -----------------------------------------------------------
+       preview — Previsualitza una entrada amb el disseny visual
+       real del frontend (sense admin layout).
+       ----------------------------------------------------------- */
+    #[Route('/{id}/preview', name: 'admin_entry_preview', methods: ['GET'])]
+    public function preview(Entry $entry, EntrySerializer $serializer): Response
+    {
+        $this->denyAccessUnlessGranted('ROLE_USUARIO');
+
+        /* ── Verificació de propietat ── */
+        $this->verifyEntryOwnership($entry);
+
+        $data = $serializer->serialize($entry);
+        $contentType = $entry->getContentType();
+
+        /* Només renderitzem preview visual per al CT de Projectes VoraStudio */
+        if ($contentType && $contentType->getSlug() === 'vorastudio-projects') {
+            return $this->render('admin/entry/preview.html.twig', [
+                'entry' => $entry,
+                'data'  => $data,
+            ]);
+        }
+
+        /* Fallback: redirigir a la vista show genèrica */
+        return $this->redirectToRoute('admin_entry_show', ['id' => $entry->getId()]);
+    }
+
+    /* -----------------------------------------------------------
        new — Crea una nova entrada dins del ContentType
        especificat. Assigna l'usuari actual a l'entrada
        (defense in depth) per garantir que sempre pertany
@@ -138,6 +167,9 @@ class EntryController extends AbstractController
         $contentType = $projectId !== null ? $ctRepo->findBySlug($slug, (int) $projectId) : $ctRepo->findBySlug($slug);
         if (!$contentType) throw $this->createNotFoundException();
 
+        /* ── Projecte contextual per a uploads: el del contentType, o el de sessió ── */
+        $contextProject = $contentType->getProject() ?? ($projectId !== null ? $em->getRepository(Project::class)->find($projectId) : null);
+
         /* ── Verificació de propietat ── */
         $this->verifyContentTypeOwnership($contentType);
 
@@ -151,7 +183,7 @@ class EntryController extends AbstractController
             $entry->setUser($this->getUser());
 
             foreach ($contentType->getFields() as $fieldDef) {
-                $value = $this->resolveFieldValue($request, $fieldDef, $mediaService);
+                $value = $this->resolveFieldValue($request, $fieldDef, $mediaService, $contextProject);
                 $fv = new FieldValue();
                 $fv->setFieldDefinition($fieldDef);
                 $fv->setValue($value ?? '');
@@ -203,11 +235,13 @@ class EntryController extends AbstractController
             }
         }
 
+        $contextProject = $entry->getContentType()->getProject() ?? ($entry->getUser()?->getProjects()->first() ?: null);
+
         if ($request->isMethod('POST')) {
             $entry->setStatus($request->request->get('status', Entry::STATUS_DRAFT));
 
             foreach ($entry->getContentType()->getFields() as $fieldDef) {
-                $value = $this->resolveFieldValue($request, $fieldDef, $mediaService);
+                $value = $this->resolveFieldValue($request, $fieldDef, $mediaService, $contextProject);
                 $found = false;
                 foreach ($entry->getFieldValues() as $fv) {
                     if ($fv->getFieldDefinition()->getId() === $fieldDef->getId()) {
@@ -308,10 +342,16 @@ class EntryController extends AbstractController
             throw $this->createAccessDeniedException('Usuari no autenticat.');
         }
 
-        if ($entry->getUser()?->getId() !== $user->getId()) {
-            throw $this->createAccessDeniedException(
-                'No tens permís per modificar aquesta entrada.'
-            );
+        /* Verificar que el ContentType de l'entrada pertany a l'usuari
+           (ja sigui directament o a través d'un projecte seu) */
+        $ct = $entry->getContentType();
+        if ($ct?->getUser()?->getId() !== $user->getId()) {
+            $project = $ct?->getProject();
+            if (!$project || $project->getUser()?->getId() !== $user->getId()) {
+                throw $this->createAccessDeniedException(
+                    'No tens permís per modificar aquesta entrada.'
+                );
+            }
         }
     }
 
@@ -351,7 +391,7 @@ class EntryController extends AbstractController
         }
     }
 
-    private function resolveFieldValue(Request $request, FieldDefinition $fieldDef, MediaService $mediaService): string
+    private function resolveFieldValue(Request $request, FieldDefinition $fieldDef, MediaService $mediaService, ?Project $contextProject = null): string
     {
         $fieldId = $fieldDef->getId();
         $raw = $request->request->get('field_' . $fieldId, '');
@@ -372,7 +412,7 @@ class EntryController extends AbstractController
             foreach ($files as $file) {
                 if ($file) {
                     try {
-                        $media = $mediaService->upload($file, $this->getUser());
+                        $media = $mediaService->upload($file, $this->getUser(), $contextProject);
                         $allIds[] = (string) $media->getId();
                     } catch (\Throwable $e) {
                         $this->addFlash('error', 'Error en pujar imatge: ' . $e->getMessage());

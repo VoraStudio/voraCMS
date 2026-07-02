@@ -74,6 +74,24 @@ class ContentTypeRepository extends ServiceEntityRepository
             ->getResult();
     }
 
+    /**
+     * @return ContentType[]
+     */
+    public function findAllForAdmin(?int $projectId = null): array
+    {
+        $qb = $this->createQueryBuilder('ct')
+            ->orderBy('ct.base', 'DESC')
+            ->addOrderBy('ct.name', 'ASC');
+
+        if ($projectId !== null) {
+            $qb->where('ct.project = :project OR (ct.base = :base AND ct.project IS NULL)')
+               ->setParameter('project', $projectId)
+               ->setParameter('base', true);
+        }
+
+        return $qb->getQuery()->getResult();
+    }
+
     public function findBaseTemplates(): array
     {
         return $this->createQueryBuilder('ct')

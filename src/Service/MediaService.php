@@ -10,14 +10,15 @@
 namespace App\Service;
 
 use App\Entity\Media;
+use App\Entity\Project;
 use App\Entity\User;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 class MediaService
 {
-    private const ALLOWED_EXTENSIONS = ['jpg', 'jpeg', 'webp', 'avif'];
-    private const MAX_FILE_SIZE = 1048576; // 1 MB
+    private const ALLOWED_EXTENSIONS = ['jpg', 'jpeg', 'png', 'svg', 'webp', 'avif'];
+    private const MAX_FILE_SIZE = 3145728; // 3 MB
     private string $uploadDir;
 
     public function __construct(
@@ -27,7 +28,7 @@ class MediaService
         $this->uploadDir = $projectDir . '/public/uploads';
     }
 
-    public function upload(UploadedFile $file, User $user): Media
+    public function upload(UploadedFile $file, User $user, ?Project $project = null): Media
     {
         $extension = strtolower($file->getClientOriginalExtension());
 
@@ -67,6 +68,7 @@ class MediaService
         $media->setFileSize($fileSize);
         $media->setUploadedBy($user);
         $media->setUser($user);
+        $media->setProject($project);
 
         $this->em->persist($media);
         $this->em->flush();

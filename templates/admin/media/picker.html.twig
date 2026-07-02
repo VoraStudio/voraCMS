@@ -29,6 +29,9 @@
     <div class="card-body p-3">
         <form id="uploadForm" enctype="multipart/form-data" class="media-picker-upload__form" data-upload-url="{{ path('admin_media_upload') }}">
             <input type="file" name="file" class="form-control form-control-sm media-picker-upload__file-input" accept=".jpg,.jpeg,.webp,.avif" required>
+            {% if project %}
+            <input type="hidden" name="project_id" value="{{ project.id }}">
+            {% endif %}
             <button type="submit" class="btn btn-sm btn-primary" id="uploadBtn"><i class="bi bi-cloud-upload"></i> <span>Pujar</span></button>
         </form>
         <div id="uploadMsg" class="mt-2 small media-picker-upload__msg"></div>

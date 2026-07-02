@@ -3,22 +3,19 @@
 /* ===========================================================
    MediaController — Gestió de la mediateca amb tenant isolation.
 
-   El MediaRepository té mètodes findByUser i
-   findByUserOrdered que filtren per user_id.
-
-   Els usuaris normals només veuen els seus fitxers. Els
-   administradors veuen tots els fitxers.
-
-   Pel mètode upload(), el MediaService ja assigna l'usuari
-   actual internament.
+   Admin: vista agrupada per client (User.company) → projecte.
+   Upload permet triar el projecte destí.
+   Usuaris normals: només els seus fitxers, vista plana.
    =========================================================== */
 
 namespace App\Controller\Admin;
 
 use Doctrine\ORM\EntityManagerInterface;
 use App\Entity\Media;
+use App\Entity\Project;
 use App\Entity\User;
 use App\Repository\MediaRepository;
+use App\Repository\ProjectRepository;
 use App\Service\MediaService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
@@ -31,30 +28,113 @@ use Symfony\Component\Routing\Attribute\Route;
 class MediaController extends AbstractController
 {
     /* -----------------------------------------------------------
-       index — Llista els fitxers multimèdia del client actual.
-       Pel super-admin, mostra tots els fitxers (clientId null).
+       index — Llista els fitxers multimèdia.
+       Admin: agrupat per client (company) → projecte.
+       MOSTRA TOTS ELS PROJECTES de cada client, fins i tot
+       si no tenen media. Els media sense projecte van a
+       "Sense projecte" dins del client corresponent.
        ----------------------------------------------------------- */
     #[Route('/', name: 'admin_media_index')]
-    public function index(MediaRepository $repo): Response
+    public function index(MediaRepository $repo, ProjectRepository $projectRepo): Response
     {
         $this->denyAccessUnlessGranted('ROLE_USUARIO');
 
         if ($this->isGranted('ROLE_ADMIN')) {
-            $media = $repo->findBy([], ['createdAt' => 'DESC']);
+            /* Indexar media per project_id i construir estructura
+               des dels projectes (TOTS), ignorant media sense projecte */
+            $allMedia = $repo->findAllWithUserOrdered();
+            $mediaByProject = [];
+            foreach ($allMedia as $m) {
+                $pid = $m->getProject()?->getId();
+                if ($pid) {
+                    $mediaByProject[$pid][] = $m;
+                }
+            }
+
+            $allProjects = $projectRepo->findBy([], ['name' => 'ASC']);
+            $grouped = [];
+
+            foreach ($allProjects as $p) {
+                $pu = $p->getUser();
+                if (!$pu) { continue; }
+                $company = $pu->getCompany() ?: $pu->getName();
+                $pKey = 'p_' . $p->getId();
+
+                if (!isset($grouped[$company])) {
+                    $grouped[$company] = ['company' => $company, 'projects' => []];
+                }
+
+                $items = $mediaByProject[$p->getId()] ?? [];
+                $grouped[$company]['projects'][$pKey] = [
+                    'project' => $p,
+                    'label'   => $p->getName(),
+                    'color'   => $p->getColor(),
+                    'items'   => $items,
+                    'count'   => count($items),
+                ];
+            }
+
+            $media = $grouped;
+            $groupedMode = true;
         } else {
+            /* Usuari normal: media agrupat pels SEUS projectes */
             $user = $this->getUser();
-            $media = $user instanceof User
-                ? $repo->findByUserOrdered($user->getId())
-                : [];
+            if (!$user instanceof User) {
+                $media = [];
+                $groupedMode = false;
+            } else {
+                $userMedia = $repo->findByUserProjects($user);
+                $mediaByPid = [];
+                foreach ($userMedia as $m) {
+                    $pid = $m->getProject()?->getId();
+                    if ($pid) { $mediaByPid[$pid][] = $m; }
+                }
+
+                $userProjects = $user->getProjects();
+                $projects = [];
+                foreach ($userProjects as $p) {
+                    $items = $mediaByPid[$p->getId()] ?? [];
+                    $projects['p_' . $p->getId()] = [
+                        'project' => $p,
+                        'label'   => $p->getName(),
+                        'color'   => $p->getColor(),
+                        'items'   => $items,
+                        'count'   => count($items),
+                    ];
+                }
+                $company = $user->getCompany() ?: 'Els meus projectes';
+                $media = [$company => ['company' => $company, 'projects' => $projects]];
+                $groupedMode = true;
+            }
+        }
+
+        /* Projectes agrupats per client → usuari per al selector d'upload */
+        $projectGroups = [];
+        if ($this->isGranted('ROLE_ADMIN')) {
+            $allProjects = $projectRepo->findBy([], ['name' => 'ASC']);
+            foreach ($allProjects as $p) {
+                $u = $p->getUser();
+                if (!$u) { continue; }
+                $company = $u->getCompany() ?: 'Sense client';
+                $userLabel = $u->getName() . ' (' . $u->getEmail() . ')';
+                $projectGroups[$company][$userLabel][] = $p;
+            }
+        } elseif ($this->getUser() instanceof User) {
+            /* Per usuaris normals: només els seus projectes */
+            $myLabel = $this->getUser()->getName() . ' (' . $this->getUser()->getEmail() . ')';
+            $myCompany = $this->getUser()->getCompany() ?: 'Els meus projectes';
+            $projectGroups[$myCompany][$myLabel] = iterator_to_array($this->getUser()->getProjects());
         }
 
         return $this->render('admin/media/index.html.twig', [
-            'media' => $media,
+            'media'         => $media,
+            'groupedMode'   => $groupedMode,
+            'projectGroups' => $projectGroups,
         ]);
     }
 
     #[Route('/upload', name: 'admin_media_upload', methods: ['POST'])]
-    public function upload(Request $request, MediaService $mediaService): JsonResponse
+    public function upload(Request $request, MediaService $mediaService, ProjectRepository $projectRepo): JsonResponse
     {
         /** @var UploadedFile|null $file */
         $file = $request->files->get('file');
@@ -62,14 +142,22 @@ class MediaController extends AbstractController
             return $this->json(['error' => 'No s\'ha rebut cap fitxer.'], 400);
         }
 
+        $user = $this->getUser();
+
+        /* Resoldre projecte si s'ha enviat */
+        $project = null;
+        $projectId = $request->request->get('project_id');
+        if ($projectId) {
+            $project = $projectRepo->find($projectId);
+        }
+
         try {
-            /* El MediaService ja assigna l'usuari actual
-               internament durant el procés d'upload. */
-            $media = $mediaService->upload($file, $this->getUser());
+            $media = $mediaService->upload($file, $user, $project);
             return $this->json([
-                'id' => $media->getId(),
-                'url' => $media->getPath(),
-                'filename' => $media->getOriginalFilename(),
+                'id'         => $media->getId(),
+                'url'        => $media->getPath(),
+                'filename'   => $media->getOriginalFilename(),
+                'project_id' => $project?->getId(),
             ]);
         } catch (\InvalidArgumentException $e) {
             return $this->json(['error' => $e->getMessage()], 400);
@@ -78,15 +166,12 @@ class MediaController extends AbstractController
 
     /* -----------------------------------------------------------
        delete — Elimina un fitxer multimèdia.
-       Scoped al client actual: només es pot eliminar media
-       del propi client.
        ----------------------------------------------------------- */
     #[Route('/{id}/delete', name: 'admin_media_delete', methods: ['POST'])]
     public function delete(Request $request, Media $media, EntityManagerInterface $em): Response
     {
         $this->denyAccessUnlessGranted('ROLE_USUARIO');
 
-        /* Tenant isolation: només l'owner o ROLE_ADMIN poden esborrar */
         if (!$this->isGranted('ROLE_ADMIN')) {
             $user = $this->getUser();
             if (!$user instanceof User || $media->getUser()?->getId() !== $user->getId()) {
@@ -95,7 +180,6 @@ class MediaController extends AbstractController
         }
 
         if ($this->isCsrfTokenValid('delete' . $media->getId(), $request->request->get('_token'))) {
-            /* Eliminar el fitxer físic */
             $filePath = $this->getParameter('kernel.project_dir') . '/public' . $media->getPath();
             if (file_exists($filePath)) {
                 unlink($filePath);
@@ -111,12 +195,18 @@ class MediaController extends AbstractController
 
     /* -----------------------------------------------------------
        picker — Modal de selecció de fitxers multimèdia.
-       Scoped al client actual igual que index().
        ----------------------------------------------------------- */
     #[Route('/picker', name: 'admin_media_picker')]
-    public function picker(Request $request, MediaRepository $repo): Response
+    public function picker(Request $request, MediaRepository $repo, ProjectRepository $projectRepo): Response
     {
         $this->denyAccessUnlessGranted('ROLE_USUARIO');
+
+        /* Projecte contextual (des de l'entrada) */
+        $project = null;
+        $projectId = $request->query->get('project_id');
+        if ($projectId) {
+            $project = $projectRepo->find($projectId);
+        }
 
         if ($this->isGranted('ROLE_ADMIN')) {
             $media = $repo->findBy([], ['createdAt' => 'DESC']);
@@ -128,9 +218,10 @@ class MediaController extends AbstractController
         }
 
         return $this->render('admin/media/picker.html.twig', [
-            'media' => $media,
-            'fieldId' => $request->query->get('field', ''),
+            'media'    => $media,
+            'fieldId'  => $request->query->get('field', ''),
             'multiple' => $request->query->get('multiple', 'false') === 'true',
+            'project'  => $project,
         ]);
     }
 }

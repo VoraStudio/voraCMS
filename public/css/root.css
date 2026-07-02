@@ -18,6 +18,7 @@
   --s-sidebar-divider: rgba(255, 255, 255, 0.06);
 
   /* Accent / Icon colors */
+  --s-accent: #06b6d4;
   --s-accent-icon: rgba(255, 255, 255, 0.7);
   --s-accent-icon-soft: rgba(255, 255, 255, 0.5);
   --s-accent-icon-card: rgba(255, 255, 255, 0.15);

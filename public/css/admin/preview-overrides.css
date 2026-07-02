@@ -1,0 +1,28 @@
+/* ===========================================================
+   preview-overrides.css — ajustes para el contexto admin
+   =========================================================== */
+
+.preview-wrapper {
+    background-color: #f5f5f5;
+    min-height: 100vh;
+}
+
+.preview-wrapper .project-hero,
+.preview-wrapper .project-strategy,
+.preview-wrapper .project-gallery {
+    max-width: 1400px;
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: 2rem;
+    padding-right: 2rem;
+    width: 100%;
+}
+
+@media (max-width: 768px) {
+    .preview-wrapper .project-hero,
+    .preview-wrapper .project-strategy,
+    .preview-wrapper .project-gallery {
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+}

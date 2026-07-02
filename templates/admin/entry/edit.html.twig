@@ -128,7 +128,7 @@
 
 {% block javascripts %}
 <div id="entryFormConfig"
-     data-media-picker-url="{{ path('admin_media_picker') }}?field=__FIELD_ID__"
+     data-media-picker-url="{{ path('admin_media_picker') }}?field=__FIELD_ID__&amp;project_id={{ contentType.project.id ?? '' }}"
      style="display:none;"></div>
 <script src="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.js"></script>
 <script src="{{ asset('js/entry-form.js') }}"></script>

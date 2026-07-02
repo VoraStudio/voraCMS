@@ -30,8 +30,8 @@ use Symfony\Component\Routing\Attribute\Route;
 class ContentTypeController extends AbstractController
 {
     /* -----------------------------------------------------------
-        index — Llista els tipus de contingut del projecte actiu.
-        Requereix ROLE_ADMIN.
+        index — Llista TOTS els tipus de contingut: els del
+        projecte actiu + les plantilles globals, en un sol llistat.
         ----------------------------------------------------------- */
     #[Route('/', name: 'admin_content_type_index')]
     public function index(
@@ -43,7 +43,8 @@ class ContentTypeController extends AbstractController
         $projectId = $request->getSession()->get('_project_id');
 
         return $this->render('admin/content-type/index.html.twig', [
-            'contentTypes' => $repo->findActive($projectId),
+            'contentTypes' => $repo->findAllForAdmin($projectId),
+            'activeProjectId' => $projectId,
         ]);
     }
 

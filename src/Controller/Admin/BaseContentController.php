@@ -91,7 +91,7 @@ class BaseContentController extends AbstractController
             $this->cloneToProjects($ct, $projectIds, $em, $ctRepo);
 
             $this->addFlash('success', 'Plantilla base creada.');
-            return $this->redirectToRoute('admin_base_content_index');
+            return $this->redirectToRoute('admin_content_type_index');
         }
 
         return $this->render('admin/base-content/new.html.twig', [
@@ -151,7 +151,7 @@ class BaseContentController extends AbstractController
 
             $em->flush();
             $this->addFlash('success', 'Plantilla actualitzada.');
-            return $this->redirectToRoute('admin_base_content_index');
+            return $this->redirectToRoute('admin_content_type_index');
         }
 
         return $this->render('admin/base-content/edit.html.twig', [
@@ -196,7 +196,7 @@ class BaseContentController extends AbstractController
             $this->addFlash('success', 'Plantilla base eliminada correctament.');
         }
 
-        return $this->redirectToRoute('admin_base_content_index');
+        return $this->redirectToRoute('admin_content_type_index');
     }
 
     /* -----------------------------------------------------------
