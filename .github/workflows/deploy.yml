@@ -1,4 +1,4 @@
-name: Deploy VoraCMS a CDMON Senior
+name: Deploy VoraCMS
 
 on:
   push:
@@ -8,82 +8,17 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout código
-        uses: actions/checkout@v4
-
-      - name: Setup PHP
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: 8.2
-          extensions: ctype, iconv, pdo_mysql, mbstring, intl
-          tools: composer:v2
-
-      - name: Cache Composer dependencies
-        uses: actions/cache@v4
-        with:
-          path: vendor
-          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
-          restore-keys: ${{ runner.os }}-composer-
-
-      - name: Install dependencies (producción)
-        run: composer install --no-dev --optimize-autoloader --no-interaction
-
-      - name: Create .env.local from secrets
-        run: |
-          cat > .env.local << EOF
-          APP_ENV=prod
-          APP_DEBUG=0
-          APP_SECRET=${{ secrets.APP_SECRET }}
-          DATABASE_URL="${{ secrets.DATABASE_URL }}"
-          JWT_SECRET_KEY=%kernel.project_dir%/config/jwt/private.pem
-          JWT_PUBLIC_KEY=%kernel.project_dir%/config/jwt/public.pem
-          JWT_PASSPHRASE=${{ secrets.JWT_PASSPHRASE }}
-          EOF
-
-      - name: Generate JWT keys
-        run: |
-          mkdir -p config/jwt
-          if [ ! -f config/jwt/private.pem ]; then
-            openssl genpkey -algorithm RSA -out config/jwt/private.pem -aes-256-cbc \
-              -pass pass:${{ secrets.JWT_PASSPHRASE }} -pkeyopt rsa_keygen_bits:4096
-            openssl pkey -in config/jwt/private.pem -passin pass:${{ secrets.JWT_PASSPHRASE }} \
-              -out config/jwt/public.pem -pubout
-          fi
-
-      - name: Warmup cache (producción)
-        run: |
-          APP_ENV=prod APP_DEBUG=0 php bin/console cache:warmup
-
-      - name: Sync files to CDMON via rsync over SSH
-        uses: easingthemes/ssh-deploy@v4
-        with:
-          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
-          remote-host: ${{ secrets.SSH_HOST }}
-          remote-user: ${{ secrets.SSH_USER }}
-          remote-port: ${{ secrets.SSH_PORT || '22' }}
-          source: .
-          target: ${{ secrets.REMOTE_PATH }}
-          args: -rlgoDzvc -i --delete --exclude-from='.rsync-exclude'
-          exclude: |
-            .git/
-            .gitignore
-            .github/
-            tests/
-            var/cache/
-            var/log/
-
-      # Si en CDMON el document_root apunta a public/ ya está.
-      # Si no, necesitas un paso extra para hacer symlink.
-      - name: Run migrations and clear cache on server
-        uses: appleboy/ssh-action@v1.0.3
+      - name: SSH and deploy
+        uses: appleboy/ssh-action@v1.2.0
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          port: ${{ secrets.SSH_PORT || '22' }}
+          key: ${{ secrets.SSH_KEY }}
           script: |
-            cd ${{ secrets.REMOTE_PATH }}
-            php bin/console doctrine:migrations:migrate --no-interaction
-            php bin/console cache:clear --no-warmup
-            php bin/console cache:warmup
-            echo "✅ Deploy completado"
+            cd /web/voracms
+            git pull origin main
+            composer install --no-dev --optimize-autoloader --no-interaction 2>&1 || true
+            php bin/console cache:clear --env=prod --no-debug 2>&1 || true
+            php bin/console cache:warmup --env=prod --no-debug 2>&1 || true
+            php bin/console doctrine:migrations:migrate --env=prod --no-interaction --no-debug 2>&1 || true
+            chmod -R 775 var/cache var/log 2>&1 || true
