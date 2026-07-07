@@ -111,5 +111,5 @@
 
 {% block javascripts %}
 {{ parent() }}
-<script src="{{ asset('js/content-type.js') }}"></script>
+<script src="{{ asset('js/content-type.js') }}?v={{ 'now'|date('U') }}"></script>
 {% endblock %}
