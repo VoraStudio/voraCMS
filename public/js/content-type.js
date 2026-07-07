@@ -51,9 +51,20 @@
 
   });
 
+  /* ─── Toggle field options (select type) via delegació ─── */
+  document.addEventListener('change', function (e) {
+    var select = e.target.closest('.field-type-select');
+    if (!select) return;
+    var row = select.closest('.field-row');
+    if (!row) return;
+    var wrap = row.querySelector('.field-options-wrap');
+    if (!wrap) return;
+    wrap.style.display = select.value === 'select' ? '' : 'none';
+  });
+
 })();
 
-/* ─── Toggle field options (select type) ─── */
+/* ─── Legacy: toggle via onchange (mantingut per compatibilitat) ─── */
 function toggleFieldOptions(selectEl) {
   var row = selectEl.closest('.field-row');
   if (!row) return;
