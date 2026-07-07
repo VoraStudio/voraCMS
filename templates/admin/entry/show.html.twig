@@ -1,0 +1,150 @@
+{% extends 'admin/layout.html.twig' %}
+
+{% block page_title %}
+{% set entryTitle = '' %}
+{% for fv in entry.fieldValues|sort((a, b) => a.fieldDefinition.sortOrder <=> b.fieldDefinition.sortOrder) %}
+    {% if fv.fieldDefinition.fieldType in ['text', 'textarea'] and fv.value and not entryTitle %}
+        {% set entryTitle = fv.value %}
+    {% endif %}
+{% endfor %}
+{{ entryTitle ?: (contentType.name ~ ' #' ~ entry.id) }}
+{% endblock %}
+
+{% block topbar_actions %}
+<div class="topbar-actions-group">
+    {% if contentType.slug in ['noticia', 'event'] %}
+        <a href="{{ path('admin_entry_preview', {id: entry.id}) }}" class="cyber-btn cyber-btn--projects js-preview-modal" data-type="{{ contentType.slug }}">
+            <i class="bi bi-eye"></i> <span>Previsualitzar</span>
+        </a>
+    {% elseif contentType.slug in ['artistes_victoria_taylor'] %}
+        <a href="{{ path('admin_entry_preview', {id: entry.id}) }}" class="cyber-btn cyber-btn--projects js-preview-newtab">
+            <i class="bi bi-eye"></i> <span>Previsualitzar</span>
+        </a>
+    {% endif %}
+    <a href="{{ path('admin_entry_edit', {id: entry.id}) }}" class="cyber-btn cyber-btn--projects">
+        <i class="bi bi-pencil"></i> <span>Editar entrada</span>
+    </a>
+    <a href="{{ path('admin_entry_by_type', {slug: contentType.slug}) }}" class="cyber-btn cyber-btn--projects">
+        <i class="bi bi-arrow-left"></i> <span>Tornar</span>
+    </a>
+</div>
+{% endblock %}
+
+{% block content %}
+{% set sortedFields = entry.fieldValues|sort((a, b) => a.fieldDefinition.sortOrder <=> b.fieldDefinition.sortOrder) %}
+
+<div class="row g-4">
+    {# ─── Metadata card ─── #}
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body s-field-list">
+                <div>
+                    <div class="s-field-label">ID</div>
+                    <div class="s-field-value">{{ entry.id }}</div>
+                </div>
+                <div>
+                    <div class="s-field-label">Estat</div>
+                    <div>
+                        <span class="cyber-status">
+                            {% if entry.status == 'published' %}
+                                <span class="cyber-status-dot cyber-status-dot--active"></span>
+                                <span class="cyber-status-text">Publicat</span>
+                            {% elseif entry.status == 'draft' %}
+                                <span class="cyber-status-dot cyber-status-dot--draft"></span>
+                                <span class="cyber-status-text--draft">No publicat</span>
+                            {% else %}
+                                <span class="cyber-status-dot cyber-status-dot--archived"></span>
+                                <span class="cyber-status-text--archived">Arxivat</span>
+                            {% endif %}
+                        </span>
+                    </div>
+                </div>
+                <div>
+                    <div class="s-field-label">Idioma</div>
+                    <div class="s-field-value">{{ entry.locale|upper }}</div>
+                </div>
+                <div>
+                    <div class="s-field-label">Data creació</div>
+                    <div class="s-field-value">{{ entry.createdAt|date('d/m/Y H:i') }}</div>
+                </div>
+                {% if entry.publishedAt %}
+                <div>
+                    <div class="s-field-label">Publicat</div>
+                    <div class="s-field-value">{{ entry.publishedAt|date('d/m/Y H:i') }}</div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    {# ─── Field values ─── #}
+    {% for fv in sortedFields %}
+    {% set def = fv.fieldDefinition %}
+    {% set raw = fv.value %}
+    {% if raw is not empty %}
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body s-field-card-body">
+                <div class="s-field-label">{{ def.name }}</div>
+
+                {% if def.fieldType == 'text' %}
+                    <div class="s-field-value s-field-value--large">{{ raw }}</div>
+
+                {% elseif def.fieldType == 'textarea' %}
+                    <div class="s-field-value s-field-value--textarea">{{ raw }}</div>
+
+                {% elseif def.fieldType == 'richtext' %}
+                    <div class="s-field-value s-field-value--richtext">{{ raw|raw }}</div>
+
+                {% elseif def.fieldType == 'image' or def.fieldType == 'gallery' %}
+                    <div class="s-field-gallery">
+                    {% for id in raw|split(',') %}
+                        {% set imgPath = mediaPaths[id] ?? null %}
+                        {% if imgPath %}
+                            <img src="{{ imgPath }}" alt="" class="s-field-gallery__img">
+                        {% endif %}
+                    {% endfor %}
+                    </div>
+
+                {% elseif def.fieldType == 'boolean' %}
+                    <div class="s-field-value--boolean" style="--field-boolean-clr:{{ raw ? 'rgb(76,175,80)' : 'var(--s-text-secondary)' }};">
+                        {{ raw ? 'Sí' : 'No' }}
+                    </div>
+
+                {% elseif def.fieldType == 'date' %}
+                    <div class="s-field-value">{{ raw }}</div>
+
+                {% elseif def.fieldType == 'date_range' %}
+                    {% set range = raw|json_decode %}
+                    <div class="s-field-value">Inici: {{ range.start ?? '—' }} · Fi: {{ range.end ?? '—' }}</div>
+
+                {% elseif def.fieldType == 'number' %}
+                    <div class="s-field-value">{{ raw }}</div>
+
+                {% elseif def.fieldType == 'location' %}
+                    {% set parts = raw|split(',') %}
+                    <div class="s-field-value">
+                        Lat: {{ parts[0] ?? '—' }}, Lng: {{ parts[1] ?? '—' }}
+                    </div>
+
+                {% elseif def.fieldType == 'youtube' %}
+                    <div class="s-field-value--youtube">{{ raw }}</div>
+
+                {% else %}
+                    <div class="s-field-value">{{ raw }}</div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    {% else %}
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body text-center py-5 s-field-empty">
+                Aquesta entrada no té contingut.
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

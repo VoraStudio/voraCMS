@@ -2,25 +2,116 @@
 
 {% block page_title %}Mediateca{% endblock %}
 
-{% block topbar_actions %}
-<button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#uploadModal">
-    <i class="bi bi-cloud-upload"></i> Pujar imatge
-</button>
-{% endblock %}
-
 {% block content %}
+<div class="s-media-upload-bar">
+    <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#uploadModal">
+        <i class="bi bi-cloud-upload"></i> <span>Pujar imatge</span>
+    </button>
+</div>
+
+{% if groupedMode %}
+{# ─── Admin: per client (fix) → projecte (acordeó) ─── #}
+<div class="media-browser" id="mediaBrowser">
+    {% for group in media %}
+    <div class="cyber-card cyber-card--mb media-client-card">
+        {# ─── Card de client (fixa, no expandible) ─── #}
+        <div class="media-client-card__header">
+            <div class="media-client-card__header-left">
+                <div class="media-client-card__avatar">{{ group.company|first|upper }}</div>
+                <div class="media-client-card__info">
+                    <span class="media-client-card__name">{{ group.company }}</span>
+                </div>
+            </div>
+        </div>
+
+        {# ─── Projectes dins del client (acordeons) ─── #}
+        <div class="media-client-card__body">
+            {% for pk, proj in group.projects %}
+            <div class="media-project-card" data-project-id="{{ proj.project ? proj.project.id : '' }}">
+                <div class="media-project-card__header" role="button" tabindex="0" aria-expanded="false">
+                    <div class="media-project-card__header-left">
+                        {% if proj.color %}
+                        <span class="media-project-card__dot" style="background:{{ proj.color }}"></span>
+                        {% endif %}
+                        <span class="media-project-card__name">{{ proj.label }}</span>
+                    </div>
+                    <div class="media-project-card__header-right">
+                        <span class="media-project-card__count">{{ proj.count }} fitxer{% if proj.count != 1 %}s{% endif %}</span>
+                        <i class="bi bi-chevron-down media-project-card__arrow"></i>
+                    </div>
+                </div>
+                <div class="media-project-card__body">
+                    <div class="row g-3">
+                        {% for m in proj.items %}
+                        <div class="col-md-3 col-sm-4 col-6">
+                            <div class="cyber-card cyber-card--flush card h-100">
+                                <div class="position-relative">
+                                    <a href="{{ m.path }}" target="_blank" class="d-block s-media-thumb">
+                                        <img src="{{ m.path }}" alt="{{ m.originalFilename }}" class="w-100 h-100 s-media-img">
+                                    </a>
+                                    <button class="s-media-delete" title="Eliminar imatge"
+                                        data-confirm="Eliminaràs «{{ m.originalFilename }}». Aquesta acció no es pot desfer."
+                                        data-form="del-media-{{ m.id }}">
+                                        <i class="bi bi-trash3"></i>
+                                    </button>
+                                    <form method="post" action="{{ path('admin_media_delete', {'id': m.id}) }}" id="del-media-{{ m.id }}" class="d-none">
+                                        <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ m.id) }}">
+                                    </form>
+                                </div>
+                                <div class="s-media-card-body">
+                                    <p class="s-media-filename text-truncate" title="{{ m.originalFilename }}">{{ m.originalFilename }}</p>
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <small class="s-media-size">{{ (m.fileSize / 1024)|number_format(2, ',', ' ') }} KB</small>
+                                        <button class="cyber-btn--icon copy-url" data-url="{{ m.path }}" title="Copiar URL">
+                                            <i class="bi bi-link-45deg"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% else %}
+                        <div class="col-12 text-center py-3 s-media-size">
+                            <p>No hi ha imatges en aquest projecte.</p>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% else %}
+    <div class="text-center py-5 s-media-size">
+        <i class="bi bi-images display-4"></i>
+        <p class="mt-2">No hi ha imatges encara.</p>
+    </div>
+    {% endfor %}
+</div>
+
+{% else %}
+{# ─── Usuari normal: vista plana ─── #}
 <div class="row g-3">
     {% for m in media %}
     <div class="col-md-3 col-sm-4 col-6">
-        <div class="card h-100">
-            <a href="{{ m.path }}" target="_blank" class="d-block" style="aspect-ratio:16/10;overflow:hidden;background:var(--s-bg);">
-                <img src="{{ m.path }}" alt="{{ m.originalFilename }}" class="w-100 h-100" style="object-fit:cover;">
-            </a>
-            <div class="card-body p-2">
-                <p class="small mb-1 text-truncate" title="{{ m.originalFilename }}">{{ m.originalFilename }}</p>
+        <div class="cyber-card cyber-card--flush card h-100">
+            <div class="position-relative">
+                <a href="{{ m.path }}" target="_blank" class="d-block s-media-thumb">
+                    <img src="{{ m.path }}" alt="{{ m.originalFilename }}" class="w-100 h-100 s-media-img">
+                </a>
+                <button class="s-media-delete" title="Eliminar imatge"
+                    data-confirm="Eliminaràs «{{ m.originalFilename }}». Aquesta acció no es pot desfer."
+                    data-form="del-media-{{ m.id }}">
+                    <i class="bi bi-trash3"></i>
+                </button>
+                <form method="post" action="{{ path('admin_media_delete', {'id': m.id}) }}" id="del-media-{{ m.id }}" class="d-none">
+                    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ m.id) }}">
+                </form>
+            </div>
+            <div class="s-media-card-body">
+                <p class="s-media-filename text-truncate" title="{{ m.originalFilename }}">{{ m.originalFilename }}</p>
                 <div class="d-flex justify-content-between align-items-center">
-                    <small style="color:var(--s-text-secondary);">{{ m.fileSize|round(0) }} KB</small>
-                    <button class="btn btn-sm btn-outline-primary copy-url" data-url="{{ m.path }}" title="Copiar URL">
+                    <small class="s-media-size">{{ (m.fileSize / 1024)|number_format(2, ',', ' ') }} KB</small>
+                    <button class="cyber-btn--icon copy-url" data-url="{{ m.path }}" title="Copiar URL">
                         <i class="bi bi-link-45deg"></i>
                     </button>
                 </div>
@@ -28,34 +119,52 @@
         </div>
     </div>
     {% else %}
-    <div class="col-12 text-center py-5" style="color:var(--s-text-secondary);">
+    <div class="col-12 text-center py-5 s-media-size">
         <i class="bi bi-images display-4"></i>
         <p class="mt-2">No hi ha imatges encara.</p>
     </div>
     {% endfor %}
 </div>
+{% endif %}
 
 {# ─── Upload Modal ─── #}
 <div class="modal fade" id="uploadModal" tabindex="-1">
     <div class="modal-dialog modal-sm">
         <div class="modal-content">
-            <form id="uploadForm" enctype="multipart/form-data">
+            <form id="uploadForm" enctype="multipart/form-data" data-upload-url="{{ path('admin_media_upload') }}">
                 <div class="modal-header">
                     <h6 class="modal-title">Pujar imatge</h6>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
                     <div class="mb-3">
-                        <label class="form-label">Selecciona una imatge</label>
-                        <input type="file" name="file" class="form-control" accept=".jpg,.jpeg,.webp,.avif" required>
-                        <small style="color:var(--s-text-secondary);">JPG, WebP o AVIF · Màxim 1MB</small>
+                        <label class="form-label">Selecciona imatges</label>
+                        <input type="file" name="files[]" class="form-control" accept=".jpg,.jpeg,.webp,.avif" multiple>
+                        <small class="field-help-text">JPG, WebP o AVIF · Màxim 1MB cadascun · Pots seleccionar-ne diversos</small>
                     </div>
+                    {% if groupedMode and projectGroups|length > 0 %}
+                    <div class="mb-3">
+                        <label class="form-label" for="uploadProject">Projecte</label>
+                        <select name="project_id" id="uploadProject" class="form-select">
+                            <option value="">Sense projecte</option>
+                            {% for company, users in projectGroups %}
+                            {% for userLabel, projects in users %}
+                            <optgroup label="{{ company }} — {{ userLabel }}">
+                                {% for p in projects %}
+                                <option value="{{ p.id }}">{{ p.name }}</option>
+                                {% endfor %}
+                            </optgroup>
+                            {% endfor %}
+                            {% endfor %}
+                        </select>
+                    </div>
+                    {% endif %}
                     <div id="uploadPreview" class="text-center d-none">
-                        <img src="" class="img-fluid rounded" style="max-height:150px;">
+                        <ul class="list-unstyled mb-0 upload-preview-list"></ul>
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="submit" class="btn btn-primary w-100" id="uploadBtn">Pujar</button>
+                    <button type="submit" class="btn btn-primary w-100" id="uploadBtn"><span>Pujar</span></button>
                 </div>
             </form>
         </div>
@@ -64,49 +173,6 @@
 {% endblock %}
 
 {% block javascripts %}
-<script>
-document.getElementById('uploadForm').addEventListener('submit', async function(e) {
-    e.preventDefault();
-    var btn = document.getElementById('uploadBtn');
-    btn.disabled = true;
-    btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Pujant...';
-
-    var formData = new FormData(this);
-    try {
-        var res = await fetch('{{ path('admin_media_upload') }}', { method: 'POST', body: formData });
-        var data = await res.json();
-        if (data.error) {
-            alert(data.error);
-        } else {
-            location.reload();
-        }
-    } catch(err) {
-        alert('Error en pujar la imatge.');
-    }
-    btn.disabled = false;
-    btn.innerHTML = 'Pujar';
-});
-
-// Preview on file select
-document.querySelector('#uploadModal input[type="file"]').addEventListener('change', function() {
-    var preview = document.getElementById('uploadPreview');
-    if (this.files && this.files[0]) {
-        var reader = new FileReader();
-        reader.onload = function(e) { preview.querySelector('img').src = e.target.result; preview.classList.remove('d-none'); };
-        reader.readAsDataURL(this.files[0]);
-    } else {
-        preview.classList.add('d-none');
-    }
-});
-
-// Copy URL buttons
-document.querySelectorAll('.copy-url').forEach(function(btn) {
-    btn.addEventListener('click', function() {
-        navigator.clipboard.writeText(this.dataset.url);
-        var orig = this.innerHTML;
-        this.innerHTML = '<i class="bi bi-check"></i>';
-        setTimeout(function() { btn.innerHTML = orig; }, 1500);
-    });
-});
-</script>
+{{ parent() }}
+<script src="{{ asset('js/media-index.js') }}?v=1.2"></script>
 {% endblock %}

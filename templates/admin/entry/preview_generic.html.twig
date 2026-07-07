@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Preview: {{ contentType.name|default('Entry') }} | {{ data.titol is defined ? data.titol : '#' ~ entry.id }}</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <style>
+        /* ===========================================================
+           Generic Preview Styles — VoraCMS (Apple Pro Dark Theme)
+           =========================================================== */
+
+        :root {
+            --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Icons", "Helvetica Neue", "Helvetica", "Arial", sans-serif;
+            --font-display: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Icons", "Helvetica Neue", "Helvetica", "Arial", sans-serif;
+            --bg-color: #000000;
+            --surface-color: #161617;
+            --border-color: rgba(255, 255, 255, 0.08);
+            --text-primary: #f5f5f7;
+            --text-secondary: #86868b;
+            --text-muted: #6e6e73;
+            --accent-color: #0071e3; /* Apple Blue */
+            --accent-green: #34c759; /* Apple Green */
+            --accent-red: #ff3b30; /* Apple Red */
+            --radius-lg: 22px;
+            --radius-md: 12px;
+            --transition-smooth: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: var(--font-sans);
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            line-height: 1.8;
+            padding: 5rem 2rem;
+            -webkit-font-smoothing: antialiased;
+            min-height: 100vh;
+        }
+
+        .preview-container {
+            max-width: 820px;
+            margin: 0 auto;
+            animation: cardEntrance 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        @keyframes cardEntrance {
+            from {
+                opacity: 0;
+                transform: translateY(20px) scale(0.98);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        /* ─── Card ─── */
+        .preview-card {
+            background-color: var(--surface-color);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 4.5rem;
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.8);
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* ─── Header ─── */
+        .preview-header {
+            margin-bottom: 3.5rem;
+            position: relative;
+        }
+
+        .preview-header__type {
+            font-family: var(--font-display);
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--text-secondary);
+            margin-bottom: 0.75rem;
+            display: inline-block;
+        }
+
+        .preview-header__title {
+            font-family: var(--font-display);
+            font-size: 3rem;
+            font-weight: 700;
+            letter-spacing: -0.025em;
+            line-height: 1.15;
+            color: #ffffff;
+            margin-bottom: 1.5rem;
+        }
+
+        .preview-header__meta {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            display: flex;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .preview-header__meta span {
+            display: inline-flex;
+            align-items: center;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .preview-header__meta span:not(:last-child)::after {
+            content: '•';
+            margin-left: 1.5rem;
+            color: var(--text-muted);
+            font-weight: normal;
+        }
+
+        .status-dot {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        .status-dot--published {
+            background-color: var(--accent-green);
+        }
+        .status-dot--draft {
+            background-color: #ff9f0a; /* Apple Orange */
+        }
+        .status-dot--pending {
+            background-color: var(--text-muted);
+        }
+
+        /* ─── Hero Image ─── */
+        .preview-hero-image {
+            margin: 3.5rem 0;
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+            position: relative;
+            aspect-ratio: 16 / 9;
+        }
+
+        .preview-hero-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+            transition: var(--transition-smooth);
+        }
+
+        .preview-hero-image:hover img {
+            transform: scale(1.01);
+        }
+
+        /* ─── Body Content ─── */
+        .preview-body-content {
+            font-size: 1.1rem;
+            color: var(--text-primary);
+            margin-bottom: 3.5rem;
+        }
+
+        .content-block {
+            margin-bottom: 2.5rem;
+        }
+
+        .content-block__title {
+            font-family: var(--font-display);
+            font-size: 1.4rem;
+            font-weight: 600;
+            color: #ffffff;
+            margin-bottom: 1rem;
+            letter-spacing: -0.015em;
+        }
+
+        .content-block__text {
+            line-height: 1.8;
+            letter-spacing: -0.007em;
+        }
+
+        .content-block__text p {
+            margin-bottom: 1.5rem;
+        }
+        
+        .content-block__text p:last-child {
+            margin-bottom: 0;
+        }
+
+        /* ─── Media Section ─── */
+        .preview-media-block {
+            margin: 3.5rem 0;
+            border-top: 1px solid var(--border-color);
+            padding-top: 3rem;
+        }
+
+        .media-block__title {
+            font-family: var(--font-display);
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #ffffff;
+            margin-bottom: 2rem;
+            letter-spacing: -0.01em;
+        }
+
+        /* Gallery Grid */
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 20px;
+        }
+
+        .gallery-grid__item {
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            aspect-ratio: 16 / 10;
+            border: 1px solid var(--border-color);
+            background: #121214;
+            transition: var(--transition-smooth);
+        }
+
+        .gallery-grid__item:hover {
+            transform: translateY(-2px);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .gallery-grid__item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        /* YouTube embed */
+        .youtube-embed {
+            position: relative;
+            padding-bottom: 56.25%;
+            height: 0;
+            overflow: hidden;
+            border-radius: var(--radius-md);
+            background: #000;
+            border: 1px solid var(--border-color);
+        }
+
+        .youtube-embed iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: 0;
+        }
+
+        /* ─── Specs Section ─── */
+        .preview-specs-section {
+            margin-top: 4rem;
+            border-top: 1px solid var(--border-color);
+            padding-top: 3rem;
+        }
+
+        .specs-title {
+            font-family: var(--font-display);
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #ffffff;
+            letter-spacing: -0.02em;
+            margin-bottom: 2rem;
+        }
+
+        .specs-grid {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .spec-item {
+            display: grid;
+            grid-template-columns: 240px 1fr;
+            gap: 2rem;
+            padding: 1.5rem 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .spec-item:last-child {
+            border-bottom: none;
+        }
+
+        .spec-label {
+            font-family: var(--font-sans);
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+
+        .spec-value {
+            font-size: 0.95rem;
+            color: var(--text-primary);
+            word-break: break-word;
+        }
+
+        /* ─── Details specifics ─── */
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        .badge--yes {
+            background: rgba(52, 199, 89, 0.15);
+            color: var(--accent-green);
+            border: 1px solid rgba(52, 199, 89, 0.2);
+        }
+
+        .badge--no {
+            background: rgba(255, 59, 48, 0.15);
+            color: var(--accent-red);
+            border: 1px solid rgba(255, 59, 48, 0.2);
+        }
+
+        .spec-value a {
+            color: var(--accent-color);
+            text-decoration: none;
+            font-weight: 500;
+            transition: var(--transition-smooth);
+        }
+
+        .spec-value a:hover {
+            text-decoration: underline;
+        }
+
+        .color-swatch {
+            display: inline-block;
+            width: 1.25rem;
+            height: 1.25rem;
+            border-radius: 50%;
+            border: 1px solid rgba(255,255,255,0.2);
+            vertical-align: middle;
+            margin-right: 0.5rem;
+            box-shadow: inset 0 0 0 2px var(--surface-color);
+        }
+
+        .color-hex {
+            font-family: monospace;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        /* ─── Footer ─── */
+        .preview-footer {
+            text-align: center;
+            padding-top: 4rem;
+        }
+
+        .preview-footer a {
+            display: inline-block;
+            color: var(--text-primary);
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            padding: 0.8rem 2rem;
+            border-radius: 100px;
+            background: var(--surface-color);
+            border: 1px solid var(--border-color);
+            transition: var(--transition-smooth);
+        }
+
+        .preview-footer a:hover {
+            background: #ffffff;
+            color: #000000;
+            transform: scale(1.02);
+        }
+
+        /* ─── Responsive ─── */
+        @media (max-width: 768px) {
+            body { padding: 3rem 1rem; }
+            .preview-card { padding: 2.5rem 1.5rem; }
+            .preview-header__title { font-size: 2.25rem; }
+            .spec-item { grid-template-columns: 1fr; gap: 0.5rem; padding: 1.25rem 0; }
+            .gallery-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="preview-container">
+        <article class="preview-card">
+            {# ─── HEADER ─── #}
+            <header class="preview-header">
+                <div class="preview-header__type">{{ contentType.name }}</div>
+                <h1 class="preview-header__title">{{ data.titol is defined and data.titol is not empty ? data.titol : contentType.name ~ ' #' ~ entry.id }}</h1>
+                <div class="preview-header__meta">
+                    <span>{{ entry.locale|upper }}</span>
+                    <span>
+                        {% if entry.status == 'published' %}
+                            <span class="status-dot status-dot--published"></span> Publicat
+                        {% elseif entry.status == 'draft' %}
+                            <span class="status-dot status-dot--draft"></span> Esborrany
+                        {% else %}
+                            <span class="status-dot status-dot--pending"></span> {{ entry.status|capitalize }}
+                        {% endif %}
+                    </span>
+                    {% if data.data is defined and data.data is not empty %}
+                        <span>{{ data.data }}</span>
+                    {% elseif entry.publishedAt %}
+                        <span>{{ entry.publishedAt|date('d/m/Y') }}</span>
+                    {% endif %}
+                </div>
+            </header>
+
+            {# ─── FIELDS ─── #}
+            <div class="preview-content">
+                
+                {# 1. HERO IMAGE (if any) ─── #}
+                {% set hasHero = false %}
+                {% for field in contentType.fields %}
+                    {% if field.fieldType == 'image' and not hasHero %}
+                        {% set value = attribute(data, field.slug) %}
+                        {% if value is defined and value[0] is defined %}
+                            <div class="preview-hero-image">
+                                <img src="{{ asset(value[0].url) }}" alt="{{ field.name }}">
+                            </div>
+                            {% set hasHero = true %}
+                        {% endif %}
+                    {% endif %}
+                {% endfor %}
+
+                {# 2. MAIN CONTENT (richtext, textarea, text) ─── #}
+                <div class="preview-body-content">
+                    {% for field in contentType.fields %}
+                        {% if field.fieldType in ['richtext', 'textarea', 'text'] %}
+                            {% set value = attribute(data, field.slug) %}
+                            {% if field.slug != 'titol' and value is defined and value is not empty %}
+                                <div class="content-block content-block--{{ field.fieldType }}">
+                                    {% if field.fieldType == 'text' %}
+                                        <h3 class="content-block__title">{{ field.name }}</h3>
+                                    {% endif %}
+                                    <div class="content-block__text">
+                                        {% if field.fieldType == 'richtext' %}
+                                            {{ value|raw }}
+                                        {% else %}
+                                            {{ value|nl2br }}
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            {% endif %}
+                        {% endif %}
+                    {% endfor %}
+                </div>
+
+                {# 3. MEDIA (gallery, youtube) ─── #}
+                {% for field in contentType.fields %}
+                    {% if field.fieldType in ['gallery', 'youtube'] %}
+                        {% set value = attribute(data, field.slug) %}
+                        {% if value is defined and value is not empty %}
+                            <div class="preview-media-block">
+                                <h4 class="media-block__title">{{ field.name }}</h4>
+                                {% if field.fieldType == 'gallery' %}
+                                    <div class="gallery-grid">
+                                        {% for img in value %}
+                                        <div class="gallery-grid__item">
+                                            <img src="{{ asset(img.url) }}" alt="" loading="lazy">
+                                        </div>
+                                        {% endfor %}
+                                    </div>
+                                {% elseif field.fieldType == 'youtube' and value.embed is defined %}
+                                    <div class="youtube-embed">
+                                        <iframe src="{{ value.embed }}" allowfullscreen loading="lazy"></iframe>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        {% endif %}
+                    {% endif %}
+                {% endfor %}
+
+                {# 4. METADATA / DETAILS SPEC SHEET ─── #}
+                {% set hasMetaFields = false %}
+                {% for field in contentType.fields %}
+                    {% if field.fieldType not in ['image', 'richtext', 'textarea', 'text', 'gallery', 'youtube'] %}
+                        {% set value = attribute(data, field.slug) %}
+                        {% if value is defined and value is not null %}
+                            {% set hasMetaFields = true %}
+                        {% endif %}
+                    {% endif %}
+                {% endfor %}
+
+                {% if hasMetaFields %}
+                    <div class="preview-specs-section">
+                        <h4 class="specs-title">Detalls</h4>
+                        <div class="specs-grid">
+                            {% for field in contentType.fields %}
+                                {% if field.fieldType not in ['image', 'richtext', 'textarea', 'text', 'gallery', 'youtube'] %}
+                                    {% set value = attribute(data, field.slug) %}
+                                    {% if value is defined and value is not null %}
+                                        <div class="spec-item">
+                                            <div class="spec-label">{{ field.name }}</div>
+                                            <div class="spec-value">
+                                                {% if field.fieldType == 'boolean' %}
+                                                    <span class="badge {% if value == true or value == '1' or value == 1 %}badge--yes{% else %}badge--no{% endif %}">
+                                                        {{ (value == true or value == '1' or value == 1) ? 'Sí' : 'No' }}
+                                                    </span>
+                                                {% elseif field.fieldType == 'number' %}
+                                                    {{ value|number_format(2, ',', '.') }}
+                                                {% elseif field.fieldType == 'date' %}
+                                                    {{ value|date('d/m/Y') }}
+                                                {% elseif field.fieldType == 'date_range' %}
+                                                    Inici: {{ value.start ?? '—' }} · Fi: {{ value.end ?? '—' }}
+                                                {% elseif field.fieldType == 'url' %}
+                                                    <a href="{{ value }}" target="_blank" rel="noopener">{{ value }}</a>
+                                                {% elseif field.fieldType == 'email' %}
+                                                    <a href="mailto:{{ value }}">{{ value }}</a>
+                                                {% elseif field.fieldType == 'color' %}
+                                                    <span class="color-swatch" style="background-color: {{ value }}"></span>
+                                                    <span class="color-hex">{{ value }}</span>
+                                                {% else %}
+                                                    {% if value is iterable %}
+                                                        <pre style="font-family: monospace; font-size: 0.8rem; background: rgba(0,0,0,0.2); padding: 0.5rem; border-radius: 4px; overflow-x: auto;">{{ value|json_encode(constant('JSON_PRETTY_PRINT')) }}</pre>
+                                                    {% else %}
+                                                        {{ value }}
+                                                    {% endif %}
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    {% endif %}
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% endif %}
+
+            </div>
+        </article>
+
+        {# ─── FOOTER ─── #}
+        <footer class="preview-footer">
+            <a href="javascript:window.close()">&larr; Tancar previsualització</a>
+        </footer>
+    </div>
+
+</body>
+</html>

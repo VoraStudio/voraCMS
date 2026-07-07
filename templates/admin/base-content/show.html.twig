@@ -1,0 +1,107 @@
+{% extends 'admin/layout.html.twig' %}
+
+{% block page_title %}Plantilla: {{ template.name }}{% endblock %}
+
+{% block topbar_actions %}
+<div class="topbar-actions-group">
+    <a href="{{ path('admin_base_content_edit', {id: template.id}) }}" class="cyber-btn cyber-btn--projects">
+        <i class="bi bi-pencil"></i> <span>Editar</span>
+    </a>
+    <a href="{{ path('admin_base_content_index') }}" class="cyber-btn cyber-btn--projects">
+        <i class="bi bi-arrow-left"></i> <span>Tornar</span>
+    </a>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="cyber-form-card">
+    <div class="cyber-card cyber-card--flush" data-anim="cyber-card">
+        <div class="cyber-form-header">
+            <div class="cyber-form-header-icon">
+                <i class="bi bi-layers-fill"></i>
+            </div>
+            <div>
+                <h2 class="cyber-section-title">{{ template.name }}</h2>
+                <p class="cyber-section-desc">Tipus de contingut per defecte (Plantilla Base)</p>
+            </div>
+        </div>
+
+        <div class="cyber-form-body">
+            <div class="row mb-3">
+                <div class="col-md-6 mb-3 mb-md-0">
+                    <div class="cyber-form-group mb-0">
+                        <label class="cyber-form-label">Nom de la plantilla</label>
+                        <div class="cyber-form-input cyber-form-input--readonly">{{ template.name }}</div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="cyber-form-group mb-0">
+                        <label class="cyber-form-label">Tipo <span class="cyber-form-label__hint">(slug)</span></label>
+                        <div class="cyber-form-input cyber-form-input--readonly">{{ template.slug }}</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="cyber-form-group mb-4">
+                <label class="cyber-form-label">Descripció</label>
+                <div class="cyber-form-input cyber-form-input--readonly" style="min-height: 50px;">
+                    {{ template.description ?: 'Sense descripció.' }}
+                </div>
+            </div>
+
+            <hr class="form-divider my-4">
+
+            <h6 class="cyber-form-label mb-3" style="font-size: 0.75rem;">Camps de la plantilla</h6>
+
+            <div class="cyber-card cyber-card--table cyber-card--flush" style="background: rgba(15, 23, 42, 0.2);">
+                <table class="cyber-table">
+                    <thead>
+                        <tr>
+                            <th>Nom del Camp</th>
+                            <th>Tipus</th>
+                            <th>Requerit</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for field in template.fields %}
+                        <tr class="cyber-row">
+                            <td class="cyber-cell fw-semibold">{{ field.name }}</td>
+                            <td class="cyber-cell">
+                                <span class="cyber-badge" style="background: rgba(6, 182, 212, 0.1); border-color: rgba(6, 182, 212, 0.15); color: #06b6d4;">
+                                    {{ field.fieldType|upper }}
+                                </span>
+                            </td>
+                            <td class="cyber-cell">
+                                {% if field.required %}
+                                <span class="cyber-status-text"><i class="bi bi-check-circle-fill"></i> Sí</span>
+                                {% else %}
+                                <span class="cyber-status-text--inactive"><i class="bi bi-x-circle-fill"></i> No</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="3" class="cyber-empty">
+                                <p class="cyber-empty-text">No hi ha camps definits en aquesta plantilla.</p>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="d-flex gap-2 mt-4">
+                <a href="{{ path('admin_base_content_edit', {id: template.id}) }}" class="cyber-form-submit w-100 text-center" data-anim="cyber-btn" style="text-decoration: none;">
+                    <i class="bi bi-pencil"></i> <span>Editar plantilla</span>
+                </a>
+                <form method="post" action="{{ path('admin_base_content_delete', {id: template.id}) }}" class="w-100" id="del-base-content-{{ template.id }}">
+                    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ template.id) }}">
+                    <button type="button" class="cyber-form-submit w-100" data-confirm="Segur que vols eliminar aquesta plantilla base?" data-form="del-base-content-{{ template.id }}" style="background: linear-gradient(135deg, #ef4444, #b91c1c); box-shadow: 0 4px 24px rgba(239, 68, 68, 0.35);">
+                        <i class="bi bi-trash3"></i> <span>Eliminar plantilla</span>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

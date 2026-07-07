@@ -1,0 +1,112 @@
+{% extends 'admin/layout.html.twig' %}
+
+{% block page_title %}Usuaris{% endblock %}
+
+{% block content %}
+{% include 'admin/components/_section_header.html.twig' with {
+    title: 'Usuaris',
+    description: 'Gestiona els usuaris i els seus permisos',
+    icon: 'bi-people-fill',
+    stats: [
+        {value: users|length, label: 'Total'},
+        {value: users|filter(u => u.active)|length, label: 'Actius', modifier: 'active'}
+    ]
+} %}
+<div class="cyber-content-actions">
+    <a href="{{ path('admin_user_new') }}" class="cyber-btn cyber-btn--projects" data-anim="cyber-btn">
+        <i class="bi bi-plus-lg"></i> <span>Nou usuari</span>
+    </a>
+</div>
+<div class="cyber-card cyber-card--table cyber-card--flush" data-anim="cyber-card">
+    <table class="cyber-table">
+        <thead>
+            <tr>
+                <th>Usuari</th>
+                <th>Email</th>
+                <th>Empresa</th>
+                <th>Rol</th>
+                <th>Projectes</th>
+                <th>Estat</th>
+                <th>Accions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for user in users %}
+            <tr class="cyber-row {{ user.active ? 'row-active' : 'row-inactive' }}" data-anim="cyber-row">
+                <td class="cyber-cell" data-label="Usuari">
+                    <div class="cyber-cell__user-info">
+                        <div class="cyber-avatar">{{ user.name|first|upper }}</div>
+                        <div>
+                            <div class="cyber-cell__title">{{ user.name }}</div>
+                            <div class="cyber-cell__subtitle">{{ user.slug }}</div>
+                        </div>
+                    </div>
+                </td>
+                <td class="cyber-cell cyber-cell--email" data-label="Email">{{ user.email }}</td>
+                <td class="cyber-cell cyber-cell--company" data-label="Empresa">{{ user.company ?: '—' }}</td>
+                <td class="cyber-cell" data-label="Rol">
+                    {% if 'ROLE_ADMIN' in user.roles %}
+                    <span class="cyber-badge cyber-badge--admin">Admin</span>
+                    {% elseif 'ROLE_MOD' in user.roles %}
+                    <span class="cyber-badge cyber-badge--mod">Mod</span>
+                    {% else %}
+                    <span class="cyber-badge cyber-badge--user">Usuari</span>
+                    {% endif %}
+                </td>
+                <td class="cyber-cell cyber-cell--project-count" data-label="Projectes">{{ userProjects[user.id] ?? 0 }}</td>
+                <td class="cyber-cell cyber-cell--status" data-label="Estat">
+                    {% include 'admin/components/_status.html.twig' with {active: user.active} %}
+                </td>
+                <td class="cyber-cell" data-label="Accions">
+                    <div class="cyber-actions">
+
+                        <a href="{{ path('admin_projects', {user: user.id}) }}"
+                           class="cyber-btn {{ user.active ? 'cyber-btn--projects' : 'cyber-btn--projects-inactive' }}"
+                           title="Veure projectes"
+                           data-active="{{ user.active ? '1' : '0' }}">
+                            <i class="bi bi-folder2-open"></i>
+                            <span>Projectes</span>
+                        </a>
+
+                        <span class="cyber-actions-divider"></span>
+
+                        {% include 'admin/components/_toggle_btn.html.twig' with {
+                            formId: 'tact-user-' ~ user.id,
+                            csrfToken: csrf_token('toggle-active-' ~ user.id),
+                            route: path('admin_user_toggle_active', {id: user.id}),
+                            active: user.active
+                        } %}
+
+                        <a href="{{ path('admin_user_edit', {id: user.id}) }}"
+                           class="cyber-btn cyber-btn--icon cyber-btn--edit"
+                           title="Editar">
+                            <i class="bi bi-pencil"></i>
+                        </a>
+
+                        <form method="post" action="{{ path('admin_user_delete', {id: user.id}) }}" class="cyber-form--inline"
+                              id="del-user-{{ user.id }}">
+                            <input type="hidden" name="_token" value="{{ csrf_token('delete-user-' ~ user.id) }}">
+                            <button type="button"
+                                    class="cyber-btn cyber-btn--icon cyber-btn--delete"
+                                    title="Eliminar"
+                                    data-confirm="Segur que vols eliminar «{{ user.name }}»?<br><small style='color:rgba(255,255,255,0.45)'>S'eliminaran tots els seus projectes, tipus de contingut i entrades.</small>"
+                                    data-form="del-user-{{ user.id }}">
+                                <i class="bi bi-trash3"></i>
+                            </button>
+                        </form>
+
+                    </div>
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="7" class="cyber-empty">
+                    <div class="cyber-empty-icon"><i class="bi bi-people"></i></div>
+                    <p class="cyber-empty-text">No hi ha usuaris</p>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

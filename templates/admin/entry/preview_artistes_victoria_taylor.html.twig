@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="ca" class="page-html js-enabled">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Victoria Taylor | {{ data.titol|default('Artista') }}</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600&family=Syne:wght@400;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.13/dist/SplitText.min.js"></script>
+
+    <style>
+        :root {
+            --color-black: #000000;
+            --color-white: #FFFFFF;
+            --color-cream: #F5ECE5;
+            --color-wine: #722F37;
+            --color-mauve: #debcb0;
+
+            --bg-color: var(--color-black);
+            --text-color: var(--color-white);
+            --accent-color: var(--color-wine);
+            --surface-color: var(--color-cream);
+
+            --font-primary: 'Syne', sans-serif;
+            --font-secondary: 'Plus Jakarta Sans', sans-serif;
+
+            --font-heading: var(--font-primary);
+            --fs-h1: clamp(3rem, calc(8vw + 1rem), 7rem);
+            --fs-h2: clamp(2rem, calc(5vw + 1rem), 4rem);
+            --fs-h3: clamp(1.5rem, calc(3vw + 1rem), 2.5rem);
+            --fs-subtitle: clamp(0.75rem, calc(1vw + 0.5rem), 1rem);
+
+            --space-xs: 8px;
+            --space-s: 16px;
+            --space-m: 24px;
+            --space-l: 32px;
+            --space-xl: 48px;
+            --space-xxl: 64px;
+
+            --transition-smooth: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            --transition-slow: 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        *, *::before, *::after { box-sizing: border-box; }
+
+        html { height: auto; overflow: visible; scroll-behavior: smooth; }
+
+        body {
+            margin: 0; padding: 0; width: 100%;
+            background-color: var(--bg-color);
+            font-family: var(--font-primary);
+            color: var(--text-color);
+            -webkit-font-smoothing: antialiased;
+            height: auto; min-height: 100svh;
+            overflow-x: hidden; overflow-y: auto;
+        }
+
+        /* ═══════════════════════════════════
+           ARTIST HERO
+           ═══════════════════════════════════ */
+        .artist-hero {
+            width: 100%; height: 100svh;
+            position: relative; overflow: hidden;
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            background-color: var(--color-black);
+        }
+        .artist-hero-bg {
+            position: absolute; inset: 0;
+            background-size: cover; background-position: center;
+            background-repeat: no-repeat; will-change: transform;
+        }
+        .artist-hero-overlay {
+            position: absolute; inset: 0; z-index: 1;
+            background: linear-gradient(180deg,
+                rgba(0,0,0,0.3) 0%,
+                rgba(0,0,0,0.6) 50%,
+                rgba(0,0,0,0.9) 100%);
+        }
+        .artist-hero-content {
+            position: relative; z-index: 2;
+            text-align: center; padding: 0 var(--space-m);
+            display: flex; flex-direction: column;
+            align-items: center; gap: var(--space-s);
+        }
+        .artist-hero-rol {
+            font-family: var(--font-secondary);
+            font-size: clamp(0.7rem, calc(0.8vw + 0.3rem), 0.85rem);
+            letter-spacing: 4px; text-transform: uppercase;
+            color: var(--color-white); opacity: 0.6;
+        }
+        .artist-hero-title {
+            font-family: var(--font-primary); font-weight: 700;
+            font-size: clamp(3.5rem, calc(6vw + 0.5rem), 5rem);
+            line-height: 0.9; text-transform: uppercase;
+            color: var(--color-white); margin: 0;
+            text-shadow: 0 10px 40px rgba(0,0,0,0.5);
+        }
+        .artist-hero-ig {
+            display: inline-flex; align-items: center; gap: var(--space-xs);
+            font-family: var(--font-secondary); font-size: 11px;
+            letter-spacing: 2px; text-transform: uppercase;
+            color: var(--color-white); text-decoration: none;
+            opacity: 0.5; transition: var(--transition-smooth);
+            margin-top: var(--space-s);
+        }
+        .artist-hero-ig:hover,
+        .artist-hero-ig:focus { opacity: 1; }
+
+        /* ═══════════════════════════════════
+           BIO
+           ═══════════════════════════════════ */
+        .artist-bio {
+            padding: var(--space-xxl) var(--space-m);
+            background-color: var(--color-white); color: var(--color-black);
+        }
+        .artist-bio-inner { max-width: 800px; margin: 0 auto; }
+        .section-label {
+            font-family: var(--font-secondary);
+            font-size: clamp(0.65rem, calc(0.7vw + 0.2rem), 0.75rem);
+            letter-spacing: 5px; text-transform: uppercase;
+            color: var(--color-black); opacity: 0.35;
+            margin: 0 0 var(--space-l); font-weight: 600;
+        }
+        .artist-bio .section-label { opacity: 1; }
+        .artist-bio-text p {
+            font-family: var(--font-secondary);
+            font-size: clamp(0.9rem, calc(1vw + 0.3rem), 1.05rem);
+            line-height: 1.8; margin: 0 0 var(--space-m);
+            color: var(--color-black);
+        }
+        .artist-bio-text p:last-child { margin-bottom: 0; }
+
+        /* ═══════════════════════════════════
+           TIMELINE
+           ═══════════════════════════════════ */
+        .artist-logros {
+            padding: var(--space-xxl) var(--space-m);
+            background-color: var(--color-black); color: var(--color-white);
+        }
+        .artist-logros .section-label { color: var(--color-white); opacity: 0.35; }
+        .artist-logros-inner { max-width: 800px; margin: 0 auto; }
+        .artist-timeline {
+            position: relative; padding-left: var(--space-l);
+        }
+        .artist-timeline::before {
+            content: '';
+            position: absolute; top: 0; left: 7px;
+            width: 1px; height: 100%;
+            background-color: var(--color-white); opacity: 0.15;
+        }
+        .artist-logro {
+            position: relative;
+            padding-bottom: var(--space-xl);
+            display: flex; flex-direction: column; gap: var(--space-xs);
+        }
+        .artist-logro:last-child { padding-bottom: 0; }
+        .artist-logro::before {
+            content: '';
+            position: absolute;
+            left: calc(-1 * var(--space-l) + 3px); top: 6px;
+            width: 9px; height: 9px; border-radius: 50%;
+            background-color: var(--color-white); opacity: 0.3;
+        }
+        .artist-logro-any {
+            font-family: var(--font-primary); font-weight: 700;
+            font-size: clamp(1rem, calc(1.5vw + 0.3rem), 1.3rem);
+            line-height: 1; color: var(--color-white); opacity: 0.6;
+        }
+        .artist-logro-textos p {
+            font-family: var(--font-secondary);
+            font-size: clamp(0.8rem, calc(0.85vw + 0.3rem), 0.9rem);
+            line-height: 1.6; margin: 0 0 var(--space-xs);
+            color: var(--color-white); opacity: 0.75;
+        }
+        .artist-logro-textos p:last-child { margin-bottom: 0; }
+
+        /* ═══════════════════════════════════
+           GALERIA
+           ═══════════════════════════════════ */
+        .artist-galeria {
+            padding: var(--space-xxl) var(--space-m);
+            background-color: var(--color-white);
+        }
+        .artist-galeria-inner { max-width: 1200px; margin: 0 auto; }
+        .artist-galeria .section-label { opacity: 1; }
+        .artist-obras-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: var(--space-s);
+        }
+        .artist-obra {
+            display: flex; flex-direction: column;
+            gap: var(--space-xs); overflow: hidden;
+            cursor: pointer;
+        }
+        .artist-obra-img {
+            width: 100%; aspect-ratio: 16 / 11; overflow: hidden; position: relative;
+        }
+        .artist-obra-img img {
+            width: 100%; height: 100%; object-fit: cover; display: block;
+            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1),
+                        filter 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            filter: grayscale(80%);
+        }
+        .artist-obra:hover .artist-obra-img img {
+            transform: scale(1.08); filter: grayscale(0%);
+        }
+        .artist-obra-titulo {
+            font-family: var(--font-secondary); font-size: 11px; font-weight: 600;
+            letter-spacing: 2px; text-transform: uppercase;
+            color: var(--color-black); opacity: 0.5; margin: 0;
+            transition: var(--transition-smooth);
+        }
+        .artist-obra:hover .artist-obra-titulo { opacity: 1; }
+
+        /* ═══════════════════════════════════
+           MODAL LIGHTBOX (calcado del original)
+           ═══════════════════════════════════ */
+        .artista-modal {
+            position: fixed; inset: 0; z-index: 9999;
+            display: flex; align-items: center; justify-content: center;
+            visibility: hidden;
+        }
+        .artista-modal-overlay {
+            position: absolute; inset: 0;
+            background: rgba(0,0,0,0.92);
+            backdrop-filter: blur(8px);
+        }
+        .artista-modal-content {
+            position: relative; z-index: 1;
+            max-width: 85vw; max-height: 85vh;
+            display: flex; flex-direction: column; align-items: center;
+        }
+        .artista-modal-img {
+            max-width: 100%; max-height: 75vh;
+            object-fit: contain; display: block; border-radius: 4px;
+        }
+        .artista-modal-titulo {
+            font-family: var(--font-secondary);
+            font-size: clamp(0.85rem, calc(0.7vw + 0.5rem), 0.95rem);
+            color: var(--color-white); opacity: 0.6;
+            margin: var(--space-m) 0 0; text-align: center;
+        }
+        .artista-modal-close {
+            position: absolute; top: var(--space-l); right: var(--space-l);
+            z-index: 2; background: none; border: none;
+            color: var(--color-white); opacity: 0.5;
+            cursor: pointer; padding: 8px;
+            transition: var(--transition-smooth);
+        }
+        .artista-modal-close:hover,
+        .artista-modal-close:focus { opacity: 1; }
+        .artista-modal-prev,
+        .artista-modal-next {
+            position: absolute; top: 50%; transform: translateY(-50%);
+            z-index: 2; background: none; border: none;
+            color: var(--color-white); opacity: 0.35;
+            cursor: pointer; padding: var(--space-m);
+            transition: var(--transition-smooth);
+        }
+        .artista-modal-prev { left: var(--space-m); }
+        .artista-modal-next { right: var(--space-m); }
+        .artista-modal-prev:hover,
+        .artista-modal-next:hover,
+        .artista-modal-prev:focus,
+        .artista-modal-next:focus { opacity: 1; }
+
+        /* ═══════════════════════════════════
+           ESCRIPTORI (≥769px)
+           ═══════════════════════════════════ */
+        @media (min-width: 769px) {
+            .artist-hero { height: 100svh; }
+            .artist-hero-content { padding-top: 5vh; }
+            .artist-bio { padding: calc(var(--space-xxl) * 2) var(--space-xl); }
+            .artist-logros { padding: calc(var(--space-xxl) * 2) var(--space-xl); }
+            .artist-galeria { padding: calc(var(--space-xxl) * 2) var(--space-xl); }
+            .artist-obras-grid {
+                grid-template-columns: repeat(3, 1fr);
+                gap: var(--space-s);
+            }
+            .artist-timeline { padding-left: var(--space-xl); }
+            .artist-timeline::before { left: 11px; }
+            .artist-logro {
+                flex-direction: row;
+                gap: var(--space-xl);
+                padding-bottom: calc(var(--space-xl) * 1.5);
+            }
+            .artist-logro::before {
+                left: calc(-1 * var(--space-xl) + 7px);
+                width: 11px; height: 11px;
+            }
+            .artist-logro-any {
+                min-width: 80px; flex-shrink: 0;
+            }
+            .artista-modal-content { max-width: 80vw; }
+            .artista-modal-prev,
+            .artista-modal-next { opacity: 0; }
+            .artista-modal:hover .artista-modal-prev,
+            .artista-modal:hover .artista-modal-next { opacity: 0.5; }
+            .artista-modal-prev:hover,
+            .artista-modal-next:hover { opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+
+    {% set heroUrl = data.imatge[0].url ?? '' %}
+    {% set logros = data.logros is defined and data.logros is not empty ? data.logros : [] %}
+    {% set galeria = data.galeria is defined and data.galeria is not empty ? data.galeria : [] %}
+
+    <main>
+        <!-- HERO -->
+        <section class="artist-hero" aria-label="{{ data.titol|default('Artista') }}">
+            <div class="artist-hero-bg"{% if heroUrl %} style="background-image: url('{{ asset(heroUrl) }}');"{% endif %}></div>
+            <div class="artist-hero-overlay"></div>
+            <div class="artist-hero-content">
+                {% if data.subtitol is defined and data.subtitol is not empty %}
+                    <span class="artist-hero-rol">{{ data.subtitol }}</span>
+                {% endif %}
+                <h1 class="artist-hero-title">{{ data.titol|default('Artista') }}</h1>
+            </div>
+        </section>
+
+        <!-- BIO -->
+        {% if data.descripcio is defined and data.descripcio is not empty %}
+        <section class="artist-bio">
+            <div class="artist-bio-inner">
+                <h2 class="section-label">Sobre l'artista</h2>
+                <div class="artist-bio-text">
+                    <p>{{ data.descripcio|nl2br }}</p>
+                </div>
+            </div>
+        </section>
+        {% endif %}
+
+        <!-- TRAJECTÒRIA -->
+        {% if logros|length > 0 %}
+        <section class="artist-logros">
+            <div class="artist-logros-inner">
+                <h2 class="section-label">Trajectòria</h2>
+                <div class="artist-timeline">
+                    {% for logro in logros %}
+                    <div class="artist-logro">
+                        <span class="artist-logro-any">{{ logro.año }}</span>
+                        <div class="artist-logro-textos">
+                            <p>{{ logro.texto }}</p>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </section>
+        {% endif %}
+
+        <!-- GALERIA -->
+        {% if galeria|length > 0 %}
+        <section class="artist-galeria">
+            <div class="artist-galeria-inner">
+                <h2 class="section-label">Obres</h2>
+                <div class="artist-obras-grid">
+                    {% for obra in galeria %}
+                    <article class="artist-obra" data-index="{{ loop.index0 }}">
+                        <div class="artist-obra-img">
+                            <img src="{{ asset(obra.url) }}" alt="Obra {{ loop.index }}" loading="lazy">
+                        </div>
+                        {% if obra.name is defined and obra.name is not empty %}
+                        <h3 class="artist-obra-titulo">{{ obra.name }}</h3>
+                        {% endif %}
+                    </article>
+                    {% endfor %}
+                </div>
+            </div>
+        </section>
+        {% endif %}
+    </main>
+
+    <!-- MODAL LIGHTBOX (calcado del original) -->
+    <div class="artista-modal" id="artist-modal" aria-hidden="true" role="dialog" aria-label="Visor d'obra">
+        <div class="artista-modal-overlay"></div>
+        <button class="artista-modal-close" aria-label="Tancar visor">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M18 6L6 18"/><path d="M6 6l12 12"/></svg>
+        </button>
+        <button class="artista-modal-prev" aria-label="Anterior obra">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M15 18l-6-6 6-6"/></svg>
+        </button>
+        <button class="artista-modal-next" aria-label="Següent obra">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M9 18l6-6-6-6"/></svg>
+        </button>
+        <div class="artista-modal-content">
+            <img class="artista-modal-img" src="" alt="">
+            <p class="artista-modal-titulo"></p>
+        </div>
+    </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var heroTitle = document.querySelector('.artist-hero-title');
+        if (heroTitle && typeof SplitText !== 'undefined') {
+            try {
+                var split = new SplitText(heroTitle, { type: 'words,chars' });
+                gsap.from(split.chars, {
+                    opacity: 0, y: 80, rotateX: -90, stagger: 0.04,
+                    duration: 1, ease: 'power4.out', delay: 0.3
+                });
+            } catch (e) {
+                gsap.from(heroTitle, { opacity: 0, y: 40, duration: 0.8, ease: 'power3.out' });
+            }
+        } else if (heroTitle) {
+            gsap.from(heroTitle, { opacity: 0, y: 40, duration: 0.8, ease: 'power3.out' });
+        }
+
+        gsap.from('.artist-hero-rol, .artist-hero-ig', {
+            opacity: 0, y: 30, duration: 1, ease: 'power3.out',
+            delay: 0.8, stagger: 0.15
+        });
+
+        /* Bio SplitText */
+        gsap.set('.artist-bio-text p', { perspective: '800px', transformStyle: 'preserve-3d' });
+        var bioPara = document.querySelectorAll('.artist-bio-text p');
+        if (bioPara.length && typeof SplitText !== 'undefined') {
+            try {
+                var bioSplit = new SplitText('.artist-bio-text p', { type: 'lines', mask: 'lines' });
+                gsap.from(bioSplit.lines, {
+                    opacity: 0, y: 40, duration: 1, ease: 'power3.out', stagger: 0.2,
+                    scrollTrigger: { trigger: '.artist-bio', start: 'top 60%', toggleActions: 'play none none reverse' }
+                });
+            } catch (e) {
+                gsap.from(bioPara, {
+                    opacity: 0, y: 30, duration: 0.8, ease: 'power3.out', stagger: 0.2,
+                    scrollTrigger: { trigger: '.artist-bio', start: 'top 60%' }
+                });
+            }
+        } else if (bioPara.length) {
+            gsap.from(bioPara, {
+                opacity: 0, y: 30, duration: 0.8, ease: 'power3.out', stagger: 0.2,
+                scrollTrigger: { trigger: '.artist-bio', start: 'top 60%' }
+            });
+        }
+
+        /* Timeline */
+        gsap.from('.artist-logro', {
+            opacity: 0, x: -60, duration: 0.8, ease: 'power3.out', stagger: 0.3,
+            scrollTrigger: { trigger: '.artist-logros', start: 'top 65%', toggleActions: 'play none none reverse' }
+        });
+
+        /* Gallery */
+        gsap.from('.artist-obra', {
+            opacity: 0, y: 60, duration: 0.8, ease: 'power3.out', stagger: 0.2,
+            scrollTrigger: { trigger: '.artist-galeria', start: 'top 60%', toggleActions: 'play none none reverse' }
+        });
+
+        /* Hero parallax */
+        var heroBg = document.querySelector('.artist-hero-bg');
+        if (heroBg) {
+            gsap.to(heroBg, {
+                yPercent: 15, ease: 'none',
+                scrollTrigger: { trigger: '.artist-hero', start: 'top top', end: 'bottom top', scrub: 1 }
+            });
+        }
+
+        ScrollTrigger.refresh();
+
+        /* ─── MODAL LIGHTBOX (calcado del original) ─── */
+        var obraEls = document.querySelectorAll('.artist-obra');
+        var modal = document.getElementById('artist-modal');
+        if (obraEls.length && modal) {
+            var modalImg = modal.querySelector('.artista-modal-img');
+            var modalTitulo = modal.querySelector('.artista-modal-titulo');
+            var modalClose = modal.querySelector('.artista-modal-close');
+            var modalPrev = modal.querySelector('.artista-modal-prev');
+            var modalNext = modal.querySelector('.artista-modal-next');
+            var obras = [];
+            var currentIdx = 0;
+
+            obraEls.forEach(function (el, i) {
+                var img = el.querySelector('img');
+                var tituloEl = el.querySelector('.artist-obra-titulo');
+                obras.push({
+                    img: img ? img.src : '',
+                    titulo: tituloEl ? tituloEl.textContent : ''
+                });
+                el.addEventListener('click', function () { openModal(i); });
+            });
+
+            function openModal(idx) {
+                currentIdx = idx;
+                modalImg.src = obras[idx].img;
+                modalImg.alt = obras[idx].titulo || 'Obra ' + (idx + 1);
+                modalTitulo.textContent = obras[idx].titulo || '';
+                modal.setAttribute('aria-hidden', 'false');
+                document.body.style.overflow = 'hidden';
+
+                gsap.set(modal, { visibility: 'visible', opacity: 0 });
+                gsap.to(modal, { opacity: 1, duration: 0.4, ease: 'power2.out' });
+                gsap.fromTo(modalImg.parentElement, { scale: 0.85, opacity: 0 }, {
+                    scale: 1, opacity: 1, duration: 0.5, ease: 'power3.out'
+                });
+            }
+
+            function closeModal() {
+                gsap.to(modalImg.parentElement, { scale: 0.85, opacity: 0, duration: 0.3, ease: 'power2.in' });
+                gsap.to(modal, {
+                    opacity: 0, duration: 0.3, ease: 'power2.in',
+                    onComplete: function () {
+                        modal.setAttribute('aria-hidden', 'true');
+                        gsap.set(modal, { visibility: 'hidden' });
+                        document.body.style.overflow = '';
+                    }
+                });
+            }
+
+            function navigate(dir) {
+                currentIdx = (currentIdx + dir + obras.length) % obras.length;
+                modalImg.src = obras[currentIdx].img;
+                modalImg.alt = obras[currentIdx].titulo || 'Obra ' + (currentIdx + 1);
+                modalTitulo.textContent = obras[currentIdx].titulo || '';
+                gsap.fromTo(modalImg.parentElement,
+                    { scale: 0.9, opacity: 0 },
+                    { scale: 1, opacity: 1, duration: 0.4, ease: 'power3.out' }
+                );
+            }
+
+            modalClose.addEventListener('click', closeModal);
+            modal.addEventListener('click', function (e) {
+                if (e.target === modal || e.target.classList.contains('artista-modal-overlay')) closeModal();
+            });
+            modalPrev.addEventListener('click', function () { navigate(-1); });
+            modalNext.addEventListener('click', function () { navigate(1); });
+
+            document.addEventListener('keydown', function (e) {
+                if (modal.getAttribute('aria-hidden') !== 'false') return;
+                if (e.key === 'Escape') closeModal();
+                if (e.key === 'ArrowLeft') navigate(-1);
+                if (e.key === 'ArrowRight') navigate(1);
+            });
+        }
+    });
+    </script>
+</body>
+</html>

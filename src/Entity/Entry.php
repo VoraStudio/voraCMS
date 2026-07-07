@@ -32,8 +32,15 @@ class Entry
     #[ORM\Column(length: 5, options: ['default' => 'ca'])]
     private ?string $locale = 'ca';
 
+    #[ORM\Column(options: ['default' => true])]
+    private ?bool $active = true;
+
     #[ORM\ManyToOne(targetEntity: User::class)]
     private ?User $author = null;
+
+    #[ORM\ManyToOne]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?User $user = null;
 
     #[ORM\OneToMany(targetEntity: FieldValue::class, mappedBy: 'entry', orphanRemoval: true, cascade: ['persist', 'remove'])]
     private Collection $fieldValues;
@@ -64,8 +71,14 @@ class Entry
     public function getLocale(): ?string { return $this->locale; }
     public function setLocale(string $locale): static { $this->locale = $locale; return $this; }
 
+    public function isActive(): ?bool { return $this->active; }
+    public function setActive(bool $active): static { $this->active = $active; return $this; }
+
     public function getAuthor(): ?User { return $this->author; }
     public function setAuthor(?User $author): static { $this->author = $author; return $this; }
+
+    public function getUser(): ?User { return $this->user; }
+    public function setUser(?User $user): static { $this->user = $user; return $this; }
 
     public function getFieldValues(): Collection { return $this->fieldValues; }
     public function addFieldValue(FieldValue $fieldValue): static

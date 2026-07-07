@@ -2,7 +2,16 @@
 
 {% block stylesheets %}
     {{ parent() }}
-    <link rel="stylesheet" href="{{ asset('css/admin.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/admin.css') }}?v=1.1">
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+    <script src="{{ asset('js/admin-animations.js') }}"></script>
+    <script src="{{ asset('js/admin.js') }}"></script>
 {% endblock %}
 
 {% block body %}
@@ -14,6 +23,7 @@
             <img src="{{ asset('img/logoVora.png') }}" alt="Vora Studio" class="s-sidebar-logo">
         </a>
 
+        {# ─── Navigation ─── #}
         <div class="s-sidebar-nav">
             <div class="s-sidebar-section">General</div>
 
@@ -21,64 +31,114 @@
                 <i class="bi bi-grid-1x2-fill"></i> Dashboard
             </a>
 
-            <a class="s-sidebar-link{% if app.request.get('_route') == 'admin_content_type_index' %} active{% endif %}" href="{{ path('admin_content_type_index') }}">
+            {# ─── Project selector / current project ─── #}
+            {% set sidebarTypes = admin_content_types() %}
+            <a class="s-sidebar-link{% if app.request.get('_route') starts with 'admin_project_' %} active{% endif %}" href="{{ path('admin_projects') }}">
+                <i class="bi bi-folder"></i> Projectes
+            </a>
+            {% if is_granted('ROLE_ADMIN') %}
+            <a class="s-sidebar-link{% if app.request.get('_route') starts with 'admin_user_' %} active{% endif %}" href="{{ path('admin_user_index') }}">
+                <i class="bi bi-people"></i> Usuaris
+            </a>
+            {% endif %}
+
+            {# ─── Seccions (gestió de tipus de contingut i plantilles globals) ─── #}
+            {% if activeProject is defined and activeProject and is_granted('ROLE_ADMIN') %}
+            <a class="s-sidebar-link{% if app.request.get('_route') starts with 'admin_content_type_' or app.request.get('_route') starts with 'admin_base_content_' %} active{% endif %}" href="{{ path('admin_content_type_index') }}">
                 <i class="bi bi-layers-fill"></i> Tipus de contingut
             </a>
+            {% endif %}
 
-            {% set sidebarTypes = admin_content_types() %}
-            {% if sidebarTypes is not empty %}
             <a class="s-sidebar-link{% if app.request.get('_route') == 'admin_media_index' %} active{% endif %}" href="{{ path('admin_media_index') }}">
                 <i class="bi bi-images"></i> Mediateca
             </a>
 
-            <div class="s-sidebar-section">Continguts</div>
+            {# ─── Si hi ha projecte actiu → mostrem les seves seccions ─── #}
+            {% if sidebarTypes is not empty %}
+            <div class="s-sidebar-section">
+                {% if activeProject is defined and activeProject %}
+                    {{ activeProject.name }}
+                {% else %}
+                    Continguts
+                {% endif %}
+            </div>
             {% for ct in sidebarTypes %}
             <a class="s-sidebar-link text-capitalize{% if app.request.get('slug') == ct.slug %} active{% endif %}" href="{{ path('admin_entry_by_type', {slug: ct.slug}) }}">
                 <i class="bi bi-file-text"></i> {{ ct.name }}
             </a>
             {% endfor %}
             {% endif %}
-        </div>
 
-        <div class="s-sidebar-footer">
-            <div class="dropdown dropup">
-                <a class="dropdown-toggle d-flex align-items-center gap-2" href="#" data-bs-toggle="dropdown">
-                    <i class="bi bi-person-circle" style="font-size:1.1rem;"></i>
-                    <span class="small">{{ app.user.name ?? app.user.email }}</span>
-                </a>
-                <ul class="dropdown-menu">
-                    <li><a class="dropdown-item" href="{{ path('admin_logout') }}"><i class="bi bi-box-arrow-right me-2"></i>Tancar sessió</a></li>
-                </ul>
-            </div>
-        </div>
+            {% if is_granted('ROLE_ADMIN') %}
+            <div class="s-sidebar-section">Desenvolupador</div>
+            <a class="s-sidebar-link{% if app.request.get('_route') == 'admin_api_guide' %} active{% endif %}" href="{{ path('admin_api_guide') }}">
+                <i class="bi bi-code-slash"></i> Guia API
+            </a>
+            {% endif %}
+
+        </div>{# ─── /s-sidebar-nav ─── #}
     </nav>
 
     {# ─── Overlay (mobile) ─── #}
-    <div class="s-sidebar-overlay" onclick="document.getElementById('adminSidebar').classList.toggle('open')"></div>
+    <div class="s-sidebar-overlay"></div>
 
     {# ─── Main ─── #}
     <main class="s-main{% if app.request.get('_route') == 'admin_dashboard' %} s-main--dashboard{% endif %}">
         <div class="s-topbar">
             <div class="d-flex align-items-center gap-3">
-                <button class="s-sidebar-toggle" onclick="document.getElementById('adminSidebar').classList.toggle('open')">
+                <button class="s-sidebar-toggle">
                     <i class="bi bi-list"></i>
                 </button>
                 <h1 class="s-topbar-title">{% block page_title %}VoraCMS{% endblock %}</h1>
             </div>
             <div class="s-topbar-actions">
-                {% block topbar_actions %}{% endblock %}
+                {# ─── Theme toggle ─── #}
+                <button class="s-theme-toggle" id="themeToggle" title="Canviar tema">
+                    <i class="bi bi-sun-fill s-theme-icon-light"></i>
+                    <i class="bi bi-moon-fill s-theme-icon-dark"></i>
+                </button>
+                {# ─── User card ─── #}
+                {% include 'admin/_user_card.html.twig' %}
             </div>
         </div>
 
+        {# ─── Action Bar (just a sota del topbar) ─── #}
+        <div class="s-action-bar">
+            {% block topbar_actions %}{% endblock %}
+        </div>
+
         <div class="s-content">
-            {% for message in app.flashes('success') %}
-                <div class="alert alert-success alert-dismissible fade show py-2 small" role="alert">
-                    <i class="bi bi-check-circle me-1"></i> {{ message }}
-                    <button type="button" class="btn-close py-2" data-bs-dismiss="alert" aria-label="Tancar"></button>
-                </div>
-            {% endfor %}
             {% block content %}{% endblock %}
+        </div>
+
+        <div class="s-footer">
+            Desenvolupat per <img src="{{ asset('img/logoVora.png') }}" alt="Vora Studio">
         </div>
     </main>
 </div>
+
+{# ─── Flash messages → SweetAlert toasts ─── #}
+<div id="flashData" class="flash-data"
+     data-flash='{
+         "success": [
+             {% for msg in app.flashes('success') %}
+                 {{ msg|json_encode|raw }}{{ loop.last ? '' : ',' }}
+             {% endfor %}
+         ],
+         "error": [
+             {% for msg in app.flashes('error') %}
+                 {{ msg|json_encode|raw }}{{ loop.last ? '' : ',' }}
+             {% endfor %}
+         ],
+         "warning": [
+             {% for msg in app.flashes('warning') %}
+                 {{ msg|json_encode|raw }}{{ loop.last ? '' : ',' }}
+             {% endfor %}
+         ],
+         "info": [
+             {% for msg in app.flashes('info') %}
+                 {{ msg|json_encode|raw }}{{ loop.last ? '' : ',' }}
+             {% endfor %}
+         ]
+     }'></div>
 {% endblock %}

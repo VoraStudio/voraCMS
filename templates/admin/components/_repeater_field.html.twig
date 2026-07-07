@@ -1,0 +1,26 @@
+{# _repeater_field.html.twig — Campo repetible con sub-campos
+   Params: fieldId, value (JSON string), required
+   Cada fila se renderiza con inputs año + texto.
+   El valor se almacena como JSON en un hidden input. #}
+{% set items = value ? value|json_decode : [] %}
+<div class="repeater-field" data-field-id="{{ fieldId }}" data-required="{{ required ? 'true' : 'false' }}">
+    <input type="hidden" name="field_{{ fieldId }}" class="repeater-value" value="{{ value|default('[]') }}">
+
+    <div class="repeater-rows">
+        {% for item in items %}
+        <div class="repeater-row">
+            <div class="repeater-row__fields">
+                <input type="text" class="form-control form-control-sm repeater-row__año" placeholder="Any (ex: 2024)" value="{{ item.año ?? '' }}">
+                <textarea class="form-control form-control-sm repeater-row__texto" rows="2" placeholder="Descripció del logro">{{ item.texto ?? '' }}</textarea>
+            </div>
+            <button type="button" class="repeater-row__remove" aria-label="Eliminar" tabindex="-1">
+                <i class="bi bi-x"></i>
+            </button>
+        </div>
+        {% endfor %}
+    </div>
+
+    <button type="button" class="btn btn-outline-primary btn-sm repeater-add">
+        <i class="bi bi-plus-lg"></i> Afegir
+    </button>
+</div>

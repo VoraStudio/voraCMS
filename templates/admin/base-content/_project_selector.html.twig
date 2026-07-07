@@ -1,0 +1,28 @@
+<hr class="form-divider my-4">
+
+<div class="project-selector">
+    <div class="project-selector__header">
+        <i class="bi bi-folder2-open"></i>
+        <div>
+            <div class="project-selector__title">Assignar a projectes existents</div>
+            <div class="project-selector__desc">Mantén Ctrl/cmd per seleccionar múltiples projectes</div>
+        </div>
+    </div>
+
+    {% if groupedProjects is empty %}
+    <p class="field-help-text" style="padding: 16px 0;">No hi ha projectes disponibles.</p>
+    {% else %}
+    <select name="projects[]" multiple class="project-selector__select" size="8">
+        {% for group in groupedProjects %}
+        <optgroup label="{{ group.user ? group.user.name : 'Sense client' }}">
+            {% for item in group.projects %}
+            {% set p = item.project %}
+            <option value="{{ p.id }}" {% if item.exists %}disabled class="project-selector__opt--exists"{% endif %}>
+                {{ p.name }} {% if item.exists %}✓ Assignat{% endif %}
+            </option>
+            {% endfor %}
+        </optgroup>
+        {% endfor %}
+    </select>
+    {% endif %}
+</div>

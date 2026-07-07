@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Preview: {{ data.titol|default('Entry #' ~ entry.id) }}</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;800&family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="http://localhost/VoraStudio/VoraStudio/css/style.css">
+    <link rel="stylesheet" href="{{ asset('css/admin/preview-overrides.css') }}">
+</head>
+<body class="page-projecte">
+    <main class="main-projecte preview-wrapper">
+        {# ─── HERO ─── #}
+        <section id="project-hero" class="project-hero">
+            <div class="project-hero__container">
+                <div class="project-hero__left">
+                    {% if data.logo is defined and data.logo[0] is defined %}
+                        <img src="{{ asset(data.logo[0].url) }}" alt="{{ data.titol|default('') }}">
+                    {% endif %}
+                    {% set websiteUrl = data.website|default('#') %}
+                    {% if websiteUrl != '#' and websiteUrl is not empty %}
+                        {% set websiteLabel = websiteUrl|replace({'https://': '', 'http://': ''})|trim('/', 'right') %}
+                    {% else %}
+                        {% set websiteLabel = '#' %}
+                    {% endif %}
+                    <a href="{{ websiteUrl != '#' ? websiteUrl : '#' }}" target="_blank" rel="noopener" class="project-hero__link">
+                        WEBSITE: <span>{{ websiteLabel }}</span>
+                    </a>
+                </div>
+                <div class="project-hero__right">
+                    <p class="project-hero__description">{{ data.descripcio|default('') }}</p>
+                    <div class="project-hero__tags">
+                        {% set tags = data.tags|default('')|split(',') %}
+                        {% for tag in tags %}
+                            {% set trimmed = tag|trim %}
+                            {% if trimmed is not empty %}
+                                <span class="project-hero__tag">{{ trimmed }}</span>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        {# ─── STRATEGY ─── #}
+        <section id="project-strategy" class="project-strategy">
+            <div class="project-strategy__container">
+                {% set strategyBlocks = [
+                    {label: 'EL REPTE', text: data.repte|default('')},
+                    {label: "L'ESTRATÈGIA", text: data.estrategia|default('')},
+                    {label: 'EL RESULTAT', text: data.resultat|default('')}
+                ] %}
+                {% for block in strategyBlocks %}
+                    {% if block.text is not empty %}
+                    <div class="project-strategy__block">
+                        <div class="project-strategy__header">
+                            <span class="project-strategy__dot"></span>
+                            <h2 class="project-strategy__label">{{ block.label }}</h2>
+                        </div>
+                        <p class="project-strategy__text">{{ block.text }}</p>
+                    </div>
+                    {% endif %}
+                {% endfor %}
+            </div>
+        </section>
+
+        {# ─── GALLERY ─── #}
+        {% set galeria = data.galeria|default([]) %}
+        {% if galeria is not empty %}
+        <section id="project-gallery" class="project-gallery">
+            <div class="project-gallery__grid">
+                {% for img in galeria %}
+                <div class="project-gallery__item">
+                    <img src="{{ asset(img.url) }}" alt="" class="project-gallery__img" loading="lazy">
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+        {% endif %}
+    </main>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <script src="{{ asset('js/admin/preview.js') }}"></script>
+</body>
+</html>

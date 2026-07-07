@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use App\Entity\Project;
 use App\Repository\MediaRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -40,7 +41,16 @@ class Media
     private ?string $altText = null;
 
     #[ORM\ManyToOne(targetEntity: User::class)]
+    #[ORM\JoinColumn(onDelete: 'CASCADE')]
     private ?User $uploadedBy = null;
+
+    #[ORM\ManyToOne]
+    #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
+    private ?User $user = null;
+
+    #[ORM\ManyToOne(targetEntity: Project::class)]
+    #[ORM\JoinColumn(nullable: true, onDelete: 'SET NULL')]
+    private ?Project $project = null;
 
     #[ORM\Column]
     private ?\DateTimeImmutable $createdAt = null;
@@ -69,5 +79,12 @@ class Media
     public function setAltText(?string $altText): static { $this->altText = $altText; return $this; }
     public function getUploadedBy(): ?User { return $this->uploadedBy; }
     public function setUploadedBy(?User $uploadedBy): static { $this->uploadedBy = $uploadedBy; return $this; }
+
+    public function getUser(): ?User { return $this->user; }
+    public function setUser(?User $user): static { $this->user = $user; return $this; }
+
+    public function getProject(): ?Project { return $this->project; }
+    public function setProject(?Project $project): static { $this->project = $project; return $this; }
+
     public function getCreatedAt(): ?\DateTimeImmutable { return $this->createdAt; }
 }

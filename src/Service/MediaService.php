@@ -1,16 +1,24 @@
 <?php
 
+/* ══════════════════════════════════════════════════════════════
+   MediaService — Pujada de fitxers amb tenant isolation
+   ══════════════════════════════════════════════════════════════
+   Desa els fitxers a /public/uploads/{userId}/ per aïllar
+   físicament els fitxers per usuari.
+   ══════════════════════════════════════════════════════════════ */
+
 namespace App\Service;
 
 use App\Entity\Media;
+use App\Entity\Project;
 use App\Entity\User;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 class MediaService
 {
-    private const ALLOWED_EXTENSIONS = ['jpg', 'jpeg', 'webp', 'avif'];
-    private const MAX_FILE_SIZE = 1048576; // 1 MB
+    private const ALLOWED_EXTENSIONS = ['jpg', 'jpeg', 'png', 'svg', 'webp', 'avif'];
+    private const MAX_FILE_SIZE = 3145728; // 3 MB
     private string $uploadDir;
 
     public function __construct(
@@ -20,7 +28,7 @@ class MediaService
         $this->uploadDir = $projectDir . '/public/uploads';
     }
 
-    public function upload(UploadedFile $file, ?User $user = null): Media
+    public function upload(UploadedFile $file, User $user, ?Project $project = null): Media
     {
         $extension = strtolower($file->getClientOriginalExtension());
 
@@ -40,21 +48,27 @@ class MediaService
 
         $safeFilename = uniqid() . '_' . time() . '.' . $extension;
 
-        // Capturar tot ANTES de $file->move() perquè move() retorna un nou objecte
-        // i el UploadedFile original queda apuntant al temporal (que ja no existeix)
+        /* ─── Directori per usuari ─── */
+        $userUploadDir = $this->uploadDir . '/' . $user->getId();
+        if (!is_dir($userUploadDir)) {
+            mkdir($userUploadDir, 0775, true);
+        }
+
         $originalName = $file->getClientOriginalName();
         $mimeType = $file->getMimeType() ?? 'application/octet-stream';
 
-        $file->move($this->uploadDir, $safeFilename);
+        $file->move($userUploadDir, $safeFilename);
 
         $media = new Media();
         $media->setFilename($safeFilename);
         $media->setOriginalFilename($originalName);
         $media->setExtension($extension);
         $media->setMimeType($mimeType);
-        $media->setPath('/uploads/' . $safeFilename);
+        $media->setPath('/uploads/' . $user->getId() . '/' . $safeFilename);
         $media->setFileSize($fileSize);
         $media->setUploadedBy($user);
+        $media->setUser($user);
+        $media->setProject($project);
 
         $this->em->persist($media);
         $this->em->flush();

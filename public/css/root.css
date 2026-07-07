@@ -1,0 +1,80 @@
+/* ═══════════════════════════════════════════════════
+   VoraCMS · Design Tokens
+   ═══════════════════════════════════════════════════ */
+
+:root {
+  /* Brand */
+  --s-primary: #4945ff;
+  --s-primary-hover: #3a36e0;
+  --s-primary-light: #eeedff;
+  --s-primary-bg: rgba(73, 69, 255, 0.06);
+
+  /* Sidebar */
+  --s-sidebar-bg: #1a1b2e;
+  --s-sidebar-hover: rgba(255, 255, 255, 0.06);
+  --s-sidebar-active: rgba(73, 69, 255, 0.18);
+  --s-sidebar-text: rgba(255, 255, 255, 0.82);
+  --s-sidebar-text-hover: #ffffff;
+  --s-sidebar-divider: rgba(255, 255, 255, 0.06);
+
+  /* Accent / Icon colors */
+  --s-accent: #06b6d4;
+  --s-accent-icon: rgba(255, 255, 255, 0.7);
+  --s-accent-icon-soft: rgba(255, 255, 255, 0.5);
+  --s-accent-icon-card: rgba(255, 255, 255, 0.15);
+  --s-card-bg: rgba(255, 255, 255, 0.03);
+  --s-hover: rgba(255, 255, 255, 0.06);
+
+  /* Text */
+  --s-text: rgba(255, 255, 255, 0.92);
+  --s-text-secondary: rgba(255, 255, 255, 0.65);
+
+  /* Surface */
+  --s-bg: rgba(255, 255, 255, 0.03);
+  --s-card: #ffffff;
+  --s-card-border: #ededf2;
+
+  /* Inputs */
+  --s-input-bg: rgba(255, 255, 255, 0.06);
+  --s-input-border: rgba(255, 255, 255, 0.18);
+  --s-input-focus: rgba(140, 190, 255, 0.5);
+
+  /* Status */
+  --s-success: #4caf50;
+  --s-success-bg: #e8f5e9;
+  --s-danger: #ef5350;
+  --s-danger-bg: #ffebee;
+  --s-warning: #ffa726;
+  --s-warning-bg: #fff3e0;
+
+  /* Shadows */
+  --s-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.04);
+  --s-shadow-md: 0 4px 16px rgba(0, 0, 0, 0.06);
+  --s-shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.08);
+
+  /* Radii */
+  --s-radius: 8px;
+  --s-radius-lg: 12px;
+  --s-radius-xl: 16px;
+
+  /* Layout */
+  --s-sidebar-width: 240px;
+
+  /* Spacing */
+  --s-space-xs: 4px;
+  --s-space-sm: 8px;
+  --s-space-md: 16px;
+  --s-space-lg: 24px;
+  --s-space-xl: 32px;
+
+  /* Motion */
+  --s-transition: 250ms cubic-bezier(0.4, 0, 0.2, 1);
+  --s-transition-slow: 400ms cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* Z-index layers */
+  --z-sidebar: 1030;
+  --z-overlay: 1029;
+  --z-topbar: 1020;
+  --z-modal: 1055;
+  --z-tooltip: 1070;
+}

@@ -18,7 +18,7 @@ class FieldDefinition
     public const TYPE_IMAGE = 'image';
     public const TYPE_GALLERY = 'gallery';
     public const TYPE_DATE = 'date';
-    public const TYPE_DATETIME = 'datetime';
+    public const TYPE_DATE_RANGE = 'date_range';
     public const TYPE_LOCATION = 'location';
     public const TYPE_BOOLEAN = 'boolean';
     public const TYPE_NUMBER = 'number';
@@ -26,16 +26,17 @@ class FieldDefinition
     public const TYPE_EMAIL = 'email';
     public const TYPE_COLOR = 'color';
     public const TYPE_YOUTUBE = 'youtube';
+    public const TYPE_REPEATER = 'repeater';
 
     public static function getTypes(): array
     {
         return [
             self::TYPE_TEXT, self::TYPE_TEXTAREA, self::TYPE_RICHTEXT,
             self::TYPE_IMAGE, self::TYPE_GALLERY,
-            self::TYPE_DATE, self::TYPE_DATETIME,
+            self::TYPE_DATE, self::TYPE_DATE_RANGE,
             self::TYPE_LOCATION, self::TYPE_BOOLEAN,
             self::TYPE_NUMBER, self::TYPE_URL, self::TYPE_EMAIL, self::TYPE_COLOR,
-            self::TYPE_YOUTUBE,
+            self::TYPE_YOUTUBE, self::TYPE_REPEATER,
         ];
     }
 

@@ -3,92 +3,112 @@
 {% block page_title %}Editar: {{ contentType.name }}{% endblock %}
 
 {% block topbar_actions %}
-<a href="{{ path('admin_content_type_index') }}" class="btn btn-outline-primary btn-sm">
-    <i class="bi bi-arrow-left"></i> Tornar
+<a href="{{ path('admin_content_type_index') }}" class="cyber-btn cyber-btn--projects">
+    <i class="bi bi-arrow-left"></i> <span>Tornar</span>
 </a>
 {% endblock %}
 
 {% block content %}
-<div class="card">
-    <div class="card-body">
-        <form method="post">
-            <div class="row g-3 mb-3">
-                <div class="col-md-6">
-                    <label class="form-label">Nom</label>
-                    <input type="text" name="name" class="form-control" value="{{ contentType.name }}" required>
+<div class="cyber-form-card">
+    <div class="cyber-card cyber-card--flush" data-anim="cyber-card">
+        <div class="cyber-form-header">
+            <div class="cyber-form-header-icon">
+                <i class="bi bi-sliders"></i>
+            </div>
+            <div>
+                <h2 class="cyber-section-title">Editar tipus de contingut: {{ contentType.name }}</h2>
+                <p class="cyber-section-desc">Gestiona la configuració i els camps del tipus de contingut</p>
+            </div>
+        </div>
+
+        <form method="post" class="cyber-form-body">
+            <div class="row mb-3">
+                <div class="col-md-6 mb-3 mb-md-0">
+                    <div class="cyber-form-group mb-0">
+                        <label class="cyber-form-label">Nom del tipus</label>
+                        <input type="text" name="name" class="cyber-form-input" value="{{ contentType.name }}" required>
+                    </div>
                 </div>
                 <div class="col-md-6">
-                    <label class="form-label">Slug</label>
-                    <input type="text" class="form-control" value="{{ contentType.slug }}" disabled>
-                    <small style="color:var(--s-text-secondary);">No es pot canviar</small>
-                </div>
-                <div class="col-12">
-                    <label class="form-label">Descripció</label>
-                    <textarea name="description" class="form-control" rows="2">{{ contentType.description }}</textarea>
-                </div>
-                <div class="col-12">
-                    <div class="form-check">
-                        <input type="checkbox" name="active" class="form-check-input" {% if contentType.active %}checked{% endif %} value="1">
-                        <label class="form-check-label">Actiu</label>
+                    <div class="cyber-form-group mb-0">
+                        <label class="cyber-form-label">Slug <span class="cyber-form-label__hint">(identificador únic)</span></label>
+                        <input type="text" class="cyber-form-input cyber-form-input--readonly" value="{{ contentType.slug }}" disabled>
                     </div>
                 </div>
             </div>
 
-            <hr style="border-color:var(--s-card-border);opacity:0.5;">
+            <div class="cyber-form-group mb-3">
+                <label class="cyber-form-label">Descripció</label>
+                <textarea name="description" class="cyber-form-input" rows="2" placeholder="Escriu una descripció del tipus...">{{ contentType.description }}</textarea>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <div class="cyber-form-group mb-0">
+                        <label class="cyber-form-label">Projecte</label>
+                        <select name="project_id" class="cyber-form-input cyber-form-input--select">
+                            <option value="">Sense projecte (Global)</option>
+                            {% for p in projects %}
+                            <option value="{{ p.id }}" {% if contentType.project and contentType.project.id == p.id %}selected{% endif %}>{{ p.user.name ?? 'Sense usuari' }} — {{ p.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-6 d-flex align-items-end">
+                    <div class="cyber-form-check mb-0">
+                        <input type="checkbox" name="active" class="cyber-form-checkbox" {% if contentType.active %}checked{% endif %} value="1" id="ct-active">
+                        <label class="cyber-form-check-label small" for="ct-active">Tipus de contingut actiu</label>
+                    </div>
+                </div>
+            </div>
+
+            <hr class="form-divider my-4">
+
             <div class="d-flex justify-content-between align-items-center mb-3">
-                <h6 class="mb-0 fw-semibold">Camps</h6>
-                <button type="button" class="btn btn-outline-primary btn-sm" id="addFieldBtn"><i class="bi bi-plus-lg"></i> Afegir camp</button>
+                <label class="cyber-form-label mb-0" style="font-size: 0.75rem;">Camps definits</label>
+                <button type="button" class="cyber-btn cyber-btn--compact" id="addFieldBtn" style="background: rgba(6, 182, 212, 0.1); border: 1px solid rgba(6, 182, 212, 0.2); color: #06b6d4;">
+                    <i class="bi bi-plus-lg"></i> <span style="font-size: 0.72rem; font-weight: 600; text-transform: uppercase;">Afegir camp</span>
+                </button>
             </div>
 
             <div id="fieldsContainer">
                 {% for field in contentType.fields %}
-                <div class="s-field-group row g-2 field-row">
+                <div class="s-field-group row g-2 field-row align-items-center mb-3">
                     <div class="col-md-4">
-                        <input type="text" name="field_name[]" class="form-control form-control-sm" value="{{ field.name }}" placeholder="Nom del camp">
+                        <input type="text" name="field_name[]" class="cyber-form-input" value="{{ field.name }}" placeholder="Nom del camp">
                     </div>
                     <div class="col-md-3">
-                        <select name="field_type[]" class="form-select form-select-sm">
+                        <select name="field_type[]" class="cyber-form-input cyber-form-input--select">
                             {% for type in fieldTypes %}
                             <option value="{{ type }}" {% if field.fieldType == type %}selected{% endif %}>{{ type }}</option>
                             {% endfor %}
                         </select>
                     </div>
                     <div class="col-md-3 d-flex align-items-center">
-                        <div class="form-check">
-                            <input type="checkbox" name="field_required[]" class="form-check-input" {% if field.required %}checked{% endif %} value="1">
-                            <label class="form-check-label small">Requerit</label>
+                        <div class="cyber-form-check mb-0">
+                            <input type="checkbox" name="field_required[]" class="cyber-form-checkbox" {% if field.required %}checked{% endif %} value="1">
+                            <span class="cyber-form-check-label small">Requerit</span>
                         </div>
                     </div>
                     <div class="col-md-2 text-end">
-                        <button type="button" class="btn btn-outline-danger btn-sm remove-field"><i class="bi bi-x"></i></button>
+                        <button type="button" class="cyber-btn cyber-btn--icon cyber-btn--delete remove-field">
+                            <i class="bi bi-x"></i>
+                        </button>
                     </div>
                 </div>
                 {% endfor %}
             </div>
 
-            <hr class="mt-4" style="border-color:var(--s-card-border);opacity:0.5;">
-            <button type="submit" class="btn btn-primary w-100">Guardar canvis</button>
+            <hr class="form-divider my-4">
+            <button type="submit" class="cyber-form-submit mt-2" data-anim="cyber-btn">
+                <i class="bi bi-check-lg"></i> <span>Guardar canvis</span>
+            </button>
         </form>
     </div>
 </div>
 {% endblock %}
 
 {% block javascripts %}
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    document.getElementById('addFieldBtn').addEventListener('click', function() {
-        var container = document.getElementById('fieldsContainer');
-        var row = container.querySelector('.field-row').cloneNode(true);
-        row.querySelectorAll('input').forEach(function(i) { i.value = ''; });
-        row.querySelectorAll('input[type="checkbox"]').forEach(function(c) { c.checked = false; });
-        container.appendChild(row);
-    });
-    document.addEventListener('click', function(e) {
-        if (e.target.closest('.remove-field')) {
-            var rows = document.querySelectorAll('.field-row');
-            if (rows.length > 1) e.target.closest('.field-row').remove();
-        }
-    });
-});
-</script>
+{{ parent() }}
+<script src="{{ asset('js/content-type.js') }}"></script>
 {% endblock %}

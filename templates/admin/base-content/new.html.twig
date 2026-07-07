@@ -1,0 +1,108 @@
+{% extends 'admin/layout.html.twig' %}
+
+{% block page_title %}Nova plantilla base{% endblock %}
+
+{% block topbar_actions %}
+<a href="{{ path('admin_base_content_index') }}" class="cyber-btn cyber-btn--projects">
+    <i class="bi bi-arrow-left"></i> <span>Tornar</span>
+</a>
+{% endblock %}
+
+{% block content %}
+<div class="cyber-form-card">
+    <div class="cyber-card cyber-card--flush" data-anim="cyber-card">
+        <div class="cyber-form-header">
+            <div class="cyber-form-header-icon">
+                <i class="bi bi-window-stack"></i>
+            </div>
+            <div>
+                <h2 class="cyber-section-title">Nova plantilla base</h2>
+                <p class="cyber-section-desc">Crea una plantilla base que es clonarà automàticament en crear un projecte nou</p>
+            </div>
+        </div>
+
+        <form method="post" class="cyber-form-body">
+            <div class="row mb-3">
+                <div class="col-md-6 mb-3 mb-md-0">
+                    <div class="cyber-form-group mb-0">
+                        <label class="cyber-form-label">Nom de la plantilla</label>
+                        <input type="text" name="name" class="cyber-form-input" placeholder="Ex: Notícies" required>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="cyber-form-group mb-0">
+                        <label class="cyber-form-label">Slug <span class="cyber-form-label__hint">(identificador únic)</span></label>
+                        <input type="text" name="slug" class="cyber-form-input" placeholder="Ex: news" required>
+                    </div>
+                </div>
+            </div>
+
+            <div class="cyber-form-group mb-4">
+                <label class="cyber-form-label">Descripció</label>
+                <textarea name="description" class="cyber-form-input" rows="2" placeholder="Escriu una descripció de la plantilla..."></textarea>
+            </div>
+
+            <hr class="form-divider my-4">
+
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <label class="cyber-form-label mb-0" style="font-size: 0.75rem;">Camps de la plantilla</label>
+                <button type="button" class="cyber-btn cyber-btn--compact" id="addFieldBtn" style="background: rgba(6, 182, 212, 0.1); border: 1px solid rgba(6, 182, 212, 0.2); color: #06b6d4;">
+                    <i class="bi bi-plus-lg"></i> <span style="font-size: 0.72rem; font-weight: 600; text-transform: uppercase;">Afegir camp</span>
+                </button>
+            </div>
+
+            <div id="fieldsContainer">
+                <div class="s-field-group row g-2 field-row align-items-center mb-3">
+                    <div class="col-md-4">
+                        <input type="text" name="field_name[]" class="cyber-form-input" placeholder="Nom del camp">
+                    </div>
+                    <div class="col-md-3">
+                        <select name="field_type[]" class="cyber-form-input cyber-form-input--select">
+                            {% for type in fieldTypes %}
+                            <option value="{{ type }}">{{ type }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-3 d-flex align-items-center">
+                        <div class="cyber-form-check mb-0">
+                            <input type="checkbox" name="field_required[]" class="cyber-form-checkbox" value="1">
+                            <span class="cyber-form-check-label small">Requerit</span>
+                        </div>
+                    </div>
+                    <div class="col-md-2 text-end">
+                        <button type="button" class="cyber-btn cyber-btn--icon cyber-btn--delete remove-field">
+                            <i class="bi bi-x"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <hr class="form-divider my-4">
+
+            <div class="cyber-form-group mb-4">
+                <div class="cyber-form-check">
+                    <input type="checkbox" name="autoClone" class="cyber-form-checkbox" value="1" checked id="autoClone">
+                    <label class="cyber-form-check-label" for="autoClone">
+                        <strong>Auto clonar</strong> en crear projectes nous
+                    </label>
+                </div>
+                <p class="field-help-text" style="margin-top: 4px; margin-left: 28px;">Si està actiu, aquesta plantilla es clonarà automàticament a cada projecte nou.</p>
+            </div>
+
+            <hr class="form-divider my-4">
+
+            {% include 'admin/base-content/_project_selector.html.twig' %}
+
+            <hr class="form-divider my-4">
+            <button type="submit" class="cyber-form-submit mt-2" data-anim="cyber-btn">
+                <i class="bi bi-check-lg"></i> <span>Crear plantilla</span>
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+<script src="{{ asset('js/content-type.js') }}"></script>
+{% endblock %}

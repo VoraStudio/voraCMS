@@ -1,0 +1,679 @@
+{% extends 'admin/layout.html.twig' %}
+
+{% block page_title %}Guia de l'API REST{% endblock %}
+
+{% block content %}
+
+{# ─── Hero ─── #}
+<div class="api-hero" data-anim="cyber-card">
+    <div class="api-hero-bg"></div>
+    <div class="api-hero-content">
+        <div class="api-hero-icon">
+            <i class="bi bi-code-slash"></i>
+        </div>
+        <div>
+            <h1 class="api-hero-title">API REST</h1>
+            <p class="api-hero-desc">
+                Consumeix el contingut del CMS des de qualsevol frontend.
+                Totes les dades estan aïllades per client automàticament.
+            </p>
+            <div class="api-hero-tags">
+                <span class="api-tag api-tag--green">Bearer Auth</span>
+                <span class="api-tag api-tag--blue">RESTful</span>
+                <span class="api-tag api-tag--amber">Strapi-compatible</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+{# ─── Grid: Auth + Base URL ─── #}
+<div class="api-grid api-grid--2col" data-anim="cyber-card">
+    <div class="api-card">
+        <div class="api-card-header">
+            <div class="api-card-icon api-card-icon--amber">
+                <i class="bi bi-shield-lock-fill"></i>
+            </div>
+            <h3 class="api-card-title">Autenticació</h3>
+        </div>
+        <div class="api-card-body">
+            <p class="api-text">L'API utilitza <strong>Bearer token</strong> amb l'<code>apiToken</code> de l'usuari.</p>
+            <div class="api-code-block">
+                <div class="api-code-header">
+                    <span>Header HTTP</span>
+                    <button class="api-copy-btn" data-copy="Authorization: Bearer <el_teu_api_token>">
+                        <i class="bi bi-clipboard"></i>
+                    </button>
+                </div>
+                <pre class="api-code"><code>Authorization: Bearer <span class="api-code--highlight">&lt;apiToken&gt;</span></code></pre>
+            </div>
+            <div class="api-alert api-alert--info">
+                <i class="bi bi-info-circle-fill"></i>
+                <span>El token el trobes a <strong>Admin → Usuaris → Editar</strong>, camp "API Token".</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="api-card">
+        <div class="api-card-header">
+            <div class="api-card-icon api-card-icon--blue">
+                <i class="bi bi-globe2"></i>
+            </div>
+            <h3 class="api-card-title">URL Base</h3>
+        </div>
+        <div class="api-card-body">
+            <p class="api-text">La URL base del CMS on està hostatjat.</p>
+            <div class="api-code-block">
+                <div class="api-code-header">
+                    <span>Base URL</span>
+                    <button class="api-copy-btn" data-copy="https://cms.domini.com">
+                        <i class="bi bi-clipboard"></i>
+                    </button>
+                </div>
+                <pre class="api-code"><code>https://<span class="api-code--highlight">el-teu-domini</span>.com</code></pre>
+            </div>
+            <div class="api-alert api-alert--success">
+                <i class="bi bi-check-circle-fill"></i>
+                <span>No cal <code>?client=</code> — l'aïllament es fa automàtic des del token.</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+{# ─── Endpoints ─── #}
+<h2 class="api-section-title" data-anim="cyber-card">
+    <i class="bi bi-link-45deg"></i> Endpoints
+</h2>
+
+{# GET /api/auth/me #}
+<div class="api-endpoint" data-anim="cyber-card">
+    <div class="api-endpoint-head">
+        <div class="api-endpoint-method">
+            <span class="api-method api-method--get">GET</span>
+            <code class="api-endpoint-url">/api/auth/me</code>
+        </div>
+        <div class="api-endpoint-badge">Perfil</div>
+    </div>
+    <div class="api-endpoint-body">
+        <p class="api-text">Retorna les dades de l'usuari autenticat, inclòs el seu <code>apiToken</code>.</p>
+
+        <div class="api-code-block">
+            <div class="api-code-header"><span>Exemple de resposta</span></div>
+            <pre class="api-code"><code>{
+  "data": {
+    "slug": "victoria-taylor",
+    "apiToken": "a1b2c3d4e5f6...",
+    "company": "Victoria Taylor Studio",
+    "email": "victoria@taylor.com",
+    "name": "Victoria Taylor"
+  }
+}</code></pre>
+        </div>
+    </div>
+</div>
+
+{# GET /api/sections #}
+<div class="api-endpoint" data-anim="cyber-card">
+    <div class="api-endpoint-head">
+        <div class="api-endpoint-method">
+            <span class="api-method api-method--get">GET</span>
+            <code class="api-endpoint-url">/api/sections?active=true</code>
+        </div>
+        <div class="api-endpoint-badge">Descobriment</div>
+    </div>
+    <div class="api-endpoint-body">
+        <p class="api-text">Retorna les seccions (tipus de contingut) de l'usuari autenticat. Ideal per construir la navegació del frontend dinàmicament.</p>
+
+        <table class="api-params-table">
+            <thead><tr><th>Paràmetre</th><th>Tipus</th><th>Per defecte</th><th>Descripció</th></tr></thead>
+            <tbody>
+                <tr><td><code>active</code></td><td>bool</td><td><code>true</code></td><td>Filtra només seccions actives</td></tr>
+            </tbody>
+        </table>
+
+        <div class="api-code-block">
+            <div class="api-code-header"><span>Exemple de resposta</span></div>
+            <pre class="api-code"><code>{
+  "data": [
+    {
+      "id": 1,
+      "name": "Notícies",
+      "slug": "noticies",
+      "description": "Secció de notícies",
+      "isActive": true,
+      "fields": [
+        { "name": "Títol", "slug": "titol", "type": "text", "required": true },
+        { "name": "Descripció", "slug": "descripcio", "type": "textarea", "required": true },
+        { "name": "Imatge", "slug": "imatge", "type": "image", "required": true },
+        { "name": "Contingut", "slug": "contingut", "type": "richtext", "required": false }
+      ]
+    },
+    {
+      "id": 2,
+      "name": "Events",
+      "slug": "events",
+      "description": "Esdeveniments i promocions",
+      "isActive": true,
+      "fields": [
+        { "name": "Títol", "slug": "titol", "type": "text", "required": true },
+        { "name": "Data", "slug": "data_esdeveniment", "type": "datetime", "required": true },
+        { "name": "Ubicació", "slug": "ubicacio", "type": "text", "required": false },
+        { "name": "Preu", "slug": "preu", "type": "number", "required": false },
+        { "name": "Cartell", "slug": "cartell", "type": "image", "required": true }
+      ]
+    }
+  ]
+}</code></pre>
+        </div>
+        <div class="api-alert api-alert--success">
+            <i class="bi bi-info-circle-fill"></i>
+            <span>Cada secció inclou un array <code>fields</code> amb el nom, slug, tipus i required de cada camp. Utilitza el <code>slug</code> per saber quines claus tindrà la resposta de les entrades.</span>
+        </div>
+    </div>
+</div>
+
+{# ─── Dynamic fields explanation ─── #}
+<h2 class="api-section-title" data-anim="cyber-card">
+    <i class="bi bi-diagram-3-fill"></i> Camps dinàmics
+</h2>
+
+<div class="api-card" data-anim="cyber-card">
+    <div class="api-card-header">
+        <div class="api-card-icon api-card-icon--blue">
+            <i class="bi bi-puzzle-fill"></i>
+        </div>
+        <h3 class="api-card-title">Cada client defineix els seus propis camps</h3>
+    </div>
+    <div class="api-card-body">
+        <p class="api-text">Els noms dels camps a la resposta JSON <strong>no són fixes</strong>. Cada content type (Notícies, Events, etc.) té els seus propis FieldDefinitions, i els noms de les claus a la resposta són els <strong>slugs dels camps</strong>.</p>
+
+        <div class="api-alert api-alert--info">
+            <i class="bi bi-lightbulb-fill"></i>
+            <span>Per saber quins camps té una secció, consulta <code>GET /api/sections</code> i mira l'array <code>fields[].slug</code>.</span>
+        </div>
+    </div>
+</div>
+
+<div class="api-grid api-grid--2col" data-anim="cyber-card">
+    <div class="api-card">
+        <div class="api-card-header">
+            <div class="api-card-icon api-card-icon--green">
+                <i class="bi bi-newspaper"></i>
+            </div>
+            <h3 class="api-card-title">Notícies — camps</h3>
+        </div>
+        <div class="api-card-body">
+            <table class="api-params-table">
+                <thead><tr><th>Camp admin</th><th>Slug (clau JSON)</th><th>Tipus</th></tr></thead>
+                <tbody>
+                    <tr><td>Títol</td><td><code>titol</code></td><td>text</td></tr>
+                    <tr><td>Descripció</td><td><code>descripcio</code></td><td>textarea</td></tr>
+                    <tr><td>Imatge</td><td><code>imatge</code></td><td>image</td></tr>
+                    <tr><td>Contingut</td><td><code>contingut</code></td><td>richtext</td></tr>
+                </tbody>
+            </table>
+            <div class="api-code-block">
+                <pre class="api-code"><code>{
+  "titol": "Nova botiga a Girona",
+  "descripcio": "Hem obert una nova ubicació",
+  "imatge": [{ "id": 3, "url": "/uploads/botiga.jpg" }],
+  "contingut": "&lt;p&gt;Text HTML&lt;/p&gt;"
+}</code></pre>
+            </div>
+        </div>
+    </div>
+    <div class="api-card">
+        <div class="api-card-header">
+            <div class="api-card-icon api-card-icon--amber">
+                <i class="bi bi-calendar-event"></i>
+            </div>
+            <h3 class="api-card-title">Events — camps</h3>
+        </div>
+        <div class="api-card-body">
+            <table class="api-params-table">
+                <thead><tr><th>Camp admin</th><th>Slug (clau JSON)</th><th>Tipus</th></tr></thead>
+                <tbody>
+                    <tr><td>Títol</td><td><code>titol</code></td><td>text</td></tr>
+                    <tr><td>Data</td><td><code>data_esdeveniment</code></td><td>datetime</td></tr>
+                    <tr><td>Ubicació</td><td><code>ubicacio</code></td><td>text</td></tr>
+                    <tr><td>Preu</td><td><code>preu</code></td><td>number</td></tr>
+                    <tr><td>Cartell</td><td><code>cartell</code></td><td>image</td></tr>
+                </tbody>
+            </table>
+            <div class="api-code-block">
+                <pre class="api-code"><code>{
+  "titol": "Concert d'estiu",
+  "data_esdeveniment": "2026-07-15T21:00:00",
+  "ubicacio": "Plaça Major",
+  "preu": 25.50,
+  "cartell": [{ "id": 8, "url": "/uploads/cartell.jpg" }]
+}</code></pre>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="api-card" style="margin-bottom: 24px;" data-anim="cyber-card">
+    <div class="api-card-body">
+        <div class="api-alert api-alert--info" style="margin-bottom: 0;">
+            <i class="bi bi-arrow-repeat"></i>
+            <span><strong>Flux recomanat:</strong> 1) <code>GET /api/sections</code> per descobrir seccions i els seus camps → 2) Usa <code>fields[].slug</code> per construir el mapping al frontend → 3) <code>GET /api/{slug}</code> per obtenir les entrades amb les claus dinàmiques.</span>
+        </div>
+    </div>
+</div>
+
+{# GET /api/{slug} #}
+<div class="api-endpoint" data-anim="cyber-card">
+    <div class="api-endpoint-head">
+        <div class="api-endpoint-method">
+            <span class="api-method api-method--get">GET</span>
+            <code class="api-endpoint-url">/api/{slug}?locale=ca</code>
+        </div>
+        <div class="api-endpoint-badge">Llistat</div>
+    </div>
+    <div class="api-endpoint-body">
+        <p class="api-text">Retorna totes les entrades <strong>publicades</strong> d'una secció.</p>
+
+        <table class="api-params-table">
+            <thead><tr><th>Paràmetre</th><th>Tipus</th><th>Obligatori</th><th>Descripció</th></tr></thead>
+            <tbody>
+                <tr><td><code>slug</code></td><td>string</td><td>✅</td><td>Slug del content type (ex: <code>noticies</code>)</td></tr>
+                <tr><td><code>locale</code></td><td>string</td><td>❌</td><td>Filtrar per idioma (<code>ca</code>, <code>es</code>, <code>en</code>)</td></tr>
+            </tbody>
+        </table>
+
+        <div class="api-alert api-alert--info" style="margin-bottom: 12px;">
+            <i class="bi bi-info-circle-fill"></i>
+            <span>Les claus dels camps dinàmics (<code>titol</code>, <code>imatge</code>, <code>contingut</code>...) venen definides per l'array <code>fields[].slug</code> de <code>GET /api/sections</code>.</span>
+        </div>
+
+        <details class="api-details">
+            <summary class="api-details-summary"><i class="bi bi-code-slash"></i> Exemple: GET /api/noticies?locale=ca</summary>
+            <div class="api-code-block">
+                <pre class="api-code"><code>{
+  "data": [
+    {
+      "id": 1,
+      "status": "published",
+      "locale": "ca",
+      "createdAt": "2026-06-10T12:00:00+00:00",
+      "publishedAt": "2026-06-10T12:00:00+00:00",
+      "titol": "Nova botiga a Girona",
+      "descripcio": "Hem obert una nova ubicació",
+      "imatge": [
+        {
+          "id": 3,
+          "name": "botiga.jpg",
+          "url": "/uploads/botiga.jpg",
+          "formats": {
+            "small": { "url": "/uploads/botiga.jpg" },
+            "thumbnail": { "url": "/uploads/botiga.jpg" }
+          }
+        }
+      ],
+      "contingut": "&lt;p&gt;Text HTML&lt;/p&gt;"
+    }
+  ]
+}</code></pre>
+            </div>
+        </details>
+
+        <details class="api-details">
+            <summary class="api-details-summary"><i class="bi bi-code-slash"></i> Exemple: GET /api/events?locale=ca</summary>
+            <div class="api-code-block">
+                <pre class="api-code"><code>{
+  "data": [
+    {
+      "id": 4,
+      "status": "published",
+      "locale": "ca",
+      "createdAt": "2026-06-12T10:00:00+00:00",
+      "publishedAt": "2026-06-12T10:00:00+00:00",
+      "titol": "Concert d'estiu",
+      "data_esdeveniment": "2026-07-15T21:00:00",
+      "ubicacio": "Plaça Major",
+      "preu": 25.50,
+      "cartell": [
+        {
+          "id": 8,
+          "name": "cartell.jpg",
+          "url": "/uploads/cartell.jpg",
+          "formats": {
+            "small": { "url": "/uploads/cartell.jpg" },
+            "thumbnail": { "url": "/uploads/cartell.jpg" }
+          }
+        }
+      ]
+    }
+  ]
+}</code></pre>
+            </div>
+        </details>
+    </div>
+</div>
+
+{# GET /api/{slug}/{id} #}
+<div class="api-endpoint" data-anim="cyber-card">
+    <div class="api-endpoint-head">
+        <div class="api-endpoint-method">
+            <span class="api-method api-method--get">GET</span>
+            <code class="api-endpoint-url">/api/{slug}/{id}</code>
+        </div>
+        <div class="api-endpoint-badge">Detall</div>
+    </div>
+    <div class="api-endpoint-body">
+        <p class="api-text">Retorna una entrada concreta pel seu ID.</p>
+
+        <table class="api-params-table">
+            <thead><tr><th>Paràmetre</th><th>Tipus</th><th>Obligatori</th><th>Descripció</th></tr></thead>
+            <tbody>
+                <tr><td><code>slug</code></td><td>string</td><td>✅</td><td>Slug del content type</td></tr>
+                <tr><td><code>id</code></td><td>integer</td><td>✅</td><td>ID de l'entrada</td></tr>
+            </tbody>
+        </table>
+
+        <details class="api-details">
+            <summary class="api-details-summary"><i class="bi bi-code-slash"></i> Exemple de resposta</summary>
+            <div class="api-code-block">
+                <pre class="api-code"><code>{
+  "data": {
+    "id": 3,
+    "status": "published",
+    "locale": "ca",
+    "titol": "Nova botiga a Girona",
+    "imatge": [{
+      "id": 3,
+      "url": "/uploads/botiga.jpg",
+      "formats": { "small": { "url": "/uploads/botiga.jpg" } }
+    }],
+    "contingut": "&lt;p&gt;Text llarg...&lt;/p&gt;"
+  }
+}</code></pre>
+            </div>
+        </details>
+    </div>
+</div>
+
+{# POST /api/visit #}
+<div class="api-endpoint" data-anim="cyber-card">
+    <div class="api-endpoint-head">
+        <div class="api-endpoint-method">
+            <span class="api-method api-method--post">POST</span>
+            <code class="api-endpoint-url">/api/visit</code>
+        </div>
+        <div class="api-endpoint-badge">Tracking</div>
+    </div>
+    <div class="api-endpoint-body">
+        <p class="api-text">Registra una visita a una entrada (per analytics).</p>
+
+        <table class="api-params-table">
+            <thead><tr><th>Camp</th><th>Tipus</th><th>Obligatori</th><th>Descripció</th></tr></thead>
+            <tbody>
+                <tr><td><code>entry_id</code></td><td>integer</td><td>✅</td><td>ID de l'entrada visitada</td></tr>
+                <tr><td><code>path</code></td><td>string</td><td>❌</td><td>Ruta de la pàgina (ex: <code>/noticies/nova-botiga</code>)</td></tr>
+            </tbody>
+        </table>
+
+        <div class="api-code-block">
+            <div class="api-code-header"><span>Exemple de request</span></div>
+            <pre class="api-code"><code>POST /api/visit
+Content-Type: application/json
+
+{
+  "entry_id": 3,
+  "path": "/noticies/nova-botiga"
+}</code></pre>
+        </div>
+
+        <div class="api-code-block">
+            <div class="api-code-header"><span>Resposta</span></div>
+            <pre class="api-code"><code>{ "ok": true }</code></pre>
+        </div>
+    </div>
+</div>
+
+{# ─── Tipus de camp ─── #}
+<h2 class="api-section-title" data-anim="cyber-card">
+    <i class="bi bi-table"></i> Tipus de camp
+</h2>
+
+<div class="api-card" data-anim="cyber-card">
+    <div class="api-card-body api-card-body--no-pad">
+        <table class="cyber-table api-types-table">
+            <thead>
+                <tr>
+                    <th>Tipus de camp</th>
+                    <th>Representació JSON</th>
+                    <th>Exemple</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td><code>text</code></td><td>string</td><td class="api-example">"Hola món"</td></tr>
+                <tr><td><code>textarea</code></td><td>string</td><td class="api-example">"Text llarg\namb salts"</td></tr>
+                <tr><td><code>richtext</code></td><td>string (HTML)</td><td class="api-example">"&lt;p&gt;Text&lt;/p&gt;"</td></tr>
+                <tr><td><code>image</code></td><td><code>[{ id, name, url, formats: { small, thumbnail } }]</code></td><td class="api-example"><code>[{ "id": 3, "url": "/uploads/img.jpg" }]</code></td></tr>
+                <tr><td><code>gallery</code></td><td><code>[{ id, name, url, formats }]</code></td><td class="api-example">Múltiples objects imatge</td></tr>
+                <tr><td><code>boolean</code></td><td>boolean</td><td class="api-example"><code>true</code></td></tr>
+                <tr><td><code>number</code></td><td>float / int</td><td class="api-example"><code>42.5</code></td></tr>
+                <tr><td><code>date</code></td><td>string ISO</td><td class="api-example">"2026-06-30T14:30:00"</td></tr>
+                <tr><td><code>youtube</code></td><td><code>{ id, url, embed }</code></td><td class="api-example"><code>{ "id": "dQw4w9WgXcQ", "url": "https://...", "embed": "https://..." }</code></td></tr>
+                <tr><td><code>color</code></td><td>string hex</td><td class="api-example">"#FF5733"</td></tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{# ─── Errors ─── #}
+<h2 class="api-section-title" data-anim="cyber-card">
+    <i class="bi bi-exclamation-triangle"></i> Codis d'error
+</h2>
+
+<div class="api-card" data-anim="cyber-card">
+    <div class="api-card-body api-card-body--no-pad">
+        <table class="cyber-table api-types-table">
+            <thead>
+                <tr>
+                    <th>Codi</th>
+                    <th>Significat</th>
+                    <th>Acció del frontend</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td><span class="api-status-code api-status-code--2xx">200</span></td><td>Èxit</td><td class="api-example">Processar <code>data</code></td></tr>
+                <tr><td><span class="api-status-code api-status-code--4xx">400</span></td><td>Paràmetres incorrectes</td><td class="api-example">Revisar la crida</td></tr>
+                <tr><td><span class="api-status-code api-status-code--4xx">401</span></td><td>Token invàlid o no enviat</td><td class="api-example">Redirigir a login</td></tr>
+                <tr><td><span class="api-status-code api-status-code--4xx">404</span></td><td>Slug o ID no trobat</td><td class="api-example">Mostrar 404</td></tr>
+                <tr><td><span class="api-status-code api-status-code--5xx">500</span></td><td>Error intern del servidor</td><td class="api-example">Reintentar més tard</td></tr>
+            </tbody>
+        </table>
+
+        <div class="api-code-block api-code-block--muted">
+            <pre class="api-code"><code>{
+  "error": "Descripció de l'error"
+}</code></pre>
+        </div>
+    </div>
+</div>
+
+{# ─── Exemples per framework ─── #}
+<h2 class="api-section-title" data-anim="cyber-card">
+    <i class="bi bi-terminal-fill"></i> Exemples per framework
+</h2>
+
+<div class="api-grid api-grid--3col" data-anim="cyber-card">
+    <div class="api-card">
+        <div class="api-card-header">
+            <div class="api-card-icon api-card-icon--yellow">
+                <i class="bi bi-filetype-js"></i>
+            </div>
+            <h3 class="api-card-title">Vanilla JS</h3>
+        </div>
+        <div class="api-card-body">
+            <div class="api-code-block">
+                <pre class="api-code"><code>const API = 'https://cms.domini.com';
+const TOKEN = 'el_token';
+
+const headers = {
+  Authorization: `Bearer ${TOKEN}`
+};
+
+// Llistar entrades
+const res = await fetch(
+  `${API}/api/noticies?locale=ca`,
+  { headers }
+);
+const { data } = await res.json();</code></pre>
+            </div>
+        </div>
+    </div>
+
+    <div class="api-card">
+        <div class="api-card-header">
+            <div class="api-card-icon api-card-icon--orange">
+                <i class="bi bi-stars"></i>
+            </div>
+            <h3 class="api-card-title">Astro</h3>
+        </div>
+        <div class="api-card-body">
+            <div class="api-code-block">
+                <pre class="api-code"><code>---const API = 'https://cms.domini.com';
+const TOKEN = 'el_token';
+
+const res = await fetch(
+  `${API}/api/noticies?locale=ca`, {
+    headers: {
+      Authorization: `Bearer ${TOKEN}`
+    }
+  }
+);
+const entries = res.ok
+  ? (await res.json()).data
+  : [];
+---
+{entries.map(entry => (
+  &lt;article&gt;
+    &lt;img src={API + entry.imatge[0].url}
+         alt={entry.titol} /&gt;
+    &lt;h2&gt;{entry.titol}&lt;/h2&gt;
+  &lt;/article&gt;
+))}</code></pre>
+            </div>
+        </div>
+    </div>
+
+    <div class="api-card">
+        <div class="api-card-header">
+            <div class="api-card-icon api-card-icon--blue">
+                <i class="bi bi-lightning-fill"></i>
+            </div>
+            <h3 class="api-card-title">Next.js</h3>
+        </div>
+        <div class="api-card-body">
+            <div class="api-code-block">
+                <pre class="api-code"><code>// lib/voracms.ts
+const API = process.env.VORACMS_URL!;
+const TOKEN = process.env.VORACMS_TOKEN!;
+
+export async function getEntries(
+  slug: string, locale?: string
+) {
+  const params = new URLSearchParams();
+  if (locale) params.set('locale', locale);
+  const qs = params.toString() ? `?${params}` : '';
+
+  const res = await fetch(
+    `${API}/api/${slug}${qs}`, {
+      headers: {
+        Authorization: `Bearer ${TOKEN}`
+      },
+      next: { revalidate: 60 }
+    }
+  );
+  if (!res.ok) return [];
+  return (await res.json()).data;
+}</code></pre>
+            </div>
+        </div>
+    </div>
+</div>
+
+{# ─── Flux complet ─── #}
+<h2 class="api-section-title" data-anim="cyber-card">
+    <i class="bi bi-arrow-repeat"></i> Flux complet
+</h2>
+
+<div class="api-card api-card--flush" data-anim="cyber-card">
+    <div class="api-card-body api-card-body--no-pad">
+        <div class="api-flow">
+            <div class="api-flow-step">
+                <div class="api-flow-num">1</div>
+                <div class="api-flow-content">
+                    <h4>Obtenir token</h4>
+                    <p>Copia l'<code>apiToken</code> des de <strong>Admin → Usuaris → Editar</strong></p>
+                </div>
+            </div>
+            <div class="api-flow-arrow"><i class="bi bi-chevron-down"></i></div>
+            <div class="api-flow-step">
+                <div class="api-flow-num">2</div>
+                <div class="api-flow-content">
+                    <h4>Descobrir seccions</h4>
+                    <p><code>GET /api/sections</code> → obtens els slugs de cada secció</p>
+                </div>
+            </div>
+            <div class="api-flow-arrow"><i class="bi bi-chevron-down"></i></div>
+            <div class="api-flow-step">
+                <div class="api-flow-num">3</div>
+                <div class="api-flow-content">
+                    <h4>Llistar entrades</h4>
+                    <p><code>GET /api/noticies?locale=ca</code> → entrades publicades</p>
+                </div>
+            </div>
+            <div class="api-flow-arrow"><i class="bi bi-chevron-down"></i></div>
+            <div class="api-flow-step">
+                <div class="api-flow-num">4</div>
+                <div class="api-flow-content">
+                    <h4>Detall d'entrada</h4>
+                    <p><code>GET /api/noticies/3</code> → entrada individual</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{# ─── Quick Reference ─── #}
+<h2 class="api-section-title" data-anim="cyber-card">
+    <i class="bi bi-lightbulb-fill"></i> Referència ràpida
+</h2>
+
+<div class="api-card" data-anim="cyber-card">
+    <div class="api-card-body">
+        <div class="api-ref-grid">
+            <div class="api-ref-item">
+                <span class="api-method api-method--get api-method--sm">GET</span>
+                <code>/api/auth/me</code>
+                <span class="api-ref-desc">Perfil usuari</span>
+            </div>
+            <div class="api-ref-item">
+                <span class="api-method api-method--get api-method--sm">GET</span>
+                <code>/api/sections</code>
+                <span class="api-ref-desc">Llistat seccions</span>
+            </div>
+            <div class="api-ref-item">
+                <span class="api-method api-method--get api-method--sm">GET</span>
+                <code>/api/{slug}</code>
+                <span class="api-ref-desc">Llistat entrades</span>
+            </div>
+            <div class="api-ref-item">
+                <span class="api-method api-method--get api-method--sm">GET</span>
+                <code>/api/{slug}/{id}</code>
+                <span class="api-ref-desc">Detall entrada</span>
+            </div>
+            <div class="api-ref-item">
+                <span class="api-method api-method--post api-method--sm">POST</span>
+                <code>/api/visit</code>
+                <span class="api-ref-desc">Registrar visita</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

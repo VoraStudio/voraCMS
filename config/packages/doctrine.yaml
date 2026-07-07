@@ -26,6 +26,10 @@ doctrine:
                 alias: App
         controller_resolver:
             auto_mapping: false
+        filters:
+            user_id_filter:
+                class: App\Filter\UserIdFilter
+                enabled: true
 
 when@test:
     doctrine:

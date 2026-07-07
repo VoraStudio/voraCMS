@@ -1,0 +1,18 @@
+/* ===========================================================
+   preview-overrides.css — NO altera el layout del frontend.
+   El diseño visual viene de style.css (body.page-projecte).
+   Solo ajustamos lo necesario para el contexto de preview.
+   ===========================================================
+
+   El frontend usa width: 100vw y padding: 180px 5vw 7rem.
+   NO forzar max-width ni cambiar paddings. */
+
+/* El preview puede tener scroll aunque falten secciones */
+.preview-wrapper {
+    min-height: 100vh;
+}
+
+/* Heredar fondo blanco del frontend (body.page-projecte) */
+body.page-projecte {
+    background-color: #fff !important;
+}

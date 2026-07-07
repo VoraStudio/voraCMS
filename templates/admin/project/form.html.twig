@@ -1,0 +1,75 @@
+{% extends 'admin/layout.html.twig' %}
+
+{% block page_title %}{{ isNew ? 'Nou projecte' : 'Editar: ' ~ project.name }}{% endblock %}
+
+{% block topbar_actions %}
+<a href="{{ path('admin_projects') }}" class="cyber-btn cyber-btn--projects">
+    <i class="bi bi-arrow-left"></i> <span>Tornar</span>
+</a>
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+        <div class="card">
+            <div class="card-body">
+                <form method="post" class="row g-4">
+                    <input type="hidden" name="_token" value="{{ csrf_token('project-edit-' ~ project.id) }}">
+
+                    {% if users is defined and users|length > 0 %}
+                    <div class="col-12">
+                        <label class="form-label">Usuari propietari *</label>
+                        <select name="user_id" class="form-control" required>
+                            {% for u in users %}
+                                <option value="{{ u.id }}" {% if (isNew and (preselectUserId > 0 ? u.id == preselectUserId : u.id == currentUser.id)) or (not isNew and project.user and u.id == project.user.id) %}selected{% endif %}>
+                                    {{ u.name }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                        <small class="field-help-text">L'usuari al qual pertany aquest projecte.</small>
+                    </div>
+                    {% endif %}
+
+                    <div class="col-12">
+                        <label class="form-label">Nom del projecte *</label>
+                        <input type="text" name="name" class="form-control" value="{{ project.name }}" required
+                               placeholder="Ex: Web Corporativa, App Mòbil...">
+                        <small class="field-help-text">El nom es convertirà automàticament en slug.</small>
+                    </div>
+
+                    <div class="col-12">
+                        <label class="form-label">Descripció</label>
+                        <textarea name="description" class="form-control" rows="3" placeholder="Què fa aquest projecte?">{{ project.description }}</textarea>
+                    </div>
+
+                    <div class="col-12">
+                        <label class="form-label">Color del projecte</label>
+                        <div class="color-picker-group">
+                            <input type="color" name="color" class="form-control form-control-color color-picker-input" value="{{ project.color ?: '#4945FF' }}">
+                            <span id="colorPreview" class="color-picker-preview">{{ project.color ?: '#4945FF' }}</span>
+                        </div>
+                        <small class="field-help-text">Tria un color per identificar el projecte visualment.</small>
+                    </div>
+
+                    {% if not isNew %}
+                    <div class="col-12">
+                        <label class="form-label">Estat</label>
+                        <div class="form-check">
+                            <input type="checkbox" name="active" class="form-check-input" value="1" {% if project.active %}checked{% endif %}>
+                            <label class="form-check-label small">Projecte actiu</label>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <div class="col-12">
+                        <hr class="form-divider">
+                        <button type="submit" class="btn btn-primary w-100">
+                            <span>{{ isNew ? 'Crear projecte' : 'Guardar canvis' }}</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
