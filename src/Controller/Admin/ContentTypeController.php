@@ -141,19 +141,35 @@ class ContentTypeController extends AbstractController
                 $contentType->setUser($project->getUser() ?? $this->getUser());
             }
 
-            // Remove existing fields and recreate
+            // Index existing fields by ID forUPDATE matching
+            $existingFields = [];
             foreach ($contentType->getFields() as $field) {
-                $em->remove($field);
+                $existingFields[$field->getId()] = $field;
             }
 
+            $fieldIds = $request->request->all('field_id') ?? [];
             $fieldNames = $request->request->all('field_name') ?? [];
             $fieldTypes = $request->request->all('field_type') ?? [];
             $fieldRequired = $request->request->all('field_required') ?? [];
             $fieldOptions = $request->request->all('field_options') ?? [];
 
+            $processedIds = [];
+
             foreach ($fieldNames as $i => $name) {
                 if (empty($name)) continue;
-                $fd = new FieldDefinition();
+
+                $fieldId = $fieldIds[$i] ?? null;
+
+                if ($fieldId && isset($existingFields[$fieldId])) {
+                    // UPDATE existing field — preserve its ID so FieldValues stay linked
+                    $fd = $existingFields[$fieldId];
+                    $processedIds[] = (int) $fieldId;
+                } else {
+                    // CREATE new field
+                    $fd = new FieldDefinition();
+                    $contentType->addField($fd);
+                }
+
                 $fd->setName($name);
                 $fd->setSlug($this->slugify($name));
                 $fd->setFieldType($fieldTypes[$i] ?? 'text');
@@ -162,7 +178,13 @@ class ContentTypeController extends AbstractController
                 if (($fieldTypes[$i] ?? '') === FieldDefinition::TYPE_SELECT && !empty($fieldOptions[$i])) {
                     $fd->setHelpText($fieldOptions[$i]);
                 }
-                $contentType->addField($fd);
+            }
+
+            // Remove only fields the user explicitly deleted from the form
+            foreach ($existingFields as $id => $field) {
+                if (!in_array($id, $processedIds)) {
+                    $em->remove($field);
+                }
             }
 
             $em->flush();

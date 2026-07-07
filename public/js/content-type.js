@@ -18,6 +18,7 @@
         if (!row) return;
         var clone = row.cloneNode(true);
         clone.querySelectorAll('input[type="text"]').forEach(function (i) { i.value = ''; });
+        clone.querySelectorAll('input[type="hidden"]').forEach(function (h) { h.value = ''; });
         clone.querySelectorAll('input[type="checkbox"]').forEach(function (c) { c.checked = false; });
         clone.querySelectorAll('textarea').forEach(function (t) { t.value = ''; });
         container.appendChild(clone);
