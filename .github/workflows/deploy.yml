@@ -22,3 +22,6 @@ jobs:
             php bin/console cache:warmup --env=prod --no-debug 2>&1 || true
             php bin/console doctrine:migrations:migrate --env=prod --no-interaction --no-debug 2>&1 || true
             chmod -R 775 var/cache var/log 2>&1 || true
+            # Reset OPcache per forçar PHP a carregar els nous fitxers
+            php -r "opcache_reset();" 2>&1 || true
+            sudo systemctl reload apache2 2>&1 || sudo service apache2 reload 2>&1 || true
