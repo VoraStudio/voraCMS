@@ -1,6 +1,6 @@
 /* ═══════════════════════════════════════════════════
    VoraCMS · Content-Type Field Management
-   Field clone/remove + auto-slug generation
+   Field clone/remove + auto-slug generation + select options
    ═══════════════════════════════════════════════════ */
 
 (function () {
@@ -17,8 +17,9 @@
         var row = container.querySelector('.field-row');
         if (!row) return;
         var clone = row.cloneNode(true);
-        clone.querySelectorAll('input').forEach(function (i) { i.value = ''; });
+        clone.querySelectorAll('input[type="text"]').forEach(function (i) { i.value = ''; });
         clone.querySelectorAll('input[type="checkbox"]').forEach(function (c) { c.checked = false; });
+        clone.querySelectorAll('textarea').forEach(function (t) { t.value = ''; });
         container.appendChild(clone);
       });
     }
@@ -51,3 +52,12 @@
   });
 
 })();
+
+/* ─── Toggle field options (select type) ─── */
+function toggleFieldOptions(selectEl) {
+  var row = selectEl.closest('.field-row');
+  if (!row) return;
+  var wrap = row.querySelector('.field-options-wrap');
+  if (!wrap) return;
+  wrap.style.display = selectEl.value === 'select' ? '' : 'none';
+}

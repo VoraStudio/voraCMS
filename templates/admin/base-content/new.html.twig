@@ -52,27 +52,34 @@
             </div>
 
             <div id="fieldsContainer">
-                <div class="s-field-group row g-2 field-row align-items-center mb-3">
-                    <div class="col-md-4">
-                        <input type="text" name="field_name[]" class="cyber-form-input" placeholder="Nom del camp">
-                    </div>
-                    <div class="col-md-3">
-                        <select name="field_type[]" class="cyber-form-input cyber-form-input--select">
-                            {% for type in fieldTypes %}
-                            <option value="{{ type }}">{{ type }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    <div class="col-md-3 d-flex align-items-center">
-                        <div class="cyber-form-check mb-0">
-                            <input type="checkbox" name="field_required[]" class="cyber-form-checkbox" value="1">
-                            <span class="cyber-form-check-label small">Requerit</span>
+                <div class="s-field-group field-row mb-3">
+                    <div class="row g-2 align-items-center">
+                        <div class="col-md-4">
+                            <input type="text" name="field_name[]" class="cyber-form-input" placeholder="Nom del camp">
+                        </div>
+                        <div class="col-md-3">
+                            <select name="field_type[]" class="cyber-form-input cyber-form-input--select field-type-select" onchange="toggleFieldOptions(this)">
+                                {% for type in fieldTypes %}
+                                <option value="{{ type }}">{{ type }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-3 d-flex align-items-center">
+                            <div class="cyber-form-check mb-0">
+                                <input type="checkbox" name="field_required[]" class="cyber-form-checkbox" value="1">
+                                <span class="cyber-form-check-label small">Requerit</span>
+                            </div>
+                        </div>
+                        <div class="col-md-2 text-end">
+                            <button type="button" class="cyber-btn cyber-btn--icon cyber-btn--delete remove-field">
+                                <i class="bi bi-x"></i>
+                            </button>
                         </div>
                     </div>
-                    <div class="col-md-2 text-end">
-                        <button type="button" class="cyber-btn cyber-btn--icon cyber-btn--delete remove-field">
-                            <i class="bi bi-x"></i>
-                        </button>
+                    <div class="row field-options-wrap" style="display:none">
+                        <div class="col-12 mt-2">
+                            <textarea name="field_options[]" class="cyber-form-input" rows="2" placeholder="Una opció per línia&#10;Ex:&#10;Essencial&#10;Integral&#10;Master"></textarea>
+                        </div>
                     </div>
                 </div>
             </div>

@@ -127,6 +127,15 @@
                     required: field.required
                 } %}
 
+                {% elseif field.fieldType == 'select' %}
+                <select name="field_{{ field.id }}" class="form-control" {% if field.required %}required{% endif %}>
+                    <option value="">Selecciona...</option>
+                    {% set options = field.helpText ? field.helpText|split('\n')|map(o => o|trim)|filter(o => o) : [] %}
+                    {% for opt in options %}
+                    <option value="{{ opt }}" {% if val == opt %}selected{% endif %}>{{ opt }}</option>
+                    {% endfor %}
+                </select>
+
                 {% elseif field.fieldType == 'youtube' %}
                 <div class="input-group">
                     <span class="input-group-text input-group-text--sm"><i class="bi bi-youtube"></i></span>
