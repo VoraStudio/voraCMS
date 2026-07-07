@@ -80,7 +80,8 @@ class EntrySerializer
             FieldDefinition::TYPE_BOOLEAN => filter_var($value, FILTER_VALIDATE_BOOLEAN),
             FieldDefinition::TYPE_NUMBER => is_numeric($value) ? (float) $value : null,
             FieldDefinition::TYPE_DATE => $this->serializeDate($value),
-            FieldDefinition::TYPE_DATETIME => $this->serializeDate($value),
+            FieldDefinition::TYPE_DATE_RANGE => $this->serializeDateRange($value),
+            FieldDefinition::TYPE_REPEATER => $this->serializeRepeater($value),
             default => $value,
         };
     }
@@ -178,6 +179,27 @@ class EntrySerializer
         }
 
         return $value;
+    }
+
+    /* Serialitza un date_range (JSON {start, end}) com a {start, end} */
+    private function serializeDateRange(?string $value): ?array
+    {
+        if (!$value) return null;
+        $decoded = json_decode($value, true);
+        if (!is_array($decoded)) return null;
+        return [
+            'start' => $this->serializeDate($decoded['start'] ?? null),
+            'end' => $this->serializeDate($decoded['end'] ?? null),
+        ];
+    }
+
+    /* ----- INICI SECCIÓ REPEATER ----- */
+    /* Converteix JSON string → array per al frontend */
+    private function serializeRepeater(?string $value): array
+    {
+        if (!$value) return [];
+        $decoded = json_decode($value, true);
+        return is_array($decoded) ? $decoded : [];
     }
 
     /* ----- INICI SECCIÓ YOUTUBE ----- */

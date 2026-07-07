@@ -113,49 +113,134 @@
     });
 
     /* ─── Quill editor init ─── */
-    document.querySelectorAll('.quill-wrapper').forEach(function (wrapper) {
-      var editorEl = wrapper.querySelector('.js-quill-editor');
-      var textarea = wrapper.querySelector('textarea');
-      if (!editorEl || !textarea) return;
+    if (typeof Quill !== 'undefined') {
+      document.querySelectorAll('.quill-wrapper').forEach(function (wrapper) {
+        try {
+          var editorEl = wrapper.querySelector('.js-quill-editor');
+          var textarea = wrapper.querySelector('textarea');
+          if (!editorEl || !textarea) return;
 
-      var quill = new Quill(editorEl, {
-        theme: 'snow',
-        modules: {
-          toolbar: [
-            ['bold', 'italic', 'underline', 'strike'],
-            [{ 'list': 'ordered' }, { 'list': 'bullet' }],
-            [{ 'header': [1, 2, 3, false] }],
-            ['link', 'clean'],
-            [{ 'align': [] }],
-            ['blockquote', 'code-block']
-          ]
-        },
-        placeholder: 'Escriu aquí...'
+          var quill = new Quill(editorEl, {
+            theme: 'snow',
+            modules: {
+              toolbar: [
+                ['bold', 'italic', 'underline', 'strike'],
+                [{ 'list': 'ordered' }, { 'list': 'bullet' }],
+                [{ 'header': [1, 2, 3, false] }],
+                ['link', 'clean'],
+                [{ 'align': [] }],
+                ['blockquote', 'code-block']
+              ]
+            },
+            placeholder: 'Escriu aquí...'
+          });
+
+          /* Restore initial value */
+          if (textarea.value) {
+            quill.root.innerHTML = textarea.value;
+          }
+
+          /* Sync on text change */
+          quill.on('text-change', function () {
+            textarea.value = quill.root.innerHTML;
+          });
+        } catch (e) {
+          console.warn('Quill init failed for', wrapper, e);
+        }
       });
-
-      /* Restore initial value */
-      if (textarea.value) {
-        quill.root.innerHTML = textarea.value;
-      }
-
-      /* Sync on text change */
-      quill.on('text-change', function () {
-        textarea.value = quill.root.innerHTML;
-      });
-    });
+    }
 
     /* ─── Quill sync on form submit ─── */
     var entryForm = document.getElementById('entryForm');
     if (entryForm) {
       entryForm.addEventListener('submit', function () {
-        document.querySelectorAll('.quill-wrapper').forEach(function (wrapper) {
-          var editorEl = wrapper.querySelector('.js-quill-editor');
-          var textarea = wrapper.querySelector('textarea');
-          var quill = Quill.find(editorEl);
-          if (quill) textarea.value = quill.root.innerHTML;
+        if (typeof Quill !== 'undefined') {
+          document.querySelectorAll('.quill-wrapper').forEach(function (wrapper) {
+            try {
+              var editorEl = wrapper.querySelector('.js-quill-editor');
+              var textarea = wrapper.querySelector('textarea');
+              var quill = Quill.find(editorEl);
+              if (quill) textarea.value = quill.root.innerHTML;
+            } catch (e) {}
+          });
+        }
+        /* Sync all repeaters before submit */
+        document.querySelectorAll('.repeater-field').forEach(function (field) {
+          syncRepeater(field);
         });
       });
     }
+
+    /* ═══════════════════════════════════════════════════
+       Repeater Logic
+       ═══════════════════════════════════════════════════ */
+
+    function getRepeaterData(container) {
+      var items = [];
+      container.querySelectorAll('.repeater-row').forEach(function (row) {
+        var año = row.querySelector('.repeater-row__año').value.trim();
+        var texto = row.querySelector('.repeater-row__texto').value.trim();
+        if (año || texto) {
+          items.push({ año: año, texto: texto });
+        }
+      });
+      return items;
+    }
+
+    function syncRepeater(container) {
+      var hidden = container.querySelector('.repeater-value');
+      if (!hidden) return;
+      hidden.value = JSON.stringify(getRepeaterData(container));
+    }
+
+    function createRepeaterRow(item) {
+      var row = document.createElement('div');
+      row.className = 'repeater-row';
+      row.innerHTML =
+        '<div class="repeater-row__fields">' +
+          '<input type="text" class="form-control form-control-sm repeater-row__año" placeholder="Any (ex: 2024)" value="' + (item.año || '') + '">' +
+          '<textarea class="form-control form-control-sm repeater-row__texto" rows="2" placeholder="Descripció del logro">' + (item.texto || '') + '</textarea>' +
+        '</div>' +
+        '<button type="button" class="repeater-row__remove" aria-label="Eliminar" tabindex="-1">' +
+          '<i class="bi bi-x"></i>' +
+        '</button>';
+      return row;
+    }
+
+    function initRepeater(container) {
+      var hidden = container.querySelector('.repeater-value');
+      var rowsContainer = container.querySelector('.repeater-rows');
+      var addBtn = container.querySelector('.repeater-add');
+      if (!hidden || !rowsContainer || !addBtn) return;
+
+      /* Add button */
+      addBtn.addEventListener('click', function () {
+        var row = createRepeaterRow({ año: '', texto: '' });
+        rowsContainer.appendChild(row);
+        syncRepeater(container);
+        row.querySelector('.repeater-row__año').focus();
+      });
+
+      /* Delegate remove + change */
+      rowsContainer.addEventListener('click', function (e) {
+        var btn = e.target.closest('.repeater-row__remove');
+        if (!btn) return;
+        var row = btn.closest('.repeater-row');
+        if (row) {
+          row.remove();
+          syncRepeater(container);
+        }
+      });
+
+      rowsContainer.addEventListener('input', function () {
+        syncRepeater(container);
+      });
+    }
+
+    /* Init all repeaters on load */
+    document.querySelectorAll('.repeater-field').forEach(function (el) {
+      initRepeater(el);
+    });
   });
 
 })();

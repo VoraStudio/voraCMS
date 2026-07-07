@@ -42,9 +42,24 @@
                 <textarea name="description" class="cyber-form-input" rows="2" placeholder="Escriu una descripció del tipus..."></textarea>
             </div>
 
-            <div class="cyber-form-check mb-4">
-                <input type="checkbox" name="active" class="cyber-form-checkbox" id="ct-active" checked value="1">
-                <label class="cyber-form-check-label small" for="ct-active">Tipus de contingut actiu</label>
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <div class="cyber-form-group mb-0">
+                        <label class="cyber-form-label">Projecte *</label>
+                        <select name="project_id" class="cyber-form-input cyber-form-input--select" required>
+                            <option value="">Selecciona un projecte</option>
+                            {% for p in projects %}
+                            <option value="{{ p.id }}">{{ p.user.name ?? 'Sense usuari' }} — {{ p.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-6 d-flex align-items-end">
+                    <div class="cyber-form-check mb-0">
+                        <input type="checkbox" name="active" class="cyber-form-checkbox" id="ct-active" checked value="1">
+                        <label class="cyber-form-check-label small" for="ct-active">Tipus de contingut actiu</label>
+                    </div>
+                </div>
             </div>
 
             <hr class="form-divider my-4">

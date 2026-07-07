@@ -261,6 +261,94 @@
     if (typeof WOW !== 'undefined') {
       new WOW().init();
     }
+
+    /* ─── Modal de Previsualització (Estil Victoria Taylor) ─── */
+    document.addEventListener('click', function (e) {
+      var btn = e.target.closest('.js-preview-modal');
+      if (!btn) return;
+      e.preventDefault();
+      
+      var url = btn.getAttribute('href');
+      var type = btn.getAttribute('data-type') || 'event';
+      openPreviewModal(url, type);
+    });
+
+    /* ─── Obrir preview personalitzada en pestanya nova ─── */
+    document.addEventListener('click', function (e) {
+      var btn = e.target.closest('.js-preview-newtab');
+      if (!btn) return;
+      e.preventDefault();
+      window.open(btn.getAttribute('href'), '_blank');
+    });
+
+    function openPreviewModal(url, type) {
+      var existing = document.querySelector('.vt-preview-modal');
+      if (existing) existing.remove();
+
+      /* Passar el tema del admin al preview via query param */
+      var saved = localStorage.getItem('voracms_theme');
+      var theme = saved || 'dark';
+      url += (url.indexOf('?') === -1 ? '?' : '&') + 'theme=' + encodeURIComponent(theme);
+
+      var containerClass = 'vt-preview-modal-container';
+      if (type === 'noticia') {
+        containerClass += ' vt-preview-modal-container--noticia';
+      } else {
+        containerClass += ' vt-preview-modal-container--event';
+      }
+
+      var modalHTML = 
+        '<div class="vt-preview-modal" aria-hidden="true" role="dialog">' +
+          '<div class="vt-preview-modal-overlay"></div>' +
+          '<div class="' + containerClass + '">' +
+            '<button class="vt-preview-modal-close" aria-label="Tancar">' +
+              '<i class="bi bi-x-lg"></i>' +
+            '</button>' +
+            '<div class="vt-preview-modal-iframe-wrapper">' +
+              '<iframe class="vt-preview-modal-iframe" src="' + url + '"></iframe>' +
+            '</div>' +
+          '</div>' +
+        '</div>';
+
+      document.body.insertAdjacentHTML('beforeend', modalHTML);
+
+      var modal = document.querySelector('.vt-preview-modal');
+      var container = modal.querySelector('.vt-preview-modal-container');
+      var overlay = modal.querySelector('.vt-preview-modal-overlay');
+      var closeBtn = modal.querySelector('.vt-preview-modal-close');
+
+      // Animació d'entrada amb GSAP (que ja està carregat al layout)
+      modal.setAttribute('aria-hidden', 'false');
+      gsap.set(modal, { display: 'flex', opacity: 0 });
+      gsap.to(modal, { opacity: 1, duration: 0.3, ease: 'power2.out' });
+      gsap.fromTo(container, 
+        { scale: 0.9, opacity: 0, y: 20 }, 
+        { scale: 1, opacity: 1, y: 0, duration: 0.4, ease: 'power3.out', delay: 0.1 }
+      );
+
+      function closeModal() {
+        gsap.to(container, { scale: 0.9, opacity: 0, y: 20, duration: 0.3, ease: 'power3.in' });
+        gsap.to(modal, {
+          opacity: 0,
+          duration: 0.3,
+          ease: 'power2.in',
+          onComplete: function () {
+            modal.remove();
+          }
+        });
+      }
+
+      closeBtn.addEventListener('click', closeModal);
+      overlay.addEventListener('click', closeModal);
+      
+      var escHandler = function (e) {
+        if (e.key === 'Escape') {
+          closeModal();
+          document.removeEventListener('keydown', escHandler);
+        }
+      };
+      document.addEventListener('keydown', escHandler);
+    }
   });
 
 })();

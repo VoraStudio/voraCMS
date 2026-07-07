@@ -50,8 +50,17 @@
                 {% elseif field.fieldType == 'date' %}
                 <input type="datetime-local" name="field_{{ field.id }}" class="form-control" {% if field.required %}required{% endif %}>
 
-                {% elseif field.fieldType == 'datetime' %}
-                <input type="datetime-local" name="field_{{ field.id }}" class="form-control">
+                {% elseif field.fieldType == 'date_range' %}
+                <div class="row g-2">
+                    <div class="col-md-6">
+                        <label class="form-label small">Inici</label>
+                        <input type="datetime-local" name="field_{{ field.id }}_start" class="form-control" {% if field.required %}required{% endif %}>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label small">Fi</label>
+                        <input type="datetime-local" name="field_{{ field.id }}_end" class="form-control" {% if field.required %}required{% endif %}>
+                    </div>
+                </div>
 
                 {% elseif field.fieldType == 'boolean' %}
                 <div class="form-check">
@@ -85,6 +94,13 @@
                     fieldType: 'gallery',
                     value: '',
                     mediaPaths: {}
+                } %}
+
+                {% elseif field.fieldType == 'repeater' %}
+                {% include 'admin/components/_repeater_field.html.twig' with {
+                    fieldId: field.id,
+                    value: '',
+                    required: field.required
                 } %}
 
                 {% elseif field.fieldType == 'youtube' %}

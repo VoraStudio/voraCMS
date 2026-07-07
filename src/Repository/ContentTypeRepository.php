@@ -77,19 +77,49 @@ class ContentTypeRepository extends ServiceEntityRepository
     /**
      * @return ContentType[]
      */
-    public function findAllForAdmin(?int $projectId = null): array
+    public function findAllForAdmin(): array
     {
-        $qb = $this->createQueryBuilder('ct')
-            ->orderBy('ct.base', 'DESC')
-            ->addOrderBy('ct.name', 'ASC');
+        $em = $this->getEntityManager();
 
-        if ($projectId !== null) {
-            $qb->where('ct.project = :project OR (ct.base = :base AND ct.project IS NULL)')
-               ->setParameter('project', $projectId)
-               ->setParameter('base', true);
+        // Subquery: slugs of all base templates
+        $subQb = $em->createQueryBuilder()
+            ->select('b.slug')
+            ->from(ContentType::class, 'b')
+            ->where('b.base = :baseTrue');
+
+        // 1) Base templates
+        $base = $this->createQueryBuilder('ct')
+            ->addSelect('p')
+            ->leftJoin('ct.project', 'p')
+            ->where('ct.base = :baseTrue')
+            ->setParameter('baseTrue', true)
+            ->orderBy('ct.name', 'ASC')
+            ->getQuery()
+            ->getResult();
+
+        // 2) Custom types: non-base, slug doesn't match any base template
+        $custom = $this->createQueryBuilder('ct2')
+            ->addSelect('p2')
+            ->leftJoin('ct2.project', 'p2')
+            ->where('ct2.base != :baseTrue')
+            ->andWhere($em->getExpressionBuilder()->notIn('ct2.slug', $subQb->getDQL()))
+            ->setParameter('baseTrue', true)
+            ->orderBy('ct2.name', 'ASC')
+            ->getQuery()
+            ->getResult();
+
+        // Deduplicate custom types by slug (keep first occurrence per slug)
+        $seen = [];
+        $deduped = [];
+        foreach ($custom as $ct) {
+            $slug = $ct->getSlug();
+            if (!isset($seen[$slug])) {
+                $seen[$slug] = true;
+                $deduped[] = $ct;
+            }
         }
 
-        return $qb->getQuery()->getResult();
+        return array_merge($base, $deduped);
     }
 
     public function findBaseTemplates(): array

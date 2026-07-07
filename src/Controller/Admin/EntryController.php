@@ -31,6 +31,7 @@ use App\Service\MediaService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
+use Twig\Environment as TwigEnvironment;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
@@ -52,18 +53,19 @@ class EntryController extends AbstractController
     ): Response {
         $this->denyAccessUnlessGranted('ROLE_USUARIO');
 
-        /* Assegurem que hi ha un projecte actiu a sessió */
+        /* Primer: buscar per projecte actiu (comportament original) */
         $projectId = $this->ensureActiveProject($request, $projectRepo);
-        if ($projectId === null) {
-            return $this->redirectToRoute('admin_projects');
+        $contentType = $projectId ? $ctRepo->findBySlug($slug, $projectId) : null;
+
+        /* Si no el troba al projecte actiu, buscar globalment */
+        if (!$contentType) {
+            $contentType = $ctRepo->findOneBy(['slug' => $slug]);
         }
-        /* Filtrem el ContentType pel projecte actiu */
-        $contentType = $ctRepo->findBySlug($slug, $projectId);
+
         if (!$contentType) throw $this->createNotFoundException();
 
         /* ── Verificació de propietat ── */
         $this->verifyContentTypeOwnership($contentType);
-        $this->verifyContentTypeProject($contentType, $projectId);
 
         $entries = $contentType->getEntries();
         $thumbnails = [];
@@ -130,7 +132,7 @@ class EntryController extends AbstractController
        real del frontend (sense admin layout).
        ----------------------------------------------------------- */
     #[Route('/{id}/preview', name: 'admin_entry_preview', methods: ['GET'])]
-    public function preview(Entry $entry, EntrySerializer $serializer): Response
+    public function preview(Entry $entry, EntrySerializer $serializer, TwigEnvironment $twig): Response
     {
         $this->denyAccessUnlessGranted('ROLE_USUARIO');
 
@@ -140,16 +142,35 @@ class EntryController extends AbstractController
         $data = $serializer->serialize($entry);
         $contentType = $entry->getContentType();
 
-        /* Només renderitzem preview visual per al CT de Projectes VoraStudio */
-        if ($contentType && $contentType->getSlug() === 'vorastudio-projects') {
+        if (!$contentType) {
+            return $this->redirectToRoute('admin_entry_show', ['id' => $entry->getId()]);
+        }
+
+        /* ── Template específic per slug (ex: preview_noticies.html.twig) ── */
+        $specificTemplate = 'admin/entry/preview_' . $contentType->getSlug() . '.html.twig';
+        $loader = $twig->getLoader();
+
+        if ($loader->exists($specificTemplate)) {
+            return $this->render($specificTemplate, [
+                'entry' => $entry,
+                'data'  => $data,
+            ]);
+        }
+
+        /* ── Template específic per slug Llegacy (vorastudio-projects → preview.html.twig) ── */
+        if ('vorastudio-projects' === $contentType->getSlug()) {
             return $this->render('admin/entry/preview.html.twig', [
                 'entry' => $entry,
                 'data'  => $data,
             ]);
         }
 
-        /* Fallback: redirigir a la vista show genèrica */
-        return $this->redirectToRoute('admin_entry_show', ['id' => $entry->getId()]);
+        /* ── Fallback: preview genèric per a qualsevol Content Type ── */
+        return $this->render('admin/entry/preview_generic.html.twig', [
+            'entry'        => $entry,
+            'data'         => $data,
+            'contentType'  => $contentType,
+        ]);
     }
 
     /* -----------------------------------------------------------
@@ -164,7 +185,27 @@ class EntryController extends AbstractController
         $this->denyAccessUnlessGranted('ROLE_USUARIO');
 
         $projectId = $request->getSession()->get('_project_id');
-        $contentType = $projectId !== null ? $ctRepo->findBySlug($slug, (int) $projectId) : $ctRepo->findBySlug($slug);
+        $user = $this->getUser();
+
+        if ($projectId !== null) {
+            $contentType = $ctRepo->findBySlug($slug, (int) $projectId);
+        } else {
+            /* ── Sin project_id en sessió: buscar entre els projectes de l'usuari ── */
+            $contentType = null;
+            foreach ($user->getProjects() as $project) {
+                $candidate = $ctRepo->findBySlug($slug, $project->getId());
+                if ($candidate) {
+                    $contentType = $candidate;
+                    break;
+                }
+            }
+
+            /* ── Fallback per a admins o plantilles base ── */
+            if (!$contentType) {
+                $contentType = $ctRepo->findOneBy(['slug' => $slug]);
+            }
+        }
+
         if (!$contentType) throw $this->createNotFoundException();
 
         /* ── Projecte contextual per a uploads: el del contentType, o el de sessió ── */
@@ -427,6 +468,14 @@ class EntryController extends AbstractController
         if ($fieldDef->getFieldType() === FieldDefinition::TYPE_YOUTUBE && $raw) {
             preg_match('/(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/', $raw, $m);
             return $m[1] ?? $raw;
+        }
+
+        // ── Date range: encode start/end as JSON ──
+        if ($fieldDef->getFieldType() === FieldDefinition::TYPE_DATE_RANGE) {
+            $start = $request->request->get('field_' . $fieldId . '_start', '');
+            $end = $request->request->get('field_' . $fieldId . '_end', '');
+            $encoded = json_encode(['start' => $start, 'end' => $end]);
+            return $encoded !== false ? $encoded : '{"start":"","end":""}';
         }
 
         return $raw;

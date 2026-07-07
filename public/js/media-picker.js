@@ -75,37 +75,72 @@
     var msg = document.getElementById('uploadMsg');
     btn.disabled = true;
     btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Pujant...';
-    var formData = new FormData(this);
+
+    /* Construir FormData manualment per garantir que TOTS els fitxers s'envien */
+    var formData = new FormData();
+    var fileInput = this.querySelector('input[type="file"]');
+    if (fileInput && fileInput.files) {
+      for (var fi = 0; fi < fileInput.files.length; fi++) {
+        formData.append('files[' + fi + ']', fileInput.files[fi]);
+      }
+    }
+    /* Copiar la resta de camps del formulari */
+    var fields = this.querySelectorAll('input:not([type="file"]), select, textarea');
+    for (var fi2 = 0; fi2 < fields.length; fi2++) {
+      var f = fields[fi2];
+      if (f.name && f.value) {
+        formData.append(f.name, f.value);
+      }
+    }
+
     try {
       var res = await fetch(this.getAttribute('data-upload-url'), { method: 'POST', body: formData });
       var data = await res.json();
       if (data.error) {
         msg.innerHTML = '<span style="color:#EF5350;">' + data.error + '</span>';
       } else {
-        msg.innerHTML = '<span style="color:#66BB6A;">Imatge pujada correctament.</span>';
         var grid = document.getElementById('mediaGrid');
-        var col = document.createElement('div');
-        col.className = 'col-4 col-md-3';
-        col.innerHTML =
-          '<div class="media-picker-item card p-1 text-center selected" data-id="' + data.id + '" data-url="' + data.url + '">' +
-          '<div class="media-picker-item__thumb">' +
-          '<img src="' + data.url + '" alt="">' +
-          '<div class="media-picker-item__check"><i class="bi bi-check"></i></div>' +
-          '</div>' +
-          '<small class="text-truncate d-block mt-1 media-picker-item__filename">' + data.filename + '</small>' +
-          '</div>';
-        grid.prepend(col);
-        selected.add(String(data.id));
-        updateSelectBtn();
-        col.querySelector('.media-picker-item').addEventListener('click', function () {
-          var id = this.dataset.id;
-          if (selected.has(id)) { selected.delete(id); this.classList.remove('selected'); updateSelectBtn(); }
-          else { selected.add(id); this.classList.add('selected'); updateSelectBtn(); }
+        var uploaded = data.uploaded || [];
+        var errors = data.errors || [];
+        var count = uploaded.length;
+
+        uploaded.forEach(function (item) {
+          var col = document.createElement('div');
+          col.className = 'col-4 col-md-3';
+          col.innerHTML =
+            '<div class="media-picker-item card p-1 text-center selected" data-id="' + item.id + '" data-url="' + item.url + '">' +
+            '<div class="media-picker-item__thumb">' +
+            '<img src="' + item.url + '" alt="">' +
+            '<div class="media-picker-item__check"><i class="bi bi-check"></i></div>' +
+            '</div>' +
+            '<small class="text-truncate d-block mt-1 media-picker-item__filename">' + item.filename + '</small>' +
+            '</div>';
+          grid.prepend(col);
+          selected.add(String(item.id));
+          col.querySelector('.media-picker-item').addEventListener('click', function () {
+            var id = this.dataset.id;
+            if (selected.has(id)) { selected.delete(id); this.classList.remove('selected'); updateSelectBtn(); }
+            else { selected.add(id); this.classList.add('selected'); updateSelectBtn(); }
+          });
         });
+
+        var statusMsg = '';
+        if (count > 0) {
+          statusMsg = count + ' imatge' + (count > 1 ? 's' : '') + ' pujada' + (count > 1 ? 's' : '') + ' correctament.';
+        }
+        if (errors.length > 0) {
+          var errorNames = errors.map(function (e) { return e.filename; }).join(', ');
+          statusMsg += ' Errors: ' + errorNames;
+          msg.style.color = '#FFA726';
+        } else {
+          msg.style.color = '#66BB6A';
+        }
+        msg.innerHTML = '<span>' + statusMsg + '</span>';
+        updateSelectBtn();
         this.reset();
       }
     } catch (err) {
-      msg.innerHTML = '<span style="color:#EF5350;">Error en pujar la imatge.</span>';
+      msg.innerHTML = '<span style="color:#EF5350;">Error en pujar les imatges.</span>';
     }
     btn.disabled = false;
     btn.innerHTML = '<i class="bi bi-cloud-upload"></i> Pujar';

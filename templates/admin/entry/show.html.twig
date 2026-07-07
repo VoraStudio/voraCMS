@@ -12,6 +12,15 @@
 
 {% block topbar_actions %}
 <div class="topbar-actions-group">
+    {% if contentType.slug in ['noticia', 'event'] %}
+        <a href="{{ path('admin_entry_preview', {id: entry.id}) }}" class="cyber-btn cyber-btn--projects js-preview-modal" data-type="{{ contentType.slug }}">
+            <i class="bi bi-eye"></i> <span>Previsualitzar</span>
+        </a>
+    {% elseif contentType.slug in ['artistes_victoria_taylor'] %}
+        <a href="{{ path('admin_entry_preview', {id: entry.id}) }}" class="cyber-btn cyber-btn--projects js-preview-newtab">
+            <i class="bi bi-eye"></i> <span>Previsualitzar</span>
+        </a>
+    {% endif %}
     <a href="{{ path('admin_entry_edit', {id: entry.id}) }}" class="cyber-btn cyber-btn--projects">
         <i class="bi bi-pencil"></i> <span>Editar entrada</span>
     </a>
@@ -105,8 +114,9 @@
                 {% elseif def.fieldType == 'date' %}
                     <div class="s-field-value">{{ raw }}</div>
 
-                {% elseif def.fieldType == 'datetime' %}
-                    <div class="s-field-value">{{ raw }}</div>
+                {% elseif def.fieldType == 'date_range' %}
+                    {% set range = raw|json_decode %}
+                    <div class="s-field-value">Inici: {{ range.start ?? '—' }} · Fi: {{ range.end ?? '—' }}</div>
 
                 {% elseif def.fieldType == 'number' %}
                     <div class="s-field-value">{{ raw }}</div>

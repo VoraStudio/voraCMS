@@ -42,9 +42,24 @@
                 <textarea name="description" class="cyber-form-input" rows="2" placeholder="Escriu una descripció del tipus...">{{ contentType.description }}</textarea>
             </div>
 
-            <div class="cyber-form-check mb-4">
-                <input type="checkbox" name="active" class="cyber-form-checkbox" {% if contentType.active %}checked{% endif %} value="1" id="ct-active">
-                <label class="cyber-form-check-label small" for="ct-active">Tipus de contingut actiu</label>
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <div class="cyber-form-group mb-0">
+                        <label class="cyber-form-label">Projecte</label>
+                        <select name="project_id" class="cyber-form-input cyber-form-input--select">
+                            <option value="">Sense projecte (Global)</option>
+                            {% for p in projects %}
+                            <option value="{{ p.id }}" {% if contentType.project and contentType.project.id == p.id %}selected{% endif %}>{{ p.user.name ?? 'Sense usuari' }} — {{ p.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-6 d-flex align-items-end">
+                    <div class="cyber-form-check mb-0">
+                        <input type="checkbox" name="active" class="cyber-form-checkbox" {% if contentType.active %}checked{% endif %} value="1" id="ct-active">
+                        <label class="cyber-form-check-label small" for="ct-active">Tipus de contingut actiu</label>
+                    </div>
+                </div>
             </div>
 
             <hr class="form-divider my-4">

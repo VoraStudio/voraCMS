@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="ca"{% set theme = app.request.query.get('theme', 'dark') %} data-theme="{{ theme }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Preview: {{ data.titul|default(data.titol|default('Event')) }}</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600&family=Syne:wght@400;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --color-black: #000000;
+            --color-white: #FFFFFF;
+            --color-cream: #F5ECE5;
+            --color-wine: #722F37;      
+            --color-mauve: #debcb0;
+            
+            --font-primary: 'Syne', sans-serif;
+            --font-secondary: 'Plus Jakarta Sans', sans-serif;
+            
+            --space-s: 16px;
+            --space-m: 24px;
+            --space-l: 32px;
+            --space-xl: 48px;
+            --space-xxl: 64px;
+
+            /* Modo Claro (Default) */
+            --page-bg: #f5f5f7;
+            --modal-bg: #ffffff;
+            --modal-border: #e0e0e0;
+            --modal-text-primary: #111111;
+            --modal-text-secondary: #555555;
+            --modal-text-muted: #333333;
+            --modal-shadow: rgba(0, 0, 0, 0.15);
+            --modal-gallery-bg: #f0f0f0;
+        }
+
+        :root[data-theme="dark"] {
+                /* Modo Oscuro */
+                --page-bg: #000000;
+                --modal-bg: #121212;
+                --modal-border: rgba(255, 255, 255, 0.25);
+                --modal-text-primary: #ffffff;
+                --modal-text-secondary: var(--color-mauve);
+                --modal-text-muted: rgba(255, 255, 255, 0.8);
+                --modal-shadow: rgba(0, 0, 0, 0.6);
+                --modal-gallery-bg: rgba(255, 255, 255, 0.02);
+        }
+
+        /* Reset & General */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--page-bg);
+            color: var(--modal-text-primary);
+            font-family: var(--font-secondary);
+            overflow: hidden;
+            -webkit-font-smoothing: antialiased;
+            padding: 0;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        #event-main {
+            width: 100%;
+            max-width: 800px;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* --- ESTILO 06: CARD CON HEADER GRADIENT --- */
+        .m6 {
+            background: var(--modal-bg, #ffffff);
+            max-width: 800px;
+            width: 100%;
+            overflow: clip;
+            box-shadow: 0 4px 32px rgba(0,0,0,.18);
+            animation: scaleUp .5s ease both;
+            border-radius:30px;
+        }
+
+        @keyframes scaleUp {
+            from { transform: scale(0.85); opacity: 0; }
+            to   { transform: scale(1); opacity: 1; }
+        }
+
+        .m6-header {
+            background: linear-gradient(60deg, #083a86ff, #97d0ffff);
+            padding: 28px 24px 14px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .m6-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: rgba(255,255,255,.6);
+            flex-shrink: 0;
+        }
+
+        .m6-htag {
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: .1em;
+            text-transform: uppercase;
+            color: #fff;
+            flex: 1;
+        }
+
+        .m6-htime {
+            font-size: 12px;
+            color: rgba(255,255,255,.65);
+        }
+
+        .m6-content {
+            display: grid;
+            grid-template-columns: 1.2fr 1fr;
+        }
+
+        @media (max-width: 600px) {
+            .m6-content {
+                grid-template-columns: 1fr;
+            }
+            .m6-right {
+                border-left: none;
+                border-top: 1px solid var(--modal-border);
+            }
+        }
+
+        .m6-left { padding: 24px; }
+
+        .m6 h2 {
+            font-family: var(--font-secondary);
+            font-size: clamp(1.1rem, 2.5vw, 1.45rem);
+            font-weight: 700;
+            color: var(--modal-text-primary);
+            line-height: 1.3;
+            margin-bottom: 8px;
+        }
+
+        .m6 h3 {
+            font-size: 13px;
+            font-weight: 400;
+            color: var(--modal-text-secondary);
+            line-height: 1.5;
+            margin-bottom: 14px;
+        }
+
+        .m6-meta-row {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .m6-meta-row span {
+            font-size: 12px;
+            color: var(--modal-text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .m6-meta-row svg {
+            flex-shrink: 0;
+            color: var(--modal-text-secondary);
+        }
+
+        .m6-text {
+            font-size: 13px;
+            color: var(--modal-text-secondary);
+            line-height: 1.75;
+        }
+
+        .m6-right { border-left: 1px solid var(--modal-border); }
+
+        .m6-main-img {
+            height: 200px;
+            background-size: cover;
+            background-position: center;
+            background-color: var(--modal-gallery-bg);
+        }
+        
+        .m6-sub-gallery {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+        }
+        
+        .m6-sub-gallery--1 {
+            grid-template-columns: 1fr;
+        }
+        .m6-sub-gallery--1 div {
+            height: 160px;
+        }
+        .m6-sub-gallery--2 {
+            grid-template-columns: 1fr 1fr;
+        }
+        .m6-sub-gallery--2 div {
+            height: 120px;
+        }
+        .m6-sub-gallery--3 div:first-child {
+            grid-column: 1 / -1;
+            height: 140px;
+        }
+        .m6-sub-gallery--3 div:nth-child(n+2) {
+            height: 100px;
+        }
+        .m6-sub-gallery--4 div {
+            height: 100px;
+        }
+        
+        .m6-sub-gallery div {
+            border-left: 1px solid var(--modal-border);
+            border-top: 1px solid var(--modal-border);
+            background-size: cover;
+            background-position: center;
+            transition: filter 0.2s ease;
+            cursor: pointer;
+        }
+
+        .m6-sub-gallery div:last-child {
+            border-right: 1px solid var(--modal-border);
+        }
+
+        /* --- LIGHTBOX MODAL --- */
+        :root {
+            --lightbox-bg: rgba(255, 255, 255, 0.96);
+            --lightbox-color: #111111;
+            --lightbox-btn-bg: rgba(0, 0, 0, 0.05);
+            --lightbox-btn-hover-bg: rgba(0, 0, 0, 0.1);
+        }
+        :root[data-theme="dark"] {
+                --lightbox-bg: rgba(10, 10, 10, 0.97);
+                --lightbox-color: #ffffff;
+                --lightbox-btn-bg: rgba(255, 255, 255, 0.08);
+                --lightbox-btn-hover-bg: rgba(255, 255, 255, 0.15);
+        }
+
+        .vt-lightbox {
+            position: fixed;
+            inset: 0;
+            z-index: 99999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--lightbox-bg);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+        }
+
+        .vt-lightbox.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .vt-lightbox-content {
+            position: relative;
+            max-width: 85%;
+            max-height: 85%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .vt-lightbox-img {
+            max-width: 100%;
+            max-height: 80vh;
+            object-fit: contain;
+            border-radius: 12px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25);
+            transform: scale(0.95);
+            transition: transform 0.3s ease;
+        }
+
+        .vt-lightbox.active .vt-lightbox-img {
+            transform: scale(1);
+        }
+
+        .vt-lightbox-close,
+        .vt-lightbox-prev,
+        .vt-lightbox-next {
+            position: absolute;
+            background: var(--lightbox-btn-bg);
+            border: none;
+            color: var(--lightbox-color);
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 10;
+            transition: all 0.2s ease;
+        }
+
+        .vt-lightbox-close:hover,
+        .vt-lightbox-prev:hover,
+        .vt-lightbox-next:hover {
+            background: var(--lightbox-btn-hover-bg);
+            transform: scale(1.05);
+        }
+
+        .vt-lightbox-close {
+            top: 24px;
+            right: 24px;
+        }
+
+        .vt-lightbox-prev {
+            left: 24px;
+        }
+
+        .vt-lightbox-next {
+            right: 24px;
+        }
+    </style>
+</head>
+<body>
+    {% set imgUrl = null %}
+    {% if data.imatge is defined and data.imatge[0] is defined %}
+        {% set imgUrl = asset(data.imatge[0].url) %}
+    {% endif %}
+
+    {% set formattedDate = '' %}
+    {% if data.data is defined and data.data is not empty %}
+        {% set formattedDate = data.data|date('d/m/Y') %}
+    {% elseif data.date is defined and data.date is not empty %}
+        {% set formattedDate = data.date|date('d/m/Y') %}
+    {% elseif data.dates is defined and data.dates is not empty %}
+        {% set formattedDate = data.dates|date('d/m/Y') %}
+    {% elseif entry.publishedAt %}
+        {% set formattedDate = entry.publishedAt|date('d/m/Y') %}
+    {% endif %}
+
+    {% set locationText = '' %}
+    {% if data.location is defined and data.location is not empty %}
+        {% set locationText = data.location %}
+    {% elseif data.ubicacio is defined and data.ubicacio is not empty %}
+        {% set locationText = data.ubicacio %}
+    {% endif %}
+
+    <main id="event-main">
+        <div class="m6">
+            <div class="m6-header">
+                <div class="m6-dot"></div>
+                <span class="m6-htag">{{ data.categoria is defined and data.categoria is not empty ? data.categoria : 'Event' }}</span>
+                <span class="m6-htime">{{ formattedDate }}{% if locationText %} · {{ locationText }}{% endif %}</span>
+            </div>
+            <div class="m6-content">
+                <div class="m6-left">
+                    <h2>{{ data.titul|default(data.titol|default('Sense Títol')) }}</h2>
+                    {% if data.subtitol is defined and data.subtitol is not empty %}
+                        <h3>{{ data.subtitol }}</h3>
+                    {% endif %}
+
+                    {% if data.rang_de_dates is defined and data.rang_de_dates is not empty %}
+                        {% set range = data.rang_de_dates %}
+                        {% if range is not iterable %}
+                            {% set range = range|json_decode %}
+                        {% endif %}
+                        {% if range.start is defined and range.start is not empty %}
+                            <div class="m6-meta-row">
+                                <span>
+                                    <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                                    {{ range.start|date('d/m/Y') }} · {{ range.end|date('d/m/Y') }}
+                                </span>
+                            </div>
+                        {% endif %}
+                    {% endif %}
+
+                    <div class="m6-meta-row">
+                        {% if formattedDate and data.rang_de_dates is not defined %}
+                            <span>
+                                <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                                {{ formattedDate }}
+                            </span>
+                        {% endif %}
+                        {% if locationText %}
+                            <span>
+                                <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                                {{ locationText }}
+                            </span>
+                        {% endif %}
+                    </div>
+
+                    <div class="m6-text">
+                        {{ data.descripcio|default('Sense contingut.')|raw }}
+                    </div>
+                </div>
+                <div class="m6-right">
+                    <div class="m6-main-img" {% if imgUrl %}style="background-image: url('{{ imgUrl }}');"{% endif %}></div>
+                    {% set galeria = data.galeria|default(data.imatges|default([])) %}
+                    {% set imgCount = galeria|length %}
+                    {% if imgCount > 4 %}{% set imgCount = 4 %}{% endif %}
+                    <div class="m6-sub-gallery m6-sub-gallery--{{ imgCount }}">
+                        {% for i in 0..imgCount - 1 %}
+                            {% if galeria[i] is defined %}
+                                <div style="background-image: url('{{ asset(galeria[i].url) }}');"></div>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Lightbox Markup -->
+    <div class="vt-lightbox" id="gallery-lightbox" aria-hidden="true">
+        <button class="vt-lightbox-close" aria-label="Tancar">
+            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+        <button class="vt-lightbox-prev" aria-label="Anterior">
+            <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"></polyline></svg>
+        </button>
+        <div class="vt-lightbox-content">
+            <img class="vt-lightbox-img" src="" alt="Galeria">
+        </div>
+        <button class="vt-lightbox-next" aria-label="Següent">
+            <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"></polyline></svg>
+        </button>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var galleryContainer = document.querySelector('.m6-sub-gallery');
+            if (!galleryContainer) return;
+
+            var images = [];
+            var currentIndex = 0;
+            var lightbox = document.getElementById('gallery-lightbox');
+            var lightboxImg = lightbox.querySelector('.vt-lightbox-img');
+            var closeBtn = lightbox.querySelector('.vt-lightbox-close');
+            var prevBtn = lightbox.querySelector('.vt-lightbox-prev');
+            var nextBtn = lightbox.querySelector('.vt-lightbox-next');
+
+            // Collect images from the grid
+            var items = galleryContainer.querySelectorAll('div');
+            items.forEach(function (item, index) {
+                var bg = item.style.backgroundImage;
+                if (bg && bg !== 'none') {
+                    var url = bg.replace(/^url\(["']?/, '').replace(/["']?\)$/, '');
+                    images.push(url);
+
+                    // Add click event
+                    item.style.cursor = 'pointer';
+                    item.addEventListener('click', function () {
+                        currentIndex = images.indexOf(url);
+                        openLightbox();
+                    });
+                }
+            });
+
+            function openLightbox() {
+                updateImage();
+                lightbox.classList.add('active');
+                lightbox.setAttribute('aria-hidden', 'false');
+            }
+
+            function closeLightbox() {
+                lightbox.classList.remove('active');
+                lightbox.setAttribute('aria-hidden', 'true');
+            }
+
+            function updateImage() {
+                if (images.length === 0) return;
+                lightboxImg.src = images[currentIndex];
+            }
+
+            function showPrev() {
+                if (images.length === 0) return;
+                currentIndex = (currentIndex - 1 + images.length) % images.length;
+                updateImage();
+            }
+
+            function showNext() {
+                if (images.length === 0) return;
+                currentIndex = (currentIndex + 1) % images.length;
+                updateImage();
+            }
+
+            closeBtn.addEventListener('click', closeLightbox);
+            prevBtn.addEventListener('click', function(e) { e.stopPropagation(); showPrev(); });
+            nextBtn.addEventListener('click', function(e) { e.stopPropagation(); showNext(); });
+            lightbox.addEventListener('click', closeLightbox);
+            lightboxImg.addEventListener('click', function(e) { e.stopPropagation(); });
+
+            document.addEventListener('keydown', function (e) {
+                if (!lightbox.classList.contains('active')) return;
+                if (e.key === 'ArrowLeft') {
+                    showPrev();
+                } else if (e.key === 'ArrowRight') {
+                    showNext();
+                } else if (e.key === 'Escape') {
+                    closeLightbox();
+                }
+            });
+        });
+    </script>
+</body>
+</html>

@@ -36,15 +36,12 @@ class ContentTypeController extends AbstractController
     #[Route('/', name: 'admin_content_type_index')]
     public function index(
         ContentTypeRepository $repo,
-        ProjectRepository $projectRepo,
         Request $request,
     ): Response {
         $this->denyAccessUnlessGranted('ROLE_ADMIN');
-        $projectId = $request->getSession()->get('_project_id');
 
         return $this->render('admin/content-type/index.html.twig', [
-            'contentTypes' => $repo->findAllForAdmin($projectId),
-            'activeProjectId' => $projectId,
+            'contentTypes' => $repo->findAllForAdmin(),
         ]);
     }
 
@@ -59,11 +56,10 @@ class ContentTypeController extends AbstractController
         ProjectRepository $projectRepo,
     ): Response {
         $this->denyAccessUnlessGranted('ROLE_ADMIN');
-        $projectId = $request->getSession()->get('_project_id');
-        $project = $projectId ? $projectRepo->find($projectId) : null;
 
-        if ($project === null) {
-            throw $this->createAccessDeniedException('Cal seleccionar un projecte per crear un tipus de contingut.');
+        $projects = $projectRepo->findAllOrderedByUser();
+        if (empty($projects)) {
+            throw $this->createAccessDeniedException('Cal tenir almenys un projecte per crear un tipus de contingut.');
         }
 
         if ($request->isMethod('POST')) {
@@ -73,12 +69,16 @@ class ContentTypeController extends AbstractController
             $ct->setDescription($request->request->get('description'));
             $ct->setActive($request->request->get('active', true));
 
-            /* Assignar usuari actual */
-            $ct->setUser($this->getUser());
-
-            /* Assignar al projecte actiu */
+            /* Assignar al projecte seleccionat */
+            $projectId = $request->request->get('project_id');
+            $project = $projectId ? $projectRepo->find($projectId) : null;
             if ($project !== null) {
                 $ct->setProject($project);
+                /* L'usuari del Content Type és l'usuari del projecte */
+                $ct->setUser($project->getUser() ?? $this->getUser());
+            } else {
+                /* Sense projecte: l'usuari és l'admin que el crea */
+                $ct->setUser($this->getUser());
             }
 
             $fieldNames = $request->request->all('field_name') ?? [];
@@ -105,6 +105,7 @@ class ContentTypeController extends AbstractController
 
         return $this->render('admin/content-type/new.html.twig', [
             'fieldTypes' => FieldDefinition::getTypes(),
+            'projects' => $projects,
         ]);
     }
 
@@ -118,6 +119,7 @@ class ContentTypeController extends AbstractController
         Request $request,
         ContentType $contentType,
         EntityManagerInterface $em,
+        ProjectRepository $projectRepo,
     ): Response {
         $this->denyAccessUnlessGranted('ROLE_ADMIN');
         $this->verifyOwnership($contentType);
@@ -126,6 +128,14 @@ class ContentTypeController extends AbstractController
             $contentType->setName($request->request->get('name'));
             $contentType->setDescription($request->request->get('description'));
             $contentType->setActive($request->request->get('active', true));
+
+            /* Assignar al projecte seleccionat */
+            $projectId = $request->request->get('project_id');
+            $project = $projectId ? $projectRepo->find($projectId) : null;
+            $contentType->setProject($project);
+            if ($project !== null) {
+                $contentType->setUser($project->getUser() ?? $this->getUser());
+            }
 
             // Remove existing fields and recreate
             foreach ($contentType->getFields() as $field) {
@@ -155,6 +165,7 @@ class ContentTypeController extends AbstractController
         return $this->render('admin/content-type/edit.html.twig', [
             'contentType' => $contentType,
             'fieldTypes' => FieldDefinition::getTypes(),
+            'projects' => $projectRepo->findAllOrderedByUser(),
         ]);
     }
 

@@ -136,12 +136,6 @@ class MediaController extends AbstractController
     #[Route('/upload', name: 'admin_media_upload', methods: ['POST'])]
     public function upload(Request $request, MediaService $mediaService, ProjectRepository $projectRepo): JsonResponse
     {
-        /** @var UploadedFile|null $file */
-        $file = $request->files->get('file');
-        if (!$file) {
-            return $this->json(['error' => 'No s\'ha rebut cap fitxer.'], 400);
-        }
-
         $user = $this->getUser();
 
         /* Resoldre projecte si s'ha enviat */
@@ -151,17 +145,65 @@ class MediaController extends AbstractController
             $project = $projectRepo->find($projectId);
         }
 
-        try {
-            $media = $mediaService->upload($file, $user, $project);
-            return $this->json([
-                'id'         => $media->getId(),
-                'url'        => $media->getPath(),
-                'filename'   => $media->getOriginalFilename(),
-                'project_id' => $project?->getId(),
-            ]);
-        } catch (\InvalidArgumentException $e) {
-            return $this->json(['error' => $e->getMessage()], 400);
+        /* Suport múltiples fitxers (files[0], files[1]…) o un de sol (file) */
+        $files = [];
+
+        /* Cas A: array de fitxers (files[]) */
+        $fileArray = $request->files->get('files', []);
+        if (is_array($fileArray)) {
+            $files = array_values(array_filter($fileArray, fn($f) => $f instanceof UploadedFile));
         }
+
+        /* Cas B: fitxer individual (file) — retrocompatibilitat */
+        if (empty($files)) {
+            $single = $request->files->get('file');
+            if ($single instanceof UploadedFile) {
+                $files = [$single];
+            }
+        }
+
+        /* Cas C: escombrar TOTS els fitxers del request per si venen indexats (files[0], files[1]…) */
+        if (empty($files)) {
+            foreach ($request->files->all() as $value) {
+                if ($value instanceof UploadedFile) {
+                    $files[] = $value;
+                } elseif (is_array($value)) {
+                    foreach ($value as $v) {
+                        if ($v instanceof UploadedFile) {
+                            $files[] = $v;
+                        }
+                    }
+                }
+            }
+        }
+
+        if (empty($files)) {
+            return $this->json(['error' => 'No s\'ha rebut cap fitxer.'], 400);
+        }
+
+        $results = [];
+        $errors = [];
+
+        foreach ($files as $file) {
+            try {
+                $media = $mediaService->upload($file, $user, $project);
+                $results[] = [
+                    'id'         => $media->getId(),
+                    'url'        => $media->getPath(),
+                    'filename'   => $media->getOriginalFilename(),
+                    'project_id' => $project?->getId(),
+                ];
+            } catch (\InvalidArgumentException $e) {
+                $errors[] = ['filename' => $file->getClientOriginalName(), 'error' => $e->getMessage()];
+            }
+        }
+
+        $response = ['uploaded' => $results];
+        if (!empty($errors)) {
+            $response['errors'] = $errors;
+        }
+
+        return $this->json($response);
     }
 
     /* -----------------------------------------------------------

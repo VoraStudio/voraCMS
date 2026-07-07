@@ -22,6 +22,7 @@ use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Twig\Extension\AbstractExtension;
 use Twig\Extension\GlobalsInterface;
+use Twig\TwigFilter;
 use Twig\TwigFunction;
 
 class AdminExtension extends AbstractExtension implements GlobalsInterface
@@ -38,6 +39,13 @@ class AdminExtension extends AbstractExtension implements GlobalsInterface
         return [
             new TwigFunction('admin_content_types', [$this, 'getContentTypes']),
             new TwigFunction('admin_active_project', [$this, 'getActiveProject']),
+        ];
+    }
+
+    public function getFilters(): array
+    {
+        return [
+            new TwigFilter('json_decode', [$this, 'decodeJson']),
         ];
     }
 
@@ -82,6 +90,19 @@ class AdminExtension extends AbstractExtension implements GlobalsInterface
         }
 
         return $this->projectRepo->find($projectId);
+    }
+
+    /* -----------------------------------------------------------
+       decodeJson — Filtre Twig per deserialitzar JSON a array.
+       Pensat per camps que emmagatzemen dades en format JSON
+       (ex: date_range, location, etc).
+       Retorna null si el valor no és un JSON vàlid o és buit.
+       ----------------------------------------------------------- */
+    public function decodeJson(?string $value): ?array
+    {
+        if (!$value) return null;
+        $decoded = json_decode($value, true);
+        return is_array($decoded) ? $decoded : null;
     }
 
     /* -----------------------------------------------------------

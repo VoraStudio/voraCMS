@@ -16,9 +16,22 @@
 {% endblock %}
 
 {% block topbar_actions %}
-<a href="{{ path('admin_entry_by_type', {slug: contentType.slug}) }}" class="cyber-btn cyber-btn--projects">
-    <i class="bi bi-arrow-left"></i> <span>Tornar</span>
-</a>
+<div class="topbar-actions-group">
+    {% if contentType.slug in ['noticia', 'event', 'artistes_victoria_taylor'] %}
+        {% if contentType.slug in ['artistes_victoria_taylor'] %}
+            <a href="{{ path('admin_entry_preview', {id: entry.id}) }}" class="cyber-btn cyber-btn--projects js-preview-newtab">
+                <i class="bi bi-eye"></i> <span>Previsualitzar</span>
+            </a>
+        {% else %}
+            <a href="{{ path('admin_entry_preview', {id: entry.id}) }}" class="cyber-btn cyber-btn--projects js-preview-modal" data-type="{{ contentType.slug }}">
+                <i class="bi bi-eye"></i> <span>Previsualitzar</span>
+            </a>
+        {% endif %}
+    {% endif %}
+    <a href="{{ path('admin_entry_by_type', {slug: contentType.slug}) }}" class="cyber-btn cyber-btn--projects">
+        <i class="bi bi-arrow-left"></i> <span>Tornar</span>
+    </a>
+</div>
 {% endblock %}
 
 {% block content %}
@@ -60,8 +73,18 @@
                 {% elseif field.fieldType == 'date' %}
                 <input type="datetime-local" name="field_{{ field.id }}" class="form-control" value="{{ val }}" {% if field.required %}required{% endif %}>
 
-                {% elseif field.fieldType == 'datetime' %}
-                <input type="datetime-local" name="field_{{ field.id }}" class="form-control" value="{{ val }}">
+                {% elseif field.fieldType == 'date_range' %}
+                {% set range = val ? val|json_decode : null %}
+                <div class="row g-2">
+                    <div class="col-md-6">
+                        <label class="form-label small">Inici</label>
+                        <input type="datetime-local" name="field_{{ field.id }}_start" class="form-control" value="{{ range.start ?? '' }}" {% if field.required %}required{% endif %}>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label small">Fi</label>
+                        <input type="datetime-local" name="field_{{ field.id }}_end" class="form-control" value="{{ range.end ?? '' }}" {% if field.required %}required{% endif %}>
+                    </div>
+                </div>
 
                 {% elseif field.fieldType == 'boolean' %}
                 <div class="form-check">
@@ -95,6 +118,13 @@
                     fieldType: 'gallery',
                     value: val,
                     mediaPaths: mediaPaths
+                } %}
+
+                {% elseif field.fieldType == 'repeater' %}
+                {% include 'admin/components/_repeater_field.html.twig' with {
+                    fieldId: field.id,
+                    value: val,
+                    required: field.required
                 } %}
 
                 {% elseif field.fieldType == 'youtube' %}

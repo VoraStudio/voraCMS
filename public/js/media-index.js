@@ -20,36 +20,60 @@
         btn.disabled = true;
         btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Pujant...';
 
-        var formData = new FormData(this);
+        /* Construir FormData manualment per garantir que TOTS els fitxers s'envien */
+        var formData = new FormData();
+        var fileInput = this.querySelector('input[type="file"]');
+        if (fileInput && fileInput.files) {
+          for (var fi = 0; fi < fileInput.files.length; fi++) {
+            formData.append('files[' + fi + ']', fileInput.files[fi]);
+          }
+        }
+        /* Copiar la resta de camps del formulari */
+        var fields = this.querySelectorAll('input:not([type="file"]), select, textarea');
+        for (var fi2 = 0; fi2 < fields.length; fi2++) {
+          var f = fields[fi2];
+          if (f.name && f.value) {
+            formData.append(f.name, f.value);
+          }
+        }
+
         try {
           var res = await fetch(uploadUrl, { method: 'POST', body: formData });
           var data = await res.json();
           if (data.error) {
             alert(data.error);
-          } else {
+          } else if (data.uploaded && data.uploaded.length > 0) {
             location.reload();
           }
+          if (data.errors && data.errors.length > 0) {
+            var msgs = data.errors.map(function (e) { return e.filename + ': ' + e.error; }).join('\n');
+            alert('Alguns fitxers no s\'han pogut pujar:\n' + msgs);
+          }
         } catch (err) {
-          alert('Error en pujar la imatge.');
+          alert('Error en pujar les imatges.');
         }
         btn.disabled = false;
         btn.innerHTML = 'Pujar';
       });
     }
 
-    /* ─── File preview ─── */
+    /* ─── File preview (multi) ─── */
     var fileInput = document.querySelector('#uploadModal input[type="file"]');
     if (fileInput) {
       fileInput.addEventListener('change', function () {
         var preview = document.getElementById('uploadPreview');
         if (!preview) return;
-        if (this.files && this.files[0]) {
-          var reader = new FileReader();
-          reader.onload = function (e) {
-            preview.querySelector('img').src = e.target.result;
-            preview.classList.remove('d-none');
-          };
-          reader.readAsDataURL(this.files[0]);
+        var list = preview.querySelector('.upload-preview-list');
+        if (!list) return;
+        if (this.files && this.files.length > 0) {
+          list.innerHTML = '';
+          for (var i = 0; i < this.files.length; i++) {
+            var li = document.createElement('li');
+            li.className = 'py-1 small text-start';
+            li.textContent = (i + 1) + '. ' + this.files[i].name;
+            list.appendChild(li);
+          }
+          preview.classList.remove('d-none');
         } else {
           preview.classList.add('d-none');
         }

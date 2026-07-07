@@ -17,7 +17,7 @@
 
 {% include 'admin/components/_section_header.html.twig' with {
     title: 'Tipus de contingut',
-    description: 'Seccions de contingut del projecte actiu',
+    description: 'Totes les seccions de contingut de tots els projectes',
     icon: 'bi-layers-fill',
     stats: [
         {value: contentTypes|length, label: 'Total'},
@@ -25,18 +25,13 @@
     ]
 } %}
 
-<div class="d-flex align-items-center gap-2 mb-3">
-    <span class="badge bg-info bg-opacity-10 text-info px-3 py-2 rounded-pill">
-        <i class="bi bi-info-circle me-1"></i> Les plantilles globals (<span class="fw-bold">base</span>) són l'origen. Es clonen automàticament als projectes si tenen <strong>Auto clonar</strong> actiu.
-    </span>
-</div>
-
 <div class="cyber-card cyber-card--table cyber-card--flush" data-anim="cyber-card">
     <table class="cyber-table">
         <thead>
             <tr>
                 <th>Nom</th>
                 <th>Slug</th>
+                <th>Projecte</th>
                 <th>Camps</th>
                 <th>Entrades</th>
                 <th>Actiu</th>
@@ -46,15 +41,9 @@
         <tbody>
         {% for ct in contentTypes %}
             <tr class="cyber-row {{ ct.active ? 'row-active' : 'row-inactive' }}" data-anim="cyber-row">
-                <td class="cyber-cell text-capitalize fw-semibold">
-                    {{ ct.name }}
-                    {% if ct.base %}
-                        <span class="badge bg-warning bg-opacity-10 text-warning ms-2 rounded-pill">Plantilla global</span>
-                    {% elseif activeProjectId is defined and activeProjectId == ct.project.id %}
-                        <span class="badge bg-success bg-opacity-10 text-success ms-2 rounded-pill">Projecte</span>
-                    {% endif %}
-                </td>
+                <td class="cyber-cell text-capitalize fw-semibold">{{ ct.name }}</td>
                 <td class="cyber-cell"><code>{{ ct.slug }}</code></td>
+                <td class="cyber-cell">{% if ct.base %}<span class="badge bg-warning bg-opacity-10 text-warning">Global</span>{% else %}<span class="badge bg-info bg-opacity-10 text-info">Personalitzat</span>{% endif %}</td>
                 <td class="cyber-cell cyber-cell--numeric">{{ ct.fields|length }}</td>
                 <td class="cyber-cell cyber-cell--numeric">{{ ct.entries|length }}</td>
                 <td class="cyber-cell cyber-cell--status">
@@ -62,14 +51,11 @@
                 </td>
                 <td class="cyber-cell cyber-cell--actions">
                     <div class="cyber-actions">
-                        {% set viewRoute = ct.base ? 'admin_base_content_show' : 'admin_entry_by_type' %}
-                        {% set viewTitle = ct.base ? 'Veure plantilla' : 'Veure entrades' %}
-                        <a href="{{ path(viewRoute, ct.base ? {id: ct.id} : {slug: ct.slug}) }}"
-                           class="cyber-btn cyber-btn--icon" title="{{ viewTitle }}">
+                        <a href="{{ path('admin_entry_by_type', {slug: ct.slug}) }}"
+                           class="cyber-btn cyber-btn--icon" title="Veure entrades">
                             <i class="bi bi-eye"></i>
                         </a>
-                        {% set editRoute = ct.base ? 'admin_base_content_edit' : 'admin_content_type_edit' %}
-                        <a href="{{ path(editRoute, {id: ct.id}) }}"
+                        <a href="{{ path('admin_content_type_edit', {id: ct.id}) }}"
                            class="cyber-btn cyber-btn--icon cyber-btn--edit" title="Editar">
                             <i class="bi bi-pencil"></i>
                         </a>
@@ -80,15 +66,13 @@
                             route: path('admin_content_type_toggle_active', {id: ct.id}),
                             active: ct.active
                         } %}
-                        {% set deleteRoute = ct.base ? 'admin_base_content_delete' : 'admin_content_type_delete' %}
-                        {% set deleteConfirm = ct.base ? 'Segur que vols eliminar aquesta plantilla global?' : 'Segur que vols eliminar aquest tipus i totes les seves entrades?' %}
-                        <form method="post" action="{{ path(deleteRoute, {id: ct.id}) }}" class="cyber-form--inline"
+                        <form method="post" action="{{ path('admin_content_type_delete', {id: ct.id}) }}" class="cyber-form--inline"
                               id="del-ct-{{ ct.id }}">
                             <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ ct.id) }}">
                             <button type="button"
                                     class="cyber-btn cyber-btn--icon cyber-btn--delete"
                                     title="Eliminar"
-                                    data-confirm="{{ deleteConfirm }}"
+                                    data-confirm="Segur que vols eliminar aquest tipus i totes les seves entrades?"
                                     data-form="del-ct-{{ ct.id }}">
                                 <i class="bi bi-trash3"></i>
                             </button>
@@ -98,7 +82,7 @@
             </tr>
         {% else %}
             <tr>
-                <td colspan="6" class="cyber-empty">
+                <td colspan="7" class="cyber-empty">
                     <div class="cyber-empty-icon"><i class="bi bi-layers"></i></div>
                     <p class="cyber-empty-text">No hi ha tipus de contingut</p>
                     <a href="{{ path('admin_content_type_new') }}" class="cyber-btn-primary cyber-btn--action">

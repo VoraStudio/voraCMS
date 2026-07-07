@@ -7,9 +7,11 @@
     <a href="{{ path('admin_entry_new', {slug: contentType.slug}) }}" class="cyber-btn cyber-btn--projects">
         <i class="bi bi-plus-lg"></i> <span>Nova Entrada</span>
     </a>
+    {% if contentType.project %}
     <a href="{{ path('admin_project_show', {id: contentType.project.id}) }}" class="cyber-btn cyber-btn--projects" title="Tornar al projecte">
         <i class="bi bi-folder2-open"></i> <span>Tornar al projecte</span>
     </a>
+    {% endif %}
 </div>
 {% endblock %}
 
@@ -94,7 +96,8 @@
                 <td class="cyber-cell" data-label="Accions">
                     <div class="cyber-actions">
                         <a href="{{ path('admin_entry_preview', {id: entry.id}) }}"
-                           class="cyber-btn cyber-btn--projects"
+                           class="cyber-btn cyber-btn--projects {% if contentType.slug in ['noticia', 'event'] %}js-preview-modal{% elseif contentType.slug in ['artistes_victoria_taylor'] %}js-preview-newtab{% endif %}"
+                           data-type="{{ contentType.slug }}"
                            title="Veure">
                             <i class="bi bi-eye"></i> <span>Veure</span>
                         </a>
