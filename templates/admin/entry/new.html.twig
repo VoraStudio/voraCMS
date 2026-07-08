@@ -14,27 +14,102 @@
 {% endblock %}
 
 {% block content %}
-<div class="card">
-    <div class="card-body">
-        <form method="post" id="entryForm" enctype="multipart/form-data" novalidate>
-            <div class="row g-3 mb-3">
-                <div class="col-md-6">
-                    <label class="form-label">Estat</label>
-                    <select name="status" class="form-select form-select-sm">
-                        <option value="draft">No publicat</option>
-                        <option value="published">Publicat</option>
-                        <option value="archived">Arxivat</option>
-                    </select>
+<div class="cyber-form-card mx-auto">
+<div class="cyber-card cyber-card--flush" data-anim="cyber-card">
+    <form method="post" id="entryForm" enctype="multipart/form-data" novalidate class="cyber-form-body">
+            <div class="s-status mb-3" role="radiogroup" aria-label="Estat de l'entrada">
+                <div class="s-status__chips" id="statusSeg">
+                    <div class="s-chip s-chip--sel" data-value="draft" tabindex="0" role="radio" aria-checked="true">
+                        <span class="s-chip__dot" style="background:#6b7280"></span>
+                        <span class="s-chip__lbl">No publicat</span>
+                        <span class="s-chip__check">✓</span>
+                    </div>
+                    <div class="s-chip" data-value="published" tabindex="0" role="radio" aria-checked="false">
+                        <span class="s-chip__dot" style="background:#22c55e"></span>
+                        <span class="s-chip__lbl">Publicat</span>
+                        <span class="s-chip__check">✓</span>
+                    </div>
+                    <div class="s-chip" data-value="archived" tabindex="0" role="radio" aria-checked="false">
+                        <span class="s-chip__dot" style="background:#f59e0b"></span>
+                        <span class="s-chip__lbl">Arxivat</span>
+                        <span class="s-chip__check">✓</span>
+                    </div>
+                    <div class="s-chip" data-value="scheduled" tabindex="0" role="radio" aria-checked="false">
+                        <span class="s-chip__dot" style="background:#3b82f6"></span>
+                        <span class="s-chip__lbl">Programat</span>
+                        <span class="s-chip__check">✓</span>
+                    </div>
+                </div>
+                <input type="hidden" name="status" id="statusInput" value="draft">
+                <div class="s-status__schedule" id="schedulePicker" style="display:none">
+                    <div class="s-sched-row">
+                        <div class="s-sched-field">
+                            <label class="s-label s-label--sub">Inici</label>
+                            <input type="datetime-local" name="scheduled_start" class="s-date-inline">
+                        </div>
+                        <div class="s-sched-field">
+                            <label class="s-label s-label--sub">Fi</label>
+                            <input type="datetime-local" name="scheduled_end" class="s-date-inline">
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <hr class="entry-fields-divider">
-            <div class="entry-fields-grid">
+            <div class="s-fields">
+            {% set mediaFields = contentType.fields|filter(f => f.fieldType in ['image', 'gallery'])|sort((a, b) => a.sortOrder <=> b.sortOrder) %}
+            {% set logoField = contentType.fields|filter(f => f.fieldType == 'image' and f.name|lower matches '/logo/')|first %}
+            {% set mainImageField = contentType.fields|filter(f => f.fieldType == 'image' and f.id != logoField.id|default(0))|first %}
+            {% set galleryField = contentType.fields|filter(f => f.fieldType == 'gallery')|first %}
+            {% set bentoMedia = logoField and mainImageField and galleryField %}
+            {% set mediaPair = not bentoMedia and mediaFields|length == 2 ? { first: mediaFields[0], second: mediaFields[1] } : {} %}
+            {% set mediaRendered = false %}
             {% for field in contentType.fields %}
-            <div class="mb-3 field-{{ field.fieldType }}">
-                <label class="form-label">
+            {% if bentoMedia and field.id in [logoField.id, mainImageField.id, galleryField.id] %}
+                {% if not mediaRendered %}
+                    {% set mediaRendered = true %}
+                    <div class="s-field s-field--wide">
+                        <div class="s-media-bento">
+                            <div class="s-media-bento__row">
+                                <div class="s-media-bento__col">
+                                    <label class="s-label">{{ logoField.name }}{% if logoField.required %}<span class="s-label__req">*</span>{% endif %}</label>
+                                    {% include 'admin/components/_gallery_field.html.twig' with { fieldId: logoField.id, fieldType: 'image', value: '', mediaPaths: {} } %}
+                                </div>
+                                <div class="s-media-bento__col">
+                                    <label class="s-label">{{ mainImageField.name }}{% if mainImageField.required %}<span class="s-label__req">*</span>{% endif %}</label>
+                                    {% include 'admin/components/_gallery_field.html.twig' with { fieldId: mainImageField.id, fieldType: 'image', value: '', mediaPaths: {} } %}
+                                </div>
+                            </div>
+                            <div class="s-media-bento__row">
+                                <div class="s-media-bento__col s-media-bento__col--wide">
+                                    <label class="s-label">{{ galleryField.name }}{% if galleryField.required %}<span class="s-label__req">*</span>{% endif %}</label>
+                                    {% include 'admin/components/_gallery_field.html.twig' with { fieldId: galleryField.id, fieldType: 'gallery', value: '', mediaPaths: {} } %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+            {% elseif mediaPair is not empty and field.id in [mediaPair.first.id, mediaPair.second.id] %}
+                {% if not mediaRendered %}
+                    {% set mediaRendered = true %}
+                    <div class="s-field s-field--wide">
+                        <div class="s-media-pair">
+                            <div class="s-media-pair__col">
+                                <label class="s-label">{{ mediaPair.first.name }}{% if mediaPair.first.required %}<span class="s-label__req">*</span>{% endif %}</label>
+                                {% include 'admin/components/_gallery_field.html.twig' with { fieldId: mediaPair.first.id, fieldType: mediaPair.first.fieldType, value: '', mediaPaths: {} } %}
+                            </div>
+                            <div class="s-media-pair__col">
+                                <label class="s-label">{{ mediaPair.second.name }}{% if mediaPair.second.required %}<span class="s-label__req">*</span>{% endif %}</label>
+                                {% include 'admin/components/_gallery_field.html.twig' with { fieldId: mediaPair.second.id, fieldType: mediaPair.second.fieldType, value: '', mediaPaths: {} } %}
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+            {% else %}
+            {% set isWide = field.fieldType in ['richtext', 'textarea', 'repeater', 'youtube'] %}
+            <div class="s-field{% if isWide %} s-field--wide{% endif %} field-{{ field.fieldType }}">
+                <label class="s-label">
                     {{ field.name }}
-                    {% if field.required %}<span class="form-label__required">*</span>{% endif %}
+                    {% if field.required %}<span class="s-label__req">*</span>{% endif %}
                 </label>
 
                 {% if field.fieldType == 'richtext' %}
@@ -45,56 +120,37 @@
                 } %}
 
                 {% elseif field.fieldType == 'textarea' %}
-                <textarea name="field_{{ field.id }}" class="form-control" rows="4" {% if field.required %}required{% endif %}></textarea>
+                <textarea name="field_{{ field.id }}" class="s-inp s-inp--ta" rows="3" {% if field.required %}required{% endif %}></textarea>
 
                 {% elseif field.fieldType == 'date' %}
-                <input type="datetime-local" name="field_{{ field.id }}" class="form-control" {% if field.required %}required{% endif %}>
+                <input type="datetime-local" name="field_{{ field.id }}" class="s-inp" {% if field.required %}required{% endif %}>
 
                 {% elseif field.fieldType == 'date_range' %}
-                <div class="row g-2">
-                    <div class="col-md-6">
-                        <label class="form-label small">Inici</label>
-                        <input type="datetime-local" name="field_{{ field.id }}_start" class="form-control" {% if field.required %}required{% endif %}>
-                    </div>
-                    <div class="col-md-6">
-                        <label class="form-label small">Fi</label>
-                        <input type="datetime-local" name="field_{{ field.id }}_end" class="form-control" {% if field.required %}required{% endif %}>
-                    </div>
+                <div class="s-row-2">
+                    <label class="s-label s-label--sub">Inici</label>
+                    <input type="datetime-local" name="field_{{ field.id }}_start" class="s-inp" {% if field.required %}required{% endif %}>
+                    <label class="s-label s-label--sub">Fi</label>
+                    <input type="datetime-local" name="field_{{ field.id }}_end" class="s-inp" {% if field.required %}required{% endif %}>
                 </div>
 
                 {% elseif field.fieldType == 'boolean' %}
-                <div class="form-check">
-                    <input type="checkbox" name="field_{{ field.id }}" class="form-check-input" value="1">
-                    <label class="form-check-label small">Sí</label>
-                </div>
+                <label class="s-toggle">
+                    <input type="checkbox" name="field_{{ field.id }}" class="s-toggle__inp" value="1">
+                    <span class="s-toggle__track"><span class="s-toggle__thumb"></span></span>
+                    <span class="s-toggle__lbl">Sí</span>
+                </label>
 
                 {% elseif field.fieldType == 'number' %}
-                <input type="number" name="field_{{ field.id }}" class="form-control" step="any" {% if field.required %}required{% endif %}>
+                <input type="number" name="field_{{ field.id }}" class="s-inp" step="any" {% if field.required %}required{% endif %}>
 
                 {% elseif field.fieldType == 'email' %}
-                <input type="email" name="field_{{ field.id }}" class="form-control" {% if field.required %}required{% endif %}>
+                <input type="email" name="field_{{ field.id }}" class="s-inp" {% if field.required %}required{% endif %}>
 
                 {% elseif field.fieldType == 'url' %}
-                <input type="url" name="field_{{ field.id }}" class="form-control" {% if field.required %}required{% endif %}>
+                <input type="url" name="field_{{ field.id }}" class="s-inp" {% if field.required %}required{% endif %}>
 
                 {% elseif field.fieldType == 'color' %}
-                <input type="color" name="field_{{ field.id }}" class="form-control form-control-color">
-
-                {% elseif field.fieldType == 'image' %}
-                {% include 'admin/components/_gallery_field.html.twig' with {
-                    fieldId: field.id,
-                    fieldType: 'image',
-                    value: '',
-                    mediaPaths: {}
-                } %}
-
-                {% elseif field.fieldType == 'gallery' %}
-                {% include 'admin/components/_gallery_field.html.twig' with {
-                    fieldId: field.id,
-                    fieldType: 'gallery',
-                    value: '',
-                    mediaPaths: {}
-                } %}
+                <input type="color" name="field_{{ field.id }}" class="s-inp s-inp--clr">
 
                 {% elseif field.fieldType == 'repeater' %}
                 {% include 'admin/components/_repeater_field.html.twig' with {
@@ -103,39 +159,84 @@
                     required: field.required
                 } %}
 
+                {% elseif field.fieldType == 'select' %}
+                <select name="field_{{ field.id }}" class="s-inp" {% if field.required %}required{% endif %}>
+                    <option value="">Selecciona...</option>
+                    {% set options = field.helpText ? field.helpText|split('\n')|map(o => o|trim)|filter(o => o) : [] %}
+                    {% for opt in options %}
+                    <option value="{{ opt }}">{{ opt }}</option>
+                    {% endfor %}
+                </select>
+
+                {% elseif field.fieldType in ['image', 'gallery'] %}
+                {% include 'admin/components/_gallery_field.html.twig' with {
+                    fieldId: field.id,
+                    fieldType: field.fieldType,
+                    value: '',
+                    mediaPaths: {}
+                } %}
+
                 {% elseif field.fieldType == 'youtube' %}
-                <div class="input-group">
-                    <span class="input-group-text input-group-text--sm"><i class="bi bi-youtube"></i></span>
-                    <input type="url" name="field_{{ field.id }}" class="form-control youtube-input" placeholder="https://youtube.com/watch?v=..." {% if field.required %}required{% endif %}>
+                <div class="s-youtube">
+                    <span class="s-youtube__icon"><i class="bi bi-youtube"></i></span>
+                    <input type="url" name="field_{{ field.id }}" class="s-inp youtube-input" placeholder="https://youtube.com/watch?v=..." {% if field.required %}required{% endif %}>
                 </div>
                 <div class="youtube-preview mt-2 d-none">
-                    <div class="ratio ratio-16x9 rounded overflow-hidden youtube-preview__frame">
+                    <div class="ratio ratio-16x9 rounded overflow-hidden">
                         <iframe src="" allowfullscreen loading="lazy"></iframe>
                     </div>
                 </div>
 
                 {% else %}
-                <input type="text" name="field_{{ field.id }}" class="form-control" {% if field.required %}required{% endif %}>
+                <input type="text" name="field_{{ field.id }}" class="s-inp" {% if field.required %}required{% endif %}>
                 {% endif %}
 
                 {% if field.helpText %}
-                <small class="field-help-text">{{ field.helpText }}</small>
+                <small class="s-hint">{{ field.helpText }}</small>
                 {% endif %}
             </div>
+            {% endif %}
             {% endfor %}
             </div>
 
-            <hr class="entry-fields-divider--top">
-            <button type="submit" class="btn btn-primary w-100"><span>Crear entrada</span></button>
+            <div class="s-actions">
+                <a href="{{ path('admin_entry_by_type', {slug: contentType.slug}) }}" class="s-btn s-btn--sec">
+                    <i class="bi bi-x"></i> Cancel·lar
+                </a>
+                <button type="submit" class="s-btn s-btn--pri">
+                    <i class="bi bi-check2"></i> Crear entrada
+                </button>
+            </div>
         </form>
     </div>
 </div>
 {% endblock %}
 
 {% block javascripts %}
+{{ parent() }}
 <div id="entryFormConfig"
      data-media-picker-url="{{ path('admin_media_picker') }}?field=__FIELD_ID__&amp;project_id={{ contentType.project.id ?? '' }}"
-     style="display:none;"></div>
+     class="d-none"></div>
 <script src="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.js"></script>
 <script src="{{ asset('js/entry-form.js') }}"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    var seg = document.getElementById('statusSeg');
+    if (!seg) return;
+    seg.addEventListener('click', function (e) {
+        var opt = e.target.closest('.s-chip');
+        if (!opt) return;
+        seg.querySelectorAll('.s-chip').forEach(function (o) {
+            o.classList.remove('s-chip--sel');
+            o.setAttribute('aria-checked', 'false');
+        });
+        opt.classList.add('s-chip--sel');
+        opt.setAttribute('aria-checked', 'true');
+        document.getElementById('statusInput').value = opt.getAttribute('data-value');
+        var picker = document.getElementById('schedulePicker');
+        if (picker) picker.style.display = opt.getAttribute('data-value') === 'scheduled' ? '' : 'none';
+    });
+
+});
+</script>
 {% endblock %}

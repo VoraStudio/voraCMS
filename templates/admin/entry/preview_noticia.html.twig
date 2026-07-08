@@ -250,6 +250,11 @@
             transform: scale(1.015);
         }
 
+        .m9-gallery-placeholder {
+            border: 1px dashed var(--modal-border);
+            background-color: var(--modal-gallery-bg);
+        }
+
         .m9-gallery div:nth-child(1) {
             grid-column: span 2;
             grid-row: span 2;
@@ -460,7 +465,7 @@
                         {% if galeria[i] is defined %}
                             <div style="background-image: url('{{ asset(galeria[i].url) }}');"></div>
                         {% else %}
-                            <div style="border: 1px dashed var(--modal-border); background-color: var(--modal-gallery-bg);"></div>
+                            <div class="m9-gallery-placeholder"></div>
                         {% endif %}
                     {% endfor %}
                 </div>

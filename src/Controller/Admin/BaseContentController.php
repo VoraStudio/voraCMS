@@ -71,6 +71,7 @@ class BaseContentController extends AbstractController
             $fieldNames = $request->request->all('field_name') ?? [];
             $fieldTypes = $request->request->all('field_type') ?? [];
             $fieldRequired = $request->request->all('field_required') ?? [];
+            $fieldOptions = $request->request->all('field_options') ?? [];
 
             foreach ($fieldNames as $i => $name) {
                 if (empty($name)) continue;
@@ -80,6 +81,9 @@ class BaseContentController extends AbstractController
                 $fd->setFieldType($fieldTypes[$i] ?? 'text');
                 $fd->setRequired(isset($fieldRequired[$i]));
                 $fd->setSortOrder($i);
+                if (($fieldTypes[$i] ?? '') === FieldDefinition::TYPE_SELECT && !empty($fieldOptions[$i])) {
+                    $fd->setHelpText($fieldOptions[$i]);
+                }
                 $ct->addField($fd);
             }
 
@@ -133,6 +137,7 @@ class BaseContentController extends AbstractController
             $fieldNames = $request->request->all('field_name') ?? [];
             $fieldTypes = $request->request->all('field_type') ?? [];
             $fieldRequired = $request->request->all('field_required') ?? [];
+            $fieldOptions = $request->request->all('field_options') ?? [];
 
             foreach ($fieldNames as $i => $name) {
                 if (empty($name)) continue;
@@ -142,6 +147,9 @@ class BaseContentController extends AbstractController
                 $fd->setFieldType($fieldTypes[$i] ?? 'text');
                 $fd->setRequired(isset($fieldRequired[$i]));
                 $fd->setSortOrder($i);
+                if (($fieldTypes[$i] ?? '') === FieldDefinition::TYPE_SELECT && !empty($fieldOptions[$i])) {
+                    $fd->setHelpText($fieldOptions[$i]);
+                }
                 $contentType->addField($fd);
             }
 

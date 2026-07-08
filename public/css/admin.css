@@ -1789,14 +1789,9 @@ input[type="time"] {
   user-select: none;
 }
 
-.project-expand-header:hover {
-  box-shadow: 0 0 0 1px rgba(6, 182, 212, 0.2);
-}
-
 .project-expand-header.is-expanded {
   border-bottom-left-radius: 0;
   border-bottom-right-radius: 0;
-  box-shadow: 0 0 0 1px rgba(6, 182, 212, 0.15);
 }
 
 .project-expand-arrow {

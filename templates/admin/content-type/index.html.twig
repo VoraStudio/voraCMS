@@ -14,7 +14,7 @@
 {% endblock %}
 
 {% block content %}
-
+<div class="cyber-form-card">
 {% include 'admin/components/_section_header.html.twig' with {
     title: 'Tipus de contingut',
     description: 'Totes les seccions de contingut de tots els projectes',
@@ -93,6 +93,7 @@
         {% endfor %}
         </tbody>
     </table>
+</div>
 </div>
 
 {% endblock %}

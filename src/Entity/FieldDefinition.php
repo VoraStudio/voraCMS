@@ -27,6 +27,7 @@ class FieldDefinition
     public const TYPE_COLOR = 'color';
     public const TYPE_YOUTUBE = 'youtube';
     public const TYPE_REPEATER = 'repeater';
+    public const TYPE_SELECT = 'select';
 
     public static function getTypes(): array
     {
@@ -36,7 +37,7 @@ class FieldDefinition
             self::TYPE_DATE, self::TYPE_DATE_RANGE,
             self::TYPE_LOCATION, self::TYPE_BOOLEAN,
             self::TYPE_NUMBER, self::TYPE_URL, self::TYPE_EMAIL, self::TYPE_COLOR,
-            self::TYPE_YOUTUBE, self::TYPE_REPEATER,
+            self::TYPE_YOUTUBE, self::TYPE_REPEATER, self::TYPE_SELECT,
         ];
     }
 
@@ -107,4 +108,13 @@ class FieldDefinition
     public function setSortOrder(int $sortOrder): static { $this->sortOrder = $sortOrder; return $this; }
 
     public function getValues(): Collection { return $this->values; }
+
+    /** Obté les opcions d'un camp select */
+    public function getSelectOptions(): array
+    {
+        if ($this->fieldType !== self::TYPE_SELECT || !$this->helpText) {
+            return [];
+        }
+        return array_map('trim', explode("\n", $this->helpText));
+    }
 }

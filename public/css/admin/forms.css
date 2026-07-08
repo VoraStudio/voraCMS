@@ -1,0 +1,1282 @@
+/* ═══════════════════════════════════════════════════
+   VoraCMS · Forms — Soft Dark Design
+   ═══════════════════════════════════════════════════ */
+
+/* --------- Grid de camps (2 columnes) --------- */
+.entry-fields-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.entry-fields-grid .mb-3 {
+  margin-bottom: 0 !important;
+  grid-column: 1 / -1;
+}
+
+.entry-fields-grid .mb-3.field-image,
+.entry-fields-grid .mb-3.field-gallery,
+.entry-fields-grid .mb-3.field-youtube,
+.entry-fields-grid .mb-3.field-email,
+.entry-fields-grid .mb-3.field-url,
+.entry-fields-grid .mb-3.field-number,
+.entry-fields-grid .mb-3.field-color,
+.entry-fields-grid .mb-3.field-boolean,
+.entry-fields-grid .mb-3.field-date,
+.entry-fields-grid .mb-3.field-datetime,
+.entry-fields-grid .mb-3.field-location {
+  grid-column: span 1;
+}
+
+/* --------- Labels — Soft Dark --------- */
+.form-label {
+  display: block;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--s-text-label);
+  margin-bottom: 7px;
+}
+
+.form-label__required {
+  color: var(--s-danger);
+}
+
+/* --------- Inputs — Soft Dark --------- */
+.form-control,
+.form-select {
+  width: 100%;
+  background: var(--s-input-bg);
+  border: 1px solid var(--s-input-border);
+  border-radius: var(--s-input-radius);
+  padding: 11px 14px;
+  color: #fff;
+  font-size: 0.875rem;
+  transition:
+    border-color var(--s-transition),
+    background var(--s-transition);
+}
+
+.form-control:focus,
+.form-select:focus {
+  border-color: var(--s-input-focus-border);
+  background: var(--s-input-focus-bg);
+  box-shadow: none;
+  outline: none;
+  color: #fff;
+}
+
+.form-control::placeholder {
+  color: var(--s-input-placeholder);
+}
+
+.form-control:disabled,
+.form-control[readonly] {
+  background: rgba(255, 255, 255, 0.02);
+  color: rgba(255, 255, 255, 0.3);
+  cursor: not-allowed;
+}
+
+.form-control-sm,
+.form-select-sm {
+  padding: 6px 10px;
+  font-size: 0.8rem;
+}
+
+/* --------- Selects — Soft Dark --------- */
+.form-select option,
+.form-control option {
+  color: #fff;
+  background: #1a1a1e;
+}
+
+.form-select optgroup {
+  color: rgba(255, 255, 255, 0.5);
+  font-weight: 600;
+}
+
+.form-select option:disabled {
+  color: rgba(255, 255, 255, 0.2);
+}
+
+/* --------- Textarea — Soft Dark --------- */
+textarea.form-control {
+  min-height: 130px;
+  resize: vertical;
+  line-height: 1.75;
+}
+
+/* --------- Form text / help --------- */
+.form-text {
+  font-size: 0.75rem;
+  color: var(--s-text-secondary);
+  margin-top: 4px;
+}
+
+/* --------- Checkboxes — Soft Dark --------- */
+.form-check-input {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.form-check-input:checked {
+  background-color: var(--s-primary);
+  border-color: var(--s-primary);
+}
+
+.form-check-input:focus {
+  border-color: var(--s-primary);
+  box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.15);
+}
+
+.form-check-label {
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+/* --------- Date inputs --------- */
+input[type="date"],
+input[type="datetime-local"],
+input[type="time"] {
+  color-scheme: dark;
+}
+
+/* --------- Validation --------- */
+.form-control.is-invalid,
+.form-select.is-invalid,
+.form-control-color.is-invalid,
+.form-check-input.is-invalid {
+  border-color: var(--s-danger) !important;
+  border-width: 2px !important;
+  box-shadow: 0 0 0 3px rgba(239, 83, 80, 0.2) !important;
+}
+
+/* --------- Gallery (Notion style) --------- */
+.gallery-field__dropzone {
+  margin-bottom: 12px;
+}
+
+.gallery-field__file-input {
+  display: none;
+}
+
+.gallery-field__label {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  padding: 14px 12px;
+  border: 1px dashed var(--s-border);
+  border-radius: 10px;
+  cursor: pointer;
+  text-align: center;
+  transition:
+    border-color 0.2s ease,
+    background 0.2s ease;
+}
+
+.gallery-field__label:hover {
+  border-color: var(--s-text-muted);
+  background: var(--s-hover);
+}
+
+.gallery-field__icon {
+  font-size: 18px;
+  color: var(--s-text-muted);
+}
+
+.gallery-field__text {
+  font-size: 11px;
+  color: var(--s-text-secondary);
+  margin: 0;
+  line-height: 1.3;
+}
+
+.gallery-field__hint {
+  font-size: 9px;
+  color: var(--s-text-muted);
+  display: block;
+}
+
+.gallery-field__pick-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+  padding: 6px 12px;
+  border: none;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--s-text-secondary);
+  font-size: 12px;
+  cursor: pointer;
+  transition:
+    background 0.15s,
+    color 0.15s;
+}
+
+.gallery-field__pick-btn:hover {
+  background: var(--s-hover);
+  color: var(--s-text);
+}
+
+/* Media pair: image + gallery side by side */
+.s-media-pair {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 24px;
+}
+
+@media (min-width: 768px) {
+  .s-media-pair {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.s-media-pair__col {
+  min-width: 0;
+}
+
+/* Media bento: logo + main image on top, gallery full-width below */
+.s-media-bento {
+  display: grid;
+  gap: 24px;
+}
+
+.s-media-bento__row {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 24px;
+}
+
+@media (min-width: 768px) {
+  .s-media-bento__row {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.s-media-bento__col {
+  min-width: 0;
+}
+
+.s-media-bento__col--wide {
+  grid-column: 1 / -1;
+}
+
+/* Gallery thumbnails */
+.gallery-thumb {
+  position: relative;
+  width: 60px;
+  height: 60px;
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--s-surface);
+  border: 1px solid var(--s-border-light);
+  flex-shrink: 0;
+}
+
+.gallery-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.gallery-previews {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 8px;
+}
+
+.gallery-thumb:hover .remove-gallery-item {
+  opacity: 1 !important;
+}
+
+.remove-gallery-item {
+  position: absolute;
+  top: 3px;
+  right: 3px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(0, 0, 0, 0.55);
+  color: #fff;
+  font-size: 12px;
+  line-height: 1;
+  padding: 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.15s;
+  z-index: 2;
+}
+
+.remove-gallery-item:hover {
+  background: rgba(200, 60, 60, 0.85) !important;
+}
+
+.remove-gallery-item i {
+  font-size: 10px;
+}
+
+/* ===============================================================
+   BENTO FORM — chip status, compact grid, toggle, actions
+   =============================================================== */
+
+/* ─── Status chips ─── */
+.s-status {
+  background: var(--s-surface);
+  border: 1px solid var(--s-border);
+  border-radius: 12px;
+  padding: 12px 14px;
+}
+
+.s-status__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.s-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 6px 12px 6px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.15s;
+  outline: none;
+  font-size: 12px;
+  user-select: none;
+  background: transparent;
+  border: 1px solid transparent;
+}
+
+.s-chip:hover {
+  background: var(--s-hover);
+}
+
+.s-chip--sel {
+  background: var(--s-accent-light);
+  border-color: var(--s-border);
+}
+
+.s-chip__dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.s-chip__lbl {
+  color: var(--s-text-secondary);
+  font-weight: 500;
+  transition: color 0.15s;
+}
+
+.s-chip--sel .s-chip__lbl {
+  color: var(--s-text);
+}
+
+.s-chip__check {
+  font-size: 10px;
+  color: var(--s-accent);
+  opacity: 0;
+  transition: opacity 0.15s;
+  line-height: 1;
+}
+
+.s-chip--sel .s-chip__check {
+  opacity: 1;
+}
+
+.s-status__schedule {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--s-border-light);
+}
+
+.s-sched-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.s-sched-field {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.s-date-inline {
+  width: 100%;
+  background: var(--s-input-bg);
+  border: 1px solid var(--s-input-border);
+  border-radius: 7px;
+  padding: 6px 10px;
+  font-size: 12px;
+  color: var(--s-text);
+  transition: border-color 0.2s;
+  color-scheme: dark;
+}
+
+.s-date-inline:focus {
+  border-color: var(--s-accent);
+  outline: none;
+}
+
+[data-theme="light"] .s-date-inline {
+  color-scheme: light;
+}
+
+/* ─── Bento fields grid ─── */
+.s-fields {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.s-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.s-field--wide {
+  grid-column: 1 / -1;
+}
+
+/* ─── Labels ─── */
+.s-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--s-text-secondary);
+  letter-spacing: 0.01em;
+}
+
+.s-label__req {
+  color: var(--s-danger, #ef5350);
+  margin-left: 2px;
+}
+
+.s-label--sub {
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--s-text-muted);
+  margin-bottom: -2px;
+}
+
+/* ─── Compact inputs ─── */
+.s-inp {
+  width: 100%;
+  background: var(--s-input-bg);
+  border: 1px solid var(--s-input-border);
+  border-radius: 8px;
+  padding: 7px 10px;
+  font-size: 13px;
+  color: var(--s-text);
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s;
+  line-height: 1.4;
+}
+
+.s-inp:focus {
+  border-color: var(--s-accent);
+  outline: none;
+  box-shadow: 0 0 0 2px var(--s-accent-light);
+}
+
+.s-inp::placeholder {
+  color: var(--s-input-placeholder, var(--s-text-muted));
+}
+
+.s-inp--ta {
+  resize: vertical;
+  min-height: 56px;
+}
+
+.s-inp--clr {
+  height: 34px;
+  padding: 2px 6px;
+}
+
+/* Select arrow override */
+.s-inp select,
+select.s-inp {
+  appearance: auto;
+}
+select.s-inp option {
+  background: #1a1a1e;
+  color: #ffffff;
+}
+[data-theme="light"] select.s-inp option {
+  background: #ffffff;
+  color: #111111;
+}
+
+/* ─── Date range row ─── */
+.s-row-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+}
+
+/* ─── Toggle switch ─── */
+.s-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.s-toggle__inp {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.s-toggle__track {
+  position: relative;
+  width: 30px;
+  height: 18px;
+  border-radius: 99px;
+  background: var(--s-input-border);
+  transition: background 0.2s;
+  flex-shrink: 0;
+}
+
+.s-toggle__inp:checked + .s-toggle__track {
+  background: var(--s-accent);
+}
+
+.s-toggle__thumb {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #fff;
+  transition: transform 0.2s;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+
+.s-toggle__inp:checked + .s-toggle__track .s-toggle__thumb {
+  transform: translateX(12px);
+}
+
+.s-toggle__lbl {
+  font-size: 12px;
+  color: var(--s-text-secondary);
+}
+
+/* ─── YouTube ─── */
+.s-youtube {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  border: 1px solid var(--s-input-border);
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--s-input-bg);
+}
+
+.s-youtube__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  flex-shrink: 0;
+  color: #ff0033;
+  font-size: 15px;
+}
+
+.s-youtube .s-inp {
+  border: none;
+  border-radius: 0;
+  background: transparent;
+}
+
+.s-youtube .s-inp:focus {
+  box-shadow: none;
+}
+
+/* ─── Action buttons ─── */
+.s-actions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 10px;
+  padding-top: 16px;
+  border-top: 1px solid var(--s-border-light);
+  margin-top: 4px;
+}
+
+.s-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 18px;
+  border-radius: 9px;
+  font-size: 13px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: all 0.15s;
+  text-decoration: none;
+  line-height: 1;
+}
+
+.s-btn--pri {
+  background: var(--s-accent);
+  color: #fff;
+}
+
+.s-btn--pri:hover {
+  opacity: 0.9;
+  color: #fff;
+}
+
+.s-btn--sec {
+  background: transparent;
+  color: var(--s-text-secondary);
+  border: 1px solid var(--s-border);
+}
+
+.s-btn--sec:hover {
+  background: var(--s-hover);
+  color: var(--s-text);
+  text-decoration: none;
+}
+
+/* ─── Hint ─── */
+.s-hint {
+  font-size: 10px;
+  color: var(--s-text-muted);
+  margin-top: 2px;
+}
+
+/* ─── Light overrides ─── */
+[data-theme="light"] .s-chip--sel {
+  background: rgba(73, 69, 255, 0.08);
+  border-color: var(--s-border);
+}
+
+/* ─── Responsive ─── */
+@media (max-width: 640px) {
+  .s-fields {
+    grid-template-columns: 1fr;
+  }
+  .s-status__chips {
+    gap: 4px;
+  }
+  .s-chip {
+    padding: 5px 10px 5px 8px;
+    font-size: 11px;
+  }
+  .s-actions {
+    flex-direction: column-reverse;
+  }
+  .s-btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+/* --------- Form helpers --------- */
+.form-divider {
+  border-color: var(--s-border);
+  opacity: 0.5;
+}
+
+.field-help-text {
+  color: var(--s-text-secondary);
+}
+
+.quill-editor-min-height {
+  min-height: 200px;
+}
+
+/* --------- YouTube preview --------- */
+.youtube-preview__frame {
+  max-width: 320px;
+  background: var(--s-surface);
+}
+
+/* --------- Color picker --------- */
+.color-picker-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.color-picker-input {
+  width: 60px;
+  height: 40px;
+  padding: 4px;
+  cursor: pointer;
+}
+
+.color-picker-preview {
+  font-size: 0.8rem;
+  color: var(--s-text-secondary);
+}
+
+/* --------- Cyber form label hint --------- */
+.cyber-form-label__hint {
+  font-weight: 400;
+  text-transform: none;
+  color: var(--s-text-secondary);
+}
+
+.cyber-form-input--readonly {
+  opacity: 0.5;
+}
+
+.cyber-form-body {
+  padding: 32px;
+  padding-top: 24px;
+}
+
+/* --------- Entry show fields --------- */
+.s-field-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+  padding: 20px 28px;
+}
+
+.s-field-card-body {
+  padding: 20px 28px;
+}
+
+.s-field-value {
+  color: var(--s-text);
+}
+
+.s-field-value--large {
+  font-size: 1.1rem;
+}
+
+.s-field-value--textarea {
+  white-space: pre-wrap;
+  line-height: 1.6;
+}
+
+.s-field-value--richtext {
+  line-height: 1.7;
+}
+
+.s-field-value--youtube {
+  color: var(--s-text-secondary);
+  font-family: monospace;
+  font-size: 0.85rem;
+}
+
+.s-field-gallery {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 8px;
+}
+
+.s-field-gallery__img {
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+  border-radius: 8px;
+  display: block;
+}
+
+.s-field-empty {
+  color: var(--s-text-secondary);
+}
+
+.badge--archived {
+  background: var(--s-danger);
+  color: #fff;
+}
+
+/* --------- Form section divider --------- */
+.entry-fields-divider,
+.entry-fields-divider--top {
+  border-color: var(--s-border);
+  opacity: 0.5;
+}
+
+.entry-fields-divider--top {
+  margin-top: 24px;
+}
+
+/* --------- Entry fields group --------- */
+.s-field-group {
+  background: var(--s-surface-secondary);
+  border-radius: var(--s-radius-lg);
+  padding: 20px 24px;
+  margin-bottom: 14px;
+  border: 1px solid var(--s-border-light);
+  transition: border-color var(--s-transition);
+}
+
+.s-field-group:hover {
+  border-color: var(--s-border);
+}
+
+.s-field-group hr {
+  margin: 16px 0;
+  border-color: var(--s-border-light);
+  opacity: 0.5;
+}
+
+.cyber-form-header + .cyber-form-body {
+  padding-top: 20px;
+}
+
+/* --------- Quill Editor --------- */
+.quill-wrapper {
+  border-radius: var(--s-radius);
+  overflow: hidden;
+  border: 2px solid transparent;
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s;
+}
+
+.quill-wrapper.is-invalid {
+  border: 2px solid var(--s-danger) !important;
+  box-shadow: 0 0 0 3px rgba(239, 83, 80, 0.2) !important;
+}
+
+.ql-toolbar {
+  border: 1px solid var(--s-border-light) !important;
+  border-bottom: none !important;
+  border-radius: var(--s-radius) var(--s-radius) 0 0;
+  background: rgba(255, 255, 255, 0.04);
+  font-family: inherit !important;
+}
+
+.ql-toolbar .ql-stroke {
+  stroke: rgba(255, 255, 255, 0.7);
+}
+
+.ql-toolbar .ql-fill {
+  fill: rgba(255, 255, 255, 0.7);
+}
+
+.ql-toolbar button {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.ql-snow.ql-toolbar button:hover,
+.ql-snow .ql-toolbar button:hover,
+.ql-snow.ql-toolbar button:focus,
+.ql-snow .ql-toolbar button:focus,
+.ql-snow.ql-toolbar button.ql-active,
+.ql-snow .ql-toolbar button.ql-active,
+.ql-snow.ql-toolbar .ql-picker-label:hover,
+.ql-snow .ql-toolbar .ql-picker-label:hover,
+.ql-snow.ql-toolbar .ql-picker-label.ql-active,
+.ql-snow .ql-toolbar .ql-picker-label.ql-active,
+.ql-snow.ql-toolbar .ql-picker-item:hover,
+.ql-snow .ql-toolbar .ql-picker-item:hover,
+.ql-snow.ql-toolbar .ql-picker-item.ql-selected,
+.ql-snow .ql-toolbar .ql-picker-item.ql-selected {
+  color: #fff !important;
+}
+
+.ql-snow.ql-toolbar button:hover .ql-fill,
+.ql-snow .ql-toolbar button:hover .ql-fill,
+.ql-snow.ql-toolbar button:focus .ql-fill,
+.ql-snow .ql-toolbar button:focus .ql-fill,
+.ql-snow.ql-toolbar button.ql-active .ql-fill,
+.ql-snow .ql-toolbar button.ql-active .ql-fill,
+.ql-snow.ql-toolbar .ql-picker-label:hover .ql-fill,
+.ql-snow .ql-toolbar .ql-picker-label:hover .ql-fill,
+.ql-snow.ql-toolbar .ql-picker-label.ql-active .ql-fill,
+.ql-snow .ql-toolbar .ql-picker-label.ql-active .ql-fill,
+.ql-snow.ql-toolbar .ql-picker-item:hover .ql-fill,
+.ql-snow .ql-toolbar .ql-picker-item:hover .ql-fill,
+.ql-snow.ql-toolbar .ql-picker-item.ql-selected .ql-fill,
+.ql-snow .ql-toolbar .ql-picker-item.ql-selected .ql-fill {
+  fill: #fff !important;
+}
+
+.ql-snow.ql-toolbar button:hover .ql-stroke,
+.ql-snow .ql-toolbar button:hover .ql-stroke,
+.ql-snow.ql-toolbar button:focus .ql-stroke,
+.ql-snow .ql-toolbar button:focus .ql-stroke,
+.ql-snow.ql-toolbar button.ql-active .ql-stroke,
+.ql-snow .ql-toolbar button.ql-active .ql-stroke,
+.ql-snow.ql-toolbar .ql-picker-label:hover .ql-stroke,
+.ql-snow .ql-toolbar .ql-picker-label:hover .ql-stroke,
+.ql-snow.ql-toolbar .ql-picker-label.ql-active .ql-stroke,
+.ql-snow .ql-toolbar .ql-picker-label.ql-active .ql-stroke,
+.ql-snow.ql-toolbar .ql-picker-item:hover .ql-stroke,
+.ql-snow .ql-toolbar .ql-picker-item:hover .ql-stroke,
+.ql-snow.ql-toolbar .ql-picker-item.ql-selected .ql-stroke,
+.ql-snow .ql-toolbar .ql-picker-item.ql-selected .ql-stroke {
+  stroke: #fff !important;
+}
+
+.ql-container {
+  border: 1px solid var(--s-border-light) !important;
+  border-top: none !important;
+  border-radius: 0 0 var(--s-radius) var(--s-radius);
+  font-family: inherit !important;
+  font-size: 0.85rem !important;
+  background: var(--s-surface-secondary);
+}
+
+.ql-editor {
+  min-height: 200px;
+  color: var(--s-text);
+}
+
+.ql-editor.ql-blank::before {
+  color: rgba(255, 255, 255, 0.2) !important;
+  font-style: normal !important;
+}
+
+/* --------- Cyber Form card --------- */
+.cyber-form-card {
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 0 16px;
+}
+
+.cyber-card--flush {
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.cyber-card {
+  background: #141418;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.cyber-form-group {
+  margin-bottom: 20px;
+}
+
+.cyber-form-label {
+  display: block;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--s-text-label);
+  margin-bottom: 7px;
+}
+
+.cyber-form-input {
+  width: 100%;
+  background: var(--s-input-bg);
+  border: 1px solid var(--s-input-border);
+  border-radius: var(--s-input-radius);
+  padding: 11px 14px;
+  color: #fff;
+  font-size: 0.875rem;
+  transition:
+    border-color var(--s-transition),
+    background var(--s-transition);
+}
+
+.cyber-form-input:focus {
+  border-color: var(--s-input-focus-border);
+  background: var(--s-input-focus-bg);
+  outline: none;
+  color: #fff;
+}
+
+.cyber-form-input:user-invalid {
+  border-color: var(--s-danger) !important;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.2) !important;
+}
+
+.cyber-form-input::placeholder {
+  color: var(--s-input-placeholder);
+}
+
+.cyber-form-input--select {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='rgba(255,255,255,0.35)' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  padding-right: 36px;
+  cursor: pointer;
+}
+
+.cyber-form-input--select option {
+  background: #1a1a1e;
+  color: #fff;
+  padding: 8px;
+}
+
+/* --------- Cyber Check --------- */
+.cyber-form-check {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 24px;
+}
+
+.cyber-form-checkbox {
+  width: 20px;
+  height: 20px;
+  border-radius: 6px;
+  accent-color: var(--s-primary);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.cyber-form-checkbox:focus {
+  outline: 2px solid rgba(249, 115, 22, 0.3);
+  outline-offset: 2px;
+}
+
+.cyber-form-check-label {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.8);
+  cursor: pointer;
+  font-weight: 500;
+}
+
+/* --------- Cyber Form Submit --------- */
+.cyber-form-submit {
+  padding: 9px 22px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  color: #fff;
+  background: #f97316;
+  transition: background 0.15s;
+  text-decoration: none;
+}
+
+.cyber-form-submit:hover {
+  background: #ea580c;
+  color: #fff;
+}
+
+.cyber-form-submit:active {
+  background: #d9660f;
+}
+
+.cyber-form-submit--secondary {
+  padding: 9px 18px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: rgba(255, 255, 255, 0.75);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.cyber-form-submit--secondary:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.cyber-form-submit--ghost {
+  padding: 9px 4px;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.3);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: color 0.15s;
+  margin-left: auto;
+}
+
+.cyber-form-submit--ghost:hover {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.cyber-form-submit--danger {
+  background: linear-gradient(135deg, #ef4444, #b91c1c);
+}
+
+/* --------- Project selector --------- */
+.project-selector {
+  margin: 0;
+}
+
+.project-selector__header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.project-selector__header i {
+  font-size: 1.5rem;
+  color: var(--s-text-muted);
+}
+
+.project-selector__title {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--s-text);
+}
+
+.project-selector__desc {
+  font-size: 0.7rem;
+  color: var(--s-text-secondary);
+  margin-top: 2px;
+}
+
+.project-selector__select {
+  width: 100%;
+  min-height: 180px;
+  padding: 8px;
+  background: var(--s-input-bg);
+  border: 1px solid var(--s-input-border);
+  border-radius: var(--s-input-radius);
+  color: var(--s-text);
+  font-size: 0.8rem;
+  outline: none;
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+
+.project-selector__select:focus {
+  border-color: var(--s-input-focus-border);
+  box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.08);
+}
+
+.project-selector__select optgroup {
+  font-weight: 600;
+  font-size: 0.72rem;
+  color: var(--s-text-secondary);
+  padding: 4px 0;
+}
+
+.project-selector__select option {
+  padding: 8px 12px;
+  font-size: 0.78rem;
+  font-weight: 400;
+  color: var(--s-text);
+  background: transparent;
+  border-radius: 6px;
+}
+
+.project-selector__select option:checked {
+  background: rgba(249, 115, 22, 0.15);
+  color: #f97316;
+  font-weight: 500;
+}
+
+.project-selector__select option:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.project-selector__opt--exists {
+  color: var(--s-text-muted) !important;
+  font-style: italic;
+}
+
+/* --------- Inline form --------- */
+.cyber-form--inline {
+  display: inline;
+}
+
+/* --------- Field help text spacing --------- */
+.field-help-text--action {
+  margin: 0 0 16px;
+}
+
+/* --------- Repeater Field --------- */
+.repeater-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.repeater-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.repeater-row {
+  display: flex;
+  gap: 6px;
+  align-items: flex-start;
+  background: var(--s-surface-secondary);
+  border: 1px solid var(--s-border-light);
+  border-radius: 6px;
+  padding: 8px;
+  transition: border-color 0.2s ease;
+}
+
+.repeater-row:hover {
+  border-color: var(--s-border);
+}
+
+.repeater-row__fields {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.repeater-row__remove {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.4);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-top: 2px;
+  transition:
+    background 0.2s ease,
+    color 0.2s ease;
+}
+
+.repeater-row__remove:hover {
+  background: rgba(239, 83, 80, 0.2);
+  color: var(--s-danger);
+}
+
+.repeater-add {
+  align-self: flex-start;
+}
+
+/* --------- Utility classes --------- */
+.cyber-form-label--sm {
+  font-size: 0.75rem;
+}
+
+.field-help-text--indent {
+  margin-top: 4px;
+  margin-left: 28px;
+}
+
+.field-help-text--padded {
+  padding: 16px 0;
+}
+
+.cyber-form-input--readonly-lg {
+  min-height: 50px;
+}
+
+

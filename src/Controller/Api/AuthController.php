@@ -43,6 +43,7 @@ class AuthController extends AbstractController
                 'company' => $user->getCompany(),
                 'email' => $user->getEmail(),
                 'name' => $user->getName(),
+                'allowedDomains' => $user->getAllowedDomains() ?? [],
             ],
         ]);
     }

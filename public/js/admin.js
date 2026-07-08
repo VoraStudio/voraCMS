@@ -257,6 +257,30 @@
       }
     });
 
+    /* ─── Field type toggle (content-type / base-content fields) ─── */
+    function toggleFieldWrap(select) {
+      var row = select.closest('.field-row');
+      if (row) {
+        var wrap = row.querySelector('.field-options-wrap');
+        if (wrap) {
+          var isSelect = select.value === 'select';
+          wrap.style.display = isSelect ? 'block' : 'none';
+        }
+      }
+    }
+
+    /* Initial toggle for existing fields */
+    document.querySelectorAll('[data-field-type="toggle"]').forEach(function (sel) {
+      toggleFieldWrap(sel);
+    });
+
+    /* Delegated change listener */
+    document.addEventListener('change', function (e) {
+      if (e.target.matches('[data-field-type="toggle"]')) {
+        toggleFieldWrap(e.target);
+      }
+    });
+
     /* WOW init */
     if (typeof WOW !== 'undefined') {
       new WOW().init();

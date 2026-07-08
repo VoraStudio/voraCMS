@@ -52,6 +52,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(length: 32, unique: true)]
     private ?string $apiToken = null;
 
+    #[ORM\Column(type: 'json', nullable: true)]
+    private ?array $allowedDomains = [];
+
     #[ORM\Column]
     private ?\DateTimeImmutable $createdAt = null;
 
@@ -93,6 +96,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function getApiToken(): ?string { return $this->apiToken; }
     public function setApiToken(string $apiToken): static { $this->apiToken = $apiToken; return $this; }
+
+    public function getAllowedDomains(): ?array { return $this->allowedDomains; }
+    public function setAllowedDomains(?array $allowedDomains): static { $this->allowedDomains = $allowedDomains; return $this; }
 
     public function getCreatedAt(): ?\DateTimeImmutable { return $this->createdAt; }
 

@@ -1,0 +1,379 @@
+/* --------- Tables --------- */
+.table {
+  margin-bottom: 0;
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.table thead th {
+  background: rgba(255, 255, 255, 0.04);
+  color: rgba(255, 255, 255, 0.45);
+  font-weight: 600;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 12px 14px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.table tbody td {
+  padding: 12px 14px;
+  vertical-align: middle;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.table-hover tbody tr {
+  transition: background var(--s-transition);
+}
+
+.table-hover tbody tr:hover {
+  background: rgba(255, 255, 255, 0.03);
+}
+/* --- Cyber cell components (entry/user index tables) --- */
+.cyber-cell__content {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.cyber-cell__thumb {
+  width: 32px;
+  height: 32px;
+  object-fit: cover;
+  border-radius: 8px;
+  flex-shrink: 0;
+}
+
+.cyber-cell__icon-placeholder {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: rgba(148, 163, 184, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: var(--s-text-secondary);
+  font-size: 0.65rem;
+}
+
+.cyber-cell__title {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--s-text);
+  line-height: 1.3;
+}
+
+.cyber-cell__subtitle {
+  font-size: 0.62rem;
+  color: var(--s-text-secondary);
+  margin-top: 1px;
+}
+
+.cyber-cell__placeholder {
+  color: var(--s-text-secondary);
+  font-style: italic;
+}
+
+.cyber-cell--date {
+  font-size: 0.78rem;
+  color: var(--s-text-secondary);
+  white-space: nowrap;
+}
+
+.cyber-cell--locale {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--s-text);
+  letter-spacing: 0.02em;
+}
+
+/* --- Excerpt column in tables --- */
+.cyber-cell__excerpt {
+  font-size: 0.72rem;
+  color: var(--s-text-secondary);
+  line-height: 1.4;
+  max-width: 200px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.cyber-section-header--section {
+  padding: 12px 20px;
+  margin-bottom: 0;
+  border-radius: 12px 12px 0 0;
+  border-bottom: none;
+}
+
+.cyber-section-header--section .cyber-section-icon {
+  width: 36px;
+  height: 36px;
+  font-size: 1rem;
+  border-radius: 10px;
+}
+
+.cyber-section-header--section .cyber-section-title {
+  font-size: clamp(0.85rem, 1.5vw, 1rem);
+}
+
+.cyber-section-header--section .cyber-section-desc {
+  font-size: 0.7rem;
+}
+
+.cyber-card--mb + .cyber-section-header--section {
+  margin-top: 16px;
+}
+/* --- Section card header (project show) --- */
+.cyber-card--section {
+  overflow: hidden;
+}
+
+.cyber-card-section__hd {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px 20px;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.12);
+}
+
+.cyber-card-section__hd-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.cyber-card-section__hd-icon {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.15), rgba(245, 158, 11, 0.05));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  color: rgb(245, 158, 11);
+  flex-shrink: 0;
+}
+
+.cyber-card-section__hd-title {
+  font-weight: 600;
+  font-size: clamp(0.85rem, 1.5vw, 1rem);
+  color: rgba(255, 255, 255, 0.92);
+  line-height: 1.3;
+}
+
+.cyber-card-section__hd-desc {
+  font-size: 0.72rem;
+  color: rgba(148, 163, 184, 0.7);
+  margin-top: 2px;
+}
+
+.cyber-card-section__hd-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.cyber-card--section .cyber-table {
+  border-top: none;
+}
+
+.cyber-card--section .cyber-empty {
+  padding: 40px 20px;
+}
+
+/* --- Project table cells --- */
+.cyber-cell__project-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.table-project-name {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--s-text);
+}
+
+.table-project-slug {
+  font-size: 0.62rem;
+  color: var(--s-text-secondary);
+  margin-top: 1px;
+}
+
+/* --- Cyber Table --- */
+.cyber-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0 6px;
+}
+
+.cyber-table thead th {
+  padding: 10px 18px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: rgba(148, 163, 184, 0.85);
+  text-align: left;
+  border: none;
+  background: transparent;
+}
+
+.cyber-table thead th:last-child {
+  text-align: right;
+}
+
+.cyber-table thead th:nth-child(5):not(:last-child),
+.cyber-table thead th:nth-child(6):not(:last-child),
+.cyber-table thead th:nth-child(7):not(:last-child) {
+  text-align: center;
+}
+
+.cyber-row {
+  background: rgba(15, 23, 42, 0.5);
+  backdrop-filter: blur(8px);
+  border-radius: 12px;
+  transition:
+    background 0.25s ease,
+    box-shadow 0.25s ease,
+    transform 0.2s ease;
+  cursor: default;
+  position: relative;
+}
+
+/* Left glow accent on rows */
+.cyber-row .cyber-cell:first-child::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  border-radius: 0 3px 3px 0;
+  background: linear-gradient(180deg, rgba(249, 115, 22, 0.9), rgba(250, 204, 21, 0.85));
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.cyber-row:hover .cyber-cell:first-child::before {
+  opacity: 1;
+}
+
+.cyber-row:hover {
+  background: rgba(249, 115, 22, 0.08);
+  box-shadow:
+    0 4px 24px rgba(0, 0, 0, 0.3),
+    0 0 0 1px rgba(245, 158, 11, 0.08);
+  transform: translateX(4px);
+}
+
+.cyber-row.row-inactive .cyber-cell:not(.cyber-cell--status) {
+  opacity: 0.2;
+}
+
+.cyber-row.row-inactive:hover .cyber-cell:not(.cyber-cell--status) {
+  opacity: 0.4;
+}
+
+.cyber-cell {
+  padding: 14px 18px;
+  border: none;
+  vertical-align: middle;
+  font-size: 0.82rem;
+  color: rgba(255, 255, 255, 0.82);
+}
+
+.cyber-cell:first-child {
+  border-radius: 12px 0 0 12px;
+  position: relative;
+}
+
+.cyber-cell:last-child {
+  border-radius: 0 12px 12px 0;
+  text-align: right;
+}
+
+.cyber-cell:nth-child(5):not(:last-child),
+.cyber-cell:nth-child(6):not(:last-child),
+.cyber-cell:nth-child(7):not(:last-child) {
+  text-align: center;
+}
+
+/* --- Projects table: fixed columns so each client card aligns --- */
+.cyber-table--projects {
+  table-layout: fixed;
+}
+
+.cyber-table--projects .cyber-cell {
+  overflow: hidden;
+}
+
+.cyber-table--projects .cyber-cell > div {
+  min-width: 0;
+}
+
+/* --- Projects table column widths --- */
+.cyber-table--projects th:nth-child(1) {
+  width: 35%;
+}
+.cyber-table--projects th:nth-child(2) {
+  width: 12%;
+}
+.cyber-table--projects th:nth-child(3) {
+  width: 12%;
+}
+.cyber-table--projects th:nth-child(4) {
+  width: 15%;
+}
+.cyber-table--projects th:nth-child(5) {
+  width: 26%;
+}
+
+/* --- Numeric cell (counts, stats) --- */
+.cyber-cell--numeric {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--s-text);
+}
+/* --- User index cells --- */
+.cyber-cell__user-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.cyber-cell--email {
+  font-size: 0.8rem;
+  color: var(--s-text);
+}
+
+.cyber-cell--company {
+  font-size: 0.78rem;
+  color: var(--s-text-secondary);
+}
+
+.cyber-cell--project-count {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--s-text);
+  letter-spacing: -0.01em;
+}
+/* --- Icon sizes in action buttons --- */
+.cyber-btn--icon i {
+  font-size: 0.85rem;
+}
+
+.cyber-btn--icon.cyber-btn--edit i,
+.cyber-btn--icon.cyber-btn--delete i {
+  font-size: 0.8rem;
+}
+
+.cyber-btn--icon.toggle-btn i {
+  font-size: 1.05rem;
+}
