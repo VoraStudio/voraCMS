@@ -31,7 +31,9 @@ security:
     api:
       pattern: ^/api
       stateless: true
-      jwt: ~
+      custom_authenticators:
+        - App\Security\ApiTokenAuthenticator
+      entry_point: App\Security\ApiTokenAuthenticator
 
     admin:
       pattern: ^/admin
@@ -46,8 +48,9 @@ security:
         target: admin_login
 
   access_control:
-    # API: login is public, public endpoints are public, everything else requires authentication
+    # API: login is public, OPTIONS preflight is public (CORS), everything else requires auth
     - { path: ^/api/auth, roles: PUBLIC_ACCESS }
+    - { path: ^/api, methods: OPTIONS, roles: PUBLIC_ACCESS }
     - { path: ^/api, roles: IS_AUTHENTICATED_FULLY }
     # Admin: login is public, dashboard requires minimum ROLE_USUARIO
     - { path: ^/admin/login, roles: PUBLIC_ACCESS }

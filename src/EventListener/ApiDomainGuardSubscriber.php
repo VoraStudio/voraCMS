@@ -63,12 +63,7 @@ readonly class ApiDomainGuardSubscriber
         /* ── Obtenir Origin ── */
         $origin = $request->headers->get('Origin');
         if ($origin === null) {
-            /* Sense Origin: blocatge segur (frontend hauria d'enviar-lo) */
-            $event->setResponse(new JsonResponse(
-                ['error' => 'Origin header required'],
-                403
-            ));
-            return;
+            return; /* Sense Origin: permetre (desenvolupament local, curl, etc.) */
         }
 
         /* ── Extreure domini de l'Origin ── */
