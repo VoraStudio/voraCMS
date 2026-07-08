@@ -1,3 +1,6 @@
+# Passar header Authorization a PHP (necessari per PHP-FPM)
+SetEnvIf Authorization "(.*)" HTTP_AUTHORIZATION=$1
+
 <IfModule mod_rewrite.c>
     Options -MultiViews
     RewriteEngine On
