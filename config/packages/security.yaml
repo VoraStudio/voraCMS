@@ -31,9 +31,7 @@ security:
     api:
       pattern: ^/api
       stateless: true
-      custom_authenticators:
-        - App\Security\ApiTokenAuthenticator
-      entry_point: App\Security\ApiTokenAuthenticator
+      jwt: ~
 
     admin:
       pattern: ^/admin
@@ -50,8 +48,6 @@ security:
   access_control:
     # API: login is public, public endpoints are public, everything else requires authentication
     - { path: ^/api/auth, roles: PUBLIC_ACCESS }
-    # ENDPOINTS PUBLICS — Esborra aquesta linia per desactivar l'API publica
-    - { path: ^/api/public, roles: PUBLIC_ACCESS }
     - { path: ^/api, roles: IS_AUTHENTICATED_FULLY }
     # Admin: login is public, dashboard requires minimum ROLE_USUARIO
     - { path: ^/admin/login, roles: PUBLIC_ACCESS }
