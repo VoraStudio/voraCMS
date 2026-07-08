@@ -10,7 +10,7 @@
     </div>
 
     {% if groupedProjects is empty %}
-    <p class="field-help-text" style="padding: 16px 0;">No hi ha projectes disponibles.</p>
+    <p class="field-help-text field-help-text--padded">No hi ha projectes disponibles.</p>
     {% else %}
     <select name="projects[]" multiple class="project-selector__select" size="8">
         {% for group in groupedProjects %}

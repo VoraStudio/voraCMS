@@ -9,7 +9,7 @@
 {% endblock %}
 
 {% block content %}
-
+<div class="cyber-form-card">
 {% include 'admin/components/_section_header.html.twig' with {
     title: 'Tipus per defecte',
     description: 'Plantilles base disponibles. Les que tenen "Auto clonar" actiu es clonen automàticament en crear un projecte nou',
@@ -45,7 +45,7 @@
             <tr class="cyber-row {{ ct.active ? 'row-active' : 'row-inactive' }}">
                 <td class="cyber-cell text-capitalize fw-semibold">{{ ct.name }}</td>
                 <td class="cyber-cell">
-                    <span class="cyber-badge" style="background: rgba(6, 182, 212, 0.1); border-color: rgba(6, 182, 212, 0.15); color: #06b6d4;">{{ ct.slug|upper }}</span>
+                    <span class="cyber-badge cyber-badge--field">{{ ct.slug|upper }}</span>
                 </td>
                 <td class="cyber-cell cyber-cell--numeric">{{ ct.fields|length }}</td>
                 <td class="cyber-cell cyber-cell--status">
@@ -86,6 +86,7 @@
         {% endfor %}
         </tbody>
     </table>
+</div>
 </div>
 
 {% endblock %}

@@ -344,6 +344,16 @@
             vertical-align: middle;
             margin-right: 0.5rem;
             box-shadow: inset 0 0 0 2px var(--surface-color);
+            background-color: var(--color-swatch-bg);
+        }
+
+        .pre-value {
+            font-family: monospace;
+            font-size: 0.8rem;
+            background: rgba(0,0,0,0.2);
+            padding: 0.5rem;
+            border-radius: 4px;
+            overflow-x: auto;
         }
 
         .color-hex {
@@ -402,6 +412,8 @@
                             <span class="status-dot status-dot--published"></span> Publicat
                         {% elseif entry.status == 'draft' %}
                             <span class="status-dot status-dot--draft"></span> Esborrany
+                        {% elseif entry.status == 'scheduled' %}
+                            <span class="status-dot" style="background:#3b82f6"></span> Programat
                         {% else %}
                             <span class="status-dot status-dot--pending"></span> {{ entry.status|capitalize }}
                         {% endif %}
@@ -516,11 +528,11 @@
                                                 {% elseif field.fieldType == 'email' %}
                                                     <a href="mailto:{{ value }}">{{ value }}</a>
                                                 {% elseif field.fieldType == 'color' %}
-                                                    <span class="color-swatch" style="background-color: {{ value }}"></span>
+                                                    <span class="color-swatch" style="--color-swatch-bg: {{ value }}"></span>
                                                     <span class="color-hex">{{ value }}</span>
                                                 {% else %}
                                                     {% if value is iterable %}
-                                                        <pre style="font-family: monospace; font-size: 0.8rem; background: rgba(0,0,0,0.2); padding: 0.5rem; border-radius: 4px; overflow-x: auto;">{{ value|json_encode(constant('JSON_PRETTY_PRINT')) }}</pre>
+                                                        <pre class="pre-value">{{ value|json_encode(constant('JSON_PRETTY_PRINT')) }}</pre>
                                                     {% else %}
                                                         {{ value }}
                                                     {% endif %}

@@ -35,29 +35,114 @@
 {% endblock %}
 
 {% block content %}
-<div class="card">
-    <div class="card-body">
-        <form method="post" id="entryForm" enctype="multipart/form-data" novalidate>
-            <div class="row g-3 mb-3">
-                <div class="col-md-6">
-                    <label class="form-label">Estat</label>
-                    <select name="status" class="form-select form-select-sm">
-                        <option value="draft" {% if entry.status == 'draft' %}selected{% endif %}>No publicat</option>
-                        <option value="published" {% if entry.status == 'published' %}selected{% endif %}>Publicat</option>
-                        <option value="archived" {% if entry.status == 'archived' %}selected{% endif %}>Arxivat</option>
-                    </select>
+<div class="cyber-form-card mx-auto">
+<div class="cyber-card cyber-card--flush" data-anim="cyber-card">
+    <form method="post" id="entryForm" enctype="multipart/form-data" novalidate class="cyber-form-body">
+            <!-- Status: modern toggle chips -->
+            <div class="s-status mb-3" role="radiogroup" aria-label="Estat de l'entrada">
+                <div class="s-status__chips" id="statusSeg">
+                    <div class="s-chip{% if entry.status == 'draft' %} s-chip--sel{% endif %}" data-value="draft" tabindex="0" role="radio" aria-checked="{% if entry.status == 'draft' %}true{% else %}false{% endif %}">
+                        <span class="s-chip__dot" style="background:#6b7280"></span>
+                        <span class="s-chip__lbl">No publicat</span>
+                        <span class="s-chip__check">✓</span>
+                    </div>
+                    <div class="s-chip{% if entry.status == 'published' %} s-chip--sel{% endif %}" data-value="published" tabindex="0" role="radio" aria-checked="{% if entry.status == 'published' %}true{% else %}false{% endif %}">
+                        <span class="s-chip__dot" style="background:#22c55e"></span>
+                        <span class="s-chip__lbl">Publicat</span>
+                        <span class="s-chip__check">✓</span>
+                    </div>
+                    <div class="s-chip{% if entry.status == 'archived' %} s-chip--sel{% endif %}" data-value="archived" tabindex="0" role="radio" aria-checked="{% if entry.status == 'archived' %}true{% else %}false{% endif %}">
+                        <span class="s-chip__dot" style="background:#f59e0b"></span>
+                        <span class="s-chip__lbl">Arxivat</span>
+                        <span class="s-chip__check">✓</span>
+                    </div>
+                    <div class="s-chip{% if entry.status == 'scheduled' %} s-chip--sel{% endif %}" data-value="scheduled" tabindex="0" role="radio" aria-checked="{% if entry.status == 'scheduled' %}true{% else %}false{% endif %}">
+                        <span class="s-chip__dot" style="background:#3b82f6"></span>
+                        <span class="s-chip__lbl">Programat</span>
+                        <span class="s-chip__check">✓</span>
+                    </div>
+                </div>
+                <input type="hidden" name="status" id="statusInput" value="{{ entry.status }}">
+                {% set schedStart = entry.scheduledAt ? entry.scheduledAt|date('Y-m-d\\TH:i') : '' %}
+                {% set schedEnd = entry.scheduledEndAt ? entry.scheduledEndAt|date('Y-m-d\\TH:i') : '' %}
+                <div class="s-status__schedule" id="schedulePicker"{% if entry.status != 'scheduled' %} style="display:none"{% endif %}>
+                    <div class="s-sched-row">
+                        <div class="s-sched-field">
+                            <label class="s-label s-label--sub">Inici</label>
+                            <input type="datetime-local" name="scheduled_start" class="s-date-inline" value="{{ schedStart }}">
+                        </div>
+                        <div class="s-sched-field">
+                            <label class="s-label s-label--sub">Fi</label>
+                            <input type="datetime-local" name="scheduled_end" class="s-date-inline" value="{{ schedEnd }}">
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <hr class="entry-fields-divider">
-            <div class="entry-fields-grid">
+            <div class="s-fields">
+            {% set mediaFields = contentType.fields|filter(f => f.fieldType in ['image', 'gallery'])|sort((a, b) => a.sortOrder <=> b.sortOrder) %}
+            {% set logoField = contentType.fields|filter(f => f.fieldType == 'image' and f.name|lower matches '/logo/')|first %}
+            {% set mainImageField = contentType.fields|filter(f => f.fieldType == 'image' and f.id != logoField.id|default(0))|first %}
+            {% set galleryField = contentType.fields|filter(f => f.fieldType == 'gallery')|first %}
+            {% set bentoMedia = logoField and mainImageField and galleryField %}
+            {% set mediaPair = not bentoMedia and mediaFields|length == 2 ? { first: mediaFields[0], second: mediaFields[1] } : {} %}
+            {% set mediaRendered = false %}
             {% for field in contentType.fields %}
+            {% if bentoMedia and field.id in [logoField.id, mainImageField.id, galleryField.id] %}
+                {% if not mediaRendered %}
+                    {% set mediaRendered = true %}
+                    {% set fvLogo = entry.fieldValues|filter(v => v.fieldDefinition.id == logoField.id)|first %}
+                    {% set fvMain = entry.fieldValues|filter(v => v.fieldDefinition.id == mainImageField.id)|first %}
+                    {% set fvGallery = entry.fieldValues|filter(v => v.fieldDefinition.id == galleryField.id)|first %}
+                    <div class="s-field s-field--wide">
+                        <div class="s-media-bento">
+                            <div class="s-media-bento__row">
+                                <div class="s-media-bento__col">
+                                    <label class="s-label">{{ logoField.name }}{% if logoField.required %}<span class="s-label__req">*</span>{% endif %}</label>
+                                    {% include 'admin/components/_gallery_field.html.twig' with { fieldId: logoField.id, fieldType: 'image', value: fvLogo ? fvLogo.value : '', mediaPaths: mediaPaths } %}
+                                </div>
+                                <div class="s-media-bento__col">
+                                    <label class="s-label">{{ mainImageField.name }}{% if mainImageField.required %}<span class="s-label__req">*</span>{% endif %}</label>
+                                    {% include 'admin/components/_gallery_field.html.twig' with { fieldId: mainImageField.id, fieldType: 'image', value: fvMain ? fvMain.value : '', mediaPaths: mediaPaths } %}
+                                </div>
+                            </div>
+                            <div class="s-media-bento__row">
+                                <div class="s-media-bento__col s-media-bento__col--wide">
+                                    <label class="s-label">{{ galleryField.name }}{% if galleryField.required %}<span class="s-label__req">*</span>{% endif %}</label>
+                                    {% include 'admin/components/_gallery_field.html.twig' with { fieldId: galleryField.id, fieldType: 'gallery', value: fvGallery ? fvGallery.value : '', mediaPaths: mediaPaths } %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+            {% elseif mediaPair is not empty and field.id in [mediaPair.first.id, mediaPair.second.id] %}
+                {% if not mediaRendered %}
+                    {% set mediaRendered = true %}
+                    {% set fvFirst = entry.fieldValues|filter(v => v.fieldDefinition.id == mediaPair.first.id)|first %}
+                    {% set fvSecond = entry.fieldValues|filter(v => v.fieldDefinition.id == mediaPair.second.id)|first %}
+                    {% set valFirst = fvFirst ? fvFirst.value : '' %}
+                    {% set valSecond = fvSecond ? fvSecond.value : '' %}
+                    <div class="s-field s-field--wide">
+                        <div class="s-media-pair">
+                            <div class="s-media-pair__col">
+                                <label class="s-label">{{ mediaPair.first.name }}{% if mediaPair.first.required %}<span class="s-label__req">*</span>{% endif %}</label>
+                                {% include 'admin/components/_gallery_field.html.twig' with { fieldId: mediaPair.first.id, fieldType: mediaPair.first.fieldType, value: valFirst, mediaPaths: mediaPaths } %}
+                            </div>
+                            <div class="s-media-pair__col">
+                                <label class="s-label">{{ mediaPair.second.name }}{% if mediaPair.second.required %}<span class="s-label__req">*</span>{% endif %}</label>
+                                {% include 'admin/components/_gallery_field.html.twig' with { fieldId: mediaPair.second.id, fieldType: mediaPair.second.fieldType, value: valSecond, mediaPaths: mediaPaths } %}
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+            {% else %}
             {% set fv = entry.fieldValues|filter(v => v.fieldDefinition.id == field.id)|first %}
             {% set val = fv ? fv.value : '' %}
-            <div class="mb-3 field-{{ field.fieldType }}">
-                <label class="form-label">
+            {% set isWide = field.fieldType in ['richtext', 'textarea', 'repeater', 'youtube'] %}
+            <div class="s-field{% if isWide %} s-field--wide{% endif %} field-{{ field.fieldType }}">
+                <label class="s-label">
                     {{ field.name }}
-                    {% if field.required %}<span class="form-label__required">*</span>{% endif %}
+                    {% if field.required %}<span class="s-label__req">*</span>{% endif %}
                 </label>
 
                 {% if field.fieldType == 'richtext' %}
@@ -68,57 +153,38 @@
                 } %}
 
                 {% elseif field.fieldType == 'textarea' %}
-                <textarea name="field_{{ field.id }}" class="form-control" rows="4" {% if field.required %}required{% endif %}>{{ val }}</textarea>
+                <textarea name="field_{{ field.id }}" class="s-inp s-inp--ta" rows="3" {% if field.required %}required{% endif %}>{{ val }}</textarea>
 
                 {% elseif field.fieldType == 'date' %}
-                <input type="datetime-local" name="field_{{ field.id }}" class="form-control" value="{{ val }}" {% if field.required %}required{% endif %}>
+                <input type="datetime-local" name="field_{{ field.id }}" class="s-inp" value="{{ val }}" {% if field.required %}required{% endif %}>
 
                 {% elseif field.fieldType == 'date_range' %}
                 {% set range = val ? val|json_decode : null %}
-                <div class="row g-2">
-                    <div class="col-md-6">
-                        <label class="form-label small">Inici</label>
-                        <input type="datetime-local" name="field_{{ field.id }}_start" class="form-control" value="{{ range.start ?? '' }}" {% if field.required %}required{% endif %}>
-                    </div>
-                    <div class="col-md-6">
-                        <label class="form-label small">Fi</label>
-                        <input type="datetime-local" name="field_{{ field.id }}_end" class="form-control" value="{{ range.end ?? '' }}" {% if field.required %}required{% endif %}>
-                    </div>
+                <div class="s-row-2">
+                    <label class="s-label s-label--sub">Inici</label>
+                    <input type="datetime-local" name="field_{{ field.id }}_start" class="s-inp" value="{{ range.start ?? '' }}" {% if field.required %}required{% endif %}>
+                    <label class="s-label s-label--sub">Fi</label>
+                    <input type="datetime-local" name="field_{{ field.id }}_end" class="s-inp" value="{{ range.end ?? '' }}" {% if field.required %}required{% endif %}>
                 </div>
 
                 {% elseif field.fieldType == 'boolean' %}
-                <div class="form-check">
-                    <input type="checkbox" name="field_{{ field.id }}" class="form-check-input" value="1" {% if val %}checked{% endif %}>
-                    <label class="form-check-label small">Sí</label>
-                </div>
+                <label class="s-toggle">
+                    <input type="checkbox" name="field_{{ field.id }}" class="s-toggle__inp" value="1" {% if val %}checked{% endif %}>
+                    <span class="s-toggle__track"><span class="s-toggle__thumb"></span></span>
+                    <span class="s-toggle__lbl">Sí</span>
+                </label>
 
                 {% elseif field.fieldType == 'number' %}
-                <input type="number" name="field_{{ field.id }}" class="form-control" step="any" value="{{ val }}" {% if field.required %}required{% endif %}>
+                <input type="number" name="field_{{ field.id }}" class="s-inp" step="any" value="{{ val }}" {% if field.required %}required{% endif %}>
 
                 {% elseif field.fieldType == 'email' %}
-                <input type="email" name="field_{{ field.id }}" class="form-control" value="{{ val }}" {% if field.required %}required{% endif %}>
+                <input type="email" name="field_{{ field.id }}" class="s-inp" value="{{ val }}" {% if field.required %}required{% endif %}>
 
                 {% elseif field.fieldType == 'url' %}
-                <input type="url" name="field_{{ field.id }}" class="form-control" value="{{ val }}" {% if field.required %}required{% endif %}>
+                <input type="url" name="field_{{ field.id }}" class="s-inp" value="{{ val }}" {% if field.required %}required{% endif %}>
 
                 {% elseif field.fieldType == 'color' %}
-                <input type="color" name="field_{{ field.id }}" class="form-control form-control-color" value="{{ val ?: '#000000' }}">
-
-                {% elseif field.fieldType == 'image' %}
-                {% include 'admin/components/_gallery_field.html.twig' with {
-                    fieldId: field.id,
-                    fieldType: 'image',
-                    value: val,
-                    mediaPaths: mediaPaths
-                } %}
-
-                {% elseif field.fieldType == 'gallery' %}
-                {% include 'admin/components/_gallery_field.html.twig' with {
-                    fieldId: field.id,
-                    fieldType: 'gallery',
-                    value: val,
-                    mediaPaths: mediaPaths
-                } %}
+                <input type="color" name="field_{{ field.id }}" class="s-inp s-inp--clr" value="{{ val ?: '#000000' }}">
 
                 {% elseif field.fieldType == 'repeater' %}
                 {% include 'admin/components/_repeater_field.html.twig' with {
@@ -128,7 +194,7 @@
                 } %}
 
                 {% elseif field.fieldType == 'select' %}
-                <select name="field_{{ field.id }}" class="form-control" {% if field.required %}required{% endif %}>
+                <select name="field_{{ field.id }}" class="s-inp" {% if field.required %}required{% endif %}>
                     <option value="">Selecciona...</option>
                     {% set options = field.helpText ? field.helpText|split('\n')|map(o => o|trim)|filter(o => o) : [] %}
                     {% for opt in options %}
@@ -136,39 +202,95 @@
                     {% endfor %}
                 </select>
 
+                {% elseif field.fieldType in ['image', 'gallery'] %}
+                {% include 'admin/components/_gallery_field.html.twig' with {
+                    fieldId: field.id,
+                    fieldType: field.fieldType,
+                    value: val,
+                    mediaPaths: mediaPaths
+                } %}
+
                 {% elseif field.fieldType == 'youtube' %}
-                <div class="input-group">
-                    <span class="input-group-text input-group-text--sm"><i class="bi bi-youtube"></i></span>
-                    <input type="url" name="field_{{ field.id }}" class="form-control youtube-input" value="{{ val }}" placeholder="https://youtube.com/watch?v=..." {% if field.required %}required{% endif %}>
+                <div class="s-youtube">
+                    <span class="s-youtube__icon"><i class="bi bi-youtube"></i></span>
+                    <input type="url" name="field_{{ field.id }}" class="s-inp youtube-input" value="{{ val }}" placeholder="https://youtube.com/watch?v=..." {% if field.required %}required{% endif %}>
                 </div>
                 <div class="youtube-preview mt-2 {% if not val %}d-none{% endif %}">
-                    <div class="ratio ratio-16x9 rounded overflow-hidden youtube-preview__frame">
+                    <div class="ratio ratio-16x9 rounded overflow-hidden">
                         <iframe src="" allowfullscreen loading="lazy"></iframe>
                     </div>
                 </div>
 
                 {% else %}
-                <input type="text" name="field_{{ field.id }}" class="form-control" value="{{ val }}" {% if field.required %}required{% endif %}>
+                <input type="text" name="field_{{ field.id }}" class="s-inp" value="{{ val }}" {% if field.required %}required{% endif %}>
                 {% endif %}
 
                 {% if field.helpText %}
-                <small class="field-help-text">{{ field.helpText }}</small>
+                <small class="s-hint">{{ field.helpText }}</small>
                 {% endif %}
             </div>
+            {% endif %}
             {% endfor %}
             </div>
 
-            <hr class="entry-fields-divider--top">
-            <button type="submit" class="btn btn-primary w-100"><span>Guardar canvis</span></button>
+            <!-- Bento actions -->
+            <div class="s-actions">
+                <a href="{{ path('admin_entry_by_type', {slug: contentType.slug}) }}" class="s-btn s-btn--sec">
+                    <i class="bi bi-x"></i> Cancel·lar
+                </a>
+                <button type="submit" class="s-btn s-btn--pri">
+                    <i class="bi bi-check2"></i> Guardar canvis
+                </button>
+            </div>
         </form>
     </div>
 </div>
 {% endblock %}
 
 {% block javascripts %}
+{{ parent() }}
 <div id="entryFormConfig"
      data-media-picker-url="{{ path('admin_media_picker') }}?field=__FIELD_ID__&amp;project_id={{ contentType.project.id ?? '' }}"
-     style="display:none;"></div>
+     class="d-none"></div>
 <script src="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.js"></script>
 <script src="{{ asset('js/entry-form.js') }}"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    /* ─── Status chips ─── */
+    var seg = document.getElementById('statusSeg');
+    if (seg) {
+        seg.addEventListener('click', function (e) {
+            var opt = e.target.closest('.s-chip');
+            if (!opt) return;
+            seg.querySelectorAll('.s-chip').forEach(function (o) {
+                o.classList.remove('s-chip--sel');
+                o.setAttribute('aria-checked', 'false');
+            });
+            opt.classList.add('s-chip--sel');
+            opt.setAttribute('aria-checked', 'true');
+            var val = opt.getAttribute('data-value');
+            document.getElementById('statusInput').value = val;
+            var picker = document.getElementById('schedulePicker');
+            if (picker) picker.style.display = val === 'scheduled' ? '' : 'none';
+        });
+        seg.addEventListener('keydown', function (e) {
+            var current = seg.querySelector('.s-chip--sel');
+            if (!current) return;
+            var opts = Array.from(seg.querySelectorAll('.s-chip'));
+            var idx = opts.indexOf(current);
+            if (e.key === 'ArrowRight') {
+                e.preventDefault();
+                (opts[(idx + 1) % opts.length]).click();
+            } else if (e.key === 'ArrowLeft') {
+                e.preventDefault();
+                (opts[(idx - 1 + opts.length) % opts.length]).click();
+            } else if (e.key === ' ' || e.key === 'Enter') {
+                e.preventDefault();
+                current.click();
+            }
+        });
+    }
+
+});
+</script>
 {% endblock %}

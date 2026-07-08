@@ -1,0 +1,268 @@
+﻿/* ═══════════════════════════════════════════════════
+   VoraCMS · Login — Soft Dark + Orange
+   ═══════════════════════════════════════════════════ */
+
+/* --------- Login images --------- */
+.s-login-brand-img {
+  height: 48px;
+  width: auto;
+  margin: 0 auto 12px;
+  display: block;
+}
+
+.s-login-footer-img {
+  height: 18px;
+  width: auto;
+  vertical-align: middle;
+  margin-left: 4px;
+}
+
+/* --------- Login wrapper --------- */
+.s-login {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--s-bg);
+  padding: 24px;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Orange glow orbs */
+.s-login::before {
+  content: "";
+  position: absolute;
+  width: 500px;
+  height: 500px;
+  background: radial-gradient(circle, rgba(249, 115, 22, 0.1) 0%, rgba(249, 115, 22, 0.03) 40%, transparent 70%);
+  top: -200px;
+  right: -150px;
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.s-login::after {
+  content: "";
+  position: absolute;
+  width: 400px;
+  height: 400px;
+  background: radial-gradient(circle, rgba(249, 115, 22, 0.06) 0%, transparent 60%);
+  bottom: -150px;
+  left: -100px;
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+/* --------- Login card --------- */
+.s-login-card {
+  width: 100%;
+  max-width: 400px;
+  position: relative;
+  z-index: 1;
+}
+
+.s-login-card .card {
+  padding: 4px;
+  background: var(--s-surface);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--s-border);
+  box-shadow:
+    0 16px 48px rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+.s-login-card .card-body {
+  padding: 40px 36px;
+}
+
+/* --------- Brand --------- */
+.s-login-brand {
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+.s-login-brand h5 {
+  font-weight: 700;
+  color: var(--s-text);
+  letter-spacing: -0.02em;
+  margin: 0;
+  font-size: 1.15rem;
+}
+
+.s-login-brand p {
+  color: var(--s-text-secondary);
+  font-size: 0.85rem;
+  margin: 6px 0 0;
+}
+
+/* --------- Login form labels --------- */
+.s-login-card .form-label {
+  display: block;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--s-text-label);
+  margin-bottom: 7px;
+}
+
+/* --------- Login form inputs --------- */
+.s-login-card .form-control {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.11);
+  border-radius: var(--s-input-radius);
+  padding: 12px 14px;
+  color: #fff;
+  font-size: 0.875rem;
+  transition:
+    border-color var(--s-transition),
+    background var(--s-transition);
+}
+
+.s-login-card .form-control::placeholder {
+  color: rgba(255, 255, 255, 0.22);
+}
+
+.s-login-card .form-control:focus {
+  border-color: rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.09);
+  outline: none;
+  color: #fff;
+}
+
+/* --------- Login button --------- */
+.s-login-card .btn-primary {
+  width: 100%;
+  padding: 16px;
+  font-size: 0.88rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 300ms cubic-bezier(0.34, 1.56, 0.64, 1);
+  color: #fff;
+  background: linear-gradient(135deg, #fb923c 0%, #f97316 50%, #ea580c 100%);
+  box-shadow:
+    0 8px 28px rgba(249, 115, 22, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  min-height: 56px;
+  position: relative;
+  overflow: hidden;
+  text-decoration: none;
+}
+
+.s-login-card .btn-primary::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, #fdba74 0%, #fb923c 50%, #f97316 100%);
+  opacity: 0;
+  transition: opacity 300ms ease;
+  border-radius: inherit;
+}
+
+.s-login-card .btn-primary:hover {
+  border-color: rgba(255, 255, 255, 0.35);
+  color: #fff;
+  box-shadow:
+    0 12px 36px rgba(249, 115, 22, 0.55),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  transform: translateY(-3px);
+}
+
+.s-login-card .btn-primary:hover::before {
+  opacity: 1;
+}
+
+.s-login-card .btn-primary:active {
+  transform: translateY(-1px) scale(0.98);
+}
+
+.s-login-card .btn-primary > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* --------- Toast --------- */
+.s-toast-login {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 18px;
+  border-radius: 14px;
+  background: transparent;
+  border: 1px solid var(--s-danger-border);
+  margin-bottom: 16px;
+  animation: sToastIn 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.s-toast-login-icon {
+  width: 38px;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.s-toast-login-icon i {
+  color: var(--s-danger);
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.s-toast-login-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.s-toast-login-label {
+  color: var(--s-danger);
+  font-size: 0.82rem;
+  font-weight: 600;
+  line-height: 1.3;
+  margin-bottom: 3px;
+}
+
+.s-toast-login-msg {
+  color: var(--s-text-secondary);
+  font-size: 0.8rem;
+  font-weight: 400;
+  line-height: 1.4;
+}
+
+/* --------- Animation --------- */
+@keyframes sToastIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* --------- Footer --------- */
+.s-login-footer {
+  text-align: center;
+  margin-top: 16px;
+  font-size: 0.75rem;
+  color: var(--s-text-muted);
+}
+
+.s-login-footer strong {
+  color: var(--s-text-secondary);
+}
+
+/* --------- Responsive --------- */
+@media (max-width: 768px) {
+  .s-login-card .card-body {
+    padding: 24px 20px;
+  }
+}

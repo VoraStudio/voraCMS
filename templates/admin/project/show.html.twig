@@ -16,6 +16,7 @@
 {% endblock %}
 
 {% block content %}
+<div class="cyber-form-card">
 
 {% set totalSections = sections|length %}
 {% set totalEntries = sections|reduce((carry, s) => carry + s.total, 0) %}
@@ -151,6 +152,9 @@
                         {% elseif entry.status == 'draft' %}
                             <span class="cyber-status-dot cyber-status-dot--draft"></span>
                             <span class="cyber-status-text--draft">No publicat</span>
+                        {% elseif entry.status == 'scheduled' %}
+                            <span class="cyber-status-dot" style="background:#3b82f6"></span>
+                            <span class="cyber-status-text" style="color:#3b82f6">Programat</span>
                         {% else %}
                             <span class="cyber-status-dot cyber-status-dot--archived"></span>
                             <span class="cyber-status-text--archived">Arxivat</span>
@@ -203,4 +207,5 @@
 {% endfor %}
 {% endif %}
 
+</div>
 {% endblock %}

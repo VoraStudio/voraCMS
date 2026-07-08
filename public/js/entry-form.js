@@ -24,8 +24,7 @@
       var hidden = galField.querySelector('.gallery-value');
       var div = document.createElement('div');
       div.className = 'gallery-thumb';
-      div.style.cssText = 'position:relative;width:80px;height:80px;border-radius:4px;overflow:hidden;background:var(--s-bg);';
-      div.innerHTML = '<img src="' + mediaUrl + '" style="width:100%;height:100%;object-fit:cover;"><button type="button" class="remove-gallery-item" aria-label="Eliminar" style="position:absolute;top:3px;right:3px;width:18px;height:18px;border-radius:50%;border:none;background:rgba(0,0,0,0.50);color:#fff;font-size:12px;line-height:1;padding:0;cursor:pointer;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity 0.15s;"><i class="bi bi-x" style="font-size:10px;"></i></button>';
+      div.innerHTML = '<img src="' + mediaUrl + '" alt=""><button type="button" class="remove-gallery-item" aria-label="Eliminar"><i class="bi bi-x"></i></button>';
       previews.appendChild(div);
       var current = hidden.value ? hidden.value.split(',') : [];
       current.push(mediaId);
@@ -61,8 +60,7 @@
           reader.onload = function (e) {
             var div = document.createElement('div');
             div.className = 'gallery-thumb';
-            div.style.cssText = 'position:relative;width:80px;height:80px;border-radius:4px;overflow:hidden;background:var(--s-bg);';
-            div.innerHTML = '<img src="' + e.target.result + '" style="width:100%;height:100%;object-fit:cover;"><button type="button" class="remove-gallery-item" aria-label="Eliminar" style="position:absolute;top:3px;right:3px;width:18px;height:18px;border-radius:50%;border:none;background:rgba(0,0,0,0.50);color:#fff;font-size:12px;line-height:1;padding:0;cursor:pointer;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity 0.15s;"><i class="bi bi-x" style="font-size:10px;"></i></button>';
+            div.innerHTML = '<img src="' + e.target.result + '" alt=""><button type="button" class="remove-gallery-item" aria-label="Eliminar"><i class="bi bi-x"></i></button>';
             previews.appendChild(div);
           };
           reader.readAsDataURL(file);

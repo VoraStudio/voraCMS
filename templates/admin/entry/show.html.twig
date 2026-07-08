@@ -31,12 +31,13 @@
 {% endblock %}
 
 {% block content %}
+<div class="cyber-form-card">
 {% set sortedFields = entry.fieldValues|sort((a, b) => a.fieldDefinition.sortOrder <=> b.fieldDefinition.sortOrder) %}
 
 <div class="row g-4">
     {# ─── Metadata card ─── #}
     <div class="col-12">
-        <div class="card">
+        <div class="cyber-card cyber-card--flush" data-anim="cyber-card">
             <div class="card-body s-field-list">
                 <div>
                     <div class="s-field-label">ID</div>
@@ -52,6 +53,9 @@
                             {% elseif entry.status == 'draft' %}
                                 <span class="cyber-status-dot cyber-status-dot--draft"></span>
                                 <span class="cyber-status-text--draft">No publicat</span>
+                            {% elseif entry.status == 'scheduled' %}
+                                <span class="cyber-status-dot" style="background:#3b82f6"></span>
+                                <span class="cyber-status-text" style="color:#3b82f6">Programat</span>
                             {% else %}
                                 <span class="cyber-status-dot cyber-status-dot--archived"></span>
                                 <span class="cyber-status-text--archived">Arxivat</span>
@@ -83,7 +87,7 @@
     {% set raw = fv.value %}
     {% if raw is not empty %}
     <div class="col-12">
-        <div class="card">
+        <div class="cyber-card cyber-card--flush" data-anim="cyber-card">
             <div class="card-body s-field-card-body">
                 <div class="s-field-label">{{ def.name }}</div>
 
@@ -139,12 +143,13 @@
     {% endif %}
     {% else %}
     <div class="col-12">
-        <div class="card">
+        <div class="cyber-card cyber-card--flush" data-anim="cyber-card">
             <div class="card-body text-center py-5 s-field-empty">
                 Aquesta entrada no té contingut.
             </div>
         </div>
     </div>
     {% endfor %}
+</div>
 </div>
 {% endblock %}

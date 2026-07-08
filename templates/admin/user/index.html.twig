@@ -3,6 +3,7 @@
 {% block page_title %}Usuaris{% endblock %}
 
 {% block content %}
+<div class="cyber-form-card">
 {% include 'admin/components/_section_header.html.twig' with {
     title: 'Usuaris',
     description: 'Gestiona els usuaris i els seus permisos',
@@ -108,5 +109,6 @@
             {% endfor %}
         </tbody>
     </table>
+</div>
 </div>
 {% endblock %}
