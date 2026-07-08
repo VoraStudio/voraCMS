@@ -252,9 +252,9 @@
     </div>
 </div>
 
-<div class="api-card" style="margin-bottom: 24px;" data-anim="cyber-card">
+<div class="api-card api-card--flush-intro" data-anim="cyber-card">
     <div class="api-card-body">
-        <div class="api-alert api-alert--info" style="margin-bottom: 0;">
+        <div class="api-alert api-alert--info api-alert--flush-bottom">
             <i class="bi bi-arrow-repeat"></i>
             <span><strong>Flux recomanat:</strong> 1) <code>GET /api/sections</code> per descobrir seccions i els seus camps → 2) Usa <code>fields[].slug</code> per construir el mapping al frontend → 3) <code>GET /api/{slug}</code> per obtenir les entrades amb les claus dinàmiques.</span>
         </div>
@@ -281,7 +281,7 @@
             </tbody>
         </table>
 
-        <div class="api-alert api-alert--info" style="margin-bottom: 12px;">
+        <div class="api-alert api-alert--info api-alert--compact">
             <i class="bi bi-info-circle-fill"></i>
             <span>Les claus dels camps dinàmics (<code>titol</code>, <code>imatge</code>, <code>contingut</code>...) venen definides per l'array <code>fields[].slug</code> de <code>GET /api/sections</code>.</span>
         </div>

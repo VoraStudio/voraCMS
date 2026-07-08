@@ -5,6 +5,7 @@
 {% block topbar_actions %}{% endblock %}
 
 {% block content %}
+<div class="cyber-form-card">
 
 {# ─── User filter header ─── #}
 {% if filterUser is defined and filterUser %}
@@ -297,6 +298,7 @@
 {% endfor %}
 {% endif %}
 
+</div>
 {% endblock %}
 
 {% block javascripts %}

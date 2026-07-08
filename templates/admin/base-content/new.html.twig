@@ -45,9 +45,9 @@
             <hr class="form-divider my-4">
 
             <div class="d-flex justify-content-between align-items-center mb-3">
-                <label class="cyber-form-label mb-0" style="font-size: 0.75rem;">Camps de la plantilla</label>
-                <button type="button" class="cyber-btn cyber-btn--compact" id="addFieldBtn" style="background: rgba(6, 182, 212, 0.1); border: 1px solid rgba(6, 182, 212, 0.2); color: #06b6d4;">
-                    <i class="bi bi-plus-lg"></i> <span style="font-size: 0.72rem; font-weight: 600; text-transform: uppercase;">Afegir camp</span>
+                <label class="cyber-form-label cyber-form-label--sm mb-0">Camps de la plantilla</label>
+                <button type="button" class="cyber-btn cyber-btn--compact cyber-btn--add-field" id="addFieldBtn">
+                    <i class="bi bi-plus-lg"></i> <span class="cyber-btn__label">Afegir camp</span>
                 </button>
             </div>
 
@@ -58,7 +58,7 @@
                             <input type="text" name="field_name[]" class="cyber-form-input" placeholder="Nom del camp">
                         </div>
                         <div class="col-md-3">
-                            <select name="field_type[]" class="cyber-form-input cyber-form-input--select field-type-select" onchange="toggleFieldOptions(this)">
+                            <select name="field_type[]" class="cyber-form-input cyber-form-input--select field-type-select" data-field-type="toggle">
                                 {% for type in fieldTypes %}
                                 <option value="{{ type }}">{{ type }}</option>
                                 {% endfor %}
@@ -76,7 +76,7 @@
                             </button>
                         </div>
                     </div>
-                    <div class="row field-options-wrap" style="display:none">
+                    <div class="row field-options-wrap">
                         <div class="col-12 mt-2">
                             <textarea name="field_options[]" class="cyber-form-input" rows="2" placeholder="Una opció per línia&#10;Ex:&#10;Essencial&#10;Integral&#10;Master"></textarea>
                         </div>
@@ -93,7 +93,7 @@
                         <strong>Auto clonar</strong> en crear projectes nous
                     </label>
                 </div>
-                <p class="field-help-text" style="margin-top: 4px; margin-left: 28px;">Si està actiu, aquesta plantilla es clonarà automàticament a cada projecte nou.</p>
+                <p class="field-help-text field-help-text--indent">Si està actiu, aquesta plantilla es clonarà automàticament a cada projecte nou.</p>
             </div>
 
             <hr class="form-divider my-4">

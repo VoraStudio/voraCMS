@@ -1,67 +1,67 @@
 security:
-    password_hashers:
-        Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface: 'auto'
+  password_hashers:
+    Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface: "auto"
 
-    role_hierarchy:
-        ROLE_ADMIN: ROLE_MOD
-        ROLE_MOD: ROLE_USUARIO
+  role_hierarchy:
+    ROLE_ADMIN: ROLE_MOD
+    ROLE_MOD: ROLE_USUARIO
 
-    providers:
-        app_user_provider:
-            entity:
-                class: App\Entity\User
-                property: email
+  providers:
+    app_user_provider:
+      entity:
+        class: App\Entity\User
+        property: email
 
-    firewalls:
-        dev:
-            pattern: ^/(_(profiler|wdt)|css|images|js)/
-            security: false
+  firewalls:
+    dev:
+      pattern: ^/(_(profiler|wdt)|css|images|js)/
+      security: false
 
-        api_login:
-            pattern: ^/api/auth
-            stateless: true
-            json_login:
-                check_path: /api/auth/login
-                username_path: email
-                password_path: password
-                success_handler: lexik_jwt_authentication.handler.authentication_success
-                failure_handler: lexik_jwt_authentication.handler.authentication_failure
-            jwt: ~
+    api_login:
+      pattern: ^/api/auth
+      stateless: true
+      json_login:
+        check_path: /api/auth/login
+        username_path: email
+        password_path: password
+        success_handler: lexik_jwt_authentication.handler.authentication_success
+        failure_handler: lexik_jwt_authentication.handler.authentication_failure
+      jwt: ~
 
-        api:
-            pattern: ^/api
-            stateless: true
-            custom_authenticators:
-                - App\Security\ApiTokenAuthenticator
-            entry_point: App\Security\ApiTokenAuthenticator
+    api:
+      pattern: ^/api
+      stateless: true
+      custom_authenticators:
+        - App\Security\ApiTokenAuthenticator
+      entry_point: App\Security\ApiTokenAuthenticator
 
-        admin:
-            pattern: ^/admin
-            lazy: true
-            provider: app_user_provider
-            form_login:
-                login_path: admin_login
-                check_path: admin_login
-                default_target_path: admin_dashboard
-            logout:
-                path: admin_logout
-                target: admin_login
+    admin:
+      pattern: ^/admin
+      lazy: true
+      provider: app_user_provider
+      form_login:
+        login_path: admin_login
+        check_path: admin_login
+        default_target_path: admin_dashboard
+      logout:
+        path: admin_logout
+        target: admin_login
 
-    access_control:
-        # API: login is public, public endpoints are public, everything else requires authentication
-        - { path: ^/api/auth, roles: PUBLIC_ACCESS }
-        # ENDPOINTS PUBLICS — Esborra aquesta linia per desactivar l'API publica
-        - { path: ^/api/public, roles: PUBLIC_ACCESS }
-        - { path: ^/api, roles: IS_AUTHENTICATED_FULLY }
-        # Admin: login is public, dashboard requires minimum ROLE_USUARIO
-        - { path: ^/admin/login, roles: PUBLIC_ACCESS }
-        - { path: ^/admin, roles: ROLE_USUARIO }
+  access_control:
+    # API: login is public, public endpoints are public, everything else requires authentication
+    - { path: ^/api/auth, roles: PUBLIC_ACCESS }
+    # ENDPOINTS PUBLICS — Esborra aquesta linia per desactivar l'API publica
+    - { path: ^/api/public, roles: PUBLIC_ACCESS }
+    - { path: ^/api, roles: IS_AUTHENTICATED_FULLY }
+    # Admin: login is public, dashboard requires minimum ROLE_USUARIO
+    - { path: ^/admin/login, roles: PUBLIC_ACCESS }
+    - { path: ^/admin, roles: ROLE_USUARIO }
 
 when@test:
-    security:
-        password_hashers:
-            Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface:
-                algorithm: auto
-                cost: 4
-                time_cost: 3
-                memory_cost: 10
+  security:
+    password_hashers:
+      Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface:
+        algorithm: auto
+        cost: 4
+        time_cost: 3
+        memory_cost: 10

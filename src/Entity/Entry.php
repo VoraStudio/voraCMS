@@ -16,6 +16,7 @@ class Entry
     public const STATUS_DRAFT = 'draft';
     public const STATUS_PUBLISHED = 'published';
     public const STATUS_ARCHIVED = 'archived';
+    public const STATUS_SCHEDULED = 'scheduled';
 
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -53,6 +54,12 @@ class Entry
 
     #[ORM\Column(type: 'date', nullable: true)]
     private ?\DateTimeInterface $publishedAt = null;
+
+    #[ORM\Column(type: 'datetime', nullable: true)]
+    private ?\DateTimeInterface $scheduledAt = null;
+
+    #[ORM\Column(type: 'datetime', nullable: true)]
+    private ?\DateTimeInterface $scheduledEndAt = null;
 
     public function __construct()
     {
@@ -105,4 +112,10 @@ class Entry
 
     public function getPublishedAt(): ?\DateTimeInterface { return $this->publishedAt; }
     public function setPublishedAt(?\DateTimeInterface $publishedAt): static { $this->publishedAt = $publishedAt; return $this; }
+
+    public function getScheduledAt(): ?\DateTimeInterface { return $this->scheduledAt; }
+    public function setScheduledAt(?\DateTimeInterface $scheduledAt): static { $this->scheduledAt = $scheduledAt; return $this; }
+
+    public function getScheduledEndAt(): ?\DateTimeInterface { return $this->scheduledEndAt; }
+    public function setScheduledEndAt(?\DateTimeInterface $scheduledEndAt): static { $this->scheduledEndAt = $scheduledEndAt; return $this; }
 }

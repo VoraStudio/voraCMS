@@ -235,6 +235,13 @@ class EntryController extends AbstractController
                 $entry->setPublishedAt(new \DateTime());
             }
 
+            if ($entry->getStatus() === Entry::STATUS_SCHEDULED) {
+                $schedStart = $request->request->get('scheduled_start');
+                $schedEnd = $request->request->get('scheduled_end');
+                if ($schedStart) $entry->setScheduledAt(new \DateTime($schedStart));
+                if ($schedEnd) $entry->setScheduledEndAt(new \DateTime($schedEnd));
+            }
+
             $em->persist($entry);
             $em->flush();
 
@@ -302,6 +309,18 @@ class EntryController extends AbstractController
 
             if ($entry->getStatus() === Entry::STATUS_PUBLISHED && !$entry->getPublishedAt()) {
                 $entry->setPublishedAt(new \DateTime());
+            }
+
+            if ($entry->getStatus() === Entry::STATUS_SCHEDULED) {
+                $schedStart = $request->request->get('scheduled_start');
+                $schedEnd = $request->request->get('scheduled_end');
+                if ($schedStart) $entry->setScheduledAt(new \DateTime($schedStart));
+                else $entry->setScheduledAt(null);
+                if ($schedEnd) $entry->setScheduledEndAt(new \DateTime($schedEnd));
+                else $entry->setScheduledEndAt(null);
+            } else {
+                $entry->setScheduledAt(null);
+                $entry->setScheduledEndAt(null);
             }
 
             $em->flush();

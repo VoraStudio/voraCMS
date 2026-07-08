@@ -44,16 +44,16 @@
 
             <div class="cyber-form-group mb-4">
                 <label class="cyber-form-label">Descripció</label>
-                <div class="cyber-form-input cyber-form-input--readonly" style="min-height: 50px;">
+                <div class="cyber-form-input cyber-form-input--readonly cyber-form-input--readonly-lg">
                     {{ template.description ?: 'Sense descripció.' }}
                 </div>
             </div>
 
             <hr class="form-divider my-4">
 
-            <h6 class="cyber-form-label mb-3" style="font-size: 0.75rem;">Camps de la plantilla</h6>
+            <h6 class="cyber-form-label cyber-form-label--sm mb-3">Camps de la plantilla</h6>
 
-            <div class="cyber-card cyber-card--table cyber-card--flush" style="background: rgba(15, 23, 42, 0.2);">
+            <div class="cyber-card cyber-card--table cyber-card--flush cyber-card--field-bg">
                 <table class="cyber-table">
                     <thead>
                         <tr>
@@ -67,7 +67,7 @@
                         <tr class="cyber-row">
                             <td class="cyber-cell fw-semibold">{{ field.name }}</td>
                             <td class="cyber-cell">
-                                <span class="cyber-badge" style="background: rgba(6, 182, 212, 0.1); border-color: rgba(6, 182, 212, 0.15); color: #06b6d4;">
+                                <span class="cyber-badge cyber-badge--field">
                                     {{ field.fieldType|upper }}
                                 </span>
                             </td>
@@ -91,12 +91,12 @@
             </div>
 
             <div class="d-flex gap-2 mt-4">
-                <a href="{{ path('admin_base_content_edit', {id: template.id}) }}" class="cyber-form-submit w-100 text-center" data-anim="cyber-btn" style="text-decoration: none;">
+                <a href="{{ path('admin_base_content_edit', {id: template.id}) }}" class="cyber-form-submit w-100 text-center" data-anim="cyber-btn">
                     <i class="bi bi-pencil"></i> <span>Editar plantilla</span>
                 </a>
                 <form method="post" action="{{ path('admin_base_content_delete', {id: template.id}) }}" class="w-100" id="del-base-content-{{ template.id }}">
                     <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ template.id) }}">
-                    <button type="button" class="cyber-form-submit w-100" data-confirm="Segur que vols eliminar aquesta plantilla base?" data-form="del-base-content-{{ template.id }}" style="background: linear-gradient(135deg, #ef4444, #b91c1c); box-shadow: 0 4px 24px rgba(239, 68, 68, 0.35);">
+                    <button type="button" class="cyber-form-submit w-100 cyber-form-submit--danger" data-confirm="Segur que vols eliminar aquesta plantilla base?" data-form="del-base-content-{{ template.id }}">
                         <i class="bi bi-trash3"></i> <span>Eliminar plantilla</span>
                     </button>
                 </form>

@@ -9,11 +9,10 @@
 {% endblock %}
 
 {% block content %}
-<div class="row justify-content-center">
-    <div class="col-md-8 col-lg-6">
-        <div class="card">
-            <div class="card-body">
-                <form method="post" class="row g-4">
+<div class="cyber-form-card">
+<div class="cyber-card cyber-card--flush" data-anim="cyber-card">
+    <div class="cyber-form-body">
+        <form method="post" class="row g-4">
                     <input type="hidden" name="_token" value="{{ csrf_token('project-edit-' ~ project.id) }}">
 
                     {% if users is defined and users|length > 0 %}
@@ -71,5 +70,4 @@
             </div>
         </div>
     </div>
-</div>
 {% endblock %}
