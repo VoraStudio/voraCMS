@@ -132,34 +132,30 @@ php bin/console doctrine:migrations:migrate --env=prod --no-interaction --no-deb
 
 ### 10. Configurar .htaccess
 
-CDMON usa PHP-FPM (`proxy_fcgi`). El `.htaccess` estándar de Symfony causa bucles de redirección.
+CDMON usa PHP-FPM (`proxy_fcgi`). Solo `FallbackResource` funciona. `mod_rewrite` causa bucles de redirección.
 
 **`public/.htaccess`:**
 
 ```apache
 SetEnv DEFAULT_URI "https://voracms.voradata.cat"
-
-# Passar header Authorization a PHP (necessari per PHP-FPM + JWT/apiToken)
 SetEnvIf Authorization "(.*)" HTTP_AUTHORIZATION=$1
 
-<IfModule mod_rewrite.c>
-    Options -MultiViews
-    RewriteEngine On
-    RewriteCond %{REQUEST_FILENAME} !-f
-    RewriteRule ^(.*)$ index.php [QSA,L]
-</IfModule>
+DirectoryIndex index.php
+FallbackResource /index.php
 ```
 
 > ⚠️ **CRÍTICO**: `SetEnv DEFAULT_URI` es necesario porque Apache+PHP-FPM no carga
-> `.env.local` en producción. Sin esta variable, el router de Symfony no puede generar
-> URLs absolutas y causa un error 500.
+> `.env.local` en producción. El `.htaccess` usa `FallbackResource`, NO `mod_rewrite`
+> (que causa "10 internal redirects" en CDMON).
 
 ### 11. Permisos
 
 ```bash
-chmod -R 775 var/cache var/log
+chmod -R 777 var/cache var/log
 chmod -R 775 config/jwt/*.pem
 ```
+
+> ⚠️ `777` en `var/` porque Apache corre como un usuario distinto al SSH (CDMON compartido).
 
 ---
 
@@ -233,23 +229,26 @@ Cada `git push` a la rama `main` ejecuta automáticamente el deploy vía GitHub 
 |---|---|
 | `SSH_HOST` | IP del servidor |
 | `SSH_USER` | Usuario SSH |
-| `SSH_KEY` | Clave privada SSH (generada en el servidor con `ssh-keygen`) |
+| `SSH_KEY` | Clave privada SSH |
 
 Los secrets se configuran en: **GitHub → Repo → Settings → Secrets and variables → Actions**
 
-El workflow ejecuta:
+**Flujo del deploy:**
 
-```bash
-git pull origin main
-chmod -R 777 var/cache/
-rm -rf var/cache/prod/*
-php deploy.php
-chmod -R 775 var/cache var/log
-```
+| Paso | Dónde | Qué |
+|------|-------|-----|
+| 1 | GitHub Runner | `composer install --no-scripts` (instala dependencias sin `proc_open`) |
+| 2 | GitHub Runner | `rsync vendor/` al servidor (evita `proc_open` en CDMON) |
+| 3 | Servidor | `git pull origin main` |
+| 4 | Servidor | `cp .env.local .env` (Apache necesita `.env`) |
+| 5 | Servidor | `chmod -R 777 var/cache var/log` |
+| 6 | Servidor | `source .env.local && COLUMNS=120 php deploy.php` (limpia caché) |
+| 7 | Servidor | `COLUMNS=120 php bin/console doctrine:migrations:migrate` |
+| 8 | Servidor | `chmod -R 777 var/cache var/log` + OPcache reset |
 
-> ⚠️ CDMON tiene `proc_open()` deshabilitado, por lo que `composer install`,
-> `cache:clear` y `doctrine:migrations:migrate` fallan si se ejecutan directamente.
-> El script `deploy.php` hace cache clear físico + migrations sin usar el CLI de Symfony.
+> ⚠️ CDMON tiene `proc_open()` deshabilitado. Por eso el `composer install` se ejecuta
+> en el runner de GitHub (no en el servidor), y los comandos CLI llevan `COLUMNS=120`
+> para evitar que Symfony Console llame a `tput cols` vía `proc_open()`.
 
 Puedes ver el estado en: `https://github.com/VoraStudio/voraCMS/actions`
 
@@ -261,10 +260,14 @@ Cuando no funcione GitHub Actions o necesites hacerlo manual:
 ssh USUARIO_SSH@SERVER_IP
 cd /web/voracms
 git pull origin main
-chmod -R 777 var/cache/
-rm -rf var/cache/prod/*
+cp .env.local .env
+chmod -R 777 var/cache var/log
+export COLUMNS=120 LINES=40
+source .env.local
 php deploy.php
-chmod -R 775 var/cache var/log
+php bin/console doctrine:migrations:migrate --env=prod --no-interaction --no-debug
+chmod -R 777 var/cache var/log
+php -r "opcache_reset();"
 ```
 
 ---
