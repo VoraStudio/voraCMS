@@ -8,7 +8,21 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: SSH and deploy
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Composer install
+        run: composer install --no-dev --optimize-autoloader --no-interaction
+
+      - name: Rsync vendor to server
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          rsync -avz --delete -e "ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no" vendor/ ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/web/voracms/vendor/
+
+      - name: Git pull & deploy on server
         uses: appleboy/ssh-action@v1.2.0
         with:
           host: ${{ secrets.SSH_HOST }}
@@ -16,23 +30,12 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           script: |
             set -e
-            export COLUMNS=120
-            export LINES=40
             cd /web/voracms
-            echo "=== 1. Git pull ==="
-            git config pull.ff only
+            echo "=== Git pull ==="
             git reset --hard HEAD
             git pull origin main
-            echo "=== 2. Composer install ==="
-            composer install --no-dev --optimize-autoloader --no-interaction 2>&1 || true
-            echo "=== 3. Symfony cache clear & warmup ==="
-            php bin/console cache:clear --env=prod --no-debug 2>&1 || true
-            php bin/console cache:warmup --env=prod --no-debug 2>&1 || true
-            echo "=== 4. Doctrine migrations ==="
-            php bin/console doctrine:migrations:migrate --env=prod --no-interaction --no-debug 2>&1 || true
-            echo "=== 5. Custom deploy script ==="
+            echo "=== Deploy ==="
             php deploy.php
-            echo "=== 6. Restore permissions ==="
+            echo "=== Permissions ==="
             chmod -R 775 var/cache var/log 2>/dev/null || true
-            # Reset OPcache
             php -r "opcache_reset();" 2>/dev/null || true
