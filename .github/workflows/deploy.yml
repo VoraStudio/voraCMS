@@ -19,12 +19,16 @@ jobs:
             cd /web/voracms
             echo "=== 1. Git pull ==="
             git pull origin main
-            echo "=== 2. Clean cache (physical) ==="
-            chmod -R 777 var/cache/ 2>/dev/null || true
-            rm -rf var/cache/prod/* 2>/dev/null || true
-            echo "=== 3. Deploy script ==="
+            echo "=== 2. Composer install ==="
+            composer install --no-dev --optimize-autoloader --no-interaction 2>&1 || true
+            echo "=== 3. Symfony cache clear & warmup ==="
+            php bin/console cache:clear --env=prod --no-debug 2>&1 || true
+            php bin/console cache:warmup --env=prod --no-debug 2>&1 || true
+            echo "=== 4. Doctrine migrations ==="
+            php bin/console doctrine:migrations:migrate --env=prod --no-interaction --no-debug 2>&1 || true
+            echo "=== 5. Custom deploy script ==="
             php deploy.php
-            echo "=== 4. Restore permissions ==="
+            echo "=== 6. Restore permissions ==="
             chmod -R 775 var/cache var/log 2>/dev/null || true
             # Reset OPcache
             php -r "opcache_reset();" 2>/dev/null || true
