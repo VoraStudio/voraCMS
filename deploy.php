@@ -10,6 +10,13 @@
 chdir(__DIR__);
 $appEnv = 'prod';
 
+require __DIR__ . '/vendor/autoload.php';
+
+/* ── Load environment variables (CLI context doesn't inherit Apache env) ── */
+if (file_exists(__DIR__ . '/.env')) {
+    (new Symfony\Component\Dotenv\Dotenv())->loadEnv(__DIR__ . '/.env');
+}
+
 echo "=== Deploy VoraCMS ===\n\n";
 
 /* ── 1. Cache: neteja física ── */
@@ -28,7 +35,6 @@ if (is_dir($cacheDir)) {
 
 /* ── 2. Migrations ── */
 echo "\n>> Running migrations...\n";
-require __DIR__ . '/vendor/autoload.php';
 
 $kernel = new App\Kernel($appEnv, false);
 $kernel->boot();
