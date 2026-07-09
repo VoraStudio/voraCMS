@@ -16,6 +16,8 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           script: |
             set -e
+            export COLUMNS=120
+            export LINES=40
             cd /web/voracms
             echo "=== 1. Git pull ==="
             git config pull.ff only
