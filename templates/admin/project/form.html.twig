@@ -52,11 +52,13 @@
 
                     {% if not isNew %}
                     <div class="col-12">
-                        <label class="form-label">Estat</label>
-                        <div class="form-check">
-                            <input type="checkbox" name="active" class="form-check-input" value="1" {% if project.active %}checked{% endif %}>
-                            <label class="form-check-label small">Projecte actiu</label>
-                        </div>
+                        <label class="s-toggle s-toggle--chk" style="--s-toggle-color:var(--s-accent)">
+                            <input type="checkbox" name="active" class="s-toggle__inp-cb" value="1" {% if project.active %}checked{% endif %}>
+                            <span class="s-toggle__switch"></span>
+                            <span class="s-toggle__icon"><i class="bi bi-folder-check"></i></span>
+                            <span class="s-toggle__lbl-cb s-toggle__lbl-cb--off">Inactiu</span>
+                            <span class="s-toggle__lbl-cb s-toggle__lbl-cb--on">Actiu</span>
+                        </label>
                     </div>
                     {% endif %}
 

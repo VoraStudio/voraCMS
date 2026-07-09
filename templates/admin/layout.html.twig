@@ -84,6 +84,9 @@
             <a class="s-sidebar-link{% if app.request.get('_route') == 'admin_api_guide' %} active{% endif %}" href="{{ path('admin_api_guide') }}">
                 <i class="bi bi-code-slash"></i> Guia API
             </a>
+            <a class="s-sidebar-link s-sidebar-link--sub{% if app.request.get('_route') == 'admin_api_guide_security' %} active{% endif %}" href="{{ path('admin_api_guide_security') }}">
+                <i class="bi bi-shield-check"></i> Seguretat
+            </a>
             {% endif %}
 
         </div>{# ─── /s-sidebar-nav ─── #}

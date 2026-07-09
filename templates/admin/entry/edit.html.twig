@@ -38,28 +38,23 @@
 <div class="cyber-form-card mx-auto">
 <div class="cyber-card cyber-card--flush" data-anim="cyber-card">
     <form method="post" id="entryForm" enctype="multipart/form-data" novalidate class="cyber-form-body">
-            <!-- Status: modern toggle chips -->
+            <!-- Status: toggle switches -->
             <div class="s-status mb-3" role="radiogroup" aria-label="Estat de l'entrada">
-                <div class="s-status__chips" id="statusSeg">
-                    <div class="s-chip{% if entry.status == 'draft' %} s-chip--sel{% endif %}" data-value="draft" tabindex="0" role="radio" aria-checked="{% if entry.status == 'draft' %}true{% else %}false{% endif %}">
-                        <span class="s-chip__dot" style="background:#6b7280"></span>
-                        <span class="s-chip__lbl">No publicat</span>
-                        <span class="s-chip__check">✓</span>
+                <div class="s-status__toggles" id="statusSeg">
+                    <div class="s-toggle{% if entry.status == 'published' %} s-toggle--sel{% endif %}" data-value="published" tabindex="0" role="radio" aria-checked="{% if entry.status == 'published' %}true{% else %}false{% endif %}" style="{% if entry.status == 'published' %}--s-toggle-color:#22c55e{% endif %}">
+                        <span class="s-toggle__switch"></span>
+                        <span class="s-toggle__icon"><i class="bi bi-globe"></i></span>
+                        <span class="s-toggle__label">{% if entry.status == 'published' %}Publicat{% else %}No publicat{% endif %}</span>
                     </div>
-                    <div class="s-chip{% if entry.status == 'published' %} s-chip--sel{% endif %}" data-value="published" tabindex="0" role="radio" aria-checked="{% if entry.status == 'published' %}true{% else %}false{% endif %}">
-                        <span class="s-chip__dot" style="background:#22c55e"></span>
-                        <span class="s-chip__lbl">Publicat</span>
-                        <span class="s-chip__check">✓</span>
+                    <div class="s-toggle{% if entry.status == 'archived' %} s-toggle--sel{% endif %}" data-value="archived" tabindex="0" role="radio" aria-checked="{% if entry.status == 'archived' %}true{% else %}false{% endif %}" style="{% if entry.status == 'archived' %}--s-toggle-color:#f59e0b{% endif %}">
+                        <span class="s-toggle__switch"></span>
+                        <span class="s-toggle__icon"><i class="bi bi-archive"></i></span>
+                        <span class="s-toggle__label">{% if entry.status == 'archived' %}Arxivat{% else %}No arxivat{% endif %}</span>
                     </div>
-                    <div class="s-chip{% if entry.status == 'archived' %} s-chip--sel{% endif %}" data-value="archived" tabindex="0" role="radio" aria-checked="{% if entry.status == 'archived' %}true{% else %}false{% endif %}">
-                        <span class="s-chip__dot" style="background:#f59e0b"></span>
-                        <span class="s-chip__lbl">Arxivat</span>
-                        <span class="s-chip__check">✓</span>
-                    </div>
-                    <div class="s-chip{% if entry.status == 'scheduled' %} s-chip--sel{% endif %}" data-value="scheduled" tabindex="0" role="radio" aria-checked="{% if entry.status == 'scheduled' %}true{% else %}false{% endif %}">
-                        <span class="s-chip__dot" style="background:#3b82f6"></span>
-                        <span class="s-chip__lbl">Programat</span>
-                        <span class="s-chip__check">✓</span>
+                    <div class="s-toggle{% if entry.status == 'scheduled' %} s-toggle--sel{% endif %}" data-value="scheduled" tabindex="0" role="radio" aria-checked="{% if entry.status == 'scheduled' %}true{% else %}false{% endif %}" style="{% if entry.status == 'scheduled' %}--s-toggle-color:#3b82f6{% endif %}">
+                        <span class="s-toggle__switch"></span>
+                        <span class="s-toggle__icon"><i class="bi bi-clock-history"></i></span>
+                        <span class="s-toggle__label">{% if entry.status == 'scheduled' %}Programat{% else %}No programat{% endif %}</span>
                     </div>
                 </div>
                 <input type="hidden" name="status" id="statusInput" value="{{ entry.status }}">
@@ -76,6 +71,9 @@
                             <input type="datetime-local" name="scheduled_end" class="s-date-inline" value="{{ schedEnd }}">
                         </div>
                     </div>
+                    <button type="submit" class="cyber-btn cyber-btn--projects" style="margin-top:16px">
+                        <i class="bi bi-clock-history"></i> <span>Programar</span>
+                    </button>
                 </div>
             </div>
 
@@ -168,10 +166,12 @@
                 </div>
 
                 {% elseif field.fieldType == 'boolean' %}
-                <label class="s-toggle">
-                    <input type="checkbox" name="field_{{ field.id }}" class="s-toggle__inp" value="1" {% if val %}checked{% endif %}>
-                    <span class="s-toggle__track"><span class="s-toggle__thumb"></span></span>
-                    <span class="s-toggle__lbl">Sí</span>
+                <label class="s-toggle s-toggle--chk" style="--s-toggle-color:var(--s-accent)">
+                    <input type="checkbox" name="field_{{ field.id }}" class="s-toggle__inp-cb" value="1" {% if val %}checked{% endif %}>
+                    <span class="s-toggle__switch"></span>
+                    <span class="s-toggle__icon"><i class="bi bi-check-circle"></i></span>
+                    <span class="s-toggle__lbl-cb s-toggle__lbl-cb--off">Inactiu</span>
+                    <span class="s-toggle__lbl-cb s-toggle__lbl-cb--on">Actiu</span>
                 </label>
 
                 {% elseif field.fieldType == 'number' %}
@@ -253,30 +253,76 @@
      data-media-picker-url="{{ path('admin_media_picker') }}?field=__FIELD_ID__&amp;project_id={{ contentType.project.id ?? '' }}"
      class="d-none"></div>
 <script src="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.js"></script>
-<script src="{{ asset('js/entry-form.js') }}"></script>
+<script src="{{ asset('js/entry-form.js') }}?v=2.0"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function () {
-    /* ─── Status chips ─── */
+    /* ─── Status toggles ─── */
     var seg = document.getElementById('statusSeg');
     if (seg) {
+        var labels = {
+            published: { on: 'Publicat',     off: 'No publicat' },
+            archived:  { on: 'Arxivat',      off: 'No arxivat' },
+            scheduled: { on: 'Programat',    off: 'No programat' }
+        };
+        var icons = {
+            published: 'bi-globe',
+            archived:  'bi-archive',
+            scheduled: 'bi-clock-history'
+        };
+        var colors = {
+            published: '#22c55e',
+            archived:  '#f59e0b',
+            scheduled: '#3b82f6'
+        };
         seg.addEventListener('click', function (e) {
-            var opt = e.target.closest('.s-chip');
+            var opt = e.target.closest('.s-toggle');
             if (!opt) return;
-            seg.querySelectorAll('.s-chip').forEach(function (o) {
-                o.classList.remove('s-chip--sel');
-                o.setAttribute('aria-checked', 'false');
-            });
-            opt.classList.add('s-chip--sel');
-            opt.setAttribute('aria-checked', 'true');
             var val = opt.getAttribute('data-value');
+            var isSelected = opt.classList.contains('s-toggle--sel');
+
+            /* Si ja està seleccionat → deseleccionar (estat esborrany) */
+            if (isSelected) {
+                opt.classList.remove('s-toggle--sel');
+                opt.setAttribute('aria-checked', 'false');
+                opt.style.setProperty('--s-toggle-color', '');
+                var labelEl = opt.querySelector('.s-toggle__label');
+                var iconEl = opt.querySelector('.s-toggle__icon i');
+                if (labelEl) labelEl.textContent = labels[val].off;
+                if (iconEl) iconEl.className = 'bi ' + icons[val];
+                document.getElementById('statusInput').value = 'draft';
+                var picker = document.getElementById('schedulePicker');
+                if (picker) picker.style.display = 'none';
+                return;
+            }
+
+            /* Desseleccionar tots */
+            seg.querySelectorAll('.s-toggle').forEach(function (o) {
+                o.classList.remove('s-toggle--sel');
+                o.setAttribute('aria-checked', 'false');
+                o.style.setProperty('--s-toggle-color', '');
+                var ov = o.getAttribute('data-value');
+                var labelEl = o.querySelector('.s-toggle__label');
+                var iconEl = o.querySelector('.s-toggle__icon i');
+                if (labelEl) labelEl.textContent = labels[ov].off;
+                if (iconEl) iconEl.className = 'bi ' + icons[ov];
+            });
+
+            /* Seleccionar el clicat */
+            opt.classList.add('s-toggle--sel');
+            opt.setAttribute('aria-checked', 'true');
+            opt.style.setProperty('--s-toggle-color', colors[val]);
+            var labelEl = opt.querySelector('.s-toggle__label');
+            var iconEl = opt.querySelector('.s-toggle__icon i');
+            if (labelEl) labelEl.textContent = labels[val].on;
+            if (iconEl) iconEl.className = 'bi ' + icons[val];
             document.getElementById('statusInput').value = val;
             var picker = document.getElementById('schedulePicker');
             if (picker) picker.style.display = val === 'scheduled' ? '' : 'none';
         });
         seg.addEventListener('keydown', function (e) {
-            var current = seg.querySelector('.s-chip--sel');
+            var current = seg.querySelector('.s-toggle--sel');
             if (!current) return;
-            var opts = Array.from(seg.querySelectorAll('.s-chip'));
+            var opts = Array.from(seg.querySelectorAll('.s-toggle'));
             var idx = opts.indexOf(current);
             if (e.key === 'ArrowRight') {
                 e.preventDefault();

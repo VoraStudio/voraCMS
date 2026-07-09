@@ -169,7 +169,7 @@ input[type="time"] {
   justify-content: center;
   gap: 2px;
   padding: 14px 12px;
-  border: 1px dashed var(--s-border);
+  border: 1.5px dashed rgba(148, 163, 184, 0.25);
   border-radius: 10px;
   cursor: pointer;
   text-align: center;
@@ -179,26 +179,44 @@ input[type="time"] {
 }
 
 .gallery-field__label:hover {
-  border-color: var(--s-text-muted);
-  background: var(--s-hover);
+  border-color: var(--s-accent);
+  background: var(--s-accent-light);
 }
 
 .gallery-field__icon {
-  font-size: 18px;
-  color: var(--s-text-muted);
+  font-size: 20px;
+  color: var(--s-accent);
 }
 
 .gallery-field__text {
-  font-size: 11px;
-  color: var(--s-text-secondary);
+  font-size: 12px;
+  color: var(--s-text);
   margin: 0;
   line-height: 1.3;
+  font-weight: 500;
 }
 
 .gallery-field__hint {
-  font-size: 9px;
-  color: var(--s-text-muted);
+  font-size: 10px;
+  color: var(--s-text-secondary);
   display: block;
+}
+
+[data-theme="light"] .gallery-field__label {
+  border-color: rgba(148, 163, 184, 0.45);
+}
+
+[data-theme="light"] .gallery-field__label:hover {
+  border-color: #b45309;
+  background: rgba(180, 83, 9, 0.06);
+}
+
+[data-theme="light"] .gallery-field__text {
+  color: #333;
+}
+
+[data-theme="light"] .gallery-field__hint {
+  color: #777;
 }
 
 .gallery-field__pick-btn {
@@ -207,20 +225,53 @@ input[type="time"] {
   gap: 6px;
   margin-top: 8px;
   padding: 6px 12px;
-  border: none;
+  border: 1px solid var(--s-accent-border);
   border-radius: 7px;
   background: transparent;
-  color: var(--s-text-secondary);
+  color: var(--s-accent);
   font-size: 12px;
   cursor: pointer;
   transition:
     background 0.15s,
-    color 0.15s;
+    color 0.15s,
+    border-color 0.15s,
+    box-shadow 0.15s;
+}
+
+.gallery-field__pick-btn i {
+  color: var(--s-accent);
+  transition: color 0.15s;
 }
 
 .gallery-field__pick-btn:hover {
-  background: var(--s-hover);
-  color: var(--s-text);
+  background: var(--s-accent-light);
+  color: var(--s-accent);
+  border-color: var(--s-accent);
+  box-shadow: 0 0 16px color-mix(in srgb, var(--s-accent) 15%, transparent);
+}
+
+.gallery-field__pick-btn:hover i {
+  color: var(--s-accent);
+}
+
+[data-theme="light"] .gallery-field__pick-btn {
+  color: #64748b;
+  border-color: rgba(100, 116, 139, 0.25);
+}
+
+[data-theme="light"] .gallery-field__pick-btn i {
+  color: #64748b;
+}
+
+[data-theme="light"] .gallery-field__pick-btn:hover {
+  background: rgba(100, 116, 139, 0.08);
+  color: #334155;
+  border-color: #64748b;
+  box-shadow: 0 0 16px rgba(100, 116, 139, 0.12);
+}
+
+[data-theme="light"] .gallery-field__pick-btn:hover i {
+  color: #334155;
 }
 
 /* Media pair: image + gallery side by side */
@@ -325,6 +376,18 @@ input[type="time"] {
   font-size: 10px;
 }
 
+/* Drag & drop reorder */
+.gallery-thumb--dragging {
+  opacity: 0.35;
+  transform: scale(0.95);
+}
+
+.gallery-thumb--over {
+  outline: 2px dashed var(--s-accent, #f97316);
+  outline-offset: -2px;
+  transform: scale(1.05);
+}
+
 /* ===============================================================
    BENTO FORM — chip status, compact grid, toggle, actions
    =============================================================== */
@@ -337,63 +400,208 @@ input[type="time"] {
   padding: 12px 14px;
 }
 
-.s-status__chips {
+/* --- Status: toggle switches --- */
+.s-status__toggles {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
+  gap: 8px;
 }
 
-.s-chip {
+.s-toggle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 14px 8px 10px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  outline: none;
+  user-select: none;
+  border: 1.5px solid rgba(148, 163, 184, 0.12);
+  background: rgba(148, 163, 184, 0.04);
+  min-width: 140px;
+}
+
+.s-toggle:hover {
+  background: rgba(148, 163, 184, 0.08);
+  border-color: rgba(148, 163, 184, 0.2);
+}
+
+.s-toggle:focus-visible {
+  box-shadow: 0 0 0 2px rgba(249, 115, 22, 0.3);
+}
+
+.s-toggle__switch {
+  position: relative;
+  width: 36px;
+  height: 20px;
+  flex-shrink: 0;
+  border-radius: 10px;
+  background: rgba(148, 163, 184, 0.2);
+  transition: background 0.25s ease;
+}
+
+.s-toggle__switch::after {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+  transition: transform 0.25s ease, background 0.25s ease;
+}
+
+.s-toggle--sel {
+  background: color-mix(in srgb, var(--s-toggle-color, #22c55e) 18%, transparent);
+  box-shadow: 0 0 28px color-mix(in srgb, var(--s-toggle-color, #22c55e) 25%, transparent);
+}
+
+.s-toggle--sel .s-toggle__switch {
+  background: linear-gradient(135deg, color-mix(in srgb, var(--s-toggle-color, #22c55e) 70%, #000), var(--s-toggle-color, #22c55e), color-mix(in srgb, var(--s-toggle-color, #22c55e) 60%, #fff));
+}
+
+.s-toggle--sel .s-toggle__switch::after {
+  transform: translateX(16px);
+}
+
+.s-toggle__icon {
   display: inline-flex;
   align-items: center;
-  gap: 7px;
-  padding: 6px 12px 6px 10px;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.15s;
-  outline: none;
-  font-size: 12px;
-  user-select: none;
-  background: transparent;
-  border: 1px solid transparent;
-}
-
-.s-chip:hover {
-  background: var(--s-hover);
-}
-
-.s-chip--sel {
-  background: var(--s-accent-light);
-  border-color: var(--s-border);
-}
-
-.s-chip__dot {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  flex-shrink: 0;
-}
-
-.s-chip__lbl {
-  color: var(--s-text-secondary);
-  font-weight: 500;
-  transition: color 0.15s;
-}
-
-.s-chip--sel .s-chip__lbl {
-  color: var(--s-text);
-}
-
-.s-chip__check {
-  font-size: 10px;
-  color: var(--s-accent);
-  opacity: 0;
-  transition: opacity 0.15s;
+  justify-content: center;
+  font-size: 1rem;
   line-height: 1;
+  opacity: 0.35;
+  transition: opacity 0.2s;
+  flex-shrink: 0;
+  width: 1.2em;
+  height: 1.2em;
 }
 
-.s-chip--sel .s-chip__check {
+.s-toggle--sel .s-toggle__icon {
   opacity: 1;
+  background: linear-gradient(135deg, var(--s-toggle-color, #22c55e), color-mix(in srgb, var(--s-toggle-color, #22c55e) 80%, #fff));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.s-toggle__label {
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: rgba(148, 163, 184, 0.6);
+  transition: color 0.2s;
+  white-space: nowrap;
+}
+
+.s-toggle--sel .s-toggle__label {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+/* Checkbox toggle (independent, CSS-only) */
+.s-toggle--chk {
+  cursor: pointer;
+}
+
+.s-toggle--chk .s-toggle__inp-cb {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+}
+
+.s-toggle--chk .s-toggle__lbl-cb--on { display: none; }
+.s-toggle--chk .s-toggle__lbl-cb--off { display: inline; }
+
+.s-toggle--chk .s-toggle__switch {
+  background: rgba(148, 163, 184, 0.35);
+}
+
+.s-toggle--chk .s-toggle__icon {
+  opacity: 0.5;
+}
+
+.s-toggle--chk .s-toggle__lbl-cb {
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: rgba(148, 163, 184, 0.75);
+  transition: color 0.2s;
+  white-space: nowrap;
+}
+
+/* On state via :has() — modern, no JS needed */
+.s-toggle--chk:has(.s-toggle__inp-cb:checked) {
+  border-color: var(--s-toggle-color, #22c55e);
+  background: color-mix(in srgb, var(--s-toggle-color, #22c55e) 20%, transparent);
+  box-shadow: 0 0 20px color-mix(in srgb, var(--s-toggle-color, #22c55e) 18%, transparent);
+}
+
+.s-toggle--chk:has(.s-toggle__inp-cb:checked) .s-toggle__switch {
+  background: linear-gradient(135deg, color-mix(in srgb, var(--s-toggle-color, #22c55e) 70%, #000), var(--s-toggle-color, #22c55e), color-mix(in srgb, var(--s-toggle-color, #22c55e) 60%, #fff));
+}
+
+.s-toggle--chk:has(.s-toggle__inp-cb:checked) .s-toggle__switch::after {
+  transform: translateX(16px);
+}
+
+.s-toggle--chk:has(.s-toggle__inp-cb:checked) .s-toggle__icon {
+  opacity: 1;
+  background: linear-gradient(135deg, var(--s-toggle-color, #22c55e), color-mix(in srgb, var(--s-toggle-color, #22c55e) 50%, #fff));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.s-toggle--chk:has(.s-toggle__inp-cb:checked) .s-toggle__lbl-cb--on {
+  display: inline;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.s-toggle--chk:has(.s-toggle__inp-cb:checked) .s-toggle__lbl-cb--off {
+  display: none;
+}
+
+/* Light theme overrides */
+[data-theme="light"] .s-toggle--chk .s-toggle__lbl-cb {
+  color: rgba(0, 0, 0, 0.55);
+}
+
+[data-theme="light"] .s-toggle--chk:has(.s-toggle__inp-cb:checked) .s-toggle__lbl-cb--on {
+  color: rgba(0, 0, 0, 0.85);
+}
+
+[data-theme="light"] .s-toggle--chk:has(.s-toggle__inp-cb:checked) {
+  background: color-mix(in srgb, var(--s-toggle-color, #22c55e) 18%, transparent);
+}
+
+/* Perfil d'usuari (inline en llistat) */
+.s-toggle--inline {
+  padding: 4px 10px 4px 8px;
+  min-width: 0;
+  border-radius: 8px;
+}
+
+.s-toggle--inline .s-toggle__switch {
+  width: 28px;
+  height: 16px;
+}
+
+.s-toggle--inline .s-toggle__switch::after {
+  width: 12px;
+  height: 12px;
+  top: 2px;
+  left: 2px;
+}
+
+.s-toggle--inline .s-toggle__icon {
+  font-size: 0.8rem;
+}
+
+.s-toggle--inline .s-toggle__label {
+  font-size: 0.7rem;
 }
 
 .s-status__schedule {
@@ -438,7 +646,7 @@ input[type="time"] {
 /* ─── Bento fields grid ─── */
 .s-fields {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(6, 1fr);
   gap: 10px;
 }
 
@@ -446,6 +654,11 @@ input[type="time"] {
   display: flex;
   flex-direction: column;
   gap: 4px;
+  grid-column: span 3;
+}
+
+.field-boolean {
+  grid-column: span 2;
 }
 
 .s-field--wide {
@@ -526,57 +739,6 @@ select.s-inp option {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 6px;
-}
-
-/* ─── Toggle switch ─── */
-.s-toggle {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  cursor: pointer;
-  user-select: none;
-}
-
-.s-toggle__inp {
-  position: absolute;
-  opacity: 0;
-  width: 0;
-  height: 0;
-}
-
-.s-toggle__track {
-  position: relative;
-  width: 30px;
-  height: 18px;
-  border-radius: 99px;
-  background: var(--s-input-border);
-  transition: background 0.2s;
-  flex-shrink: 0;
-}
-
-.s-toggle__inp:checked + .s-toggle__track {
-  background: var(--s-accent);
-}
-
-.s-toggle__thumb {
-  position: absolute;
-  top: 2px;
-  left: 2px;
-  width: 14px;
-  height: 14px;
-  border-radius: 50%;
-  background: #fff;
-  transition: transform 0.2s;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
-}
-
-.s-toggle__inp:checked + .s-toggle__track .s-toggle__thumb {
-  transform: translateX(12px);
-}
-
-.s-toggle__lbl {
-  font-size: 12px;
-  color: var(--s-text-secondary);
 }
 
 /* ─── YouTube ─── */
@@ -671,17 +833,64 @@ select.s-inp option {
   border-color: var(--s-border);
 }
 
+[data-theme="light"] .s-toggle {
+  border-color: rgba(0, 0, 0, 0.08);
+  background: rgba(0, 0, 0, 0.02);
+}
+
+[data-theme="light"] .s-toggle:hover {
+  background: rgba(0, 0, 0, 0.04);
+  border-color: rgba(0, 0, 0, 0.15);
+}
+
+[data-theme="light"] .s-toggle--sel {
+  border-color: var(--s-toggle-color, #22c55e) !important;
+  background: color-mix(in srgb, var(--s-toggle-color, #22c55e) 15%, transparent);
+  box-shadow: 0 0 28px color-mix(in srgb, var(--s-toggle-color, #22c55e) 20%, transparent);
+}
+
+[data-theme="light"] .s-toggle--sel .s-toggle__switch {
+  background: linear-gradient(135deg, color-mix(in srgb, var(--s-toggle-color, #22c55e) 50%, #000), var(--s-toggle-color, #22c55e), color-mix(in srgb, var(--s-toggle-color, #22c55e) 70%, #fff));
+}
+
+[data-theme="light"] .s-toggle--sel .s-toggle__icon {
+  background: linear-gradient(135deg, color-mix(in srgb, var(--s-toggle-color, #22c55e) 40%, #000), var(--s-toggle-color, #22c55e));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+[data-theme="light"] .s-toggle--sel .s-toggle__label {
+  color: rgba(0, 0, 0, 0.85);
+}
+
+[data-theme="light"] .s-toggle__switch {
+  background: rgba(0, 0, 0, 0.15);
+}
+
+[data-theme="light"] .s-toggle__label {
+  color: rgba(0, 0, 0, 0.4);
+}
+
 /* ─── Responsive ─── */
 @media (max-width: 640px) {
   .s-fields {
     grid-template-columns: 1fr;
   }
-  .s-status__chips {
-    gap: 4px;
+  .s-field,
+  .field-boolean {
+    grid-column: auto;
   }
-  .s-chip {
-    padding: 5px 10px 5px 8px;
-    font-size: 11px;
+  .s-status__toggles {
+    gap: 6px;
+  }
+  .s-toggle {
+    padding: 6px 10px 6px 8px;
+    min-width: 0;
+    flex: 1 1 45%;
+  }
+  .s-toggle__label {
+    font-size: 0.72rem;
   }
   .s-actions {
     flex-direction: column-reverse;

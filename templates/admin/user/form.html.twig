@@ -65,11 +65,16 @@
                 </select>
             </div>
 
-            <div class="cyber-form-check">
-                <input type="checkbox" name="active" value="1" id="user-active"
-                       class="cyber-form-checkbox"
-                       {{ user.id is null or user.active ? 'checked' : '' }}>
-                <label for="user-active" class="cyber-form-check-label">Actiu</label>
+            <div class="cyber-form-group">
+                <label class="s-toggle s-toggle--chk" style="--s-toggle-color:var(--s-accent)">
+                    <input type="checkbox" name="active" value="1"
+                           class="s-toggle__inp-cb"
+                           {{ user.id is null or user.active ? 'checked' : '' }}>
+                    <span class="s-toggle__switch"></span>
+                    <span class="s-toggle__icon"><i class="bi bi-person-check"></i></span>
+                    <span class="s-toggle__lbl-cb s-toggle__lbl-cb--off">Inactiu</span>
+                    <span class="s-toggle__lbl-cb s-toggle__lbl-cb--on">Actiu</span>
+                </label>
             </div>
 
             <button type="submit" class="cyber-form-submit" data-anim="cyber-btn">

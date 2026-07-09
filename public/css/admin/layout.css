@@ -135,6 +135,14 @@ body {
   box-shadow: none;
 }
 
+/* Sub-links (indentats, estil secundari) */
+.s-sidebar-link--sub {
+  padding-left: 42px !important;
+  font-size: 0.75rem !important;
+  font-weight: 500 !important;
+  gap: 10px !important;
+}
+
 .s-sidebar-footer {
   padding: 12px;
   border-top: 1px solid var(--s-sidebar-divider);

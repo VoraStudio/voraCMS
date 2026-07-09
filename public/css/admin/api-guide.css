@@ -163,6 +163,13 @@
   padding: 16px 20px;
 }
 
+.api-card-subtitle {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.78);
+  margin: 18px 0 8px;
+}
+
 .api-card-body--no-pad {
   padding: 0;
 }

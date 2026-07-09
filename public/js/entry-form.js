@@ -24,6 +24,7 @@
       var hidden = galField.querySelector('.gallery-value');
       var div = document.createElement('div');
       div.className = 'gallery-thumb';
+      div.setAttribute('draggable', 'true');
       div.innerHTML = '<img src="' + mediaUrl + '" alt=""><button type="button" class="remove-gallery-item" aria-label="Eliminar"><i class="bi bi-x"></i></button>';
       previews.appendChild(div);
       var current = hidden.value ? hidden.value.split(',') : [];
@@ -60,6 +61,7 @@
           reader.onload = function (e) {
             var div = document.createElement('div');
             div.className = 'gallery-thumb';
+            div.setAttribute('draggable', 'true');
             div.innerHTML = '<img src="' + e.target.result + '" alt=""><button type="button" class="remove-gallery-item" aria-label="Eliminar"><i class="bi bi-x"></i></button>';
             previews.appendChild(div);
           };
@@ -94,7 +96,7 @@
         var fieldId = this.dataset.field;
         var multiple = this.dataset.multiple === 'true';
         var pickerUrl = mediaPickerUrl ? mediaPickerUrl.replace('__FIELD_ID__', encodeURIComponent(fieldId)) + '&multiple=' + multiple : null;
-        if (pickerUrl) window.open(pickerUrl, 'mediaPicker', 'width=750,height=600');
+        if (pickerUrl) window.open(pickerUrl, 'mediaPicker', 'width=780,height=700');
       });
     });
 
@@ -108,6 +110,73 @@
           addMediaToGallery(e.data.fieldId, item.id, item.url);
         });
       }
+    });
+
+    /* ─── Drag & drop reorder for gallery thumbs ─── */
+    var draggedThumb = null;
+
+    function updateGalleryHidden(field) {
+      if (!field) return;
+      var hidden = field.querySelector('.gallery-value');
+      if (!hidden) return;
+      var ids = [];
+      field.querySelectorAll('.gallery-thumb').forEach(function (thumb) {
+        var dataId = thumb.getAttribute('data-id');
+        if (dataId) ids.push(dataId);
+      });
+      hidden.value = ids.join(',');
+    }
+
+    document.addEventListener('dragstart', function (e) {
+      var thumb = e.target.closest('.gallery-thumb');
+      if (!thumb) return;
+      draggedThumb = thumb;
+      e.dataTransfer.effectAllowed = 'move';
+      e.dataTransfer.setData('text/plain', '');
+      thumb.classList.add('gallery-thumb--dragging');
+    });
+
+    document.addEventListener('dragend', function (e) {
+      var thumb = e.target.closest('.gallery-thumb');
+      if (!thumb) return;
+      thumb.classList.remove('gallery-thumb--dragging');
+      document.querySelectorAll('.gallery-thumb--over').forEach(function (t) {
+        t.classList.remove('gallery-thumb--over');
+      });
+      draggedThumb = null;
+    });
+
+    document.addEventListener('dragover', function (e) {
+      var target = e.target.closest('.gallery-thumb');
+      if (!target || target === draggedThumb) return;
+      e.preventDefault();
+      target.classList.add('gallery-thumb--over');
+    });
+
+    document.addEventListener('dragleave', function (e) {
+      var target = e.target.closest('.gallery-thumb');
+      if (target) target.classList.remove('gallery-thumb--over');
+    });
+
+    document.addEventListener('drop', function (e) {
+      var target = e.target.closest('.gallery-thumb');
+      if (!target) return;
+      e.preventDefault();
+      target.classList.remove('gallery-thumb--over');
+      if (!draggedThumb || draggedThumb === target) return;
+
+      var children = Array.from(target.parentElement.children);
+      var fromIdx = children.indexOf(draggedThumb);
+      var toIdx = children.indexOf(target);
+      if (fromIdx < 0 || toIdx < 0) return;
+
+      if (fromIdx < toIdx) {
+        target.after(draggedThumb);
+      } else {
+        target.before(draggedThumb);
+      }
+
+      updateGalleryHidden(target.closest('.gallery-field'));
     });
 
     /* ─── Quill editor init ─── */
