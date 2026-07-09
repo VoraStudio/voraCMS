@@ -39,8 +39,11 @@ jobs:
             [ -f .env.local ] && source .env.local
             [ -f .env ] && source .env
             set +a
+            export COLUMNS=120 LINES=40
             echo "=== Deploy ==="
             php deploy.php
+            echo "=== Migrations ==="
+            php bin/console doctrine:migrations:migrate --env=prod --no-interaction --no-debug 2>&1 || true
             echo "=== Permissions ==="
             chmod -R 775 var/cache var/log 2>/dev/null || true
             php -r "opcache_reset();" 2>/dev/null || true
