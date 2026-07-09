@@ -132,20 +132,27 @@ php bin/console doctrine:migrations:migrate --env=prod --no-interaction --no-deb
 
 ### 10. Configurar .htaccess
 
-CDMON usa PHP-FPM (`proxy_fcgi`), el `.htaccess` estándar de Symfony causa bucles de redirección.
+CDMON usa PHP-FPM (`proxy_fcgi`). El `.htaccess` estándar de Symfony causa bucles de redirección.
 
 **`public/.htaccess`:**
 
 ```apache
+SetEnv DEFAULT_URI "https://voracms.voradata.cat"
+
 # Passar header Authorization a PHP (necessari per PHP-FPM + JWT/apiToken)
 SetEnvIf Authorization "(.*)" HTTP_AUTHORIZATION=$1
 
-DirectoryIndex index.php
-FallbackResource /index.php
+<IfModule mod_rewrite.c>
+    Options -MultiViews
+    RewriteEngine On
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteRule ^(.*)$ index.php [QSA,L]
+</IfModule>
 ```
 
-> ⚠️ **CRÍTICO**: Sin `SetEnvIf Authorization`, Apache con PHP-FPM NO pasa el header
-> `Authorization` a PHP. El `ApiTokenAuthenticator` nunca recibe el token y devuelve 401.
+> ⚠️ **CRÍTICO**: `SetEnv DEFAULT_URI` es necesario porque Apache+PHP-FPM no carga
+> `.env.local` en producción. Sin esta variable, el router de Symfony no puede generar
+> URLs absolutas y causa un error 500.
 
 ### 11. Permisos
 

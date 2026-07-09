@@ -34,16 +34,18 @@ jobs:
             echo "=== Git pull ==="
             git reset --hard HEAD
             git pull origin main
+            echo "=== Env & perms ==="
+            cp .env.local .env 2>/dev/null || true
+            chmod -R 777 var/cache var/log 2>/dev/null || true
             echo "=== Load env ==="
             set -a
-            [ -f .env.local ] && source .env.local
-            [ -f .env ] && source .env
+            source .env.local 2>/dev/null || true
             set +a
             export COLUMNS=120 LINES=40
             echo "=== Deploy ==="
             php deploy.php
             echo "=== Migrations ==="
             php bin/console doctrine:migrations:migrate --env=prod --no-interaction --no-debug 2>&1 || true
-            echo "=== Permissions ==="
-            chmod -R 775 var/cache var/log 2>/dev/null || true
+            echo "=== Final perms ==="
+            chmod -R 777 var/cache var/log 2>/dev/null || true
             php -r "opcache_reset();" 2>/dev/null || true
