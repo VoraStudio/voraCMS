@@ -137,9 +137,15 @@ CDMON usa PHP-FPM (`proxy_fcgi`), el `.htaccess` estándar de Symfony causa bucl
 **`public/.htaccess`:**
 
 ```apache
+# Passar header Authorization a PHP (necessari per PHP-FPM + JWT/apiToken)
+SetEnvIf Authorization "(.*)" HTTP_AUTHORIZATION=$1
+
 DirectoryIndex index.php
 FallbackResource /index.php
 ```
+
+> ⚠️ **CRÍTICO**: Sin `SetEnvIf Authorization`, Apache con PHP-FPM NO pasa el header
+> `Authorization` a PHP. El `ApiTokenAuthenticator` nunca recibe el token y devuelve 401.
 
 ### 11. Permisos
 
@@ -228,12 +234,15 @@ El workflow ejecuta:
 
 ```bash
 git pull origin main
-composer install --no-dev --optimize-autoloader --no-interaction
-php bin/console cache:clear --env=prod --no-debug
-php bin/console cache:warmup --env=prod --no-debug
-php bin/console doctrine:migrations:migrate --env=prod --no-interaction --no-debug
+chmod -R 777 var/cache/
+rm -rf var/cache/prod/*
+php deploy.php
 chmod -R 775 var/cache var/log
 ```
+
+> ⚠️ CDMON tiene `proc_open()` deshabilitado, por lo que `composer install`,
+> `cache:clear` y `doctrine:migrations:migrate` fallan si se ejecutan directamente.
+> El script `deploy.php` hace cache clear físico + migrations sin usar el CLI de Symfony.
 
 Puedes ver el estado en: `https://github.com/VoraStudio/voraCMS/actions`
 
@@ -245,21 +254,10 @@ Cuando no funcione GitHub Actions o necesites hacerlo manual:
 ssh USUARIO_SSH@SERVER_IP
 cd /web/voracms
 git pull origin main
-composer install --no-dev --optimize-autoloader --no-interaction
-php bin/console cache:clear --env=prod --no-debug
-php bin/console cache:warmup --env=prod --no-debug
-php bin/console doctrine:migrations:migrate --env=prod --no-interaction --no-debug
+chmod -R 777 var/cache/
+rm -rf var/cache/prod/*
+php deploy.php
 chmod -R 775 var/cache var/log
-```
-
-Si el cambio es solo CSS/JS/config sin nuevas dependencias:
-
-```bash
-ssh USUARIO_SSH@SERVER_IP
-cd /web/voracms
-git pull origin main
-php bin/console cache:clear --env=prod --no-debug
-php bin/console cache:warmup --env=prod --no-debug
 ```
 
 ---
@@ -278,11 +276,26 @@ ssh USUARIO_SSH@SERVER_IP "mysqldump -h 127.0.0.1 -u USUARIO_BD -p'PASSWORD_BD' 
 
 ## Resolución de problemas comunes
 
+### Error 401 "Authentication required" en llamadas API
+
+La API devuelve 401 aunque se envíe el token Bearer correcto.
+
+**Causa:** Apache + PHP-FPM no pasa el header `Authorization` a PHP.
+
+**Solución:** Verificar que `public/.htaccess` tenga la línea:
+
+```apache
+SetEnvIf Authorization "(.*)" HTTP_AUTHORIZATION=$1
+```
+
+Si está, forzar recarga de Apache o esperar unos minutos (CDMON cachea la configuración).
+
 ### Error 500 — Internal Server Error
 
 1. Mirar logs de Apache: `tail -50 /errors.log`
 2. Mirar logs de Symfony: `tail -50 /web/voracms/var/log/prod.log`
 3. Si no hay logs Symfony, asegurar `APP_ENV=prod` en `.env` y crear `var/log/` con permisos 775
+4. Comprobar migraciones pendientes: `php bin/console doctrine:migrations:status --env=prod --no-debug`
 
 ### Bucle de redirecciones (10 internal redirects)
 

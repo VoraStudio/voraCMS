@@ -1,0 +1,178 @@
+{% extends 'admin/layout.html.twig' %}
+
+{% block page_title %}Seguretat · Guia API{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('css/admin/api-guide.css') }}?v=2.0">
+{% endblock %}
+
+{% block content %}
+
+{# ─── Hero ─── #}
+<div class="api-hero" data-anim="cyber-card">
+    <div class="api-hero-bg"></div>
+    <div class="api-hero-content">
+        <div class="api-hero-icon">
+            <i class="bi bi-shield-check"></i>
+        </div>
+        <div>
+            <h1 class="api-hero-title">Seguretat</h1>
+            <p class="api-hero-desc">
+                Mecanismes de protecció del CMS: rate limiting, autenticació,
+                control de dominis i bones pràctiques.
+            </p>
+            <div class="api-hero-tags">
+                <span class="api-tag api-tag--green">Rate Limiting</span>
+                <span class="api-tag api-tag--amber">Bearer Auth</span>
+                <span class="api-tag api-tag--blue">Domain Guard</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+{# ─── Rate Limiting ─── #}
+<div class="api-card" data-anim="cyber-card">
+    <div class="api-card-header">
+        <div class="api-card-icon api-card-icon--amber">
+            <i class="bi bi-speedometer2"></i>
+        </div>
+        <h3 class="api-card-title">Rate Limiting</h3>
+    </div>
+    <div class="api-card-body">
+        <p class="api-text">Protegeix el CMS contra força bruta i abús limitant el nombre de peticions per minut. Hi ha <strong>tres nivells independents</strong>:</p>
+
+        <table class="api-params-table" style="margin-bottom: 1rem;">
+            <thead><tr><th>Àmbit</th><th>Límit</th><th>Finestra</th><th>Clau</th><th>Algorisme</th></tr></thead>
+            <tbody>
+                <tr><td><span class="api-tag api-tag--green">Admin login</span></td><td><strong>5 intents</strong></td><td>1 minut</td><td>IP + email</td><td>Token bucket</td></tr>
+                <tr><td><span class="api-tag api-tag--blue">API login</span></td><td><strong>10 intents</strong></td><td>1 minut</td><td>IP + email</td><td>Token bucket</td></tr>
+                <tr><td><span class="api-tag api-tag--amber">API general</span></td><td><strong>60 peticions</strong></td><td>1 minut</td><td>IP (o IP + user ID)</td><td>Sliding window</td></tr>
+            </tbody>
+        </table>
+
+        <div class="api-card-subtitle">Configuració</div>
+        <div class="api-code-block">
+            <div class="api-code-header"><span>config/packages/rate_limiter.yaml</span></div>
+            <pre class="api-code"><code>framework:
+    rate_limiter:
+        api:                              # API general
+            policy: 'sliding_window'      # 60 peticions en finestra mòbil d'1 min
+            limit: 60
+            interval: '1 minute'</code></pre>
+        </div>
+
+        <div class="api-code-block" style="margin-top:0.5rem;">
+            <div class="api-code-header"><span>config/packages/security.yaml</span></div>
+            <pre class="api-code"><code>security:
+    firewalls:
+        api_login:
+            login_throttling:
+                max_attempts: 10          # API login: 10 intents/min
+        admin:
+            login_throttling:
+                max_attempts: 5           # Admin login: 5 intents/min</code></pre>
+        </div>
+
+        <div class="api-card-subtitle">Com funciona</div>
+        <ul class="api-text" style="padding-left:1.25rem;">
+            <li><strong>Login (admin + API):</strong> Utilitza <code>login_throttling</code> de Symfony amb algorisme <strong>token bucket</strong>. Per cada intent <em>fallit</em> es consumeix un token; els tokens es regeneren gradualment (1 cada ~12s). Permet ràfegues curtes (5 intents en 3s) però bloqueja intents sostinguts. Compta només intents <strong>fallits</strong>, no exitosos.</li>
+            <li><strong>API general:</strong> Un <code>ApiRateLimiterSubscriber</code> amb <strong>sliding window</strong> de 60 peticions per minut. Compta <strong>totes</strong> les peticions, siguin exitoses o no. La clau és la IP del client; si l'usuari està autenticat, es combina IP + user ID per no penalitzar usuaris darrere d'una mateixa IP.</li>
+            <li>Les rutes <code>/api/auth/*</code> queden excloses del rate limiter general perquè ja tenen el seu propi <code>login_throttling</code>. Les peticions <code>OPTIONS</code> (CORS preflight) tampoc es limiten.</li>
+        </ul>
+
+        <div class="api-card-subtitle">Flux d'una petició API</div>
+        <div class="api-flow">
+            <div class="api-flow-step">
+                <div class="api-flow-num">1</div>
+                <div class="api-flow-content">
+                    <h4>Request</h4>
+                    <p><code>GET /api/entries</code> amb <code>Authorization: Bearer &lt;token&gt;</code></p>
+                </div>
+            </div>
+            <div class="api-flow-arrow"><i class="bi bi-chevron-down"></i></div>
+            <div class="api-flow-step">
+                <div class="api-flow-num" style="background:rgba(234,179,8,0.15);border-color:rgba(234,179,8,0.2);color:#eab308;">2</div>
+                <div class="api-flow-content">
+                    <h4 style="color:#eab308;">Rate Limiter</h4>
+                    <p>ApiRateLimiterSubscriber comprova <strong>sliding window</strong> (60/min).<br>
+                    Si s'ha superat → <strong>429</strong> directe, sense processar res més.</p>
+                </div>
+            </div>
+            <div class="api-flow-arrow"><i class="bi bi-chevron-down"></i></div>
+            <div class="api-flow-step">
+                <div class="api-flow-num" style="background:rgba(249,115,22,0.15);border-color:rgba(249,115,22,0.2);color:#f97316;">3</div>
+                <div class="api-flow-content">
+                    <h4 style="color:#f97316;">Domain Guard</h4>
+                    <p>Verifica que l'<code>Origin</code> estigui dins dels dominis permesos de l'usuari.<br>
+                    Si no → <strong>403</strong>.</p>
+                </div>
+            </div>
+            <div class="api-flow-arrow"><i class="bi bi-chevron-down"></i></div>
+            <div class="api-flow-step">
+                <div class="api-flow-num" style="background:rgba(34,197,94,0.15);border-color:rgba(34,197,94,0.2);color:#22c55e;">4</div>
+                <div class="api-flow-content">
+                    <h4 style="color:#22c55e;">Autenticació</h4>
+                    <p>ApiTokenAuthenticator valida el Bearer token (JWT o apiToken).<br>
+                    Si invàlid → <strong>401</strong>.</p>
+                </div>
+            </div>
+            <div class="api-flow-arrow"><i class="bi bi-chevron-down"></i></div>
+            <div class="api-flow-step">
+                <div class="api-flow-num">5</div>
+                <div class="api-flow-content">
+                    <h4>Controller</h4>
+                    <p>Processa la petició i retorna JSON amb headers <code>X-RateLimit-*</code>.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="api-card-subtitle">Endpoints i rate limiting</div>
+        <table class="api-params-table" style="margin-bottom:0.75rem;">
+            <thead><tr><th>Endpoint</th><th>Rate limit</th><th>Responsable</th></tr></thead>
+            <tbody>
+                <tr><td><code>POST /api/auth/login</code></td><td><span class="api-tag api-tag--green" style="font-size:0.65rem;">✅ 10/min (fallits)</span></td><td><code>login_throttling</code></td></tr>
+                <tr><td><code>GET /api/auth/me</code></td><td><span class="api-tag" style="font-size:0.65rem;background:rgba(148,163,184,0.1);color:rgba(148,163,184,0.5);">❌ No</span></td><td>Exclòs explícitament</td></tr>
+                <tr><td><code>GET /api/sections</code></td><td><span class="api-tag api-tag--amber" style="font-size:0.65rem;">✅ 60/min</span></td><td><code>ApiRateLimiterSubscriber</code></td></tr>
+                <tr><td><code>GET /api/{slug}</code></td><td><span class="api-tag api-tag--amber" style="font-size:0.65rem;">✅ 60/min</span></td><td><code>ApiRateLimiterSubscriber</code></td></tr>
+                <tr><td><code>GET /api/{slug}/{id}</code></td><td><span class="api-tag api-tag--amber" style="font-size:0.65rem;">✅ 60/min</span></td><td><code>ApiRateLimiterSubscriber</code></td></tr>
+                <tr><td><code>POST /api/visit</code></td><td><span class="api-tag api-tag--amber" style="font-size:0.65rem;">✅ 60/min</span></td><td><code>ApiRateLimiterSubscriber</code></td></tr>
+                <tr><td><code>OPTIONS /api/*</code></td><td><span class="api-tag" style="font-size:0.65rem;background:rgba(148,163,184,0.1);color:rgba(148,163,184,0.5);">❌ No</span></td><td>Exclòs (CORS preflight)</td></tr>
+                <tr><td><code>POST /admin/login</code></td><td><span class="api-tag api-tag--green" style="font-size:0.65rem;">✅ 5/min (fallits)</span></td><td><code>login_throttling</code></td></tr>
+            </tbody>
+        </table>
+
+        <div class="api-card-subtitle">Headers de resposta</div>
+        <p class="api-text">Totes les respostes de l'API inclouen tres headers perquè el frontend conegui el seu estat:</p>
+        <table class="api-params-table" style="margin-bottom:0.75rem;">
+            <thead><tr><th>Header</th><th>Significat</th></tr></thead>
+            <tbody>
+                <tr><td><code>X-RateLimit-Limit</code></td><td>Límit màxim de peticions per finestra</td></tr>
+                <tr><td><code>X-RateLimit-Remaining</code></td><td>Peticions restants en la finestra actual</td></tr>
+                <tr><td><code>X-RateLimit-Reset</code></td><td>Timestamp Unix quan es renicia el comptador</td></tr>
+            </tbody>
+        </table>
+
+        <div class="api-card-subtitle">Què passa si es supera el límit</div>
+        <p class="api-text">L'API respon amb <strong>429 Too Many Requests</strong> i el header <code>Retry-After</code> indicant quants segons esperar abans de reintentar.</p>
+
+        <details class="api-details">
+            <summary class="api-details-summary"><i class="bi bi-code-slash"></i> Exemple de resposta 429</summary>
+            <div class="api-code-block">
+                <pre class="api-code"><code>HTTP/1.1 429 Too Many Requests
+Retry-After: 45
+X-RateLimit-Limit: 60
+X-RateLimit-Remaining: 0
+X-RateLimit-Reset: 1741564800
+
+{
+  "error": "Too many requests",
+  "message": "Has superat el límit de peticions. Intenta-ho de nou en 45 segons.",
+  "retryAfter": 45
+}</code></pre>
+            </div>
+        </details>
+    </div>
+</div>
+
+{% endblock %}

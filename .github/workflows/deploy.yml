@@ -15,10 +15,20 @@ jobs:
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_KEY }}
           script: |
+            set -e
             cd /web/voracms
+            echo "=== 1. Git pull ==="
             git pull origin main
+            echo "=== 2. Composer install ==="
             composer install --no-dev --optimize-autoloader --no-interaction 2>&1 || true
+            echo "=== 3. Symfony cache clear & warmup ==="
             php bin/console cache:clear --env=prod --no-debug 2>&1 || true
             php bin/console cache:warmup --env=prod --no-debug 2>&1 || true
+            echo "=== 4. Doctrine migrations ==="
             php bin/console doctrine:migrations:migrate --env=prod --no-interaction --no-debug 2>&1 || true
-            chmod -R 775 var/cache var/log 2>&1 || true
+            echo "=== 5. Custom deploy script ==="
+            php deploy.php
+            echo "=== 6. Restore permissions ==="
+            chmod -R 775 var/cache var/log 2>/dev/null || true
+            # Reset OPcache
+            php -r "opcache_reset();" 2>/dev/null || true

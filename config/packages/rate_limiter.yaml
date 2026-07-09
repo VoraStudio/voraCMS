@@ -1,0 +1,15 @@
+# ══════════════════════════════════════════════════════════════
+#   Rate Limiter — VoraCMS
+# ══════════════════════════════════════════════════════════════
+#   Limita el tráfico general de la API para evitar abusos.
+#   El login throttling se configura directamente en security.yaml.
+# ══════════════════════════════════════════════════════════════
+
+framework:
+    rate_limiter:
+
+        # ── API General ────────────────────────────────  60 peticiones/min
+        api:
+            policy: 'sliding_window'
+            limit: 60
+            interval: '1 minute'

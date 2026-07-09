@@ -55,10 +55,13 @@
                     </div>
                 </div>
                 <div class="col-md-6 d-flex align-items-end">
-                    <div class="cyber-form-check mb-0">
-                        <input type="checkbox" name="active" class="cyber-form-checkbox" {% if contentType.active %}checked{% endif %} value="1" id="ct-active">
-                        <label class="cyber-form-check-label small" for="ct-active">Tipus de contingut actiu</label>
-                    </div>
+                    <label class="s-toggle s-toggle--chk mb-0" style="--s-toggle-color:var(--s-accent)" for="ct-active">
+                        <input type="checkbox" name="active" class="s-toggle__inp-cb" id="ct-active" {% if contentType.active %}checked{% endif %} value="1">
+                        <span class="s-toggle__switch"></span>
+                        <span class="s-toggle__icon"><i class="bi bi-check-circle"></i></span>
+                        <span class="s-toggle__lbl-cb s-toggle__lbl-cb--off">Inactiu</span>
+                        <span class="s-toggle__lbl-cb s-toggle__lbl-cb--on">Actiu</span>
+                    </label>
                 </div>
             </div>
 
@@ -87,10 +90,13 @@
                             </select>
                         </div>
                         <div class="col-md-3 d-flex align-items-center">
-                            <div class="cyber-form-check mb-0">
-                                <input type="checkbox" name="field_required[]" class="cyber-form-checkbox" {% if field.required %}checked{% endif %} value="1">
-                                <span class="cyber-form-check-label small">Requerit</span>
-                            </div>
+                            <label class="s-toggle s-toggle--chk s-toggle--inline mb-0" style="--s-toggle-color:#ef4444">
+                                <input type="checkbox" name="field_required[]" class="s-toggle__inp-cb" {% if field.required %}checked{% endif %} value="1">
+                                <span class="s-toggle__switch"></span>
+                                <span class="s-toggle__icon"><i class="bi bi-asterisk"></i></span>
+                                <span class="s-toggle__lbl-cb s-toggle__lbl-cb--off">Opcional</span>
+                                <span class="s-toggle__lbl-cb s-toggle__lbl-cb--on">Requerit</span>
+                            </label>
                         </div>
                         <div class="col-md-2 text-end">
                             <button type="button" class="cyber-btn cyber-btn--icon cyber-btn--delete remove-field">

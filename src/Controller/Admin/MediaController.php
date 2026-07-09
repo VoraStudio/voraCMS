@@ -250,20 +250,71 @@ class MediaController extends AbstractController
             $project = $projectRepo->find($projectId);
         }
 
+        /* Indexar media per project_id */
+        $user = $this->getUser();
+
         if ($this->isGranted('ROLE_ADMIN')) {
-            $media = $repo->findBy([], ['createdAt' => 'DESC']);
+            $allMedia = $repo->findAllWithUserOrdered();
+        } elseif ($user instanceof User) {
+            $allMedia = $repo->findByUserProjects($user);
         } else {
-            $user = $this->getUser();
-            $media = $user instanceof User
-                ? $repo->findByUserOrdered($user->getId())
-                : [];
+            $allMedia = [];
         }
 
+        $mediaByPid = [];
+        $mediaNoProject = [];
+        foreach ($allMedia as $m) {
+            $pid = $m->getProject()?->getId();
+            if ($pid) {
+                $mediaByPid[$pid][] = $m;
+            } else {
+                $mediaNoProject[] = $m;
+            }
+        }
+
+        /* Obtenir TOTS els projectes per construir l'estructura completa */
+        $groups = [];
+
+        if ($this->isGranted('ROLE_ADMIN')) {
+            $allProjects = $projectRepo->findBy([], ['name' => 'ASC']);
+        } elseif ($user instanceof User) {
+            $allProjects = $user->getProjects()->toArray();
+        } else {
+            $allProjects = [];
+        }
+
+        foreach ($allProjects as $p) {
+            $company = $p->getUser()?->getCompany() ?: 'Sense client';
+            $companyKey = strtolower($company);
+
+            if (!isset($groups[$companyKey])) {
+                $groups[$companyKey] = ['company' => $company, 'projects' => []];
+            }
+
+            $groups[$companyKey]['projects'][] = [
+                'project' => $p,
+                'items'   => $mediaByPid[$p->getId()] ?? [],
+            ];
+        }
+
+        /* Afegir media sense projecte (si n'hi ha) */
+        if (!empty($mediaNoProject)) {
+            $companyKey = '_sense';
+            $groups[$companyKey] = ['company' => 'Sense client', 'projects' => []];
+            $groups[$companyKey]['projects'][] = [
+                'project' => null,
+                'items'   => $mediaNoProject,
+            ];
+        }
+
+        /* Ordenar: per nom de companyia */
+        usort($groups, fn($a, $b) => strcmp($a['company'], $b['company']));
+
         return $this->render('admin/media/picker.html.twig', [
-            'media'    => $media,
-            'fieldId'  => $request->query->get('field', ''),
-            'multiple' => $request->query->get('multiple', 'false') === 'true',
-            'project'  => $project,
+            'mediaGrouped' => $groups,
+            'fieldId'      => $request->query->get('field', ''),
+            'multiple'     => $request->query->get('multiple', 'false') === 'true',
+            'project'      => $project,
         ]);
     }
 }

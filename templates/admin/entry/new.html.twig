@@ -18,29 +18,24 @@
 <div class="cyber-card cyber-card--flush" data-anim="cyber-card">
     <form method="post" id="entryForm" enctype="multipart/form-data" novalidate class="cyber-form-body">
             <div class="s-status mb-3" role="radiogroup" aria-label="Estat de l'entrada">
-                <div class="s-status__chips" id="statusSeg">
-                    <div class="s-chip s-chip--sel" data-value="draft" tabindex="0" role="radio" aria-checked="true">
-                        <span class="s-chip__dot" style="background:#6b7280"></span>
-                        <span class="s-chip__lbl">No publicat</span>
-                        <span class="s-chip__check">✓</span>
+                <div class="s-status__toggles" id="statusSeg">
+                    <div class="s-toggle s-toggle--sel" data-value="published" tabindex="0" role="radio" aria-checked="true" style="--s-toggle-color:#22c55e">
+                        <span class="s-toggle__switch"></span>
+                        <span class="s-toggle__icon"><i class="bi bi-globe"></i></span>
+                        <span class="s-toggle__label">No publicat</span>
                     </div>
-                    <div class="s-chip" data-value="published" tabindex="0" role="radio" aria-checked="false">
-                        <span class="s-chip__dot" style="background:#22c55e"></span>
-                        <span class="s-chip__lbl">Publicat</span>
-                        <span class="s-chip__check">✓</span>
+                    <div class="s-toggle" data-value="archived" tabindex="0" role="radio" aria-checked="false">
+                        <span class="s-toggle__switch"></span>
+                        <span class="s-toggle__icon"><i class="bi bi-archive"></i></span>
+                        <span class="s-toggle__label">No arxivat</span>
                     </div>
-                    <div class="s-chip" data-value="archived" tabindex="0" role="radio" aria-checked="false">
-                        <span class="s-chip__dot" style="background:#f59e0b"></span>
-                        <span class="s-chip__lbl">Arxivat</span>
-                        <span class="s-chip__check">✓</span>
-                    </div>
-                    <div class="s-chip" data-value="scheduled" tabindex="0" role="radio" aria-checked="false">
-                        <span class="s-chip__dot" style="background:#3b82f6"></span>
-                        <span class="s-chip__lbl">Programat</span>
-                        <span class="s-chip__check">✓</span>
+                    <div class="s-toggle" data-value="scheduled" tabindex="0" role="radio" aria-checked="false">
+                        <span class="s-toggle__switch"></span>
+                        <span class="s-toggle__icon"><i class="bi bi-clock-history"></i></span>
+                        <span class="s-toggle__label">No programat</span>
                     </div>
                 </div>
-                <input type="hidden" name="status" id="statusInput" value="draft">
+                <input type="hidden" name="status" id="statusInput" value="published">
                 <div class="s-status__schedule" id="schedulePicker" style="display:none">
                     <div class="s-sched-row">
                         <div class="s-sched-field">
@@ -52,6 +47,9 @@
                             <input type="datetime-local" name="scheduled_end" class="s-date-inline">
                         </div>
                     </div>
+                    <button type="submit" class="cyber-btn cyber-btn--projects" style="margin-top:16px">
+                        <i class="bi bi-clock-history"></i> <span>Programar</span>
+                    </button>
                 </div>
             </div>
 
@@ -134,10 +132,12 @@
                 </div>
 
                 {% elseif field.fieldType == 'boolean' %}
-                <label class="s-toggle">
-                    <input type="checkbox" name="field_{{ field.id }}" class="s-toggle__inp" value="1">
-                    <span class="s-toggle__track"><span class="s-toggle__thumb"></span></span>
-                    <span class="s-toggle__lbl">Sí</span>
+                <label class="s-toggle s-toggle--chk" style="--s-toggle-color:var(--s-accent)">
+                    <input type="checkbox" name="field_{{ field.id }}" class="s-toggle__inp-cb" value="1">
+                    <span class="s-toggle__switch"></span>
+                    <span class="s-toggle__icon"><i class="bi bi-check-circle"></i></span>
+                    <span class="s-toggle__lbl-cb s-toggle__lbl-cb--off">Inactiu</span>
+                    <span class="s-toggle__lbl-cb s-toggle__lbl-cb--on">Actiu</span>
                 </label>
 
                 {% elseif field.fieldType == 'number' %}
@@ -223,18 +223,63 @@
 document.addEventListener('DOMContentLoaded', function () {
     var seg = document.getElementById('statusSeg');
     if (!seg) return;
+
+    var labels = {
+        published: { on: 'Publicat',     off: 'No publicat' },
+        archived:  { on: 'Arxivat',      off: 'No arxivat' },
+        scheduled: { on: 'Programat',    off: 'No programat' }
+    };
+    var icons = {
+        published: 'bi-globe',
+        archived:  'bi-archive',
+        scheduled: 'bi-clock-history'
+    };
+    var colors = {
+        published: '#22c55e',
+        archived:  '#f59e0b',
+        scheduled: '#3b82f6'
+    };
+
     seg.addEventListener('click', function (e) {
-        var opt = e.target.closest('.s-chip');
+        var opt = e.target.closest('.s-toggle');
         if (!opt) return;
-        seg.querySelectorAll('.s-chip').forEach(function (o) {
-            o.classList.remove('s-chip--sel');
+        var val = opt.getAttribute('data-value');
+        var isSelected = opt.classList.contains('s-toggle--sel');
+
+        if (isSelected) {
+            opt.classList.remove('s-toggle--sel');
+            opt.setAttribute('aria-checked', 'false');
+            opt.style.setProperty('--s-toggle-color', '');
+            var labelEl = opt.querySelector('.s-toggle__label');
+            var iconEl = opt.querySelector('.s-toggle__icon i');
+            if (labelEl) labelEl.textContent = labels[val].off;
+            if (iconEl) iconEl.className = 'bi ' + icons[val];
+            document.getElementById('statusInput').value = 'draft';
+            var picker = document.getElementById('schedulePicker');
+            if (picker) picker.style.display = 'none';
+            return;
+        }
+
+        seg.querySelectorAll('.s-toggle').forEach(function (o) {
+            o.classList.remove('s-toggle--sel');
             o.setAttribute('aria-checked', 'false');
+            o.style.setProperty('--s-toggle-color', '');
+            var ov = o.getAttribute('data-value');
+            var labelEl = o.querySelector('.s-toggle__label');
+            var iconEl = o.querySelector('.s-toggle__icon i');
+            if (labelEl) labelEl.textContent = labels[ov].off;
+            if (iconEl) iconEl.className = 'bi ' + icons[ov];
         });
-        opt.classList.add('s-chip--sel');
+        opt.classList.add('s-toggle--sel');
         opt.setAttribute('aria-checked', 'true');
-        document.getElementById('statusInput').value = opt.getAttribute('data-value');
+        opt.style.setProperty('--s-toggle-color', colors[val]);
+        var labelEl = opt.querySelector('.s-toggle__label');
+        var iconEl = opt.querySelector('.s-toggle__icon i');
+        if (labelEl) labelEl.textContent = labels[val].on;
+        if (iconEl) iconEl.className = 'bi ' + icons[val];
+        document.getElementById('statusInput').value = val;
         var picker = document.getElementById('schedulePicker');
-        if (picker) picker.style.display = opt.getAttribute('data-value') === 'scheduled' ? '' : 'none';
+        if (picker) picker.style.display = val === 'scheduled' ? '' : 'none';
     });
 
 });

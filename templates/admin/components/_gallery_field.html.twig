@@ -19,7 +19,7 @@
     <!-- Gallery previews (JS-compatible class names) -->
     <div class="gallery-previews">
         {% for gid in itemIds %}
-        <div class="gallery-thumb" data-id="{{ gid }}">
+        <div class="gallery-thumb" data-id="{{ gid }}" draggable="true">
             <img src="{{ mediaPaths[gid] ?? '' }}" alt="">
             <button type="button" class="remove-gallery-item" aria-label="Eliminar"><i class="bi bi-x"></i></button>
         </div>

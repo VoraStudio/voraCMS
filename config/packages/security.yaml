@@ -27,6 +27,8 @@ security:
         success_handler: lexik_jwt_authentication.handler.authentication_success
         failure_handler: lexik_jwt_authentication.handler.authentication_failure
       jwt: ~
+      login_throttling:
+        max_attempts: 10
 
     api:
       pattern: ^/api
@@ -46,6 +48,8 @@ security:
       logout:
         path: admin_logout
         target: admin_login
+      login_throttling:
+        max_attempts: 5
 
   access_control:
     # API: login is public, OPTIONS preflight is public (CORS), everything else requires auth
