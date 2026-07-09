@@ -18,6 +18,8 @@ jobs:
             set -e
             cd /web/voracms
             echo "=== 1. Git pull ==="
+            git config pull.ff only
+            git reset --hard HEAD
             git pull origin main
             echo "=== 2. Composer install ==="
             composer install --no-dev --optimize-autoloader --no-interaction 2>&1 || true
