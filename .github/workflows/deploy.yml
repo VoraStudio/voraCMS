@@ -34,6 +34,11 @@ jobs:
             echo "=== Git pull ==="
             git reset --hard HEAD
             git pull origin main
+            echo "=== Load env ==="
+            set -a
+            [ -f .env.local ] && source .env.local
+            [ -f .env ] && source .env
+            set +a
             echo "=== Deploy ==="
             php deploy.php
             echo "=== Permissions ==="
