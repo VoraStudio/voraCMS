@@ -87,6 +87,9 @@
             <a class="s-sidebar-link s-sidebar-link--sub{% if app.request.get('_route') == 'admin_api_guide_security' %} active{% endif %}" href="{{ path('admin_api_guide_security') }}">
                 <i class="bi bi-shield-check"></i> Seguretat
             </a>
+            <a class="s-sidebar-link s-sidebar-link--sub{% if app.request.get('_route') == 'admin_api_guide_jwt' %} active{% endif %}" href="{{ path('admin_api_guide_jwt') }}">
+                <i class="bi bi-key-fill"></i> JWT
+            </a>
             {% endif %}
 
         </div>{# ─── /s-sidebar-nav ─── #}
@@ -109,6 +112,10 @@
                 <button class="s-theme-toggle" id="themeToggle" title="Canviar tema">
                     <i class="bi bi-sun-fill s-theme-icon-light"></i>
                     <i class="bi bi-moon-fill s-theme-icon-dark"></i>
+                </button>
+                {# ─── Help / FAQ ─── #}
+                <button class="s-help-toggle faq-btn" type="button" title="Ajuda ràpida" aria-label="Ajuda ràpida">
+                    <i class="bi bi-question-circle-fill"></i>
                 </button>
                 {# ─── User card ─── #}
                 {% include 'admin/_user_card.html.twig' %}

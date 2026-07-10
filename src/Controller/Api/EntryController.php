@@ -7,8 +7,8 @@
    Format de sortida: { data: { ... } } — compatible Strapi v5.
 
    Autenticació: Bearer token via header
-   Authorization: Bearer <apiToken>
-   El token subscriber resol l'usuari al security context.
+   Authorization: Bearer <jwt>
+   El JWT és validat per LexikJWTAuthenticator.
 
    Les consultes ja són scoped a l'usuari autenticat pel
    UserIdFilter / UserFilterSubscriber. No s'accepta el

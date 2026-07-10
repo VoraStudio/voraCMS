@@ -47,13 +47,4 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
             ->getQuery()
             ->getOneOrNullResult();
     }
-
-    public function findByApiToken(string $token): ?User
-    {
-        return $this->createQueryBuilder('u')
-            ->where('u.apiToken = :token')
-            ->setParameter('token', $token)
-            ->getQuery()
-            ->getOneOrNullResult();
-    }
 }

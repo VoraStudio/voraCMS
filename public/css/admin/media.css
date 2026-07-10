@@ -1,6 +1,185 @@
 /* ═══════════════════════════════════════════════════════
-   VoraCMS · Media Picker — Soft Dark + Client/Project Accordion
+   VoraCMS · Media Index & Picker — Soft Dark + Client/Project Accordion
    ═══════════════════════════════════════════════════════ */
+
+/* ─── Media Index wrapper ─── */
+.media-index {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.media-index .media-picker__upload {
+  padding: 12px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.media-index .media-picker__upload .media-picker__upload-inner {
+  max-width: 640px;
+}
+
+.media-index .media-picker__projects {
+  padding: 8px 0 0;
+  overflow-y: visible;
+}
+
+.media-index .media-picker__client:last-child {
+  margin-bottom: 0;
+}
+
+/* ─── Project select in upload bar ─── */
+.media-index__project-select {
+  padding: 7px 30px 7px 12px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #f59e0b;
+  background: #000;
+  border: 1px solid rgba(245, 158, 11, 0.5);
+  border-radius: 8px;
+  cursor: pointer;
+  flex-shrink: 0;
+  max-width: 180px;
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 5 5-5' fill='none' stroke='%23f59e0b' stroke-width='1.5'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  transition:
+    border-color 0.2s ease,
+    background 0.2s ease;
+}
+
+.media-index__project-select:hover {
+  border-color: #f59e0b;
+  background: #000;
+}
+
+.media-index__project-select:focus {
+  outline: none;
+  border-color: #f59e0b;
+  box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.2);
+}
+
+[data-theme="light"] .media-index__project-select {
+  color: rgba(0, 0, 0, 0.85);
+  background: #f0f0f0;
+  border-color: rgba(245, 158, 11, 0.5);
+}
+
+[data-theme="light"] .media-index__project-select:hover {
+  border-color: #f59e0b;
+  background: #e8e8e8;
+}
+
+[data-theme="light"] .media-index__project-select:focus {
+  border-color: #f59e0b;
+  box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.15);
+}
+
+/* ─── Media index item (extended picker item) ─── */
+.media-index__item {
+  position: relative;
+  cursor: default;
+}
+
+.media-index__item:hover {
+  z-index: 2;
+}
+
+.media-index__item-info {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 4px 6px;
+  background: linear-gradient(0deg, rgba(2, 6, 23, 0.85) 0%, transparent 100%);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.media-index__item:hover .media-index__item-info {
+  opacity: 1;
+}
+
+.media-index__item-name {
+  font-size: 0.6rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.9);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.2;
+}
+
+.media-index__item-size {
+  font-size: 0.55rem;
+  color: rgba(148, 163, 184, 0.6);
+  line-height: 1.2;
+}
+
+.media-index__item-copy {
+  position: absolute;
+  top: 3px;
+  right: 3px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(245, 158, 11, 0.85);
+  color: #fff;
+  font-size: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  opacity: 0;
+  transform: scale(0.85);
+  transition: all 0.15s ease;
+  z-index: 3;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.35);
+  padding: 0;
+  line-height: 1;
+}
+
+.media-index__item:hover .media-index__item-copy {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.media-index__item-copy:hover {
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  box-shadow: 0 2px 8px rgba(245, 158, 11, 0.5);
+  transform: scale(1.1);
+}
+
+.media-index__item-copy:active {
+  transform: scale(0.9);
+}
+
+[data-theme="light"] .media-index__item-info {
+  background: linear-gradient(0deg, rgba(255, 255, 255, 0.92) 0%, transparent 100%);
+}
+
+[data-theme="light"] .media-index__item-name {
+  color: rgba(15, 23, 42, 0.9);
+}
+
+[data-theme="light"] .media-index__item-size {
+  color: rgba(71, 85, 105, 0.6);
+}
+
+[data-theme="light"] .media-index__item-copy {
+  background: rgba(245, 158, 11, 0.9);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
+}
+
+[data-theme="light"] .media-index__item-copy:hover {
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  box-shadow: 0 2px 8px rgba(217, 119, 6, 0.4);
+}
 
 /* ─── Body ─── */
 .media-picker-body {
@@ -361,8 +540,7 @@
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.06em;
-  color: var(--s-accent, #f59e0b);
-  opacity: 0.85;
+  color: #f59e0b;
 }
 
 /* ─── Project card ─── */
@@ -435,7 +613,7 @@
 .media-picker__card-name {
   font-size: 0.82rem;
   font-weight: 500;
-  color: rgba(255, 255, 255, 0.8);
+  color: #fff;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -788,8 +966,7 @@
 }
 
 [data-theme="light"] .media-picker__client-name {
-  color: var(--s-accent, #d97706);
-  opacity: 0.6;
+  color: #d97706;
 }
 
 [data-theme="light"] .media-picker__card {
@@ -910,6 +1087,10 @@
 
 [data-theme="light"] .media-picker__card-header {
   color: rgba(0, 0, 0, 0.75);
+}
+
+[data-theme="light"] .media-index .media-picker__upload {
+  border-bottom-color: rgba(0, 0, 0, 0.04);
 }
 
 [data-theme="light"] .media-picker__upload-btn:disabled {

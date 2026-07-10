@@ -1,37 +1,154 @@
 /* ═══════════════════════════════════════════════════
-   VoraCMS · Media Index
-   Upload AJAX, file preview, copy URL
+   VoraCMS · Media Index v2
+   Upload AJAX, accordion (picker-style), delete, copy URL
    ═══════════════════════════════════════════════════ */
 
 (function () {
   'use strict';
 
   document.addEventListener('DOMContentLoaded', function () {
+    var browser = document.getElementById('mediaBrowser');
+    if (!browser) return;
+
+    /* ─── Accordion: single-open per client ─── */
+    var clients = browser.querySelectorAll('.media-picker__client');
+
+    clients.forEach(function (client) {
+      var cards = client.querySelectorAll('.media-picker__card');
+
+      function closeAllCards (skip) {
+        cards.forEach(function (c) {
+          if (c !== skip) {
+            c.classList.remove('media-picker__card--open');
+            var h = c.querySelector('.media-picker__card-header');
+            if (h) h.setAttribute('aria-expanded', 'false');
+          }
+        });
+      }
+
+      cards.forEach(function (card) {
+        var header = card.querySelector('.media-picker__card-header');
+        if (!header) return;
+
+        header.addEventListener('click', function (e) {
+          e.stopPropagation();
+          var isOpen = card.classList.contains('media-picker__card--open');
+          if (isOpen) {
+            closeAllCards();
+          } else {
+            closeAllCards();
+            card.classList.add('media-picker__card--open');
+            header.setAttribute('aria-expanded', 'true');
+          }
+        });
+
+        /* Keyboard */
+        header.addEventListener('keydown', function (e) {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            header.click();
+          }
+        });
+      });
+    });
+
+    /* Click outside → close all */
+    document.addEventListener('click', function (e) {
+      if (!browser.contains(e.target)) {
+        browser.querySelectorAll('.media-picker__card--open').forEach(function (c) {
+          c.classList.remove('media-picker__card--open');
+          var h = c.querySelector('.media-picker__card-header');
+          if (h) h.setAttribute('aria-expanded', 'false');
+        });
+      }
+    });
 
     /* ─── Upload form ─── */
     var uploadForm = document.getElementById('uploadForm');
     if (uploadForm) {
+      var fileInput = uploadForm.querySelector('.media-picker__file-input');
+      var uploadPreview = document.getElementById('uploadPreview');
+      var uploadMsg = document.getElementById('uploadMsg');
+
+      /* Preview on file select */
+      if (fileInput && uploadPreview) {
+        fileInput.addEventListener('change', function () {
+          if (this.files && this.files.length > 0) {
+            uploadPreview.innerHTML = '';
+            for (var i = 0; i < this.files.length; i++) {
+              var f = this.files[i];
+              var div = document.createElement('div');
+              div.className = 'media-picker__preview-item';
+
+              var img = document.createElement('img');
+              img.src = URL.createObjectURL(f);
+              img.alt = f.name;
+              div.appendChild(img);
+
+              var span = document.createElement('span');
+              span.textContent = f.name;
+              div.appendChild(span);
+
+              var rem = document.createElement('button');
+              rem.type = 'button';
+              rem.className = 'media-picker__preview-remove';
+              rem.innerHTML = '<i class="bi bi-x"></i>';
+              rem.setAttribute('aria-label', 'Eliminar');
+              (function (fi) {
+                rem.addEventListener('click', function () {
+                  /* No es pot eliminar del FileList, però traiem la preview */
+                  div.remove();
+                  if (uploadPreview.children.length === 0) {
+                    uploadPreview.classList.remove('media-picker__preview--show');
+                  }
+                });
+              })(i);
+              div.appendChild(rem);
+
+              uploadPreview.appendChild(div);
+            }
+            uploadPreview.classList.add('media-picker__preview--show');
+          } else {
+            uploadPreview.classList.remove('media-picker__preview--show');
+            uploadPreview.innerHTML = '';
+          }
+        });
+      }
+
       uploadForm.addEventListener('submit', async function (e) {
         e.preventDefault();
         var uploadUrl = this.getAttribute('data-upload-url');
         if (!uploadUrl) return;
 
+        /* Validar: si hi ha select de projecte, cal escollir-ne un */
+        var projectSelect = this.querySelector('select[name="project_id"]');
+        if (projectSelect && !projectSelect.value) {
+          Swal.fire({
+            icon: 'warning',
+            title: 'Selecciona un projecte',
+            text: 'Has de triar un projecte on pujar la imatge abans de continuar.',
+            confirmButtonColor: '#f59e0b',
+            confirmButtonText: 'D\'acord'
+          });
+          return;
+        }
+
         var btn = document.getElementById('uploadBtn');
         btn.disabled = true;
-        btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Pujant...';
+        var origHtml = btn.innerHTML;
+        btn.innerHTML = '<span class="media-picker__spinner"></span> Pujant...';
 
-        /* Construir FormData manualment per garantir que TOTS els fitxers s'envien */
         var formData = new FormData();
-        var fileInput = this.querySelector('input[type="file"]');
-        if (fileInput && fileInput.files) {
-          for (var fi = 0; fi < fileInput.files.length; fi++) {
-            formData.append('files[' + fi + ']', fileInput.files[fi]);
+        var fi = this.querySelector('.media-picker__file-input');
+        if (fi && fi.files) {
+          for (var i = 0; i < fi.files.length; i++) {
+            formData.append('files[' + i + ']', fi.files[i]);
           }
         }
-        /* Copiar la resta de camps del formulari */
+        /* Altres camps */
         var fields = this.querySelectorAll('input:not([type="file"]), select, textarea');
-        for (var fi2 = 0; fi2 < fields.length; fi2++) {
-          var f = fields[fi2];
+        for (var j = 0; j < fields.length; j++) {
+          var f = fields[j];
           if (f.name && f.value) {
             formData.append(f.name, f.value);
           }
@@ -41,118 +158,66 @@
           var res = await fetch(uploadUrl, { method: 'POST', body: formData });
           var data = await res.json();
           if (data.error) {
-            alert(data.error);
+            if (uploadMsg) uploadMsg.textContent = data.error;
           } else if (data.uploaded && data.uploaded.length > 0) {
             location.reload();
           }
           if (data.errors && data.errors.length > 0) {
             var msgs = data.errors.map(function (e) { return e.filename + ': ' + e.error; }).join('\n');
-            alert('Alguns fitxers no s\'han pogut pujar:\n' + msgs);
+            if (uploadMsg) uploadMsg.textContent = 'Errors:\n' + msgs;
           }
         } catch (err) {
-          alert('Error en pujar les imatges.');
+          if (uploadMsg) uploadMsg.textContent = 'Error en pujar les imatges.';
         }
         btn.disabled = false;
-        btn.innerHTML = 'Pujar';
+        btn.innerHTML = origHtml;
       });
     }
 
-    /* ─── File preview (multi) ─── */
-    var fileInput = document.querySelector('#uploadModal input[type="file"]');
-    if (fileInput) {
-      fileInput.addEventListener('change', function () {
-        var preview = document.getElementById('uploadPreview');
-        if (!preview) return;
-        var list = preview.querySelector('.upload-preview-list');
-        if (!list) return;
-        if (this.files && this.files.length > 0) {
-          list.innerHTML = '';
-          for (var i = 0; i < this.files.length; i++) {
-            var li = document.createElement('li');
-            li.className = 'py-1 small text-start';
-            li.textContent = (i + 1) + '. ' + this.files[i].name;
-            list.appendChild(li);
-          }
-          preview.classList.remove('d-none');
-        } else {
-          preview.classList.add('d-none');
+    /* ─── Delete (event delegation) ─── */
+    browser.addEventListener('click', function (e) {
+      var delBtn = e.target.closest('.media-picker__item-delete');
+      if (!delBtn) return;
+
+      var confirmMsg = delBtn.getAttribute('data-confirm');
+      var formId = delBtn.getAttribute('data-form');
+      if (!confirmMsg || !formId) return;
+
+      e.preventDefault();
+      Swal.fire({
+        icon: 'warning',
+        title: 'Eliminar imatge',
+        text: confirmMsg,
+        showCancelButton: true,
+        confirmButtonColor: '#dc2626',
+        cancelButtonColor: '#6b7280',
+        confirmButtonText: 'Sí, eliminar',
+        cancelButtonText: 'Cancel·lar',
+        reverseButtons: true
+      }).then(function (result) {
+        if (result.isConfirmed) {
+          var form = document.getElementById(formId);
+          if (form) form.submit();
         }
-      });
-    }
-
-    /* ─── Copy URL ─── */
-    document.querySelectorAll('.copy-url').forEach(function (btn) {
-      btn.addEventListener('click', function () {
-        navigator.clipboard.writeText(this.dataset.url);
-        var orig = this.innerHTML;
-        this.innerHTML = '<i class="bi bi-check"></i>';
-        setTimeout(function () { btn.innerHTML = orig; }, 1500);
       });
     });
 
-    /* ═══════════════════════════════════════════════════
-       Media Browser — acordeó per projecte (single-open per client)
-       ═══════════════════════════════════════════════════ */
-    var browser = document.getElementById('mediaBrowser');
-    if (browser) {
-      /* Per cada client, gestionar els seus projectes independentment */
-      var clientCards = browser.querySelectorAll('.media-client-card');
+    /* ─── Copy URL (event delegation) ─── */
+    browser.addEventListener('click', function (e) {
+      var copyBtn = e.target.closest('.media-index__item-copy');
+      if (!copyBtn) return;
 
-      clientCards.forEach(function (client) {
-        var projectCards = client.querySelectorAll('.media-project-card');
+      var url = copyBtn.getAttribute('data-url');
+      if (!url) return;
 
-        function closeAllProjects (skip) {
-          projectCards.forEach(function (pc) {
-            if (pc !== skip) {
-              pc.classList.remove('media-project-card--open');
-              var h = pc.querySelector('.media-project-card__header');
-              if (h) { h.setAttribute('aria-expanded', 'false'); }
-            }
-          });
+      navigator.clipboard.writeText(url).then(function () {
+        var icon = copyBtn.querySelector('i');
+        if (icon) {
+          icon.className = 'bi bi-check';
+          setTimeout(function () { icon.className = 'bi bi-link-45deg'; }, 1500);
         }
-
-        function openProject (pc) {
-          pc.classList.add('media-project-card--open');
-          var h = pc.querySelector('.media-project-card__header');
-          if (h) { h.setAttribute('aria-expanded', 'true'); }
-        }
-
-        projectCards.forEach(function (pc) {
-          var header = pc.querySelector('.media-project-card__header');
-          if (!header) { return; }
-
-          header.addEventListener('click', function (e) {
-            e.stopPropagation();
-            var isOpen = pc.classList.contains('media-project-card--open');
-            if (isOpen) {
-              closeAllProjects();
-            } else {
-              closeAllProjects();
-              openProject(pc);
-            }
-          });
-
-          /* Keyboard: Enter / Space */
-          header.addEventListener('keydown', function (e) {
-            if (e.key === 'Enter' || e.key === ' ') {
-              e.preventDefault();
-              header.click();
-            }
-          });
-        });
-      });
-
-      /* Click outside → close all project cards across all clients */
-      document.addEventListener('click', function (e) {
-        if (!browser.contains(e.target)) {
-          browser.querySelectorAll('.media-project-card--open').forEach(function (pc) {
-            pc.classList.remove('media-project-card--open');
-            var h = pc.querySelector('.media-project-card__header');
-            if (h) { h.setAttribute('aria-expanded', 'false'); }
-          });
-        }
-      });
-    }
+      }).catch(function () {});
+    });
 
   });
 

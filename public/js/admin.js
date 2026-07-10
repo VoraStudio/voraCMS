@@ -281,6 +281,50 @@
       }
     });
 
+    /* ─── FAQ Panel ─── */
+    var faqBtn = document.querySelector('.faq-btn');
+    var faqPanel = document.getElementById('faqPanel');
+    if (faqBtn && faqPanel) {
+      faqBtn.addEventListener('click', function () {
+        var isOpen = faqPanel.classList.contains('faq-panel--open');
+        if (isOpen) {
+          faqPanel.classList.remove('faq-panel--open');
+          faqPanel.setAttribute('aria-hidden', 'true');
+        } else {
+          faqPanel.classList.add('faq-panel--open');
+          faqPanel.setAttribute('aria-hidden', 'false');
+        }
+      });
+
+      /* Close btn */
+      var faqClose = faqPanel.querySelector('.faq-panel__close');
+      if (faqClose) {
+        faqClose.addEventListener('click', function () {
+          faqPanel.classList.remove('faq-panel--open');
+          faqPanel.setAttribute('aria-hidden', 'true');
+        });
+      }
+
+      /* Backdrop click */
+      var faqBackdrop = faqPanel.querySelector('.faq-panel__backdrop');
+      if (faqBackdrop) {
+        faqBackdrop.addEventListener('click', function () {
+          faqPanel.classList.remove('faq-panel--open');
+          faqPanel.setAttribute('aria-hidden', 'true');
+        });
+      }
+
+      /* Accordion */
+      faqPanel.querySelectorAll('.faq-item__question').forEach(function (q) {
+        q.addEventListener('click', function () {
+          var item = this.parentElement;
+          var isOpen = item.classList.contains('faq-item--open');
+          item.classList.toggle('faq-item--open');
+          this.setAttribute('aria-expanded', isOpen ? 'false' : 'true');
+        });
+      });
+    }
+
     /* WOW init */
     if (typeof WOW !== 'undefined') {
       new WOW().init();

@@ -33,9 +33,7 @@ security:
     api:
       pattern: ^/api
       stateless: true
-      custom_authenticators:
-        - App\Security\ApiTokenAuthenticator
-      entry_point: App\Security\ApiTokenAuthenticator
+      jwt: ~
 
     admin:
       pattern: ^/admin

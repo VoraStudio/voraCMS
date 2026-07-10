@@ -25,7 +25,7 @@
             <div class="api-hero-tags">
                 <span class="api-tag api-tag--green">Rate Limiting</span>
                 <span class="api-tag api-tag--amber">Bearer Auth</span>
-                <span class="api-tag api-tag--blue">Domain Guard</span>
+                <span class="api-tag api-tag--blue">JWT Domain Validation</span>
             </div>
         </div>
     </div>
@@ -101,20 +101,20 @@
             </div>
             <div class="api-flow-arrow"><i class="bi bi-chevron-down"></i></div>
             <div class="api-flow-step">
-                <div class="api-flow-num" style="background:rgba(249,115,22,0.15);border-color:rgba(249,115,22,0.2);color:#f97316;">3</div>
+                <div class="api-flow-num" style="background:rgba(34,197,94,0.15);border-color:rgba(34,197,94,0.2);color:#22c55e;">3</div>
                 <div class="api-flow-content">
-                    <h4 style="color:#f97316;">Domain Guard</h4>
-                    <p>Verifica que l'<code>Origin</code> estigui dins dels dominis permesos de l'usuari.<br>
-                    Si no → <strong>403</strong>.</p>
+                    <h4 style="color:#22c55e;">Autenticació JWT</h4>
+                    <p>LexikJWTAuthenticator valida la signatura RSA, l'expiració i el <code>user_id</code> del token.<br>
+                    Si invàlid → <strong>401</strong>.</p>
                 </div>
             </div>
             <div class="api-flow-arrow"><i class="bi bi-chevron-down"></i></div>
             <div class="api-flow-step">
-                <div class="api-flow-num" style="background:rgba(34,197,94,0.15);border-color:rgba(34,197,94,0.2);color:#22c55e;">4</div>
+                <div class="api-flow-num" style="background:rgba(249,115,22,0.15);border-color:rgba(249,115,22,0.2);color:#f97316;">4</div>
                 <div class="api-flow-content">
-                    <h4 style="color:#22c55e;">Autenticació</h4>
-                    <p>ApiTokenAuthenticator valida el Bearer token (JWT o apiToken).<br>
-                    Si invàlid → <strong>401</strong>.</p>
+                    <h4 style="color:#f97316;">JWT Domain Validation</h4>
+                    <p>JwtClientIdSubscriber valida que el <strong>Host de cada petició</strong> estigui dins dels <code>allowed_domains</code> del payload.<br>
+                    Si no → <strong>401</strong>.</p>
                 </div>
             </div>
             <div class="api-flow-arrow"><i class="bi bi-chevron-down"></i></div>

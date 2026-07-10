@@ -42,7 +42,7 @@ class MediaService
 
         if ($fileSize > self::MAX_FILE_SIZE) {
             throw new \InvalidArgumentException(
-                "Fitxer massa gran: " . ceil($fileSize / 1024) . "KB. Màxim: 1MB"
+                "Fitxer massa gran: " . ceil($fileSize / 2048) . "KB. Màxim: 1MB"
             );
         }
 

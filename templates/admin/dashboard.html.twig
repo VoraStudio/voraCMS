@@ -2,6 +2,8 @@
 
 {% block page_title %}Dashboard{% endblock %}
 
+{% block topbar_actions %}{% endblock %}
+
 {% block content %}
 <div class="cyber-form-card">
 {% set cardIcons = ['bi-file-text', 'bi-calendar-event', 'bi-person', 'bi-image', 'bi-link', 'bi-star', 'bi-geo-alt', 'bi-chat-dots'] %}
@@ -247,4 +249,5 @@
 
 </div>
 </div>
+{% include 'admin/components/_help_faq.html.twig' with { form_context: 'dashboard' } %}
 {% endblock %}
