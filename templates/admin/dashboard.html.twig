@@ -5,271 +5,353 @@
 {% block topbar_actions %}{% endblock %}
 
 {% block content %}
-<div class="cyber-form-card">
-{% set cardIcons = ['bi-file-text', 'bi-calendar-event', 'bi-person', 'bi-image', 'bi-link', 'bi-star', 'bi-geo-alt', 'bi-chat-dots'] %}
-<div class="s-dashboard">
-
-{##}
-{## ─── ADMIN DASHBOARD — Global, tots els usuaris ─── #}
-{##}
-{% if isAdmin is defined and isAdmin %}
-
-    {# ─── Mètriques globals ─── #}
-    <div class="row g-3 mb-4">
-        <div class="col-md-3">
-            <div class="s-stat-card s-stat-card--metric" data-anim="metric">
-                <div class="s-stat-label s-stat-label--metric">
-                    <i class="bi bi-people me-1 s-stat-label-icon"></i> Usuaris
-                </div>
-                <div class="s-stat-value">{{ metrics.totalUsuaris }}</div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="s-stat-card s-stat-card--metric" data-anim="metric">
-                <div class="s-stat-label s-stat-label--metric">
-                    <i class="bi bi-folder me-1 s-stat-label-icon"></i> Projectes
-                </div>
-                <div class="s-stat-value">{{ metrics.totalProyectos }}</div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="s-stat-card s-stat-card--metric" data-anim="metric">
-                <div class="s-stat-label s-stat-label--metric">
-                    <i class="bi bi-check-circle me-1 s-stat-label-icon"></i> Publicacions
-                </div>
-                <div class="s-stat-value s-stat-value--success">{{ metrics.totalPublicaciones }}</div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="s-stat-card s-stat-card--metric" data-anim="metric">
-                <div class="s-stat-label s-stat-label--metric">
-                    <i class="bi bi-eye me-1 s-stat-label-icon"></i> Visites avui
-                </div>
-                <div class="s-stat-value s-stat-value--accent">{{ metrics.totalVisites }}</div>
-            </div>
-        </div>
-    </div>
-
-
-
-    {# ─── Últims registres: Clients · Projectes · Seccions ─── #}
-    <div class="row g-3 mb-4">
-        {# ─── Últims clients ─── #}
-        <div class="col-md-4">
-            <div class="cyber-card cyber-card--list" data-anim="cyber-card">
-                <div class="cyber-card-header">
-                    <h6 class="cyber-card-header__title">
-                        <i class="bi bi-people"></i> Últims clients
-                    </h6>
-                </div>
-                <div class="cyber-card-list__body">
-                    {% for u in latestUsers %}
-                    <a href="{{ path('admin_user_edit', {id: u.id}) }}" class="cyber-list-item">
-                        <div class="cyber-avatar cyber-list-item__icon--avatar">{{ u.name|first|upper }}</div>
-                        <div class="cyber-list-item__body">
-                            <div class="cyber-list-item__title">{{ u.name }}</div>
-                            <div class="cyber-list-item__subtitle">{{ u.company ?: u.email }}</div>
-                        </div>
-                        <i class="bi bi-chevron-right cyber-list-item__arrow"></i>
-                    </a>
-                    {% else %}
-                    <div class="cyber-list-empty">No hi ha clients</div>
-                    {% endfor %}
-                </div>
-            </div>
-        </div>
-
-        {# ─── Últims projectes ─── #}
-        <div class="col-md-4">
-            <div class="cyber-card cyber-card--list" data-anim="cyber-card">
-                <div class="cyber-card-header">
-                    <h6 class="cyber-card-header__title">
-                        <i class="bi bi-folder2-open"></i> Últims projectes
-                    </h6>
-                </div>
-                <div class="cyber-card-list__body">
-                    {% for p in latestProjects %}
-                    {% set color = p.color ?: '#4945FF' %}
-                    <a href="{{ path('admin_switch_project', {id: p.id}) }}" class="cyber-list-item">
-                        <div class="cyber-list-item__icon cyber-list-item__icon--dynamic" style="--icon-clr:{{ color }};">
-                            <i class="bi bi-folder2-open"></i>
-                        </div>
-                        <div class="cyber-list-item__body">
-                            <div class="cyber-list-item__title">{{ p.name }}</div>
-                            <div class="cyber-list-item__subtitle">
-                                {% if p.user %}{{ p.user.name }} · {% endif %}{{ p.contentTypes|length }} seccions
-                            </div>
-                        </div>
-                        <i class="bi bi-chevron-right cyber-list-item__arrow"></i>
-                    </a>
-                    {% else %}
-                    <div class="cyber-list-empty">No hi ha projectes</div>
-                    {% endfor %}
-                </div>
-            </div>
-        </div>
-
-        {# ─── Últimes seccions ─── #}
-        <div class="col-md-4">
-            <div class="cyber-card cyber-card--list" data-anim="cyber-card">
-                <div class="cyber-card-header">
-                    <h6 class="cyber-card-header__title">
-                        <i class="bi bi-grid-1x2"></i> Últimes seccions
-                    </h6>
-                </div>
-                <div class="cyber-card-list__body">
-                    {% for ct in latestContentTypes %}
-                    {% set icon = 'bi-file-earmark' %}
-                    <a href="{{ path('admin_entry_by_type', {slug: ct.slug}) }}" class="cyber-list-item">
-                        <div class="cyber-list-item__icon cyber-list-item__icon--content-type">
-                            <i class="bi {{ icon }}"></i>
-                        </div>
-                        <div class="cyber-list-item__body">
-                            <div class="cyber-list-item__title">{{ ct.name }}</div>
-                            <div class="cyber-list-item__subtitle">
-                                {{ ct.project ? ct.project.name : 'Sense projecte' }} · {{ ct.entries|length }} entrades
-                            </div>
-                        </div>
-                        <i class="bi bi-chevron-right cyber-list-item__arrow"></i>
-                    </a>
-                    {% else %}
-                    <div class="cyber-list-empty">No hi ha seccions</div>
-                    {% endfor %}
-                </div>
-            </div>
-        </div>
-    </div>
-
-{##}
-{## ─── NON-ADMIN DASHBOARD — Scoped a l'usuari ─── #}
-{##}
-{% else %}
-
-    {# ─── Mètriques agregades ─── #}
-    {% if metrics is defined and metrics %}
-    <div class="row g-3 mb-4">
-        <div class="col-md-3">
-            <div class="s-stat-card s-stat-card--metric" data-anim="metric">
-                <div class="s-stat-label s-stat-label--metric">
-                    <i class="bi bi-file-text me-1 s-stat-label-icon"></i> Entrades
-                </div>
-                <div class="s-stat-value">{{ metrics.totalEntries }}</div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="s-stat-card s-stat-card--metric" data-anim="metric">
-                <div class="s-stat-label s-stat-label--metric">
-                    <i class="bi bi-check-circle me-1 s-stat-label-icon"></i> Publicacions
-                </div>
-                <div class="s-stat-value s-stat-value--success">{{ metrics.totalPublished }}</div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="s-stat-card s-stat-card--metric" data-anim="metric">
-                <div class="s-stat-label s-stat-label--metric">
-                    <i class="bi bi-images me-1 s-stat-label-icon"></i> Fitxers
-                </div>
-                <div class="s-stat-value">{{ metrics.totalMedia }}</div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="s-stat-card s-stat-card--metric" data-anim="metric">
-                <div class="s-stat-label s-stat-label--metric">
-                    <i class="bi bi-folder me-1 s-stat-label-icon"></i> Projectes
-                </div>
-                <div class="s-stat-value">{{ metrics.totalProjects }}</div>
-            </div>
-        </div>
-    </div>
-    {% endif %}
-
-    {# ─── Els teus projectes ─── #}
-    <div class="project-section-header mb-3">
-        <h6 class="project-section-title">
-            <i class="bi bi-folder2-open me-2"></i>Els teus projectes
-        </h6>
-    </div>
-    <div class="row g-3">
-        {% for pd in projectsData %}
-        {% set p = pd.project %}
-        {% set color = p.color ?: '#06b6d4' %}
-        {% set isActive = (activeProjectId is defined and p.id == activeProjectId) %}
-        <div class="col-12">
-            <div class="cyber-project-card-row {% if isActive %}cyber-project-card-row--active{% endif %}">
-                
-                {# Izquierda: Icono y Nombre del Proyecto #}
-                <div class="cyber-project-info">
-                    <div class="cyber-project-icon" style="--proj-color: {{ color }};">
-                        <i class="bi bi-folder2-open"></i>
+    <div class="s-dashboard">
+        
+        {# ─── Selectores de Filtro (ROLE_ADMIN) ─── #}
+        {% if isAdmin %}
+            <div class="d1-filters mb-4">
+                <form method="get" action="{{ path('admin_dashboard') }}" class="d-flex gap-3 flex-wrap align-items-center">
+                    <div class="d1-filter-group">
+                        <label class="d1-filter-label" for="clientSelect">Client:</label>
+                        <select name="clientId" id="clientSelect" class="d1-filter-select">
+                            <option value="all">Tots els clients</option>
+                            {% for c in clients %}
+                                <option value="{{ c.id }}" {% if selectedClientId == c.id %}selected{% endif %}>{{ c.name }}</option>
+                            {% endfor %}
+                        </select>
                     </div>
-                    <div>
-                        <div class="cyber-project-title">{{ p.name }}</div>
-                        <div class="cyber-project-subtitle">ID {{ p.id }}</div>
+                    <div class="d1-filter-group">
+                        <label class="d1-filter-label" for="projectSelect">Projecte:</label>
+                        <select name="projectId" id="projectSelect" class="d1-filter-select">
+                            <option value="all">Tots els projectes</option>
+                            {% for p in filteredProjects %}
+                                <option value="{{ p.id }}" {% if selectedProjectId == p.id %}selected{% endif %}>{{ p.name }}</option>
+                            {% endfor %}
+                        </select>
                     </div>
-                </div>
-
-                {# Centro: Métricas horizontales #}
-                <div class="cyber-project-metrics-row">
-                    <div class="cyber-project-metric-col">
-                        <span class="cyber-project-metric-lbl">
-                            <i class="bi bi-layers-half me-1"></i> Seccions
-                        </span>
-                        <span class="cyber-project-metric-num">{{ pd.totalSections }}</span>
-                    </div>
-                    <div class="cyber-project-metric-divider"></div>
-                    <div class="cyber-project-metric-col">
-                        <span class="cyber-project-metric-lbl">
-                            <i class="bi bi-collection-play me-1"></i> Entrades
-                        </span>
-                        <span class="cyber-project-metric-num">{{ pd.totalEntries }}</span>
-                    </div>
-                    <div class="cyber-project-metric-divider"></div>
-                    <div class="cyber-project-metric-col">
-                        <span class="cyber-project-metric-lbl">
-                            <i class="bi bi-broadcast me-1"></i> Publicats
-                        </span>
-                        <span class="cyber-project-metric-num text-success-neon">{{ pd.totalPublished }}</span>
-                    </div>
-                    <div class="cyber-project-metric-divider"></div>
-                    <div class="cyber-project-metric-col">
-                        <span class="cyber-project-metric-lbl">
-                            <i class="bi bi-eye me-1"></i> Visites
-                        </span>
-                        <span class="cyber-project-metric-num">{{ pd.totalVisits }}</span>
-                    </div>
-                    <div class="cyber-project-metric-divider"></div>
-                    <div class="cyber-project-metric-col">
-                        <span class="cyber-project-metric-lbl">
-                            <i class="bi bi-clock-history me-1"></i> Actualització
-                        </span>
-                        <span class="cyber-project-metric-num" style="font-size:0.75rem;font-weight:500;">
-                            {{ pd.lastUpdate ? pd.lastUpdate|date('d/m/Y') : '—' }}
-                        </span>
-                    </div>
-                </div>
-
-                {# Derecha: Badge de estado y Botón de acción #}
-                <div class="cyber-project-actions-row">
-                    {% if isActive %}
-                    <span class="cyber-project-badge-neon me-3">Actiu</span>
+                    {% if selectedClientId or selectedProjectId %}
+                        <a href="{{ path('admin_dashboard') }}" class="d1-card-more ms-2" style="font-size: 12px; text-decoration: none;">Neteja filtres</a>
                     {% endif %}
-                    <a href="{{ path('admin_switch_project', {id: p.id, _redirect: path('admin_project_show', {id: p.id})}) }}" class="cyber-btn cyber-btn--projects cyber-btn--compact-row">
-                        <span>Gestionar</span> <i class="bi bi-chevron-right ms-2"></i>
-                    </a>
+                </form>
+            </div>
+        {% endif %}
+
+        <div class="d1-body">
+            {# ─── KPIs ─── #}
+            <div class="d1-kpis">
+                <!-- Visites avui -->
+                <div class="d1-kpi" data-anim="metric">
+                    <div class="d1-kpi-label">
+                        <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="margin-right: 4px;">
+                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                            <circle cx="12" cy="12" r="3" />
+                        </svg>
+                        Visites avui
+                    </div>
+                    <div class="d1-kpi-val">{{ visitsToday|number_format(0, ',', '.') }}</div>
+                    {% if visitTrend > 0 %}
+                        <div class="d1-kpi-delta delta-up">↑ {{ visitTrend }}% vs ahir</div>
+                    {% elseif visitTrend < 0 %}
+                        <div class="d1-kpi-delta delta-dn">↓ {{ visitTrend|abs }}% vs ahir</div>
+                    {% else %}
+                        <div class="d1-kpi-delta delta-neu">0% vs ahir</div>
+                    {% endif %}
                 </div>
 
+                <!-- Peticions API -->
+                <div class="d1-kpi" data-anim="metric">
+                    <div class="d1-kpi-label">
+                        <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="margin-right: 4px;">
+                            <polyline points="22,12 18,12 15,21 9,3 6,12 2,12" />
+                        </svg>
+                        Peticions API
+                    </div>
+                    <div class="d1-kpi-val">{{ apiToday|number_format(0, ',', '.') }}</div>
+                    {% if apiTrend > 0 %}
+                        <div class="d1-kpi-delta delta-up">↑ {{ apiTrend }}% vs ahir</div>
+                    {% elseif apiTrend < 0 %}
+                        <div class="d1-kpi-delta delta-dn">↓ {{ apiTrend|abs }}% vs ahir</div>
+                    {% else %}
+                        <div class="d1-kpi-delta delta-neu">0% vs ahir</div>
+                    {% endif %}
+                </div>
+
+                <!-- Acceptades -->
+                <div class="d1-kpi" data-anim="metric">
+                    <div class="d1-kpi-label">
+                        <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="margin-right: 4px;">
+                            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                            <polyline points="22,4 12,14.01 9,11.01" />
+                        </svg>
+                        Acceptades
+                    </div>
+                    <div class="d1-kpi-val">{{ acceptedToday|number_format(0, ',', '.') }}</div>
+                    <div class="d1-kpi-delta delta-up">{{ successRate }}% tasa èxit</div>
+                </div>
+
+                <!-- Denegades -->
+                <div class="d1-kpi" data-anim="metric">
+                    <div class="d1-kpi-label">
+                        <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="margin-right: 4px;">
+                            <circle cx="12" cy="12" r="10" />
+                            <line x1="15" y1="9" x2="9" y2="15" />
+                            <line x1="9" y1="9" x2="15" y2="15" />
+                        </svg>
+                        Denegades
+                    </div>
+                    <div class="d1-kpi-val">{{ deniedToday|number_format(0, ',', '.') }}</div>
+                    {% if deniedToday > 0 %}
+                        <div class="d1-kpi-delta delta-dn">↑ {{ deniedToday }} errors avui</div>
+                    {% else %}
+                        <div class="d1-kpi-delta delta-neu">Sense errors</div>
+                    {% endif %}
+                </div>
+            </div>
+
+            {# ─── GRÀFICS I CLIENTS ─── #}
+            <div class="d1-row2 mt-3">
+                <!-- Gràfics API -->
+                <div class="d1-card">
+                    <div class="d1-card-title">Peticions API setmanals <span class="d1-card-more">Últims 7 dies</span></div>
+                    
+                    {# Dibuixar camí dinàmic de línies SVG per Twig #}
+                    {% set maxVal = maxDailyRequests > 0 ? maxDailyRequests : 1 %}
+                    {% set points = [] %}
+                    {% for i, dayData in weeklyRequests %}
+                        {% set x = i * 70 %}
+                        {% set y = 70 - ((dayData.total / maxVal) * 50) %}
+                        {% set points = points|merge([x ~ ',' ~ y]) %}
+                    {% endfor %}
+                    {% set pathD = 'M' ~ points|join(' L') %}
+                    {% set areaD = pathD ~ ' L420,80 L0,80Z' %}
+                    {% set lastY = 70 - ((weeklyRequests[6].total / maxVal) * 50) %}
+
+                    <svg class="d1-sparksvg" viewBox="0 0 420 80" preserveAspectRatio="none" style="margin-bottom: 12px;">
+                        <defs>
+                            <linearGradient id="g1" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="0%" stop-color="var(--s-primary)" stop-opacity=".3" />
+                                <stop offset="100%" stop-color="var(--s-primary)" stop-opacity="0" />
+                            </linearGradient>
+                        </defs>
+                        <path d="{{ pathD }}" fill="none" stroke="var(--s-primary)" stroke-width="2.5" stroke-linecap="round" />
+                        <path d="{{ areaD }}" fill="url(#g1)" />
+                        <circle cx="420" cy="{{ lastY }}" r="4" fill="var(--s-primary)" />
+                    </svg>
+
+                    <div style="font-size: 10px; color: var(--s-text-secondary); opacity: 0.8; margin-bottom: 8px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase;">
+                        Acceptades vs Denegades
+                    </div>
+                    
+                    <div class="d1-chart-bars">
+                        {% set maxBarVal = maxDailyAcceptedDenied > 0 ? maxDailyAcceptedDenied : 1 %}
+                        {% for dayData in weeklyAcceptedVsDenied %}
+                            {% set accHeight = (dayData.accepted / maxBarVal) * 85 %}
+                            {% set denHeight = (dayData.denied / maxBarVal) * 85 %}
+                            <div class="d1-bar-wrap">
+                                <div class="d1-bar" style="height: {{ accHeight > 4 ? accHeight : 4 }}%; background: #22c55e;"></div>
+                                <div class="d1-bar" style="height: {{ denHeight > 2 ? denHeight : 2 }}%; background: #ef4444; margin-top: 1px;"></div>
+                                <div class="d1-bar-lbl">{{ dayData.day }}</div>
+                            </div>
+                        {% endfor %}
+                    </div>
+
+                    <div style="display: flex; gap: 14px; margin-top: 10px;">
+                        <span style="font-size: 11px; color: var(--s-text-secondary); display: flex; align-items: center; gap: 5px;">
+                            <span style="width: 8px; height: 8px; border-radius: 2px; background: #22c55e; display: inline-block;"></span>Acceptades
+                        </span>
+                        <span style="font-size: 11px; color: var(--s-text-secondary); display: flex; align-items: center; gap: 5px;">
+                            <span style="width: 8px; height: 8px; border-radius: 2px; background: #ef4444; display: inline-block;"></span>Denegades
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Clients list (admin only) -->
+                {% if isAdmin %}
+                <div class="d1-card">
+                    <div class="d1-card-title">Últims clients actius <a href="{{ path('admin_user_index') }}" class="d1-card-more">Tots</a></div>
+                    {% for c in latestClients %}
+                        <div class="d1-cli-item">
+                            <div class="d1-cli-av" style="background: {{ c.color }};">{{ c.user.name|first|upper }}</div>
+                            <div class="d1-cli-info">
+                                <div class="d1-cli-name">{{ c.user.name }}</div>
+                                <div class="d1-cli-sub">{{ c.projectsCount }} {% if c.projectsCount == 1 %}projecte{% else %}projectes{% endif %} · {{ c.sectionsCount }} {% if c.sectionsCount == 1 %}secció{% else %}seccions{% endif %}</div>
+                            </div>
+                            {% if c.user.isActive %}
+                                <span class="d1-cli-badge" style="background: rgba(34, 197, 94, 0.12); color: #22c55e;">Actiu</span>
+                            {% else %}
+                                <span class="d1-cli-badge" style="background: rgba(245, 158, 11, 0.12); color: #f59e0b;">Inactiu</span>
+                            {% endif %}
+                        </div>
+                    {% else %}
+                        <div class="cyber-list-empty">No hi ha clients actius</div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+
+            {# ─── DETALLS D'API, FITXERS Y RECURSOS ─── #}
+            <div class="d1-row3 mt-3">
+                <!-- Endpoints -->
+                <div class="d1-card">
+                    <div class="d1-card-title">Endpoints més usats <a href="{{ path('admin_api_guide') }}" class="d1-card-more">API</a></div>
+                    {% for ep in topEndpoints %}
+                        {% set methodColor = '#22c55e' %}
+                        {% set methodBg = 'rgba(34, 197, 94, 0.12)' %}
+                        {% if ep.method == 'POST' %}
+                            {% set methodColor = '#fbbf24' %}
+                            {% set methodBg = 'rgba(245, 158, 11, 0.12)' %}
+                        {% elseif ep.method == 'PUT' or ep.method == 'PATCH' %}
+                            {% set methodColor = '#3b82f6' %}
+                            {% set methodBg = 'rgba(59, 130, 246, 0.12)' %}
+                        {% elseif ep.method == 'DELETE' %}
+                            {% set methodColor = '#f87171' %}
+                            {% set methodBg = 'rgba(239, 68, 68, 0.12)' %}
+                        {% endif %}
+                        
+                        <div class="d1-api-item">
+                            <span class="d1-api-method" style="background: {{ methodBg }}; color: {{ methodColor }};">{{ ep.method }}</span>
+                            <span class="d1-api-path" title="{{ ep.endpoint }}">{{ ep.endpoint }}</span>
+                            <span class="d1-api-count">{{ ep.total|number_format(0, ',', '.') }}</span>
+                        </div>
+                    {% else %}
+                        <div class="cyber-list-empty">Sense registres de crides a l'API</div>
+                    {% endfor %}
+                </div>
+
+                <!-- Recent Files -->
+                <div class="d1-card">
+                    <div class="d1-card-title">Fitxers recents <a href="{{ path('admin_media_index') }}" class="d1-card-more">Mediateca</a></div>
+                    {% for f in recentFiles %}
+                        {% set isImage = f.mimeType starts with 'image/' %}
+                        <div class="d1-file-item">
+                            <div class="d1-file-ic" style="background: {% if isImage %}rgba(245, 160, 78, 0.12){% else %}rgba(59, 130, 246, 0.1){% endif %};">
+                                {% if isImage %}
+                                    <i class="bi bi-image" style="color: var(--s-primary);"></i>
+                                {% else %}
+                                    <i class="bi bi-file-earmark-text" style="color: #60a5fa;"></i>
+                                {% endif %}
+                            </div>
+                            <div class="d1-file-info">
+                                <div class="d1-file-name" title="{{ f.originalFilename }}">{{ f.originalFilename }}</div>
+                                <div class="d1-file-meta">{% if f.project %}{{ f.project.name }}{% else %}Sense projecte{% endif %} · {{ f.createdAt|date('d/m H:i') }}</div>
+                            </div>
+                            {% set sizeKB = (f.fileSize / 1024)|round(1) %}
+                            <span class="d1-file-size">{% if sizeKB > 1024 %}{{ (sizeKB / 1024)|round(1) }}MB{% else %}{{ sizeKB }}KB{% endif %}</span>
+                        </div>
+                    {% else %}
+                        <div class="cyber-list-empty">No hi ha fitxers recents</div>
+                    {% endfor %}
+                </div>
+
+                <!-- resources donut -->
+                <div class="d1-card">
+                    <div class="d1-card-title">Recursos més sol·licitats</div>
+                    
+                    {% set circ = 188 %}
+                    {% set imgDash = (imagesPct / 100) * circ %}
+                    {% set entDash = (entriesPct / 100) * circ %}
+                    {% set othDash = (otherPct / 100) * circ %}
+
+                    {% set imgOffset = 0 %}
+                    {% set entOffset = -imgDash %}
+                    {% set othOffset = -(imgDash + entDash) %}
+
+                    <div class="d1-donut-wrap">
+                        <svg class="d1-donut-svg" width="80" height="80" viewBox="0 0 80 80">
+                            <circle cx="40" cy="40" r="30" fill="none" stroke="rgba(255,255,255,.06)" stroke-width="14" />
+                            {% if imagesPct > 0 %}
+                            <circle
+                              cx="40"
+                              cy="40"
+                              r="30"
+                              fill="none"
+                              stroke="var(--s-primary)"
+                              stroke-width="14"
+                              stroke-dasharray="{{ imgDash }} {{ circ - imgDash }}"
+                              stroke-dashoffset="{{ imgOffset }}"
+                              stroke-linecap="butt"
+                              transform="rotate(-90 40 40)"
+                            />
+                            {% endif %}
+                            {% if entriesPct > 0 %}
+                            <circle
+                              cx="40"
+                              cy="40"
+                              r="30"
+                              fill="none"
+                              stroke="#3b82f6"
+                              stroke-width="14"
+                              stroke-dasharray="{{ entDash }} {{ circ - entDash }}"
+                              stroke-dashoffset="{{ entOffset }}"
+                              stroke-linecap="butt"
+                              transform="rotate(-90 40 40)"
+                            />
+                            {% endif %}
+                            {% if otherPct > 0 %}
+                            <circle
+                              cx="40"
+                              cy="40"
+                              r="30"
+                              fill="none"
+                              stroke="#22c55e"
+                              stroke-width="14"
+                              stroke-dasharray="{{ othDash }} {{ circ - othDash }}"
+                              stroke-dashoffset="{{ othOffset }}"
+                              stroke-linecap="butt"
+                              transform="rotate(-90 40 40)"
+                            />
+                            {% endif %}
+                        </svg>
+                        
+                        <div class="d1-donut-legend">
+                            <div class="d1-legend-item">
+                              <span class="d1-legend-dot" style="background: var(--s-primary);"></span>Imatges<span class="d1-legend-val">{{ imagesPct }}%</span>
+                            </div>
+                            <div class="d1-legend-item">
+                              <span class="d1-legend-dot" style="background: #3b82f6;"></span>Entrades<span class="d1-legend-val">{{ entriesPct }}%</span>
+                            </div>
+                            <div class="d1-legend-item">
+                              <span class="d1-legend-dot" style="background: #22c55e;"></span>Altres<span class="d1-legend-val">{{ otherPct }}%</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 14px;">
+                        <div class="d1-prog-row">
+                            {% set quotaGB = 10 %}
+                            {% set quotaPct = ((totalGB / quotaGB) * 100)|round %}
+                            <div class="d1-prog-head">
+                                <span class="d1-prog-lbl">Emmagatzematge</span>
+                                <span class="d1-prog-val">{% if totalGB > 0.1 %}{{ totalGB }} GB{% else %}{{ totalMB }} MB{% endif %} / {{ quotaGB }} GB</span>
+                            </div>
+                            <div class="d1-prog-track"><div class="d1-prog-fill" style="width: {{ quotaPct < 100 ? quotaPct : 100 }}%; background: var(--s-primary);"></div></div>
+                        </div>
+                        <div class="d1-prog-row">
+                            <div class="d1-prog-head">
+                                <span class="d1-prog-lbl">Fitxers totals</span>
+                                <span class="d1-prog-val">{{ totalFiles }}</span>
+                            </div>
+                            {% set filesQuota = 5000 %}
+                            {% set filesPct = ((totalFiles / filesQuota) * 100)|round %}
+                            <div class="d1-prog-track"><div class="d1-prog-fill" style="width: {{ filesPct < 100 ? filesPct : 100 }}%; background: #3b82f6;"></div></div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
-        {% endfor %}
     </div>
-
-{% endif %}
-
-</div>
-</div>
-{% include 'admin/components/_help_faq.html.twig' with { form_context: 'dashboard' } %}
 {% endblock %}
 
 {% block javascripts %}
 {{ parent() }}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var sel = document.querySelectorAll('.d1-filter-select');
+  for (var i = 0; i < sel.length; i++) {
+    sel[i].addEventListener('change', function () {
+      this.form.submit();
+    });
+  }
+});
+</script>
 {% endblock %}
