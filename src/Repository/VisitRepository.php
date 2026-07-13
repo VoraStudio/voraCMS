@@ -48,6 +48,31 @@ class VisitRepository extends ServiceEntityRepository
             ->getSingleScalarResult();
     }
 
+    /* ── Visites totals per projecte ── */
+    public function countByProject(int $projectId): int
+    {
+        $conn = $this->getEntityManager()->getConnection();
+        $sql = 'SELECT COUNT(v.id)
+                FROM visit v
+                JOIN entry e ON e.id = v.entry_id
+                JOIN content_type ct ON ct.id = e.content_type_id
+                WHERE ct.project_id = :projectId';
+        return (int) $conn->fetchOne($sql, ['projectId' => $projectId]);
+    }
+
+    /* ── Última visita al projecte ── */
+    public function lastVisitByProject(int $projectId): ?\DateTimeImmutable
+    {
+        $conn = $this->getEntityManager()->getConnection();
+        $sql = 'SELECT MAX(v.visited_at)
+                FROM visit v
+                JOIN entry e ON e.id = v.entry_id
+                JOIN content_type ct ON ct.id = e.content_type_id
+                WHERE ct.project_id = :projectId';
+        $result = $conn->fetchOne($sql, ['projectId' => $projectId]);
+        return $result ? new \DateTimeImmutable($result) : null;
+    }
+
     /* ── Visites per dia (últims 7 dies) ── */
     public function countByDayLast7(): array
     {

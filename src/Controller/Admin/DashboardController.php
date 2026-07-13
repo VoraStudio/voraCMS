@@ -18,7 +18,6 @@ namespace App\Controller\Admin;
 
 use App\Entity\Entry;
 use App\Entity\User;
-use App\Repository\ApiRequestLogRepository;
 use App\Repository\ContentTypeRepository;
 use App\Repository\EntryRepository;
 use App\Repository\MediaRepository;
@@ -50,7 +49,6 @@ class DashboardController extends AbstractController
         EntityManagerInterface $em,
         VisitRepository $visitRepo,
         UserRepository $userRepo,
-        ApiRequestLogRepository $apiLogRepo,
     ): Response {
         $user = $this->getUser();
         $isAdmin = $this->isGranted('ROLE_ADMIN');
@@ -71,17 +69,6 @@ class DashboardController extends AbstractController
             /* ── Visites d'avui ── */
             $totalVisitsToday = $visitRepo->countTodayGlobal();
 
-            /* ── Dades per als gràfics ── */
-            $apiToday = $apiLogRepo->countToday();
-            $api2xx = $apiLogRepo->countByStatusRangeToday(200, 299);
-            $api4xx = $apiLogRepo->countByStatusRangeToday(400, 499);
-            $api5xx = $apiLogRepo->countByStatusRangeToday(500, 599);
-            $avgResponse = $apiLogRepo->averageResponseTimeToday();
-            $tokenGrants = $apiLogRepo->countTokenGrantsToday();
-            $tokenDenials = $apiLogRepo->countTokenDenialsToday();
-            $topOrigins = $apiLogRepo->topOriginsToday();
-            $visitsWeek = $visitRepo->countByDayLast7();
-
             return $this->render('admin/dashboard.html.twig', [
                 'isAdmin' => true,
                 'metrics' => [
@@ -93,17 +80,6 @@ class DashboardController extends AbstractController
                 'latestUsers' => $userRepo->findBy([], ['createdAt' => 'DESC'], 5),
                 'latestProjects' => $projectRepo->findBy([], ['createdAt' => 'DESC'], 5),
                 'latestContentTypes' => $ctRepo->findLatestWithProject(5),
-                'chartData' => [
-                    'apiToday' => $apiToday,
-                    'api2xx' => $api2xx,
-                    'api4xx' => $api4xx,
-                    'api5xx' => $api5xx,
-                    'avgResponse' => $avgResponse,
-                    'tokenGrants' => $tokenGrants,
-                    'tokenDenials' => $tokenDenials,
-                    'topOrigins' => $topOrigins,
-                    'visitsWeek' => $visitsWeek,
-                ],
             ]);
         }
 
@@ -128,6 +104,11 @@ class DashboardController extends AbstractController
             $activeProjectId = $projects[0]->getId();
         }
 
+        $userId = $user !== null ? $user->getId() : null;
+        $totalMedia = $userId !== null
+            ? count($mediaRepo->findByUser($userId))
+            : 0;
+
         /* ── Mètriques de cada projecte del usuari ── */
         $projectsData = [];
         $globalEntries = 0;
@@ -136,6 +117,7 @@ class DashboardController extends AbstractController
         foreach ($projects as $p) {
             $projEntries = 0;
             $projPublished = 0;
+            $lastUpdate = null;
 
             foreach ($p->getContentTypes() as $ct) {
                 if ($ct->isActive()) {
@@ -143,6 +125,9 @@ class DashboardController extends AbstractController
                     foreach ($ct->getEntries() as $entry) {
                         if ($entry->getStatus() === Entry::STATUS_PUBLISHED) {
                             $projPublished++;
+                        }
+                        if ($entry->getUpdatedAt() && (!$lastUpdate || $entry->getUpdatedAt() > $lastUpdate)) {
+                            $lastUpdate = $entry->getUpdatedAt();
                         }
                     }
                 }
@@ -153,16 +138,13 @@ class DashboardController extends AbstractController
                 'totalSections' => count($p->getContentTypes()),
                 'totalEntries' => $projEntries,
                 'totalPublished' => $projPublished,
+                'totalVisits' => $visitRepo->countByProject($p->getId()),
+                'lastUpdate' => $lastUpdate,
             ];
 
             $globalEntries += $projEntries;
             $globalPublished += $projPublished;
         }
-
-        $userId = $user?? null ? $user->getId() : null;
-        $totalMedia = $userId !== null
-            ? count($mediaRepo->findByUser($userId))
-            : 0;
 
         return $this->render('admin/dashboard.html.twig', [
             'projectsData' => $projectsData,
