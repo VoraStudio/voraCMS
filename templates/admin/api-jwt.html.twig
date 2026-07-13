@@ -31,8 +31,364 @@
     </div>
 </div>
 
+{# ─── Master Token ─── #}
+<div class="api-card" id="master-token" data-anim="cyber-card">
+    <div class="api-card-header">
+        <div class="api-card-icon api-card-icon--purple">
+            <i class="bi bi-magic"></i>
+        </div>
+        <h3 class="api-card-title">Master Token (sense login)</h3>
+    </div>
+    <div class="api-card-body">
+        <p class="api-text">Per a frontends públics que <strong>no tenen login</strong> (landing pages, webs corporatives), hi ha un endpoint públic que genera un JWT validant només el <strong>domini</strong> de la petició contra els <code>allowed_domains</code> dels usuaris.</p>
+
+        <div class="api-card-subtitle">Endpoint</div>
+        <div class="api-code-block">
+            <div class="api-code-header"><span>GET /api/public/token</span></div>
+            <pre class="api-code"><code>GET /api/public/token
+Host: vorastudio.cat
+
+→ 200 { "token": "eyJ..." }
+→ 403 { "error": "Domini no autoritzat" }</code></pre>
+        </div>
+
+        <div class="api-card-subtitle">Com funciona</div>
+        <div class="api-flow">
+            <div class="api-flow-step">
+                <div class="api-flow-num">1</div>
+                <div class="api-flow-content">
+                    <h4>Petició al Master Token</h4>
+                    <p>El frontend fa <code>GET /api/public/token</code> (endpoint públic, no cal auth previ). <code>TokenMasterService</code> obté el <code>Host</code> i busca un usuari amb aquest domini a <code>allowed_domains</code>.</p>
+                </div>
+            </div>
+            <div class="api-flow-arrow"><i class="bi bi-chevron-down"></i></div>
+            <div class="api-flow-step">
+                <div class="api-flow-num">2</div>
+                <div class="api-flow-content">
+                    <h4>Validació + emissió</h4>
+                    <p>Si el domini existeix, genera un JWT via <code>JWTTokenManagerInterface::create($user)</code>. L'<code>allowed_domains</code> s'injecta automàticament al payload. Si no existeix → 403.</p>
+                </div>
+            </div>
+            <div class="api-flow-arrow"><i class="bi bi-chevron-down"></i></div>
+            <div class="api-flow-step">
+                <div class="api-flow-num">3</div>
+                <div class="api-flow-content">
+                    <h4>Logging automàtic</h4>
+                    <p>L'<code>ApiRequestLogger</code> registra <strong>totes</strong> les crides API a <code>api_request_log</code>: domini, endpoint, status, IP, User-Agent, temps de resposta, JTI del token emès.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="api-alert api-alert--info" style="margin-top:0.75rem;">
+            <i class="bi bi-clock-fill"></i>
+            <span>TTL per defecte de <strong>7 dies</strong>, però el frontend en demana un de nou a cada càrrega de pàgina. La caducitat real és per page-load.</span>
+        </div>
+
+        <div class="api-card-subtitle">Exemple: Vanilla JS</div>
+        <div class="api-code-block">
+            <pre class="api-code"><code>const API = {
+  base: 'https://cms.domini.com', token: null,
+
+  async fetchToken() {
+    const res = await fetch(`${this.base}/api/public/token`);
+    if (!res.ok) throw new Error('Domini no autoritzat');
+    this.token = (await res.json()).token;
+  },
+
+  async get(path) {
+    if (!this.token) await this.fetchToken();
+    const res = await fetch(`${this.base}${path}`, {
+      headers: { 'Authorization': `Bearer ${this.token}` },
+    });
+    if (res.status === 401) { this.token = null; return this.get(path); }
+    return res.json();
+  },
+};
+
+const data = await API.get('/api/public/vorastudio/projects');</code></pre>
+        </div>
+
+        <div class="api-card-subtitle" style="margin-top:1.5rem;">Serveis implicats</div>
+        <table class="api-params-table" style="margin-bottom:0;">
+            <thead><tr><th>Classe</th><th>Funció</th></tr></thead>
+            <tbody>
+                <tr><td><code>TokenMasterService</code></td><td>Busca usuari per domini i genera JWT</td></tr>
+                <tr><td><code>UserRepository::findOneByDomain()</code></td><td>Cerca usuari amb el domini als seus <code>allowed_domains</code></td></tr>
+                <tr><td><code>ApiRequestLogger</code></td><td>Subscriber que registra totes les peticions API</td></tr>
+                <tr><td><code>ApiRequestLog</code></td><td>Entitat amb domini, endpoint, status, IP, UA, Origin, Referer, temps de resposta, JTI</td></tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{# ─── Validació per client ─── #}
+<div class="api-card" id="validacio-client" data-anim="cyber-card">
+    <div class="api-card-header">
+        <div class="api-card-icon api-card-icon--blue">
+            <i class="bi bi-diagram-3-fill"></i>
+        </div>
+        <h3 class="api-card-title">Validació de peticions per client</h3>
+    </div>
+    <div class="api-card-body">
+        <p class="api-text">
+            Cada petició a l'API passa per <strong>cinc capes de validació</strong> en cadena, des del firewall fins al filtre
+            Doctrine. Aquest sistema garanteix que cada client només veu les seves dades, i que un token robat no serveix
+            des d'un domini no autoritzat.
+        </p>
+
+        <div class="api-card-subtitle">Diagrama de flux (petició qualsevol a /api/*)</div>
+        <div class="api-flow">
+            <div class="api-flow-step">
+                <div class="api-flow-num">1</div>
+                <div class="api-flow-content">
+                    <h4>Firewall JWT</h4>
+                    <p>
+                        Tota petició a <code>/api/*</code> passa pel firewall <code>api</code> amb <code>jwt: ~</code>.
+                        L'<code>LexikJWTAuthenticator</code> valida la <strong>signatura RSA</strong> i l'<strong>expiració</strong>
+                        del token. Sense token vàlid → <strong>401 JWT Token not found</strong>.
+                    </p>
+                    <p class="api-text-muted" style="font-size:0.8rem;margin:0.25rem 0 0;">
+                        Excepció: <code>GET /api/public/token</code> té <code>PUBLIC_ACCESS</code>.
+                    </p>
+                </div>
+            </div>
+            <div class="api-flow-arrow"><i class="bi bi-chevron-down"></i></div>
+            <div class="api-flow-step">
+                <div class="api-flow-num">2</div>
+                <div class="api-flow-content">
+                    <h4>Domain Lock (JwtDomainValidator)</h4>
+                    <p>
+                        Al decodificar el JWT, <code>JwtClientIdSubscriber::onJwtDecoded()</code> crida
+                        <code>JwtDomainValidator::validateFromPayload()</code>. Compara el <strong>Host real de la petició</strong>
+                        contra els <code>allowed_domains</code> del payload. Si el domini no hi és → JWT marcat com a invàlid → <strong>401</strong>.
+                    </p>
+                    <p class="api-text-muted" style="font-size:0.8rem;margin:0.25rem 0 0;">
+                        Així un token obtingut per <code>vorastudio.cat</code> no pot reutilitzar-se des de <code>altre-domini.com</code>.
+                    </p>
+                </div>
+            </div>
+            <div class="api-flow-arrow"><i class="bi bi-chevron-down"></i></div>
+            <div class="api-flow-step">
+                <div class="api-flow-num">3</div>
+                <div class="api-flow-content">
+                    <h4>UserFilterSubscriber</h4>
+                    <p>
+                        Abans d'executar el controlador, <code>UserFilterSubscriber::onController()</code> comprova
+                        l'usuari autenticat:
+                    </p>
+                    <ul style="margin:0;padding-left:1.25rem;">
+                        <li>
+                            <strong>ROLE_ADMIN</strong> → <em>bypass</em>. No s'aplica cap filtre. L'usuari
+                            administrador veu <strong>totes</strong> les dades de tots els clients.
+                        </li>
+                        <li>
+                            <strong>Altres rols</strong> → activa el filtre Doctrine
+                            <code>user_id_filter</code> amb l'ID de l'usuari autenticat.
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <div class="api-flow-arrow"><i class="bi bi-chevron-down"></i></div>
+            <div class="api-flow-step">
+                <div class="api-flow-num">4</div>
+                <div class="api-flow-content">
+                    <h4>UserIdFilter (Doctrine SQL Filter)</h4>
+                    <p>
+                        El filtre <code>UserIdFilter::addFilterConstraint()</code> afegeix automàticament
+                        <code>WHERE user_id = :user_id</code> a <strong>totes</strong> les queries SQL d'entitats
+                        que tenen camp <code>user_id</code>.
+                    </p>
+                    <p style="margin-top:0.25rem;">
+                        <strong>Exemple amb usuari no-admin (id=17):</strong>
+                    </p>
+                    <pre class="api-code" style="margin:0;"><code>-- Sense filtre:
+SELECT * FROM entries WHERE status = 'published'
+
+-- Amb UserIdFilter:
+SELECT * FROM entries
+WHERE status = 'published'
+  AND user_id = 17        ← INJECTAT AUTOMÀTICAMENT</code></pre>
+                    <p class="api-text-muted" style="font-size:0.8rem;margin:0.25rem 0 0;">
+                        El filtre s'aplica a <strong>totes</strong> les entitats que tenen <code>user_id</code>:
+                        <code>Entry</code>, <code>Media</code>, <code>Visit</code>, etc. Cap consulta pot
+                        escapar-ne.
+                    </p>
+                </div>
+            </div>
+            <div class="api-flow-arrow"><i class="bi bi-chevron-down"></i></div>
+            <div class="api-flow-step">
+                <div class="api-flow-num">5</div>
+                <div class="api-flow-content">
+                    <h4>Controlador</h4>
+                    <p>
+                        El controlador rep la petició amb l'usuari autenticat. Pot fer comprovacions addicionals
+                        com <code>$this->getUser()</code> o validar permisos, però l'aïllament de dades ja
+                        està garantit per la capa anterior (UserIdFilter).
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="api-card-subtitle" style="margin-top:1.5rem;">Com s'aplica a cada endpoint</div>
+        <table class="api-params-table" style="margin-bottom:0;">
+            <thead>
+                <tr>
+                    <th>Endpoint</th>
+                    <th>JWT?</th>
+                    <th>Domain Lock?</th>
+                    <th>UserIdFilter?</th>
+                    <th>Efecte</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><code>GET /api/public/token</code></td>
+                    <td><span class="api-tag api-tag--grey">❌ No</span></td>
+                    <td><span class="api-tag api-tag--grey">❌ No</span></td>
+                    <td><span class="api-tag api-tag--grey">❌ No</span></td>
+                    <td>Obert. Retorna JWT si el domini està a <code>allowed_domains</code> d'algun usuari.</td>
+                </tr>
+                <tr>
+                    <td><code>GET /api/public/{proj}/{type}</code></td>
+                    <td><span class="api-tag api-tag--yellow">✅ Sí</span></td>
+                    <td><span class="api-tag api-tag--yellow">✅ Sí</span></td>
+                    <td><span class="api-tag api-tag--yellow">✅ <em>si no admin</em></span></td>
+                    <td>Dades públiques d'un projecte + content type. L'admin ho veu tot; un usuari normal veu només les seves.</td>
+                </tr>
+                <tr>
+                    <td><code>GET /api/{slug}</code></td>
+                    <td><span class="api-tag api-tag--yellow">✅ Sí</span></td>
+                    <td><span class="api-tag api-tag--yellow">✅ Sí</span></td>
+                    <td><span class="api-tag api-tag--yellow">✅ <em>si no admin</em></span></td>
+                    <td>Llistat d'entrades d'un content type. Scoped a l'usuari autenticat.</td>
+                </tr>
+                <tr>
+                    <td><code>GET /api/{slug}/{id}</code></td>
+                    <td><span class="api-tag api-tag--yellow">✅ Sí</span></td>
+                    <td><span class="api-tag api-tag--yellow">✅ Sí</span></td>
+                    <td><span class="api-tag api-tag--yellow">✅ <em>si no admin</em></span></td>
+                    <td>Entrada individual. Scoped a l'usuari autenticat.</td>
+                </tr>
+                <tr>
+                    <td><code>GET /api/sections</code></td>
+                    <td><span class="api-tag api-tag--yellow">✅ Sí</span></td>
+                    <td><span class="api-tag api-tag--yellow">✅ Sí</span></td>
+                    <td><span class="api-tag api-tag--yellow">✅ <em>si no admin</em></span></td>
+                    <td>Content types de l'usuari. El controlador fa <code>$this->getUser()</code>.</td>
+                </tr>
+                <tr>
+                    <td><code>POST /api/visit</code></td>
+                    <td><span class="api-tag api-tag--yellow">✅ Sí</span></td>
+                    <td><span class="api-tag api-tag--yellow">✅ Sí</span></td>
+                    <td><span class="api-tag api-tag--yellow">✅ <em>si no admin</em></span></td>
+                    <td>Registra visita. L'entitat <code>Visit</code> té <code>user_id</code>.</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="api-card-subtitle" style="margin-top:1.5rem;">Exemple: dos clients, dades separades</div>
+        <p class="api-text">
+            Suposa dos usuaris al CMS:
+        </p>
+        <table class="api-params-table" style="margin-bottom:0;">
+            <thead>
+                <tr>
+                    <th>Usuari</th>
+                    <th>ID</th>
+                    <th>Role</th>
+                    <th>allowed_domains</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><code>admin@vora.es</code></td>
+                    <td>16</td>
+                    <td><span class="api-tag api-tag--green">ROLE_ADMIN</span></td>
+                    <td><code>["vorastudio.cat", "voracms.voradata.cat"]</code></td>
+                </tr>
+                <tr>
+                    <td><code>xavi@vora.es</code></td>
+                    <td>17</td>
+                    <td><span class="api-tag api-tag--blue">ROLE_USUARIO</span></td>
+                    <td><code>["victoriataylor.com"]</code></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="api-flow" style="margin-top:0.75rem;">
+            <div class="api-flow-step" style="margin-bottom:0;">
+                <div class="api-flow-content">
+                    <h4>Petició A: VoraStudio des de vorastudio.cat</h4>
+                    <ol style="margin:0;padding-left:1.25rem;">
+                        <li>Obté token via <code>GET /api/public/token</code> des de <code>vorastudio.cat</code> → JWT per a l'usuari 16 (admin).</li>
+                        <li>Crida <code>GET /api/public/web/vorastudio-projects</code> amb el JWT.</li>
+                        <li>Domain Lock: <code>vorastudio.cat</code> està a <code>allowed_domains</code> → ✅.</li>
+                        <li>UserFilterSubscriber: ROLE_ADMIN → <strong>bypass</strong> → veu <strong>totes</strong> les entrades.</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+
+        <div class="api-flow" style="margin-top:0.5rem;">
+            <div class="api-flow-step" style="margin-bottom:0;">
+                <div class="api-flow-content">
+                    <h4>Petició B: Taylor des de victoriataylor.com</h4>
+                    <ol style="margin:0;padding-left:1.25rem;">
+                        <li>Obté token via <code>GET /api/public/token</code> des de <code>victoriataylor.com</code> → JWT per a l'usuari 17 (xavi).</li>
+                        <li>Crida <code>GET /api/public/victoria-taylor/noticia</code> amb el JWT.</li>
+                        <li>Domain Lock: <code>victoriataylor.com</code> està a <code>allowed_domains</code> → ✅.</li>
+                        <li>UserFilterSubscriber: ROLE_USUARIO → activa <code>user_id_filter</code> amb <code>user_id = 17</code> → <strong>només</strong> veu les entrades de l'usuari 17.</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+
+        <div class="api-alert api-alert--warning" style="margin-top:0.75rem;">
+            <i class="bi bi-shield-exclamation"></i>
+            <span><strong>Cas de prova:</strong> si el token de VoraStudio (usuari 16, admin) es fa servir des de <code>victoriataylor.com</code>, el <strong>Domain Lock</strong> el rebutja perquè <code>victoriataylor.com</code> no està a <code>allowed_domains</code> de l'usuari 16. Si el token es fa servir des del domini correcte però per una entitat que no pertany a l'usuari, el <strong>UserIdFilter</strong> (per a no-admin) ho bloca a nivell de base de dades.</span>
+        </div>
+
+        <div class="api-card-subtitle" style="margin-top:1.5rem;">Serveis i classes implicades</div>
+        <table class="api-params-table" style="margin-bottom:0;">
+            <thead><tr><th>Classe</th><th>Capa</th><th>Funció</th></tr></thead>
+            <tbody>
+                <tr>
+                    <td><code>LexikJWTAuthenticator</code></td>
+                    <td>1 — Firewall</td>
+                    <td>Valida signatura RSA i expiració del JWT</td>
+                </tr>
+                <tr>
+                    <td><code>JwtClientIdSubscriber</code></td>
+                    <td>2 — Esdeveniments JWT</td>
+                    <td>Injeta <code>user_id</code> i <code>allowed_domains</code> al payload; dispara validació de domini</td>
+                </tr>
+                <tr>
+                    <td><code>JwtDomainValidator</code></td>
+                    <td>2 — Domain Lock</td>
+                    <td>Compara el Host real de la petició contra <code>allowed_domains</code> del payload</td>
+                </tr>
+                <tr>
+                    <td><code>UserFilterSubscriber</code></td>
+                    <td>3 — Kernel event</td>
+                    <td>Activa el filtre Doctrine si l'usuari no és admin</td>
+                </tr>
+                <tr>
+                    <td><code>UserIdFilter</code></td>
+                    <td>4 — Doctrine SQL</td>
+                    <td>Afegeix <code>WHERE user_id = :id</code> a totes les queries</td>
+                </tr>
+                <tr>
+                    <td><code>TokenMasterService</code></td>
+                    <td>— Master Token</td>
+                    <td>Busca usuari per domini i genera JWT sense login</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
 {# ─── Com funciona ─── #}
-<div class="api-card" data-anim="cyber-card">
+<div class="api-card" id="com-funciona" data-anim="cyber-card">
     <div class="api-card-header">
         <div class="api-card-icon api-card-icon--blue">
             <i class="bi bi-diagram-3-fill"></i>
@@ -101,7 +457,7 @@
 </div>
 
 {# ─── Obtenir JWT ─── #}
-<div class="api-card" data-anim="cyber-card">
+<div class="api-card" id="obtenir-jwt" data-anim="cyber-card">
     <div class="api-card-header">
         <div class="api-card-icon api-card-icon--orange">
             <i class="bi bi-box-arrow-in-right"></i>

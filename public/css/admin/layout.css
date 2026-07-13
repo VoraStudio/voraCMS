@@ -143,6 +143,35 @@ body {
   gap: 10px !important;
 }
 
+/* Sub-links profunds (seccions dins d'una pàgina) */
+.s-sidebar-link--sub-deep {
+  padding-left: 62px !important;
+  font-size: 0.7rem !important;
+  font-weight: 400 !important;
+  gap: 8px !important;
+}
+
+/* ─── Grup col·lapsable al sidebar ─── */
+.s-sidebar-group-children {
+  overflow: hidden;
+  max-height: 0;
+  transition: max-height 0.3s ease;
+}
+
+.s-sidebar-group.is-open .s-sidebar-group-children {
+  max-height: 200px;
+}
+
+.s-sidebar-group-arrow {
+  margin-left: auto;
+  font-size: 0.65rem;
+  transition: transform 0.3s ease;
+}
+
+.s-sidebar-group.is-open .s-sidebar-group-arrow {
+  transform: rotate(180deg);
+}
+
 .s-sidebar-footer {
   padding: 12px;
   border-top: 1px solid var(--s-sidebar-divider);

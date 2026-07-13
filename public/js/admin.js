@@ -227,6 +227,22 @@
       sidebarOverlay.addEventListener('click', toggleSidebar);
     }
 
+    /* ─── Sidebar group collapse (JWT sub-seccions, etc.) ─── */
+    document.querySelectorAll('.s-sidebar-group-toggle').forEach(function (toggle) {
+      toggle.addEventListener('click', function (e) {
+        var group = this.closest('.s-sidebar-group');
+        if (group) {
+          /* El link del group toggle navega a la pàgina igualment,
+             però evitem que el toggle interfereixi si ja hi som */
+          var isJwtPage = window.location.pathname.indexOf('/admin/api-guide/jwt') !== -1;
+          if (isJwtPage) {
+            e.preventDefault();
+            group.classList.toggle('is-open');
+          }
+        }
+      });
+    });
+
     /* Delete confirmation via data-confirm attribute */
     document.addEventListener('click', function (e) {
       var btn = e.target.closest('[data-confirm]');

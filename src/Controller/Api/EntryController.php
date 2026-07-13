@@ -50,12 +50,12 @@ class EntryController extends AbstractController
     ): JsonResponse {
         $user = $this->getUser();
         if (!$user instanceof User) {
-            return $this->json(['error' => 'Unauthorized'], 401);
+            return $this->json(['error' => 'No autoritzat'], 401);
         }
 
         $contentType = $ctRepo->findBySlug($slug);
         if (!$contentType) {
-            return $this->json(['error' => 'Not found'], 404);
+            return $this->json(['error' => 'No trobat'], 404);
         }
 
         $locale = $request->query->get('locale');
@@ -69,7 +69,7 @@ class EntryController extends AbstractController
     /* ─── DETALL ─── */
     /* GET /api/{slug}/{id}
        Retorna una entrada concreta pel seu ID, scoped a l'usuari. */
-    #[Route('/{slug}/{id}', name: 'api_entry_show', methods: ['GET'])]
+    #[Route('/{slug}/{id}', name: 'api_entry_show', methods: ['GET'], requirements: ['id' => '\d+'])]
     public function show(
         string $slug,
         int $id,
@@ -78,17 +78,17 @@ class EntryController extends AbstractController
     ): JsonResponse {
         $user = $this->getUser();
         if (!$user instanceof User) {
-            return $this->json(['error' => 'Unauthorized'], 401);
+            return $this->json(['error' => 'No autoritzat'], 401);
         }
 
         $contentType = $ctRepo->findBySlug($slug);
         if (!$contentType) {
-            return $this->json(['error' => 'Content type not found'], 404);
+            return $this->json(['error' => 'Tipus de contingut no trobat'], 404);
         }
 
         $entry = $entryRepo->findPublishedById($id);
         if (!$entry || $entry->getContentType()->getId() !== $contentType->getId()) {
-            return $this->json(['error' => 'Entry not found'], 404);
+            return $this->json(['error' => 'Entrada no trobada'], 404);
         }
 
         return $this->json([

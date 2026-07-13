@@ -47,4 +47,18 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
             ->getQuery()
             ->getOneOrNullResult();
     }
+
+    /* ── Troba usuari amb allowed_domains que contingui el domini ── */
+    public function findOneByDomain(string $domain): ?User
+    {
+        return $this->createQueryBuilder('u')
+            ->where($this->getEntityManager()->getExpressionBuilder()->like(
+                'u.allowedDomains',
+                ':domain'
+            ))
+            ->setParameter('domain', '%"' . $domain . '"%')
+            ->setMaxResults(1)
+            ->getQuery()
+            ->getOneOrNullResult();
+    }
 }

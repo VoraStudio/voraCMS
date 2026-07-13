@@ -5,6 +5,8 @@
    ══════════════════════════════════════════════════════════════
    Endpoints públics (sense autenticació) perquè el frontend
    estàtic de Victoria Taylor pugui consumir dades.
+
+   CORS i OPTIONS gestionats globalment per CorsSubscriber.
    ══════════════════════════════════════════════════════════════ */
 
 namespace App\Controller\Api;
@@ -12,8 +14,11 @@ namespace App\Controller\Api;
 use App\Entity\Entry;
 use App\Entity\ContentType;
 use App\Repository\ContentTypeRepository;
+use App\Repository\EntryRepository;
 use App\Repository\ProjectRepository;
+use App\Service\ArtisteTransformerService;
 use App\Service\EntrySerializer;
+use App\Service\TokenMasterService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -35,7 +40,7 @@ class PublicController extends AbstractController
            /api/public/victoria-taylor/event
            /api/public/victoria-taylor/artistes_victoria_taylor
        Sense autenticació. CORS obert. */
-    #[Route('/{project}/{type}', name: 'api_public_content', methods: ['GET', 'OPTIONS'])]
+    #[Route('/{project}/{type}', name: 'api_public_content', methods: ['GET'])]
     public function content(
         string $project,
         string $type,
@@ -44,18 +49,14 @@ class PublicController extends AbstractController
         EntityManagerInterface $em,
         Request $request,
     ): JsonResponse {
-        if ($request->isMethod('OPTIONS')) {
-            return $this->corsResponse(204);
-        }
-
         $projectEntity = $projectRepo->findBySlug($project);
         if (!$projectEntity) {
-            return $this->json(['error' => 'Project not found'], 404, $this->corsHeaders());
+            return $this->json(['error' => 'Projecte no trobat'], 404);
         }
 
         $contentType = $ctRepo->findBySlug($type, $projectEntity->getId());
         if (!$contentType) {
-            return $this->json(['error' => 'Content type not found'], 404, $this->corsHeaders());
+            return $this->json(['error' => 'Tipus de contingut no trobat'], 404);
         }
 
         $entries = $em->createQueryBuilder()
@@ -70,18 +71,15 @@ class PublicController extends AbstractController
             ->getResult();
 
         $baseUrl = $request->getSchemeAndHttpHost();
-        $data = $this->serializer->serializeCollection($entries);
+        $data = $this->serializer->serializeCollection($entries, $baseUrl);
 
-        /* Resoldre URLs d'imatges a absolutes */
-        $data = $this->resolveMediaUrls($data, $baseUrl);
-
-        return $this->json(['data' => $data], Response::HTTP_OK, $this->corsHeaders());
+        return $this->json(['data' => $data]);
     }
 
     /* ─── ITEM INDIVIDUAL ─── */
     /* GET /api/public/{project}/{type}/{id}
        Retorna una entrada individual del content type dins del projecte. */
-    #[Route('/{project}/{type}/{id}', name: 'api_public_content_item', methods: ['GET', 'OPTIONS'])]
+    #[Route('/{project}/{type}/{id}', name: 'api_public_content_item', methods: ['GET'])]
     public function item(
         string $project,
         string $type,
@@ -91,168 +89,65 @@ class PublicController extends AbstractController
         EntityManagerInterface $em,
         Request $request,
     ): JsonResponse {
-        if ($request->isMethod('OPTIONS')) {
-            return $this->corsResponse(204);
-        }
-
         $projectEntity = $projectRepo->findBySlug($project);
         if (!$projectEntity) {
-            return $this->json(['error' => 'Project not found'], 404, $this->corsHeaders());
+            return $this->json(['error' => 'Projecte no trobat'], 404);
         }
 
         $contentType = $ctRepo->findBySlug($type, $projectEntity->getId());
         if (!$contentType) {
-            return $this->json(['error' => 'Content type not found'], 404, $this->corsHeaders());
+            return $this->json(['error' => 'Tipus de contingut no trobat'], 404);
         }
 
         $entry = $em->find(Entry::class, $id);
         if (!$entry || $entry->getContentType()->getId() !== $contentType->getId()) {
-            return $this->json(['error' => 'Entry not found'], 404, $this->corsHeaders());
+            return $this->json(['error' => 'Entrada no trobada'], 404);
         }
 
         $baseUrl = $request->getSchemeAndHttpHost();
-        $data = $this->serializer->serialize($entry);
-        $data = $this->resolveMediaUrls([$data], $baseUrl);
+        $data = $this->serializer->serialize($entry, $baseUrl);
 
-        return $this->json(['data' => $data[0]], Response::HTTP_OK, $this->corsHeaders());
+        return $this->json(['data' => $data]);
     }
 
     /* ─── ARTISTES (format compat amb artistas.js) ─── */
-    #[Route('/artistes', name: 'api_public_artistes', methods: ['GET', 'OPTIONS'])]
+    #[Route('/artistes', name: 'api_public_artistes', methods: ['GET'])]
     public function artistes(
         ContentTypeRepository $ctRepo,
         EntryRepository $entryRepo,
+        ArtisteTransformerService $transformer,
         Request $request,
     ): JsonResponse {
-        if ($request->isMethod('OPTIONS')) {
-            return $this->corsResponse(204);
-        }
-
         $contentType = $ctRepo->findBySlug('artistes_victoria_taylor');
         if (!$contentType) {
-            return $this->json(['error' => 'Content type not found'], 404, $this->corsHeaders());
+            return $this->json(['error' => 'Tipus de contingut no trobat'], 404);
         }
 
         $entries = $entryRepo->findPublishedByType('artistes_victoria_taylor');
         $baseUrl = $request->getSchemeAndHttpHost();
-        $result = [];
+        $locale = $request->query->get('locale', 'ca');
 
-        foreach ($entries as $entry) {
-            $data = $this->serializer->serialize($entry);
-            $locale = $entry->getLocale() ?: 'ca';
-            $titol = $data['titol'] ?? 'Artista';
-            $id = $this->slugifyId($titol) . '-' . $entry->getId();
+        return $this->json($transformer->transformAll($entries, $baseUrl, $locale));
+    }
 
-            $imgUrl = !empty($data['imatge'][0]['url'])
-                ? $baseUrl . '/' . ltrim($data['imatge'][0]['url'], '/')
-                : null;
+    /* ─── TOKEN MASTER (JWT sense login) ─── */
+    /* GET /api/public/token
+       Retorna un JWT si el domini del client està autoritzat
+       als allowed_domains d'algun usuari. Sense credencials. */
+    #[Route('/token', name: 'api_public_token', methods: ['GET'])]
+    public function token(
+        Request $request,
+        TokenMasterService $tokenService,
+    ): JsonResponse {
+        $token = $tokenService->generateToken($request->getHost());
 
-            $artist = [
-                'id' => $id,
-                'nombre' => $this->toLang($titol, $locale),
-                'rol' => $this->toLang($data['subtitol'] ?? '', $locale),
-                'cardImg' => $imgUrl,
-                'heroImg' => $imgUrl,
-                'instagram' => null,
-                'bio' => $this->toLang(
-                    $data['descripcio'] ? [$data['descripcio']] : [],
-                    $locale
-                ),
-                'logros' => $this->mapLogros($data['logros'] ?? [], $locale),
-                'obras' => $this->mapObras($data['galeria'] ?? [], $baseUrl, $locale),
-            ];
-
-            $result[$id] = $artist;
+        if (!$token) {
+            return $this->json(
+                ['error' => 'Domini no autoritzat'],
+                Response::HTTP_FORBIDDEN
+            );
         }
 
-        return $this->json($result, Response::HTTP_OK, $this->corsHeaders());
-    }
-
-    /* ─── HELPERS ─── */
-
-    private function corsHeaders(): array
-    {
-        return [
-            'Access-Control-Allow-Origin' => '*',
-            'Access-Control-Allow-Methods' => 'GET, OPTIONS',
-            'Access-Control-Allow-Headers' => 'Content-Type, Authorization',
-        ];
-    }
-
-    private function corsResponse(int $status): JsonResponse
-    {
-        return new JsonResponse(null, $status, $this->corsHeaders());
-    }
-
-    private function resolveMediaUrls(array $data, string $baseUrl): array
-    {
-        foreach ($data as &$entry) {
-            foreach ($entry as $key => &$value) {
-                /* Image field: array of [{url, ...}] */
-                if (is_array($value) && isset($value[0]['url'])) {
-                    foreach ($value as &$item) {
-                        if (isset($item['url']) && $item['url'] && !str_starts_with($item['url'], 'http')) {
-                            $item['url'] = $baseUrl . '/' . ltrim($item['url'], '/');
-                        }
-                        if (isset($item['formats'])) {
-                            foreach ($item['formats'] as &$fmt) {
-                                if (isset($fmt['url']) && $fmt['url'] && !str_starts_with($fmt['url'], 'http')) {
-                                    $fmt['url'] = $baseUrl . '/' . ltrim($fmt['url'], '/');
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        return $data;
-    }
-
-    private function toLang(mixed $value, string $locale): object
-    {
-        $locales = ['es', 'ca', 'en'];
-        $obj = [];
-        foreach ($locales as $l) {
-            $obj[$l] = $l === $locale ? $value : '';
-        }
-        return (object) $obj;
-    }
-
-    private function mapLogros(array $logros, string $locale): array
-    {
-        return array_map(function ($l) use ($locale) {
-            return [
-                'año' => $l['año'] ?? '',
-                'textos' => $this->toLang(
-                    !empty($l['texto']) ? [$l['texto']] : [],
-                    $locale
-                ),
-            ];
-        }, $logros);
-    }
-
-    private function mapObras(array $galeria, string $baseUrl, string $locale): array
-    {
-        return array_map(function ($o) use ($baseUrl, $locale) {
-            $url = !empty($o['url'])
-                ? $baseUrl . '/' . ltrim($o['url'], '/')
-                : null;
-            return [
-                'img' => $url,
-                'titulo' => $this->toLang($o['name'] ?? '', $locale),
-            ];
-        }, $galeria);
-    }
-
-    private function slugifyId(string $text): string
-    {
-        $text = mb_strtolower(trim($text));
-        $text = str_replace(
-            ['á','é','í','ó','ú','à','è','ì','ò','ù','ñ','ü'],
-            ['a','e','i','o','u','a','e','i','o','u','n','u'],
-            $text
-        );
-        $text = preg_replace('/[^a-z0-9]+/', '-', $text);
-        return trim($text, '-');
+        return $this->json(['token' => $token]);
     }
 }

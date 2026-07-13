@@ -29,7 +29,7 @@ class SectionController extends AbstractController
     {
         $user = $this->getUser();
         if (!$user instanceof User) {
-            return $this->json(['error' => 'Unauthorized'], 401);
+            return $this->json(['error' => 'No autoritzat'], 401);
         }
 
         $active = $request->query->get('active');
