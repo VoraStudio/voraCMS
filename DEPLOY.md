@@ -10,7 +10,8 @@
 
 - [Primer deploy](#primer-deploy)
 - [Post-deploy: ajustes necesarios](#post-deploy-ajustes-necesarios)
-- [Deploys posteriores](#deploys-posteriores)
+- [Deploy automático (GitHub Actions)](#deploy-automático-con-github-actions)
+- [Deploys manuales](#deploys-manuales-alternativa-ssh)
 - [Backup de la base de datos](#backup-de-la-base-de-datos)
 - [Resolución de problemas comunes](#resolución-de-problemas-comunes)
 
@@ -94,8 +95,10 @@ ENVEOF
 ### 7. Instalar dependencias
 
 ```bash
-composer install --no-dev --optimize-autoloader --no-interaction
+composer install --no-dev --optimize-autoloader --no-interaction --no-scripts
 ```
+
+> ⚠️ CDMON tiene `proc_open()` deshabilitado. El flag `--no-scripts` evita que los scripts de composer fallen. Si algún script (post-install, post-update) intenta ejecutar comandos externos, se saltan.
 
 ### 8. Generar JWT keys
 
@@ -125,10 +128,13 @@ php gen-jwt.php
 ### 9. Cache y migrations
 
 ```bash
+export COLUMNS=120 LINES=40
 php bin/console cache:clear --env=prod --no-debug
 php bin/console cache:warmup --env=prod --no-debug
 php bin/console doctrine:migrations:migrate --env=prod --no-interaction --no-debug
 ```
+
+> ⚠️ `COLUMNS=120` evita que Symfony Console cridi a `tput cols` via `proc_open()` (deshabilitat a CDMON).
 
 ### 10. Configurar .htaccess
 
@@ -243,8 +249,9 @@ Los secrets se configuran en: **GitHub → Repo → Settings → Secrets and var
 | 4 | Servidor | `cp .env.local .env` (Apache necesita `.env`) |
 | 5 | Servidor | `chmod -R 777 var/cache var/log` |
 | 6 | Servidor | `source .env.local && COLUMNS=120 php deploy.php` (limpia caché) |
-| 7 | Servidor | `COLUMNS=120 php bin/console doctrine:migrations:migrate` |
-| 8 | Servidor | `chmod -R 777 var/cache var/log` + OPcache reset |
+| 7 | Servidor | `COLUMNS=120 php bin/console doctrine:migrations:migrate` (falla si hi ha error) |
+| 8 | Servidor | `COLUMNS=120 php bin/console cache:warmup --env=prod` (regenera caché) |
+| 9 | Servidor | `chmod -R 777 var/cache var/log` + OPcache reset |
 
 > ⚠️ CDMON tiene `proc_open()` deshabilitado. Por eso el `composer install` se ejecuta
 > en el runner de GitHub (no en el servidor), y los comandos CLI llevan `COLUMNS=120`
@@ -266,6 +273,7 @@ export COLUMNS=120 LINES=40
 source .env.local
 php deploy.php
 php bin/console doctrine:migrations:migrate --env=prod --no-interaction --no-debug
+php bin/console cache:warmup --env=prod --no-debug
 chmod -R 777 var/cache var/log
 php -r "opcache_reset();"
 ```

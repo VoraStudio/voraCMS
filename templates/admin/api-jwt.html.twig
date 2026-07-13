@@ -42,48 +42,61 @@
     <div class="api-card-body">
         <p class="api-text">El CMS utilitza <strong>JWT (JSON Web Token)</strong> signat amb <strong>RSA (SHA-256)</strong> per autenticar totes les peticions a l'API. No hi ha cap altre mètode d'autenticació disponible.</p>
 
-        <div class="api-card-subtitle">Flux complet</div>
+        <div class="api-card-subtitle">Flux complet pas a pas</div>
         <div class="api-flow">
             <div class="api-flow-step">
                 <div class="api-flow-num">1</div>
                 <div class="api-flow-content">
-                    <h4>Login</h4>
-                    <p>El frontend fa <code>POST /api/auth/login</code> amb <strong>email + password</strong> de l'usuari.</p>
+                    <h4>Login → POST /api/auth/login</h4>
+                    <p>El frontend envia <strong>email + password</strong>. El firewall <code>api_login</code> de <code>security.yaml</code> captura les credencials amb <code>json_login</code>. Abans de generar el token, <code>UserChecker::checkPreAuth()</code> comprova que l'usuari estigui <strong>actiu</strong> — si està inactiu, llança <code>DisabledException</code> i rebutja el login. <code>login_throttling</code> limita a 10 intents.</p>
                 </div>
             </div>
             <div class="api-flow-arrow"><i class="bi bi-chevron-down"></i></div>
             <div class="api-flow-step">
                 <div class="api-flow-num">2</div>
                 <div class="api-flow-content">
-                    <h4>Emissió del JWT</h4>
-                    <p>El servidor valida les credencials i retorna un JWT signat amb RSA. El payload inclou l'<code>allowed_domains</code> de l'usuari. El JWT s'emet sempre — la validació passa <strong>després, a cada petició</strong>: comprova el <strong>Host d'aquesta petició</strong> contra <code>allowed_domains</code>.</p>
+                    <h4>Emissió del JWT (LexikJWTAuthenticationBundle)</h4>
+                    <p>El bundle signa el JWT amb <strong>RSA (SHA-256)</strong> i dispara l'esdeveniment <code>JWT_CREATED</code>. El subscriber <code>JwtClientIdSubscriber::onJwtCreated()</code> injecta al payload: <code>user_id</code>, <code>user_slug</code> i <code>allowed_domains</code> (extrets de l'entitat <code>User</code>). El JWT es retorna al client amb <code>success_handler</code> de Lexik.</p>
                 </div>
             </div>
             <div class="api-flow-arrow"><i class="bi bi-chevron-down"></i></div>
             <div class="api-flow-step">
                 <div class="api-flow-num">3</div>
                 <div class="api-flow-content">
-                    <h4>Autenticació</h4>
-                    <p>A cada petició a l'API, el frontend envia <code>Authorization: Bearer &lt;JWT&gt;</code>. El servidor valida la <strong>signatura RSA</strong> i la <strong>caducitat (exp)</strong> abans de processar la petició.</p>
+                    <h4>Cada petició → verificar signatura RSA</h4>
+                    <p>El frontend envia <code>Authorization: Bearer &lt;JWT&gt;</code>. El firewall <code>api</code> (stateless) captura la petició. Lexik decodifica el token: si la <strong>signatura RSA</strong> no coincideix o el token ha <strong>expirat (exp)</strong>, retorna 401 immediatament. <strong>Zero consultes a base de dades</strong> — tota la informació necessària és al JWT.</p>
                 </div>
             </div>
             <div class="api-flow-arrow"><i class="bi bi-chevron-down"></i></div>
             <div class="api-flow-step">
                 <div class="api-flow-num">4</div>
                 <div class="api-flow-content">
-                    <h4>Validació de domini</h4>
-                    <p>Quan s'usa el JWT (crida des d'una landing page o eina externa), el <code>JwtClientIdSubscriber</code> valida que el <strong>domini d'<em>aquesta</em> petició</strong> (Host header) estigui dins de <code>allowed_domains</code>. <strong>localhost</strong> està sempre permès. Si no hi és, 401. <strong>Login i admin panel no es veuen afectats</strong> (login no valida; admin usa sessió, no JWT).</p>
+                    <h4>Esdeveniment JWT_DECODED → JwtClientIdSubscriber</h4>
+                    <p>Lexik dispara <code>JWT_DECODED</code>. <code>JwtClientIdSubscriber::onJwtDecoded()</code> delega la validació de domini a <code>JwtDomainValidator::validateFromPayload()</code>. Aquest servei: (1) extreu <code>allowed_domains</code> del payload; (2) afegeix <code>localhost</code> si no hi és; (3) obté el <code>Host</code> real de la petició via <code>RequestStack</code>; (4) el normalitza internament (treu protocol, www, trailing slash, path); (5) compara contra cada domini permès. Si no coincideix cap → <code>markAsInvalid()</code> → 401.</p>
                 </div>
             </div>
             <div class="api-flow-arrow"><i class="bi bi-chevron-down"></i></div>
             <div class="api-flow-step">
                 <div class="api-flow-num">5</div>
                 <div class="api-flow-content">
-                    <h4>Resposta</h4>
-                    <p>El servidor processa la petició i retorna les dades sol·licitades, aïllades per usuari.</p>
+                    <h4>Resposta del controlador</h4>
+                    <p>La petició arriba al <strong>controlador</strong> corresponent (<code>EntryController</code>, <code>AuthController</code>, <code>PublicApiController</code>...). El controlador processa la petició, respecta l'aïllament multi-tenant per usuari, i retorna les dades en JSON.</p>
                 </div>
             </div>
         </div>
+
+        <div class="api-card-subtitle" style="margin-top:1.5rem;">Serveis i classes implicades</div>
+        <table class="api-params-table" style="margin-bottom:0;">
+            <thead><tr><th>Classe</th><th>Funció</th></tr></thead>
+            <tbody>
+                <tr><td><code>UserChecker</code></td><td>Filtre de login: bloca usuaris inactius</td></tr>
+                <tr><td><code>JwtClientIdSubscriber</code></td><td>Orquestrador d'esdeveniments JWT: injecta dades al payload i dispara validació</td></tr>
+                <tr><td><code>JwtDomainValidator</code></td><td>Validador de domini: normalitza Host de la petició i el compara contra <code>allowed_domains</code></td></tr>
+                <tr><td><code>AuthController</code></td><td>Endpoint <code>/api/auth/me</code>: retorna dades de l'usuari autenticat + el token actiu</td></tr>
+                <tr><td><code>UserController</code></td><td>CRUD d'usuaris al panell admin: gestiona <code>allowed_domains</code></td></tr>
+                <tr><td>LexikJWTAuthenticationBundle</td><td>Bundle Symfony: signatura RSA, generació i validació de JWT</td></tr>
+            </tbody>
+        </table>
     </div>
 </div>
 
@@ -155,7 +168,7 @@ Content-Type: application/json
 
         <div class="api-alert api-alert--info" style="margin-top:0.75rem;">
             <i class="bi bi-shield-fill-check"></i>
-            <span>El JWT es valida <strong>al payload</strong>, no al header <code>Origin</code>. La validació de domini comprova el <strong>Host de cada petició</strong> contra <code>allowed_domains</code>, no el domini del login.</span>
+            <span>El JWT es valida <strong>al payload</strong>, no al header <code>Origin</code>. La validació de domini comprova el <strong>Host de cada petició</strong> contra <code>allowed_domains</code> (que viatgen dins el JWT signat). Si el token es roba des d'un domini no autoritzat, el rebota amb 401.</span>
         </div>
     </div>
 </div>
@@ -169,52 +182,60 @@ Content-Type: application/json
         <h3 class="api-card-title">Validació de domini (JwtDomainValidator)</h3>
     </div>
     <div class="api-card-body">
-        <p class="api-text">Cada petició JWT a l'API passa per <code>JwtDomainValidator</code> (servei intern), cridat des de <code>JwtClientIdSubscriber</code>. Valida que el <strong>Host d'aquesta petició</strong> estigui dins els <code>allowed_domains</code> de l'usuari. No hi ha domini al payload — la validació és contra el Host real de cada petició.</p>
+        <p class="api-text">Cada petició JWT a l'API passa pel servei <code>JwtDomainValidator</code>, cridat des de <code>JwtClientIdSubscriber</code> a l'esdeveniment <code>JWT_DECODED</code>. Valida que el <strong>Host real d'aquesta petició</strong> estigui dins els <code>allowed_domains</code> de l'usuari. La normalització del domini (treure protocol, www, path, trailing slash) la fa internament el mateix servei — no cal cap dependència externa.</p>
 
         <div class="api-alert api-alert--success" style="margin-top:0.75rem;">
             <i class="bi bi-info-circle-fill"></i>
             <span>La validació de domini <strong>només</strong> s'aplica a les peticions que porten JWT (landing pages, eines externes). El <strong>login</strong> no la valida i el <strong>panell admin</strong> no l'usa (sessió PHP, no JWT).</span>
         </div>
 
-        <div class="api-card-subtitle">Com funciona</div>
+        <div class="api-card-subtitle">Com funciona (pas a pas dins JwtDomainValidator)</div>
         <div class="api-flow">
             <div class="api-flow-step">
                 <div class="api-flow-num">1</div>
                 <div class="api-flow-content">
-                    <h4>Login</h4>
-                    <p><code>POST /api/auth/login</code>. El servidor valida credencials, genera el JWT amb <code>allowed_domains</code> de l'usuari. <strong>Cap domini al payload.</strong></p>
+                    <h4>Comprovar si cal validar</h4>
+                    <p>Si el payload NO conté <code>user_id</code> (token d'usuari anònim), es permet el pas sense validació.</p>
                 </div>
             </div>
             <div class="api-flow-arrow"><i class="bi bi-chevron-down"></i></div>
             <div class="api-flow-step">
                 <div class="api-flow-num">2</div>
                 <div class="api-flow-content">
-                    <h4>Petició API</h4>
-                    <p>La landing page fa <code>GET /api/public/...</code> amb <code>Authorization: Bearer &lt;JWT&gt;</code>.</p>
+                    <h4>Extreure allowed_domains del payload</h4>
+                    <p>Llegeix <code>allowed_domains</code> del payload del JWT. Aquest array va ser injectat per <code>JwtClientIdSubscriber::onJwtCreated()</code> al moment del login, extret de l'entitat <code>User</code>. Si l'usuari no en té → array buit.</p>
                 </div>
             </div>
             <div class="api-flow-arrow"><i class="bi bi-chevron-down"></i></div>
             <div class="api-flow-step">
                 <div class="api-flow-num">3</div>
                 <div class="api-flow-content">
-                    <h4>Llegir Host d'aquesta petició</h4>
-                    <p>El <code>onJwtDecoded</code> agafa el <strong>Host header</strong> de la petició actual i el normalitza amb <code>DomainService</code>.</p>
+                    <h4>localhost sempre permès</h4>
+                    <p>El servei afegeix <strong>sempre</strong> <code>localhost</code> a la llista, encara que l'usuari no el tingui configurat. Això permet treballar en entorns de desenvolupament sense haver de configurar res.</p>
                 </div>
             </div>
             <div class="api-flow-arrow"><i class="bi bi-chevron-down"></i></div>
             <div class="api-flow-step">
                 <div class="api-flow-num">4</div>
                 <div class="api-flow-content">
-                    <h4>localhost sempre permès</h4>
-                    <p>El servei afegeix <strong>sempre</strong> <code>localhost</code> a <code>allowed_domains</code>, a sobre dels que tingui l'usuari.</p>
+                    <h4>Capturar el Host real de la petició</h4>
+                    <p>Obté el <strong>Host header</strong> de la petició HTTP actual via <code>RequestStack::getCurrentRequest()</code>. Aquest és el domini des d'on s'està fent la crida <strong>ara</strong>, no el que es va guardar al login.</p>
                 </div>
             </div>
             <div class="api-flow-arrow"><i class="bi bi-chevron-down"></i></div>
             <div class="api-flow-step">
                 <div class="api-flow-num">5</div>
                 <div class="api-flow-content">
-                    <h4>Validar</h4>
-                    <p>Si el Host d'aquesta petició NO està a <code>allowed_domains</code> → <strong>401 Invalid JWT Token</strong>. Si hi és → 200.</p>
+                    <h4>Normalitzar internament</h4>
+                    <p>El mètode privat <code>normalize()</code> neteja el domini: treu <code>https://</code>, treu <code>www.</code>, extrau només el host amb <code>parse_url()</code> (per si algú passa una URL completa), i elimina trailing slash. Així <code>"https://www.micliente.com/"</code> → <code>"micliente.com"</code>.</p>
+                </div>
+            </div>
+            <div class="api-flow-arrow"><i class="bi bi-chevron-down"></i></div>
+            <div class="api-flow-step">
+                <div class="api-flow-num">6</div>
+                <div class="api-flow-content">
+                    <h4>Comparar</h4>
+                    <p>Itera sobre <code>allowed_domains</code> i compara el Host normalitzat contra cada domini permès. Si coincideix exactament o és un <strong>subdomini</strong> (ex: <code>app.micliente.com</code> ⊆ <code>micliente.com</code>) → OK. Si cap coincideix → <code>return false</code> → <code>onJwtDecoded()</code> crida <code>markAsInvalid()</code> → el token es rebutja amb 401.</p>
                 </div>
             </div>
         </div>
@@ -238,6 +259,7 @@ Content-Type: application/json
                 <tr><td><code>localhost</code></td><td><code>[]</code> (no configurat)</td><td><span class="api-tag api-tag--green">✅ Permès</span> (localhost per defecte)</td></tr>
                 <tr><td><code>localhost</code></td><td><code>["vorastudio.cat"]</code></td><td><span class="api-tag api-tag--green">✅ Permès</span> (localhost s'afegeix automàticament)</td></tr>
                 <tr><td><code>vorastudio.cat</code></td><td><code>["vorastudio.cat"]</code></td><td><span class="api-tag api-tag--green">✅ Permès</span></td></tr>
+                <tr><td><code>app.vorastudio.cat</code></td><td><code>["vorastudio.cat"]</code></td><td><span class="api-tag api-tag--green">✅ Permès</span> (subdomini coincident)</td></tr>
                 <tr><td><code>hacker.com</code></td><td><code>["vorastudio.cat"]</code></td><td><span class="api-tag api-tag--red">❌ 401</span> (hacker.com no està a la llista)</td></tr>
             </tbody>
         </table>
