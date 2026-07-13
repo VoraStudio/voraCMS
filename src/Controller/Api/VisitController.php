@@ -29,12 +29,12 @@ class VisitController extends AbstractController
         $data = json_decode($request->getContent(), true);
 
         if (!$data || !isset($data['entry_id'])) {
-            return $this->json(['error' => 'entry_id required'], 400);
+            return $this->json(['error' => 'entry_id requerit'], 400);
         }
 
         $entry = $entryRepo->find($data['entry_id']);
         if (!$entry || !$entry->getUser()) {
-            return $this->json(['error' => 'entry not found'], 404);
+            return $this->json(['error' => 'Entrada no trobada'], 404);
         }
 
         $visit = new Visit();

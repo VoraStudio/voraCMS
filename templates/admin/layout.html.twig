@@ -87,9 +87,23 @@
             <a class="s-sidebar-link s-sidebar-link--sub{% if app.request.get('_route') == 'admin_api_guide_security' %} active{% endif %}" href="{{ path('admin_api_guide_security') }}">
                 <i class="bi bi-shield-check"></i> Seguretat
             </a>
-            <a class="s-sidebar-link s-sidebar-link--sub{% if app.request.get('_route') == 'admin_api_guide_jwt' %} active{% endif %}" href="{{ path('admin_api_guide_jwt') }}">
-                <i class="bi bi-key-fill"></i> JWT
-            </a>
+            <div class="s-sidebar-group{% if app.request.get('_route') == 'admin_api_guide_jwt' %} is-open{% endif %}">
+                <a class="s-sidebar-link s-sidebar-link--sub{% if app.request.get('_route') == 'admin_api_guide_jwt' %} active{% endif %} s-sidebar-group-toggle" href="{{ path('admin_api_guide_jwt') }}">
+                    <i class="bi bi-key-fill"></i> JWT
+                    <i class="bi bi-chevron-down s-sidebar-group-arrow"></i>
+                </a>
+                <div class="s-sidebar-group-children">
+                    <a class="s-sidebar-link s-sidebar-link--sub-deep" href="{{ path('admin_api_guide_jwt') }}#master-token">
+                        <i class="bi bi-magic"></i> Master Token
+                    </a>
+                    <a class="s-sidebar-link s-sidebar-link--sub-deep" href="{{ path('admin_api_guide_jwt') }}#validacio-client">
+                        <i class="bi bi-diagram-3-fill"></i> Validació per client
+                    </a>
+                    <a class="s-sidebar-link s-sidebar-link--sub-deep" href="{{ path('admin_api_guide_jwt') }}#obtenir-jwt">
+                        <i class="bi bi-box-arrow-in-right"></i> Login
+                    </a>
+                </div>
+            </div>
             {% endif %}
 
         </div>{# ─── /s-sidebar-nav ─── #}

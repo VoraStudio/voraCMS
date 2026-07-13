@@ -15,6 +15,10 @@
      number         → float
      date/datetime  → string ISO
      youtube        → array { id, url, embed }
+
+   Resolució d'URLs:
+     Si es passa $baseUrl, les URLs relatives d'imatges es
+     converteixen a absolutes automàticament.
    =========================================================== */
 
 namespace App\Service;
@@ -36,7 +40,7 @@ class EntrySerializer
 
     /* ----- INICI SECCIÓ SERIALITZACIÓ PRINCIPAL ----- */
     /* Converteix una Entry en array. Itera tots els FieldValues i els aplan per slug. */
-    public function serialize(Entry $entry): array
+    public function serialize(Entry $entry, ?string $baseUrl = null): array
     {
         $data = [
             'id' => $entry->getId(),
@@ -57,13 +61,52 @@ class EntrySerializer
             $data[$slug] = $this->serializeValue($fv, $fieldDef);
         }
 
+        if ($baseUrl !== null) {
+            $data = $this->resolveMediaUrls([$data], $baseUrl);
+            return $data[0];
+        }
+
         return $data;
     }
 
-    /* Serialitza un array d'entries (per al llistat) */
-    public function serializeCollection(array $entries): array
+    /* Serialitza un array d'entrades (per al llistat) */
+    public function serializeCollection(array $entries, ?string $baseUrl = null): array
     {
-        return array_map(fn(Entry $e) => $this->serialize($e), $entries);
+        $data = array_map(fn(Entry $e) => $this->serialize($e), $entries);
+
+        if ($baseUrl !== null) {
+            $data = $this->resolveMediaUrls($data, $baseUrl);
+        }
+
+        return $data;
+    }
+
+    /* ----- INICI SECCIÓ RESOLUCIÓ D'URLS ----- */
+    /* Converteix URLs relatives d'imatges a absolutes usant $baseUrl.
+       Detecta camps d'imatge per l'estructura [{url, formats}] i
+       camps de galeria pel mateix patró. */
+    private function resolveMediaUrls(array $data, string $baseUrl): array
+    {
+        foreach ($data as &$entry) {
+            foreach ($entry as $key => &$value) {
+                /* Image field: array of [{url, ...}] */
+                if (is_array($value) && isset($value[0]['url'])) {
+                    foreach ($value as &$item) {
+                        if (isset($item['url']) && $item['url'] && !str_starts_with($item['url'], 'http')) {
+                            $item['url'] = $baseUrl . '/' . ltrim($item['url'], '/');
+                        }
+                        if (isset($item['formats'])) {
+                            foreach ($item['formats'] as &$fmt) {
+                                if (isset($fmt['url']) && $fmt['url'] && !str_starts_with($fmt['url'], 'http')) {
+                                    $fmt['url'] = $baseUrl . '/' . ltrim($fmt['url'], '/');
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return $data;
     }
 
     /* ----- INICI SECCIÓ SERIALITZACIÓ PER TIPUS ----- */
