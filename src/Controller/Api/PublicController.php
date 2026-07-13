@@ -139,7 +139,14 @@ class PublicController extends AbstractController
         Request $request,
         TokenMasterService $tokenService,
     ): JsonResponse {
-        $token = $tokenService->generateToken($request->getHost());
+        $origin = $request->headers->get('Origin');
+        if ($origin) {
+            $domain = parse_url($origin, PHP_URL_HOST);
+        } else {
+            $domain = $request->getHost();
+        }
+
+        $token = $tokenService->generateToken($domain);
 
         if (!$token) {
             return $this->json(
