@@ -47,4 +47,37 @@ class VisitRepository extends ServiceEntityRepository
             ->getQuery()
             ->getSingleScalarResult();
     }
+
+    /* ── Visites per dia (últims 7 dies) ── */
+    public function countByDayLast7(): array
+    {
+        $sevenDaysAgo = new \DateTimeImmutable('-7 days midnight');
+
+        $rows = $this->createQueryBuilder('v')
+            ->select("DATE(v.visitedAt) AS dia, COUNT(v.id) AS total")
+            ->where('v.visitedAt >= :since')
+            ->groupBy('dia')
+            ->orderBy('dia', 'ASC')
+            ->setParameter('since', $sevenDaysAgo)
+            ->getQuery()
+            ->getResult();
+
+        /* Omplir amb 0 els dies sense visites */
+        $visitsByDay = [];
+        foreach ($rows as $r) {
+            $visitsByDay[$r['dia']] = (int) $r['total'];
+        }
+
+        $result = [];
+        $now = new \DateTimeImmutable('today');
+        for ($i = 6; $i >= 0; $i--) {
+            $day = $now->modify("-{$i} days")->format('Y-m-d');
+            $result[] = [
+                'date' => $day,
+                'total' => $visitsByDay[$day] ?? 0,
+            ];
+        }
+
+        return $result;
+    }
 }

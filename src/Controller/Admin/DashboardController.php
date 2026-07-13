@@ -18,6 +18,7 @@ namespace App\Controller\Admin;
 
 use App\Entity\Entry;
 use App\Entity\User;
+use App\Repository\ApiRequestLogRepository;
 use App\Repository\ContentTypeRepository;
 use App\Repository\EntryRepository;
 use App\Repository\MediaRepository;
@@ -49,6 +50,7 @@ class DashboardController extends AbstractController
         EntityManagerInterface $em,
         VisitRepository $visitRepo,
         UserRepository $userRepo,
+        ApiRequestLogRepository $apiLogRepo,
     ): Response {
         $user = $this->getUser();
         $isAdmin = $this->isGranted('ROLE_ADMIN');
@@ -69,6 +71,17 @@ class DashboardController extends AbstractController
             /* ── Visites d'avui ── */
             $totalVisitsToday = $visitRepo->countTodayGlobal();
 
+            /* ── Dades per als gràfics ── */
+            $apiToday = $apiLogRepo->countToday();
+            $api2xx = $apiLogRepo->countByStatusRangeToday(200, 299);
+            $api4xx = $apiLogRepo->countByStatusRangeToday(400, 499);
+            $api5xx = $apiLogRepo->countByStatusRangeToday(500, 599);
+            $avgResponse = $apiLogRepo->averageResponseTimeToday();
+            $tokenGrants = $apiLogRepo->countTokenGrantsToday();
+            $tokenDenials = $apiLogRepo->countTokenDenialsToday();
+            $topOrigins = $apiLogRepo->topOriginsToday();
+            $visitsWeek = $visitRepo->countByDayLast7();
+
             return $this->render('admin/dashboard.html.twig', [
                 'isAdmin' => true,
                 'metrics' => [
@@ -80,6 +93,17 @@ class DashboardController extends AbstractController
                 'latestUsers' => $userRepo->findBy([], ['createdAt' => 'DESC'], 5),
                 'latestProjects' => $projectRepo->findBy([], ['createdAt' => 'DESC'], 5),
                 'latestContentTypes' => $ctRepo->findLatestWithProject(5),
+                'chartData' => [
+                    'apiToday' => $apiToday,
+                    'api2xx' => $api2xx,
+                    'api4xx' => $api4xx,
+                    'api5xx' => $api5xx,
+                    'avgResponse' => $avgResponse,
+                    'tokenGrants' => $tokenGrants,
+                    'tokenDenials' => $tokenDenials,
+                    'topOrigins' => $topOrigins,
+                    'visitsWeek' => $visitsWeek,
+                ],
             ]);
         }
 
