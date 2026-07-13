@@ -53,14 +53,14 @@ class VisitRepository extends ServiceEntityRepository
     {
         $sevenDaysAgo = new \DateTimeImmutable('-7 days midnight');
 
-        $rows = $this->createQueryBuilder('v')
-            ->select("DATE(v.visitedAt) AS dia, COUNT(v.id) AS total")
-            ->where('v.visitedAt >= :since')
-            ->groupBy('dia')
-            ->orderBy('dia', 'ASC')
-            ->setParameter('since', $sevenDaysAgo)
-            ->getQuery()
-            ->getResult();
+        $conn = $this->getEntityManager()->getConnection();
+        $sql = 'SELECT DATE(v.visited_at) AS dia, COUNT(v.id) AS total
+                FROM visit v
+                WHERE v.visited_at >= :since
+                GROUP BY dia
+                ORDER BY dia ASC';
+        $stmt = $conn->executeQuery($sql, ['since' => $sevenDaysAgo->format('Y-m-d H:i:s')]);
+        $rows = $stmt->fetchAllAssociative();
 
         /* Omplir amb 0 els dies sense visites */
         $visitsByDay = [];
