@@ -42,7 +42,12 @@ readonly class JwtDomainValidator
             return true;
         }
 
-        $currentDomain = $this->normalize($request->getHost());
+        $origin = $request->headers->get('Origin');
+        if ($origin) {
+            $currentDomain = $this->normalize($origin);
+        } else {
+            $currentDomain = $this->normalize($request->getHost());
+        }
         foreach ($allowedDomains as $allowed) {
             $normalizedAllowed = $this->normalize($allowed);
             if ($currentDomain === $normalizedAllowed || str_ends_with($currentDomain, '.' . $normalizedAllowed)) {
