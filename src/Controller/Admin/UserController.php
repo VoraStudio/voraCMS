@@ -15,7 +15,6 @@ use App\Entity\User;
 use App\Repository\ProjectRepository;
 use App\Repository\UserRepository;
 use App\Service\SlugGenerator;
-use App\Service\TokenGenerator;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -64,7 +63,6 @@ class UserController extends AbstractController
         EntityManagerInterface $em,
         UserPasswordHasherInterface $hasher,
         SlugGenerator $slugGenerator,
-        TokenGenerator $tokenGenerator,
         ValidatorInterface $validator,
     ): Response {
         $this->denyAccessUnlessGranted('ROLE_ADMIN');
@@ -83,10 +81,13 @@ class UserController extends AbstractController
             $user->setName($name);
             $user->setCompany($company ?: null);
             $user->setSlug($slugGenerator->generate($company ?: $name));
-            $user->setApiToken($tokenGenerator->generate(32));
             $user->setRoles([$role]);
             $user->setActive($active);
             $user->setPassword($hasher->hashPassword($user, $password));
+
+            $allowedDomains = $request->request->get('allowed_domains', '');
+            $domains = array_values(array_filter(array_map('trim', explode("\n", $allowedDomains))));
+            $user->setAllowedDomains(!empty($domains) ? $domains : null);
 
             $errors = $validator->validate($user);
             if (count($errors) > 0) {
@@ -144,6 +145,10 @@ class UserController extends AbstractController
 
             $user->setRoles([$request->request->get('role', 'ROLE_USUARIO')]);
             $user->setActive($request->request->getBoolean('active', $user->isActive()));
+
+            $allowedDomains = $request->request->get('allowed_domains', '');
+            $domains = array_values(array_filter(array_map('trim', explode("\n", $allowedDomains))));
+            $user->setAllowedDomains(!empty($domains) ? $domains : null);
 
             $password = $request->request->get('password', '');
             if (!empty($password)) {

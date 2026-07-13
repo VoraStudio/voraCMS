@@ -49,11 +49,8 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToMany(targetEntity: Project::class, mappedBy: 'user', cascade: ['remove'])]
     private Collection $projects;
 
-    #[ORM\Column(length: 32, unique: true)]
-    private ?string $apiToken = null;
-
     #[ORM\Column(type: 'json', nullable: true)]
-    private ?array $allowedDomains = [];
+    private ?array $allowedDomains = null;
 
     #[ORM\Column]
     private ?\DateTimeImmutable $createdAt = null;
@@ -93,9 +90,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setCompany(?string $company): static { $this->company = $company; return $this; }
 
     public function getProjects(): Collection { return $this->projects; }
-
-    public function getApiToken(): ?string { return $this->apiToken; }
-    public function setApiToken(string $apiToken): static { $this->apiToken = $apiToken; return $this; }
 
     public function getAllowedDomains(): ?array { return $this->allowedDomains; }
     public function setAllowedDomains(?array $allowedDomains): static { $this->allowedDomains = $allowedDomains; return $this; }

@@ -97,6 +97,12 @@
   border: 1px solid rgba(234, 179, 8, 0.15);
 }
 
+.api-tag--orange {
+  background: rgba(249, 115, 22, 0.12);
+  color: rgb(249, 115, 22);
+  border: 1px solid rgba(249, 115, 22, 0.15);
+}
+
 /* --- Section titles --- */
 .api-section-title {
   display: flex;

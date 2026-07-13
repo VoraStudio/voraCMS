@@ -4,7 +4,6 @@ namespace App\Command;
 
 use App\Entity\User;
 use App\Service\SlugGenerator;
-use App\Service\TokenGenerator;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
@@ -23,7 +22,6 @@ class CreateUserCommand extends Command
         private readonly EntityManagerInterface $em,
         private readonly UserPasswordHasherInterface $hasher,
         private readonly SlugGenerator $slugGenerator,
-        private readonly TokenGenerator $tokenGenerator,
     ) {
         parent::__construct();
     }
@@ -57,7 +55,6 @@ class CreateUserCommand extends Command
         $user->setName($name);
         $user->setCompany($company);
         $user->setSlug($this->slugGenerator->generate($company));
-        $user->setApiToken($this->tokenGenerator->generate(32));
         $user->setRoles([$role]);
         $user->setPassword($this->hasher->hashPassword($user, $password));
         $user->setActive(true);

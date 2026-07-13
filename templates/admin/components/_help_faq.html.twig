@@ -1,0 +1,569 @@
+<div class="faq-panel" id="faqPanel" role="dialog" aria-label="Ajuda ràpida" aria-hidden="true">
+    <div class="faq-panel__backdrop"></div>
+    <div class="faq-panel__card">
+        <div class="faq-panel__header">
+            <div class="faq-panel__header-left">
+                <div class="faq-panel__header-icon">
+                    <i class="bi bi-question-circle"></i>
+                </div>
+                <div>
+                    <h3 class="faq-panel__title">Ajuda ràpida</h3>
+                    <p class="faq-panel__subtitle">
+                        {% if form_context == 'dashboard' %}Panell d'inici
+                        {% elseif form_context == 'projects_index' %}Gestió de projectes
+                        {% elseif form_context == 'content_types_index' %}Tipus de contingut
+                        {% elseif form_context == 'media_index' %}Mediateca
+                        {% elseif form_context == 'project' %}Formulari de projecte
+                        {% elseif form_context == 'user' %}Formulari d'usuari
+                        {% elseif form_context == 'content_type' %}Formulari de tipus de contingut
+                        {% else %}Guia per al formulari{% endif %}
+                    </p>
+                </div>
+            </div>
+            <button class="faq-panel__close" type="button" aria-label="Tancar ajuda">
+                <i class="bi bi-x-lg"></i>
+            </button>
+        </div>
+        <div class="faq-panel__body">
+
+{% if form_context == 'dashboard' %}
+
+            <div class="faq-item">
+                <button class="faq-item__question" type="button" aria-expanded="false">
+                    <span>Què es veu al dashboard?</span>
+                    <i class="bi bi-chevron-down faq-item__chevron"></i>
+                </button>
+                <div class="faq-item__answer">
+                    <p>El dashboard mostra un resum de tot el sistema: mètriques globals (usuaris, projectes, publicacions, visites), els últims clients registrats, els últims projectes creats i les últimes seccions amb activitat.</p>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <button class="faq-item__question" type="button" aria-expanded="false">
+                    <span>Com accedir ràpidament a un projecte?</span>
+                    <i class="bi bi-chevron-down faq-item__chevron"></i>
+                </button>
+                <div class="faq-item__answer">
+                    <p>Des de la secció "Els teus projectes", fes clic al botó <strong>Gestionar</strong> del projecte que vulguis. Si ets admin, també pots fer clic directament a qualsevol projecte de la llista d'últims projectes.</p>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <button class="faq-item__question" type="button" aria-expanded="false">
+                    <span>Com sé quantes entrades té cada projecte?</span>
+                    <i class="bi bi-chevron-down faq-item__chevron"></i>
+                </button>
+                <div class="faq-item__answer">
+                    <p>A la secció "Els teus projectes", cada projecte mostra tres mètriques: el nombre de <strong>seccions</strong>, el total d'<strong>entrades</strong> i els <strong>publicats</strong> (entrades visibles al web).</p>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <button class="faq-item__question" type="button" aria-expanded="false">
+                    <span>Com canviar de projecte actiu?</span>
+                    <i class="bi bi-chevron-down faq-item__chevron"></i>
+                </button>
+                <div class="faq-item__answer">
+                    <p>Fes clic al nom del projecte o al botó <strong>Gestionar</strong> per canviar el context de treball. El projecte actiu es marca amb un badge <strong>Actiu</strong> i es reflecteix a la barra lateral.</p>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <button class="faq-item__question" type="button" aria-expanded="false">
+                    <span>Què significa cada mètrica?</span>
+                    <i class="bi bi-chevron-down faq-item__chevron"></i>
+                </button>
+                <div class="faq-item__answer">
+                    <p><strong>Usuaris</strong>: total de clients al sistema. <strong>Projectes</strong>: total de projectes actius. <strong>Publicacions</strong>: entrades publicades. <strong>Visites avui</strong>: visites rebudes durant el dia actual.</p>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <button class="faq-item__question" type="button" aria-expanded="false">
+                    <span>Com veure els projectes d'un client?</span>
+                    <i class="bi bi-chevron-down faq-item__chevron"></i>
+                </button>
+                <div class="faq-item__answer">
+                    <p>Ves a la secció <strong>Projectes</strong> des de la barra lateral. Si ets admin, veuràs tots els projectes agrupats per client. Fes clic a <strong>Obrir</strong> per veure les seccions i entrades d'un projecte.</p>
+                </div>
+            </div>
+
+{% elseif form_context == 'projects_index' %}
+
+            <div class="faq-item">
+                <button class="faq-item__question" type="button" aria-expanded="false">
+                    <span>Què és un projecte?</span>
+                    <i class="bi bi-chevron-down faq-item__chevron"></i>
+                </button>
+                <div class="faq-item__answer">
+                    <p>Un <strong>projecte</strong> és un contenidor que agrupa tipus de contingut i entrades. Cada projecte pertany a un usuari (client) i té un nom, slug i color propi.</p>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <button class="faq-item__question" type="button" aria-expanded="false">
+                    <span>Com crear un nou projecte?</span>
+                    <i class="bi bi-chevron-down faq-item__chevron"></i>
+                </button>
+                <div class="faq-item__answer">
+                    <p>Si ets admin, fes clic al botó <strong>Nou projecte</strong> que apareix al costat del nom del client. Omple el nom (es generarà un slug automàticament), afegeix una descripció opcional i tria un color per identificar-lo.</p>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <button class="faq-item__question" type="button" aria-expanded="false">
+                    <span>Com editar un projecte existent?</span>
+                    <i class="bi bi-chevron-down faq-item__chevron"></i>
+                </button>
+                <div class="faq-item__answer">
+                    <p>Fes clic a la icona <i class="bi bi-pencil"></i> <strong>Editar</strong> a la fila del projecte. Podràs canviar el nom, la descripció, el color i l'estat actiu/inactiu.</p>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <button class="faq-item__question" type="button" aria-expanded="false">
+                    <span>Com desactivar un projecte?</span>
+                    <i class="bi bi-chevron-down faq-item__chevron"></i>
+                </button>
+                <div class="faq-item__answer">
+                    <p>Fes clic a la icona de toggle <i class="bi bi-toggle2-on"></i> a la columna d'accions. El projecte es desactivarà immediatament i es mostrarà amb opacitat reduïda.</p>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <button class="faq-item__question" type="button" aria-expanded="false">
+                    <span>Què passa si desactivo un projecte?</span>
+                    <i class="bi bi-chevron-down faq-item__chevron"></i>
+                </button>
+                <div class="faq-item__answer">
+                    <p>El projecte i tot el seu contingut es mantenen a la base de dades, però es marquen com a inactius. No es mostraran al dashboard de l'usuari ni a la navegació ràpida.</p>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <button class="faq-item__question" type="button" aria-expanded="false">
+                    <span>Com veure el contingut d'un projecte?</span>
+                    <i class="bi bi-chevron-down faq-item__chevron"></i>
+                </button>
+                <div class="faq-item__answer">
+                    <p>Fes clic al botó <strong>Obrir</strong> del projecte. Veuràs totes les seccions (tipus de contingut) del projecte amb el nombre d'entrades de cadascuna. Des d'allà podràs gestionar les entrades.</p>
+                </div>
+            </div>
+
+{% elseif form_context == 'content_types_index' %}
+
+            <div class="faq-item">
+                <button class="faq-item__question" type="button" aria-expanded="false">
+                    <span>Què és un tipus de contingut?</span>
+                    <i class="bi bi-chevron-down faq-item__chevron"></i>
+                </button>
+                <div class="faq-item__answer">
+                    <p>Un <strong>tipus de contingut</strong> defineix una estructura de dades amb camps personalitzats. Per exemple: "Notícies", "Esdeveniments" o "Productes". Cada tipus pot tenir els seus propis camps (text, imatge, galeria, etc.).</p>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <button class="faq-item__question" type="button" aria-expanded="false">
+                    <span>Com crear un nou tipus?</span>
+                    <i class="bi bi-chevron-down faq-item__chevron"></i>
+                </button>
+                <div class="faq-item__answer">
+                    <p>Fes clic al botó <strong>Nou tipus</strong> a la part superior. Tria un nom i un slug, selecciona el projecte al qual pertany i comença a afegir camps personalitzats.</p>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <button class="faq-item__question" type="button" aria-expanded="false">
+                    <span>Com afegir camps a un tipus?</span>
+                    <i class="bi bi-chevron-down faq-item__chevron"></i>
+                </button>
+                <div class="faq-item__answer">
+                    <p>Edita el tipus de contingut i fes clic a <strong>Afegir camp</strong>. Selecciona el tipus de camp (text, àrea de text, imatge, galeria, data, booleà, etc.), posa-li nom i indica si és obligatori.</p>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <button class="faq-item__question" type="button" aria-expanded="false">
+                    <span>Què és una plantilla global?</span>
+                    <i class="bi bi-chevron-down faq-item__chevron"></i>
+                </button>
+                <div class="faq-item__answer">
+                    <p>Una <strong>plantilla global (base)</strong> és un tipus de contingut que es clona automàticament a tots els projectes. Ideal per a continguts que tots els clients necessiten, com "Pàgines" o "Configuració".</p>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <button class="faq-item__question" type="button" aria-expanded="false">
+                    <span>Com desactivar un tipus de contingut?</span>
+                    <i class="bi bi-chevron-down faq-item__chevron"></i>
+                </button>
+                <div class="faq-item__answer">
+                    <p>Fes clic a la icona de toggle <i class="bi bi-toggle2-on"></i> a la columna d'accions. En desactivar-lo, les seves entrades deixaran de mostrar-se al web però es conservaran a la base de dades.</p>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <button class="faq-item__question" type="button" aria-expanded="false">
+                    <span>Com eliminar un tipus de contingut?</span>
+                    <i class="bi bi-chevron-down faq-item__chevron"></i>
+                </button>
+                <div class="faq-item__answer">
+                    <p>Fes clic a la icona <i class="bi bi-trash3"></i> <strong>Eliminar</strong> i confirma l'acció. S'eliminarà el tipus de contingut i <strong>totes les seves entrades</strong> de manera permanent. Aquesta acció no es pot desfer.</p>
+                </div>
+            </div>
+
+{% elseif form_context == 'media_index' %}
+
+            <div class="faq-item">
+                <button class="faq-item__question" type="button" aria-expanded="false">
+                    <span>Com pujar una imatge?</span>
+                    <i class="bi bi-chevron-down faq-item__chevron"></i>
+                </button>
+                <div class="faq-item__answer">
+                    <p>Fes clic al botó <strong>Pujar imatge</strong> a la part superior. Selecciona una o més imatges i, si escau, tria el projecte al qual assignar-les. Les imatges apareixeran automàticament a la mediateca.</p>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <button class="faq-item__question" type="button" aria-expanded="false">
+                    <span>Quins formats són acceptats?</span>
+                    <i class="bi bi-chevron-down faq-item__chevron"></i>
+                </button>
+                <div class="faq-item__answer">
+                    <p>Els formats acceptats són <strong>JPG, WebP i AVIF</strong>. El pes màxim per fitxer és d'<strong>1 MB</strong>. Pots seleccionar múltiples imatges alhora per pujar-les totes d'una vegada.</p>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <button class="faq-item__question" type="button" aria-expanded="false">
+                    <span>Com eliminar una imatge?</span>
+                    <i class="bi bi-chevron-down faq-item__chevron"></i>
+                </button>
+                <div class="faq-item__answer">
+                    <p>Fes clic a la icona <i class="bi bi-trash3"></i> que apareix a la cantonada superior dreta de la imatge. Confirma l'eliminació. L'acció <strong>no es pot desfer</strong>.</p>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <button class="faq-item__question" type="button" aria-expanded="false">
+                    <span>Com copiar l'URL d'una imatge?</span>
+                    <i class="bi bi-chevron-down faq-item__chevron"></i>
+                </button>
+                <div class="faq-item__answer">
+                    <p>A sota de cada imatge hi ha un botó <i class="bi bi-link-45deg"></i> <strong>Copiar URL</strong>. Fes-hi clic per copiar l'enllaç directe al porta-retalls i poder-lo utilitzar als teus continguts.</p>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <button class="faq-item__question" type="button" aria-expanded="false">
+                    <span>Com organitzar les imatges per projecte?</span>
+                    <i class="bi bi-chevron-down faq-item__chevron"></i>
+                </button>
+                <div class="faq-item__answer">
+                    <p>Si ets admin, les imatges s'agrupen automàticament per client i projecte. Fes clic al nom del projecte per expandir-lo i veure les seves imatges. Cada imatge es mostra amb el seu nom i pes.</p>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <button class="faq-item__question" type="button" aria-expanded="false">
+                    <span>Com veure una imatge a pantalla completa?</span>
+                    <i class="bi bi-chevron-down faq-item__chevron"></i>
+                </button>
+                <div class="faq-item__answer">
+                    <p>Fes clic directament a la imatge. S'obrirà en una pestanya nova del navegador a mida completa. Des d'allà pots descarregar-la o copiar-ne l'URL.</p>
+                </div>
+            </div>
+
+{% elseif form_context == 'user' %}
+
+            <div class="faq-item">
+                <button class="faq-item__question" type="button" aria-expanded="false">
+                    <span>Com crear un usuari?</span>
+                    <i class="bi bi-chevron-down faq-item__chevron"></i>
+                </button>
+                <div class="faq-item__answer">
+                    <p>Omple el nom, email, empresa i contrasenya. El slug es genera automàticament des de l'empresa. Selecciona el rol (Usuari, Moderador o Admin) i l'estat actiu.</p>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <button class="faq-item__question" type="button" aria-expanded="false">
+                    <span>Quins rols existeixen?</span>
+                    <i class="bi bi-chevron-down faq-item__chevron"></i>
+                </button>
+                <div class="faq-item__answer">
+                    <p><strong>Usuari</strong>: accés als seus propis projectes i continguts. <strong>Moderador</strong>: pot gestionar continguts de múltiples projectes. <strong>Admin</strong>: accés complet a tot el sistema, usuaris i configuració.</p>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <button class="faq-item__question" type="button" aria-expanded="false">
+                    <span>La contrasenya és obligatòria?</span>
+                    <i class="bi bi-chevron-down faq-item__chevron"></i>
+                </button>
+                <div class="faq-item__answer">
+                    <p>En crear un usuari, la contrasenya és obligatòria. En editar-lo, pots deixar el camp buit per mantenir la contrasenya actual.</p>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <button class="faq-item__question" type="button" aria-expanded="false">
+                    <span>Com desactivar un usuari?</span>
+                    <i class="bi bi-chevron-down faq-item__chevron"></i>
+                </button>
+                <div class="faq-item__answer">
+                    <p>Utilitza el toggle <strong>Actiu/Inactiu</strong> al formulari d'edició. Un usuari inactiu no pot iniciar sessió, però els seus projectes i continguts es conserven.</p>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <button class="faq-item__question" type="button" aria-expanded="false">
+                    <span>Què és el slug d'usuari?</span>
+                    <i class="bi bi-chevron-down faq-item__chevron"></i>
+                </button>
+                <div class="faq-item__answer">
+                    <p>El <strong>slug</strong> és un identificador únic que es genera automàticament a partir del nom de l'empresa. Es fa servir per a l'API pública i les URL del frontend.</p>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <button class="faq-item__question" type="button" aria-expanded="false">
+                    <span>Com configurar l'API d'un usuari?</span>
+                    <i class="bi bi-chevron-down faq-item__chevron"></i>
+                </button>
+                <div class="faq-item__answer">
+                    <p>L'autenticació API es fa amb <strong>JWT</strong>. L'usuari pot configurar una llista de <strong>dominis permesos</strong>. Consulta la <strong>Guia JWT</strong> a la barra lateral per veure com obtenir i utilitzar el token.</p>
+                </div>
+            </div>
+
+{% elseif form_context == 'project' %}
+
+            <div class="faq-item">
+                <button class="faq-item__question" type="button" aria-expanded="false">
+                    <span>Què és un projecte?</span>
+                    <i class="bi bi-chevron-down faq-item__chevron"></i>
+                </button>
+                <div class="faq-item__answer">
+                    <p>Un <strong>projecte</strong> agrupa tot el contingut d'un client. Cada projecte té el seu propi color, slug i descripció.</p>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <button class="faq-item__question" type="button" aria-expanded="false">
+                    <span>Com s'assigna el color?</span>
+                    <i class="bi bi-chevron-down faq-item__chevron"></i>
+                </button>
+                <div class="faq-item__answer">
+                    <p>Utilitza el selector de color al formulari. El color s'utilitza per identificar visualment el projecte a les llistes i targetes del dashboard.</p>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <button class="faq-item__question" type="button" aria-expanded="false">
+                    <span>Com es genera el slug?</span>
+                    <i class="bi bi-chevron-down faq-item__chevron"></i>
+                </button>
+                <div class="faq-item__answer">
+                    <p>El <strong>slug</strong> del projecte es genera automàticament a partir del nom. Es fa servir a les URL i a l'API. Ha de ser únic per a cada usuari.</p>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <button class="faq-item__question" type="button" aria-expanded="false">
+                    <span>Puc canviar l'usuari propietari?</span>
+                    <i class="bi bi-chevron-down faq-item__chevron"></i>
+                </button>
+                <div class="faq-item__answer">
+                    <p>Si ets admin, pots reassignar el projecte a un altre usuari mitjançant el selector d'usuari al formulari d'edició.</p>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <button class="faq-item__question" type="button" aria-expanded="false">
+                    <span>Com desactivar un projecte?</span>
+                    <i class="bi bi-chevron-down faq-item__chevron"></i>
+                </button>
+                <div class="faq-item__answer">
+                    <p>Utilitza el toggle <strong>Actiu/Inactiu</strong> al formulari. Un projecte inactiu no apareix al dashboard de l'usuari, però les dades es conserven.</p>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <button class="faq-item__question" type="button" aria-expanded="false">
+                    <span>Quins camps són obligatoris?</span>
+                    <i class="bi bi-chevron-down faq-item__chevron"></i>
+                </button>
+                <div class="faq-item__answer">
+                    <p>El <strong>nom</strong> i l'<strong>usuari propietari</strong> són obligatoris. La descripció i el color són opcionals.</p>
+                </div>
+            </div>
+
+{% elseif form_context == 'content_type' %}
+
+            <div class="faq-item">
+                <button class="faq-item__question" type="button" aria-expanded="false">
+                    <span>Com editar un tipus de contingut?</span>
+                    <i class="bi bi-chevron-down faq-item__chevron"></i>
+                </button>
+                <div class="faq-item__answer">
+                    <p>Des de la llista de tipus de contingut, fes clic a la icona <i class="bi bi-pencil"></i> <strong>Editar</strong>. Podràs canviar el nom, la descripció, el projecte associat i gestionar els camps.</p>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <button class="faq-item__question" type="button" aria-expanded="false">
+                    <span>Com afegir un camp nou?</span>
+                    <i class="bi bi-chevron-down faq-item__chevron"></i>
+                </button>
+                <div class="faq-item__answer">
+                    <p>Fes clic a <strong>Afegir camp</strong>, escriu el nom del camp i selecciona el tipus. Pots marcar-lo com a obligatori. Els camps es guarden en l'ordre que apareixen al formulari.</p>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <button class="faq-item__question" type="button" aria-expanded="false">
+                    <span>Quins tipus de camp existeixen?</span>
+                    <i class="bi bi-chevron-down faq-item__chevron"></i>
+                </button>
+                <div class="faq-item__answer">
+                    <p>Text, àrea de text, text enriquit (Quill), número, email, URL, data, data amb hora, rang de dates, booleà (si/no), selector, color, imatge, galeria, YouTube i repetidor.</p>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <button class="faq-item__question" type="button" aria-expanded="false">
+                    <span>Com canviar l'ordre dels camps?</span>
+                    <i class="bi bi-chevron-down faq-item__chevron"></i>
+                </button>
+                <div class="faq-item__answer">
+                    <p>Actualment l'ordre es defineix en crear els camps. Elimina i afegeix els camps en l'ordre desitjat, o edita'ls individualment per ajustar-ne la configuració.</p>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <button class="faq-item__question" type="button" aria-expanded="false">
+                    <span>Què és una plantilla global?</span>
+                    <i class="bi bi-chevron-down faq-item__chevron"></i>
+                </button>
+                <div class="faq-item__answer">
+                    <p>Una <strong>plantilla global</strong> (base content) es clona automàticament a tots els projectes. És útil per a seccions comunes com "Pàgines", "Menú" o "Configuració del lloc".</p>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <button class="faq-item__question" type="button" aria-expanded="false">
+                    <span>Com eliminar un camp?</span>
+                    <i class="bi bi-chevron-down faq-item__chevron"></i>
+                </button>
+                <div class="faq-item__answer">
+                    <p>Fes clic a la icona <i class="bi bi-x"></i> al costat del camp que vols eliminar. Els canvis es guarden en enviar el formulari. Les dades associades al camp també s'eliminaran.</p>
+                </div>
+            </div>
+
+{% else %}
+
+{# ─── Default: entry form ─── #}
+            <div class="faq-item">
+                <button class="faq-item__question" type="button" aria-expanded="false">
+                    <span>Com crear una entrada?</span>
+                    <i class="bi bi-chevron-down faq-item__chevron"></i>
+                </button>
+                <div class="faq-item__answer">
+                    <p>Omple els camps del formulari, selecciona un estat (Publicat, Arxivat o Programat) i fes clic a "Guardar canvis" o "Crear entrada". Els camps marcats amb * són obligatoris.</p>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <button class="faq-item__question" type="button" aria-expanded="false">
+                    <span>Què significa cada estat?</span>
+                    <i class="bi bi-chevron-down faq-item__chevron"></i>
+                </button>
+                <div class="faq-item__answer">
+                    <p><strong>Publicat</strong>: visible al web. <strong>Arxivat</strong>: amagat però no eliminat. <strong>Programat</strong>: es publicarà automàticament en la data indicada.</p>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <button class="faq-item__question" type="button" aria-expanded="false">
+                    <span>Com afegir imatges?</span>
+                    <i class="bi bi-chevron-down faq-item__chevron"></i>
+                </button>
+                <div class="faq-item__answer">
+                    <p>Fes clic al botó "Escull des de la mediateca" per seleccionar imatges existents o puja'n de noves. Pots arrossegar imatges per reordenar-les a les galeries.</p>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <button class="faq-item__question" type="button" aria-expanded="false">
+                    <span>Com funciona l'editor de text?</span>
+                    <i class="bi bi-chevron-down faq-item__chevron"></i>
+                </button>
+                <div class="faq-item__answer">
+                    <p>L'editor Quill permet formatar text (negreta, cursiva, enllaços, llistes). Selecciona el text i usa la barra d'eines que apareix.</p>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <button class="faq-item__question" type="button" aria-expanded="false">
+                    <span>Com programar una publicació?</span>
+                    <i class="bi bi-chevron-down faq-item__chevron"></i>
+                </button>
+                <div class="faq-item__answer">
+                    <p>Selecciona l'estat "Programat", escull la data i hora d'inici i fi, i fes clic al botó "Programar".</p>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <button class="faq-item__question" type="button" aria-expanded="false">
+                    <span>Per què no es guarden els canvis?</span>
+                    <i class="bi bi-chevron-down faq-item__chevron"></i>
+                </button>
+                <div class="faq-item__answer">
+                    <p>Comprova que tots els camps obligatoris (*) estan omplerts. Si l'input té un marc vermell, revisa'l. Si el problema persisteix, prova de recarregar la pàgina.</p>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <button class="faq-item__question" type="button" aria-expanded="false">
+                    <span>Com reordenar els camps?</span>
+                    <i class="bi bi-chevron-down faq-item__chevron"></i>
+                </button>
+                <div class="faq-item__answer">
+                    <p>Al formulari d'edició del tipus de contingut, els camps es mostren en l'ordre definit. Per canviar-lo, ves a <strong>Tipus de contingut</strong>, edita el tipus i reordena els camps amb el selector d'ordre.</p>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <button class="faq-item__question" type="button" aria-expanded="false">
+                    <span>Com eliminar una entrada?</span>
+                    <i class="bi bi-chevron-down faq-item__chevron"></i>
+                </button>
+                <div class="faq-item__answer">
+                    <p>Des de la llista d'entrades, fes clic al botó d'eliminar (<i class="bi bi-x"></i>) de la fila i confirma l'acció. L'entrada s'eliminarà permanentment.</p>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <button class="faq-item__question" type="button" aria-expanded="false">
+                    <span>Com canviar entre tema clar i fosc?</span>
+                    <i class="bi bi-chevron-down faq-item__chevron"></i>
+                </button>
+                <div class="faq-item__answer">
+                    <p>Fes clic a la icona de sol o lluna (<i class="bi bi-sun-fill"></i> / <i class="bi bi-moon-fill"></i>) a la part superior dreta del panell per alternar entre el mode clar i el mode fosc.</p>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <button class="faq-item__question" type="button" aria-expanded="false">
+                    <span>Com recuperar una entrada arxivada?</span>
+                    <i class="bi bi-chevron-down faq-item__chevron"></i>
+                </button>
+                <div class="faq-item__answer">
+                    <p>Les entrades <strong>arxivades</strong> no s'han eliminat. Ves a la llista d'entrades, canvia el filtre d'estat a "Arxivat" i selecciona l'entrada. Edita-la i canvia l'estat a "Publicat" per tornar-la a mostrar al web.</p>
+                </div>
+            </div>
+
+{% endif %}
+        </div>
+    </div>
+</div>

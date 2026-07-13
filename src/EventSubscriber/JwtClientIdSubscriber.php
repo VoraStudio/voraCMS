@@ -3,6 +3,7 @@
 namespace App\EventSubscriber;
 
 use App\Entity\User;
+use App\Service\JwtDomainValidator;
 use Lexik\Bundle\JWTAuthenticationBundle\Event\JWTCreatedEvent;
 use Lexik\Bundle\JWTAuthenticationBundle\Event\JWTDecodedEvent;
 use Lexik\Bundle\JWTAuthenticationBundle\Events;
@@ -10,6 +11,10 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 class JwtClientIdSubscriber implements EventSubscriberInterface
 {
+    public function __construct(
+        private readonly JwtDomainValidator $domainValidator,
+    ) {}
+
     public static function getSubscribedEvents(): array
     {
         return [
@@ -26,17 +31,16 @@ class JwtClientIdSubscriber implements EventSubscriberInterface
             $payload = $event->getData();
             $payload['user_id'] = $user->getId();
             $payload['user_slug'] = $user->getSlug();
+            $payload['allowed_domains'] = $user->getAllowedDomains() ?? [];
+
             $event->setData($payload);
         }
     }
 
     public function onJwtDecoded(JWTDecodedEvent $event): void
     {
-        $payload = $event->getPayload();
-
-        if (!isset($payload['user_id'])) {
-            /* Token antic sense user_id — el deixem passar
-               o el forcem a reautenticar */
+        if (!$this->domainValidator->validateFromPayload($event->getPayload())) {
+            $event->markAsInvalid();
         }
     }
 }

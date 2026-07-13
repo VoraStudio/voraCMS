@@ -16,7 +16,6 @@ use App\Entity\FieldDefinition;
 use App\Entity\Project;
 use App\Entity\User;
 use App\Service\SlugGenerator;
-use App\Service\TokenGenerator;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Persistence\ObjectManager;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
@@ -26,7 +25,6 @@ class AppFixtures extends Fixture
     public function __construct(
         private UserPasswordHasherInterface $hasher,
         private SlugGenerator $slugGenerator,
-        private TokenGenerator $tokenGenerator,
     ) {}
 
     public function load(ObjectManager $manager): void
@@ -37,7 +35,6 @@ class AppFixtures extends Fixture
         $admin->setName('Vora Studio');
         $admin->setSlug($this->slugGenerator->generate('vora-studio'));
         $admin->setCompany('Vora Studio');
-        $admin->setApiToken($this->tokenGenerator->generate(32));
         $admin->setRoles(['ROLE_ADMIN']);
         $admin->setPassword($this->hasher->hashPassword($admin, '123'));
         $admin->setActive(true);
@@ -49,7 +46,6 @@ class AppFixtures extends Fixture
         $palmito->setName('Palmito House');
         $palmito->setSlug($this->slugGenerator->generate('palmito-house'));
         $palmito->setCompany('Palmito House');
-        $palmito->setApiToken($this->tokenGenerator->generate(32));
         $palmito->setRoles(['ROLE_USUARIO']);
         $palmito->setPassword($this->hasher->hashPassword($palmito, '123'));
         $palmito->setActive(true);

@@ -12,6 +12,7 @@ namespace App\Controller\Api;
 use App\Entity\User;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Attribute\Route;
 
 #[Route('/api/auth')]
@@ -28,7 +29,7 @@ class AuthController extends AbstractController
     /* ─── ME ─── */
     /* Retorna les dades de l'usuari (ara també és el tenant). */
     #[Route('/me', name: 'api_auth_me', methods: ['GET'])]
-    public function me(): JsonResponse
+    public function me(Request $request): JsonResponse
     {
         $user = $this->getUser();
 
@@ -36,10 +37,16 @@ class AuthController extends AbstractController
             return $this->json(['error' => 'Usuari no autenticat'], 401);
         }
 
+        $authHeader = $request->headers->get('Authorization', '');
+        $token = '';
+        if (str_starts_with($authHeader, 'Bearer ')) {
+            $token = substr($authHeader, 7);
+        }
+
         return $this->json([
             'data' => [
                 'slug' => $user->getSlug(),
-                'apiToken' => $user->getApiToken(),
+                'token' => $token,
                 'company' => $user->getCompany(),
                 'email' => $user->getEmail(),
                 'name' => $user->getName(),

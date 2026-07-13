@@ -66,6 +66,15 @@
             </div>
 
             <div class="cyber-form-group">
+                <label class="cyber-form-label">Dominis permesos (API)</label>
+                <textarea name="allowed_domains" class="cyber-form-input"
+                          placeholder="Un domini per línia&#10;ex: vorastudio.cat" rows="3">{{ user.allowedDomains is not null ? user.allowedDomains|join("\n") : '' }}</textarea>
+                <p class="cyber-form-hint" style="font-size:0.85rem;color:var(--s-muted);margin-top:4px">
+                    Els JWT només seran vàlids des d'aquests dominis. Deixa buit = sense restricció.
+                </p>
+            </div>
+
+            <div class="cyber-form-group">
                 <label class="s-toggle s-toggle--chk" style="--s-toggle-color:var(--s-accent)">
                     <input type="checkbox" name="active" value="1"
                            class="s-toggle__inp-cb"
@@ -83,4 +92,5 @@
         </form>
     </div>
 </div>
+{% include 'admin/components/_help_faq.html.twig' with { form_context: 'user' } %}
 {% endblock %}

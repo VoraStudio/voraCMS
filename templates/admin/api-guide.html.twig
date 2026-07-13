@@ -36,19 +36,19 @@
             <h3 class="api-card-title">Autenticació</h3>
         </div>
         <div class="api-card-body">
-            <p class="api-text">L'API utilitza <strong>Bearer token</strong> amb l'<code>apiToken</code> de l'usuari.</p>
+            <p class="api-text">L'API utilitza <strong>Bearer token</strong> amb un <strong>JWT</strong> obtingut via login.</p>
             <div class="api-code-block">
                 <div class="api-code-header">
                     <span>Header HTTP</span>
-                    <button class="api-copy-btn" data-copy="Authorization: Bearer <el_teu_api_token>">
+                    <button class="api-copy-btn" data-copy="Authorization: Bearer <JWT>">
                         <i class="bi bi-clipboard"></i>
                     </button>
                 </div>
-                <pre class="api-code"><code>Authorization: Bearer <span class="api-code--highlight">&lt;apiToken&gt;</span></code></pre>
+                <pre class="api-code"><code>Authorization: Bearer <span class="api-code--highlight">&lt;JWT&gt;</span></code></pre>
             </div>
             <div class="api-alert api-alert--info">
                 <i class="bi bi-info-circle-fill"></i>
-                <span>El token el trobes a <strong>Admin → Usuaris → Editar</strong>, camp "API Token".</span>
+                <span>Obté un JWT fent <code>POST /api/auth/login</code> amb email i contrasenya. Consulta la <strong>Guia JWT</strong> per a més detalls.</span>
             </div>
         </div>
     </div>
@@ -94,17 +94,18 @@
         <div class="api-endpoint-badge">Perfil</div>
     </div>
     <div class="api-endpoint-body">
-        <p class="api-text">Retorna les dades de l'usuari autenticat, inclòs el seu <code>apiToken</code>.</p>
+        <p class="api-text">Retorna les dades de l'usuari autenticat, incloent el JWT actiu a <code>token</code>.</p>
 
         <div class="api-code-block">
             <div class="api-code-header"><span>Exemple de resposta</span></div>
             <pre class="api-code"><code>{
   "data": {
     "slug": "victoria-taylor",
-    "apiToken": "a1b2c3d4e5f6...",
+    "token": "eyJhbGciOiJSUzI1NiIs...",
     "company": "Victoria Taylor Studio",
     "email": "victoria@taylor.com",
-    "name": "Victoria Taylor"
+    "name": "Victoria Taylor",
+    "allowedDomains": ["taylor.com"]
   }
 }</code></pre>
         </div>
@@ -607,8 +608,8 @@ export async function getEntries(
             <div class="api-flow-step">
                 <div class="api-flow-num">1</div>
                 <div class="api-flow-content">
-                    <h4>Obtenir token</h4>
-                    <p>Copia l'<code>apiToken</code> des de <strong>Admin → Usuaris → Editar</strong></p>
+                    <h4>Obtenir JWT</h4>
+                    <p><code>POST /api/auth/login</code> amb email i contrasenya. El JWT caduca als 7 dies.</p>
                 </div>
             </div>
             <div class="api-flow-arrow"><i class="bi bi-chevron-down"></i></div>

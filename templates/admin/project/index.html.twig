@@ -303,6 +303,7 @@
 
 {% block javascripts %}
 {{ parent() }}
+{% include 'admin/components/_help_faq.html.twig' with { form_context: 'projects_index' } %}
 <script>
 document.addEventListener('DOMContentLoaded', function () {
   var headers = document.querySelectorAll('.project-expand-header');
