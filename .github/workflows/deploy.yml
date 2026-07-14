@@ -52,12 +52,16 @@ jobs:
             php -r "opcache_reset();" 2>/dev/null || true
             echo "=== Deploy complete ==="
 
-      - name: Health check
+      - name: Health check (opcional)
         env:
           SITE_URL: ${{ secrets.SITE_URL }}
         run: |
+          if [ -z "$SITE_URL" ]; then
+            echo "⚠️  SITE_URL secret not set — skipping health check"
+            echo "    Set it in GitHub → Settings → Secrets → Actions → SITE_URL"
+            exit 0
+          fi
           sleep 5
-          if [ -z "$SITE_URL" ]; then echo "❌ SITE_URL secret not set"; exit 1; fi
           CLEAN_URL=$(echo "$SITE_URL" | sed 's|/$||')
           URL="${CLEAN_URL}/admin/login"
           HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" "$URL" 2>/dev/null || echo "000")
