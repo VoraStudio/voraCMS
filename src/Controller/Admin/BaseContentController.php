@@ -59,6 +59,10 @@ class BaseContentController extends AbstractController
         $groupedProjects = $this->getGroupedProjects([]);
 
         if ($request->isMethod('POST')) {
+            if (!$this->isCsrfTokenValid('base-content-new', $request->request->get('_token'))) {
+                $this->addFlash('error', 'Token de seguretat invàlid.');
+                return $this->redirectToRoute('admin_content_type_index');
+            }
             $ct = new ContentType();
             $ct->setName($request->request->get('name'));
             $ct->setSlug($request->request->get('slug'));
@@ -126,6 +130,10 @@ class BaseContentController extends AbstractController
         $groupedProjects = $this->getGroupedProjects($existingProjectIds);
 
         if ($request->isMethod('POST')) {
+            if (!$this->isCsrfTokenValid('base-content-edit-' . $contentType->getId(), $request->request->get('_token'))) {
+                $this->addFlash('error', 'Token de seguretat invàlid.');
+                return $this->redirectToRoute('admin_content_type_index');
+            }
             $contentType->setName($request->request->get('name'));
             $contentType->setDescription($request->request->get('description'));
             $contentType->setAutoClone((bool) $request->request->get('autoClone', false));

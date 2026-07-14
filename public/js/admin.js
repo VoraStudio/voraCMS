@@ -433,6 +433,71 @@
       };
       document.addEventListener('keydown', escHandler);
     }
+
+    // --- API Guide: Collapsible Sections ---
+    document.querySelectorAll('.api-collapsible-header').forEach(function (header) {
+      // Per defecte comencen tancats, excepte si necessiten estar oberts
+      var targetId = header.getAttribute('data-target');
+      var content = document.getElementById(targetId);
+      var icon = header.querySelector('.api-collapsible-header__icon i');
+      
+      if (content) {
+        // Inicialment tancat
+        gsap.set(content, { height: 0, opacity: 0, display: 'none' });
+        header.classList.add('is-collapsed');
+        if (icon) gsap.set(icon, { rotation: -90 });
+
+        header.addEventListener('click', function () {
+          var isCollapsed = header.classList.toggle('is-collapsed');
+          
+          if (isCollapsed) {
+            // Tancar (Collapse)
+            gsap.to(content, { 
+              height: 0, 
+              opacity: 0, 
+              duration: 0.35, 
+              ease: 'power3.inOut', 
+              onComplete: function() { 
+                content.style.display = 'none'; 
+              } 
+            });
+            if (icon) gsap.to(icon, { rotation: -90, duration: 0.3, ease: 'power2.out' });
+          } else {
+            // Obrir (Expand)
+            content.style.display = 'block';
+            gsap.set(content, { height: 'auto', opacity: 1 });
+            var autoHeight = content.offsetHeight;
+            
+            gsap.fromTo(content, 
+              { height: 0, opacity: 0 }, 
+              { height: autoHeight, opacity: 1, duration: 0.45, ease: 'power3.out' }
+            );
+            if (icon) gsap.to(icon, { rotation: 0, duration: 0.3, ease: 'power2.out' });
+          }
+        });
+      }
+    });
+
+    // --- API Guide: Clipboard Copy ---
+    document.querySelectorAll('.api-copy-btn').forEach(function (btn) {
+      btn.addEventListener('click', function (e) {
+        e.stopPropagation(); // Evitar col·lisions amb esdeveniments superiors
+        var text = btn.getAttribute('data-copy');
+        if (text) {
+          navigator.clipboard.writeText(text).then(function () {
+            var icon = btn.querySelector('i');
+            if (icon) {
+              icon.className = 'bi bi-check-lg text-success';
+              btn.classList.add('api-copy-btn--success');
+              setTimeout(function () {
+                icon.className = 'bi bi-clipboard';
+                btn.classList.remove('api-copy-btn--success');
+              }, 2000);
+            }
+          });
+        }
+      });
+    });
   });
 
 })();

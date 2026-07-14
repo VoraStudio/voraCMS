@@ -215,6 +215,10 @@ class EntryController extends AbstractController
         $this->verifyContentTypeOwnership($contentType);
 
         if ($request->isMethod('POST')) {
+            if (!$this->isCsrfTokenValid('entry-new-' . $contentType->getId(), $request->request->get('_token'))) {
+                $this->addFlash('error', 'Token de seguretat invàlid.');
+                return $this->redirectToRoute('admin_entry_by_type', ['slug' => $slug]);
+            }
             $entry = new Entry();
             $entry->setContentType($contentType);
             $entry->setStatus($request->request->get('status', Entry::STATUS_DRAFT));
@@ -286,6 +290,10 @@ class EntryController extends AbstractController
         $contextProject = $entry->getContentType()->getProject() ?? ($entry->getUser()?->getProjects()->first() ?: null);
 
         if ($request->isMethod('POST')) {
+            if (!$this->isCsrfTokenValid('entry-edit-' . $entry->getId(), $request->request->get('_token'))) {
+                $this->addFlash('error', 'Token de seguretat invàlid.');
+                return $this->redirectToRoute('admin_entry_by_type', ['slug' => $entry->getContentType()->getSlug()]);
+            }
             $entry->setStatus($request->request->get('status', Entry::STATUS_DRAFT));
 
             foreach ($entry->getContentType()->getFields() as $fieldDef) {

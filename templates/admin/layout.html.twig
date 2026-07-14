@@ -92,6 +92,9 @@
             <a class="s-sidebar-link s-sidebar-link--sub{% if app.request.get('_route') == 'admin_api_guide_security' %} active{% endif %}" href="{{ path('admin_api_guide_security') }}">
                 <i class="bi bi-shield-check"></i> Seguretat
             </a>
+            <a class="s-sidebar-link s-sidebar-link--sub{% if app.request.get('_route') == 'admin_api_guide_tests' %} active{% endif %}" href="{{ path('admin_api_guide_tests') }}">
+                <i class="bi bi-check-circle"></i> Tests JWT
+            </a>
             <div class="s-sidebar-group{% if app.request.get('_route') == 'admin_api_guide_jwt' %} is-open{% endif %}">
                 <a class="s-sidebar-link s-sidebar-link--sub{% if app.request.get('_route') == 'admin_api_guide_jwt' %} active{% endif %} s-sidebar-group-toggle" href="{{ path('admin_api_guide_jwt') }}">
                     <i class="bi bi-key-fill"></i> JWT
@@ -106,6 +109,9 @@
                     </a>
                     <a class="s-sidebar-link s-sidebar-link--sub-deep" href="{{ path('admin_api_guide_jwt') }}#obtenir-jwt">
                         <i class="bi bi-box-arrow-in-right"></i> Login
+                    </a>
+                    <a class="s-sidebar-link s-sidebar-link--sub-deep" href="{{ path('admin_api_guide_jwt') }}#ssr">
+                        <i class="bi bi-server"></i> SSR
                     </a>
                 </div>
             </div>

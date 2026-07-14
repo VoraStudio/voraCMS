@@ -32,9 +32,9 @@ class AppFixtures extends Fixture
         /* ----- admin@vora.es (ROLE_ADMIN) ----- */
         $admin = new User();
         $admin->setEmail('admin@vora.es');
-        $admin->setName('Vora Studio');
-        $admin->setSlug($this->slugGenerator->generate('vora-studio'));
-        $admin->setCompany('Vora Studio');
+        $admin->setName('Vora Data');
+        $admin->setSlug($this->slugGenerator->generate('vora-data'));
+        $admin->setCompany('Vora Data');
         $admin->setRoles(['ROLE_ADMIN']);
         $admin->setPassword($this->hasher->hashPassword($admin, '123'));
         $admin->setActive(true);
@@ -50,6 +50,18 @@ class AppFixtures extends Fixture
         $palmito->setPassword($this->hasher->hashPassword($palmito, '123'));
         $palmito->setActive(true);
         $manager->persist($palmito);
+
+        /* ----- vorastudio@vora.es (ROLE_MOD) — Token públic SSR ----- */
+        $vorastudio = new User();
+        $vorastudio->setEmail('vora@vora.es');
+        $vorastudio->setName('VoraStudio');
+        $vorastudio->setSlug($this->slugGenerator->generate('vorastudio'));
+        $vorastudio->setCompany('Vora Studio');
+        $vorastudio->setRoles(['ROLE_MOD']);
+        $vorastudio->setAllowedDomains(['https://vorastudio.cat', 'vorastudio.cat', 'localhost']);
+        $vorastudio->setPassword($this->hasher->hashPassword($vorastudio, '123'));
+        $vorastudio->setActive(true);
+        $manager->persist($vorastudio);
 
         /* ----- Projecte base: admin ----- */
         $landings = new Project();

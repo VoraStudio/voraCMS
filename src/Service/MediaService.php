@@ -17,7 +17,7 @@ use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 class MediaService
 {
-    private const ALLOWED_EXTENSIONS = ['jpg', 'jpeg', 'png', 'svg', 'webp', 'avif'];
+    private const ALLOWED_EXTENSIONS = ['jpg', 'jpeg', 'png', 'webp', 'avif'];
     private const MAX_FILE_SIZE = 3145728; // 3 MB
     private string $uploadDir;
 

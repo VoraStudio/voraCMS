@@ -52,6 +52,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(type: 'json', nullable: true)]
     private ?array $allowedDomains = null;
 
+    #[ORM\Column(type: 'json', nullable: true)]
+    private ?array $allowedIps = null;
+
     #[ORM\Column]
     private ?\DateTimeImmutable $createdAt = null;
 
@@ -93,6 +96,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function getAllowedDomains(): ?array { return $this->allowedDomains; }
     public function setAllowedDomains(?array $allowedDomains): static { $this->allowedDomains = $allowedDomains; return $this; }
+
+    public function getAllowedIps(): ?array { return $this->allowedIps; }
+    public function setAllowedIps(?array $allowedIps): static { $this->allowedIps = $allowedIps; return $this; }
 
     public function getCreatedAt(): ?\DateTimeImmutable { return $this->createdAt; }
 

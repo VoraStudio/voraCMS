@@ -80,25 +80,32 @@
 </div>
 
 {# ─── Endpoints ─── #}
-<h2 class="api-section-title" data-anim="cyber-card">
-    <i class="bi bi-link-45deg"></i> Endpoints
-</h2>
-
-{# GET /api/auth/me #}
-<div class="api-endpoint" data-anim="cyber-card">
-    <div class="api-endpoint-head">
-        <div class="api-endpoint-method">
-            <span class="api-method api-method--get">GET</span>
-            <code class="api-endpoint-url">/api/auth/me</code>
-        </div>
-        <div class="api-endpoint-badge">Perfil</div>
+<div class="api-collapsible-header" data-target="section-endpoints" data-anim="cyber-card">
+    <div class="api-collapsible-header__title">
+        <i class="bi bi-link-45deg"></i>
+        <span>Endpoints</span>
     </div>
-    <div class="api-endpoint-body">
-        <p class="api-text">Retorna les dades de l'usuari autenticat, incloent el JWT actiu a <code>token</code>.</p>
+    <div class="api-collapsible-header__icon">
+        <i class="bi bi-chevron-down"></i>
+    </div>
+</div>
 
-        <div class="api-code-block">
-            <div class="api-code-header"><span>Exemple de resposta</span></div>
-            <pre class="api-code"><code>{
+<div class="api-collapsible-content" id="section-endpoints">
+    {# GET /api/auth/me #}
+    <div class="api-endpoint" data-anim="cyber-card">
+        <div class="api-endpoint-head">
+            <div class="api-endpoint-method">
+                <span class="api-method api-method--get">GET</span>
+                <code class="api-endpoint-url">/api/auth/me</code>
+            </div>
+            <div class="api-endpoint-badge">Perfil</div>
+        </div>
+        <div class="api-endpoint-body">
+            <p class="api-text">Retorna les dades de l'usuari autenticat, incloent el JWT actiu a <code>token</code>.</p>
+    
+            <div class="api-code-block">
+                <div class="api-code-header"><span>Exemple de resposta</span></div>
+                <pre class="api-code"><code>{
   "data": {
     "slug": "victoria-taylor",
     "token": "eyJhbGciOiJSUzI1NiIs...",
@@ -108,32 +115,32 @@
     "allowedDomains": ["taylor.com"]
   }
 }</code></pre>
+            </div>
         </div>
     </div>
-</div>
-
-{# GET /api/sections #}
-<div class="api-endpoint" data-anim="cyber-card">
-    <div class="api-endpoint-head">
-        <div class="api-endpoint-method">
-            <span class="api-method api-method--get">GET</span>
-            <code class="api-endpoint-url">/api/sections?active=true</code>
+    
+    {# GET /api/sections #}
+    <div class="api-endpoint" data-anim="cyber-card">
+        <div class="api-endpoint-head">
+            <div class="api-endpoint-method">
+                <span class="api-method api-method--get">GET</span>
+                <code class="api-endpoint-url">/api/sections?active=true</code>
+            </div>
+            <div class="api-endpoint-badge">Descobriment</div>
         </div>
-        <div class="api-endpoint-badge">Descobriment</div>
-    </div>
-    <div class="api-endpoint-body">
-        <p class="api-text">Retorna les seccions (tipus de contingut) de l'usuari autenticat. Ideal per construir la navegació del frontend dinàmicament.</p>
-
-        <table class="api-params-table">
-            <thead><tr><th>Paràmetre</th><th>Tipus</th><th>Per defecte</th><th>Descripció</th></tr></thead>
-            <tbody>
-                <tr><td><code>active</code></td><td>bool</td><td><code>true</code></td><td>Filtra només seccions actives</td></tr>
-            </tbody>
-        </table>
-
-        <div class="api-code-block">
-            <div class="api-code-header"><span>Exemple de resposta</span></div>
-            <pre class="api-code"><code>{
+        <div class="api-endpoint-body">
+            <p class="api-text">Retorna les seccions (tipus de contingut) de l'usuari autenticat. Ideal per construir la navegació del frontend dinàmicament.</p>
+    
+            <table class="api-params-table">
+                <thead><tr><th>Paràmetre</th><th>Tipus</th><th>Per defecte</th><th>Descripció</th></tr></thead>
+                <tbody>
+                    <tr><td><code>active</code></td><td>bool</td><td><code>true</code></td><td>Filtra només seccions actives</td></tr>
+                </tbody>
+            </table>
+    
+            <div class="api-code-block">
+                <div class="api-code-header"><span>Exemple de resposta</span></div>
+                <pre class="api-code"><code>{
   "data": [
     {
       "id": 1,
@@ -164,19 +171,27 @@
     }
   ]
 }</code></pre>
-        </div>
-        <div class="api-alert api-alert--success">
-            <i class="bi bi-info-circle-fill"></i>
-            <span>Cada secció inclou un array <code>fields</code> amb el nom, slug, tipus i required de cada camp. Utilitza el <code>slug</code> per saber quines claus tindrà la resposta de les entrades.</span>
+            </div>
+            <div class="api-alert api-alert--success">
+                <i class="bi bi-info-circle-fill"></i>
+                <span>Cada secció inclou un array <code>fields</code> amb el nom, slug, tipus i required de cada camp. Utilitza el <code>slug</code> per saber quines claus tindrà la resposta de les entrades.</span>
+            </div>
         </div>
     </div>
 </div>
 
 {# ─── Dynamic fields explanation ─── #}
-<h2 class="api-section-title" data-anim="cyber-card">
-    <i class="bi bi-diagram-3-fill"></i> Camps dinàmics
-</h2>
+<div class="api-collapsible-header" data-target="section-fields" data-anim="cyber-card">
+    <div class="api-collapsible-header__title">
+        <i class="bi bi-diagram-3-fill"></i>
+        <span>Camps dinàmics</span>
+    </div>
+    <div class="api-collapsible-header__icon">
+        <i class="bi bi-chevron-down"></i>
+    </div>
+</div>
 
+<div class="api-collapsible-content" id="section-fields">
 <div class="api-card" data-anim="cyber-card">
     <div class="api-card-header">
         <div class="api-card-icon api-card-icon--blue">
@@ -433,9 +448,17 @@ Content-Type: application/json
 </div>
 
 {# ─── Tipus de camp ─── #}
-<h2 class="api-section-title" data-anim="cyber-card">
-    <i class="bi bi-table"></i> Tipus de camp
-</h2>
+<div class="api-collapsible-header" data-target="section-types" data-anim="cyber-card">
+    <div class="api-collapsible-header__title">
+        <i class="bi bi-table"></i>
+        <span>Tipus de camp</span>
+    </div>
+    <div class="api-collapsible-header__icon">
+        <i class="bi bi-chevron-down"></i>
+    </div>
+</div>
+
+<div class="api-collapsible-content" id="section-types">
 
 <div class="api-card" data-anim="cyber-card">
     <div class="api-card-body api-card-body--no-pad">
@@ -464,9 +487,17 @@ Content-Type: application/json
 </div>
 
 {# ─── Errors ─── #}
-<h2 class="api-section-title" data-anim="cyber-card">
-    <i class="bi bi-exclamation-triangle"></i> Codis d'error
-</h2>
+<div class="api-collapsible-header" data-target="section-errors" data-anim="cyber-card">
+    <div class="api-collapsible-header__title">
+        <i class="bi bi-exclamation-triangle"></i>
+        <span>Codis d'error</span>
+    </div>
+    <div class="api-collapsible-header__icon">
+        <i class="bi bi-chevron-down"></i>
+    </div>
+</div>
+
+<div class="api-collapsible-content" id="section-errors">
 
 <div class="api-card" data-anim="cyber-card">
     <div class="api-card-body api-card-body--no-pad">
@@ -496,9 +527,17 @@ Content-Type: application/json
 </div>
 
 {# ─── Exemples per framework ─── #}
-<h2 class="api-section-title" data-anim="cyber-card">
-    <i class="bi bi-terminal-fill"></i> Exemples per framework
-</h2>
+<div class="api-collapsible-header" data-target="section-frameworks" data-anim="cyber-card">
+    <div class="api-collapsible-header__title">
+        <i class="bi bi-terminal-fill"></i>
+        <span>Exemples per framework</span>
+    </div>
+    <div class="api-collapsible-header__icon">
+        <i class="bi bi-chevron-down"></i>
+    </div>
+</div>
+
+<div class="api-collapsible-content" id="section-frameworks">
 
 <div class="api-grid api-grid--3col" data-anim="cyber-card">
     <div class="api-card">
@@ -598,9 +637,17 @@ export async function getEntries(
 </div>
 
 {# ─── Flux complet ─── #}
-<h2 class="api-section-title" data-anim="cyber-card">
-    <i class="bi bi-arrow-repeat"></i> Flux complet
-</h2>
+<div class="api-collapsible-header" data-target="section-flow" data-anim="cyber-card">
+    <div class="api-collapsible-header__title">
+        <i class="bi bi-arrow-repeat"></i>
+        <span>Flux complet</span>
+    </div>
+    <div class="api-collapsible-header__icon">
+        <i class="bi bi-chevron-down"></i>
+    </div>
+</div>
+
+<div class="api-collapsible-content" id="section-flow">
 
 <div class="api-card api-card--flush" data-anim="cyber-card">
     <div class="api-card-body api-card-body--no-pad">
@@ -609,7 +656,7 @@ export async function getEntries(
                 <div class="api-flow-num">1</div>
                 <div class="api-flow-content">
                     <h4>Obtenir JWT</h4>
-                    <p><code>POST /api/auth/login</code> amb email i contrasenya. El JWT caduca als 7 dies.</p>
+                    <p><code>POST /api/auth/login</code> amb email i contrasenya. El JWT caduca al cap d'1 hora (<code>token_ttl: 3600</code>).</p>
                 </div>
             </div>
             <div class="api-flow-arrow"><i class="bi bi-chevron-down"></i></div>
@@ -641,9 +688,17 @@ export async function getEntries(
 </div>
 
 {# ─── Quick Reference ─── #}
-<h2 class="api-section-title" data-anim="cyber-card">
-    <i class="bi bi-lightbulb-fill"></i> Referència ràpida
-</h2>
+<div class="api-collapsible-header" data-target="section-reference" data-anim="cyber-card">
+    <div class="api-collapsible-header__title">
+        <i class="bi bi-lightbulb-fill"></i>
+        <span>Referència ràpida</span>
+    </div>
+    <div class="api-collapsible-header__icon">
+        <i class="bi bi-chevron-down"></i>
+    </div>
+</div>
+
+<div class="api-collapsible-content" id="section-reference">
 
 <div class="api-card" data-anim="cyber-card">
     <div class="api-card-body">
@@ -675,6 +730,7 @@ export async function getEntries(
             </div>
         </div>
     </div>
+</div>
 </div>
 
 {% endblock %}

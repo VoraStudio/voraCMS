@@ -1,0 +1,108 @@
+{% extends 'admin/layout.html.twig' %}
+
+{% block page_title %}Tests · Guia API{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('css/admin/api-guide.css') }}?v=3.0">
+{% endblock %}
+
+{% block content %}
+
+{# ─── Hero ─── #}
+<div class="api-hero" data-anim="cyber-card">
+    <div class="api-hero-bg"></div>
+    <div class="api-hero-content">
+        <div class="api-hero-icon">
+            <i class="bi bi-check-circle-fill"></i>
+        </div>
+        <div>
+            <h1 class="api-hero-title">Tests del sistema JWT</h1>
+            <p class="api-hero-desc">
+                Com verificar localment que tot el sistema funciona: Master Token,
+                Domain Lock, IP validation, i JWT en endpoints protegits.
+            </p>
+            <div class="api-hero-tags">
+                <span class="api-tag api-tag--green">12 tests</span>
+                <span class="api-tag api-tag--blue">PowerShell</span>
+                <span class="api-tag api-tag--amber">Servidor local</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+{# ─── Com executar els tests ─── #}
+<div class="api-card" data-anim="cyber-card">
+    <div class="api-card-header">
+        <div class="api-card-icon api-card-icon--green">
+            <i class="bi bi-terminal-fill"></i>
+        </div>
+        <h3 class="api-card-title">Execució pas a pas</h3>
+    </div>
+    <div class="api-card-body">
+        <div class="api-card-subtitle">Requisits</div>
+        <ul style="margin:0 0 1rem 1.25rem;">
+            <li>PHP instal·lat i accessible via <code>php</code> al terminal</li>
+            <li>cURL per a Windows (inclòs amb Windows 10/11 com a <code>curl.exe</code>)</li>
+            <li>Servidor Symfony arrencat en mode desenvolupament</li>
+        </ul>
+
+        <div class="api-card-subtitle">Arrencar el servidor de proves</div>
+        <div class="api-code-block">
+            <div class="api-code-header"><span>PowerShell (finestra 1)</span></div>
+            <pre class="api-code"><code>php -S localhost:8080 -t C:\xampp\htdocs\VoraStudio\voracms\public C:\xampp\htdocs\VoraStudio\voracms\public\index.php</code></pre>
+        </div>
+
+        <div class="api-alert api-alert--info" style="margin-top:0;">
+            <i class="bi bi-info-circle-fill"></i>
+            <span>Deixa aquesta finestra oberta mentre el servidor estigui en marxa.</span>
+        </div>
+
+        <div class="api-card-subtitle">Executar els tests</div>
+        <div class="api-code-block">
+            <div class="api-code-header"><span>PowerShell (finestra 2)</span></div>
+            <pre class="api-code"><code>C:\xampp\htdocs\VoraStudio\voracms\test-jwt.ps1
+
+# Si dona error de permisos d'execució:
+powershell -ExecutionPolicy Bypass -File C:\xampp\htdocs\VoraStudio\voracms\test-jwt.ps1</code></pre>
+        </div>
+
+        <div class="api-alert api-alert--success">
+            <i class="bi bi-check-circle-fill"></i>
+            <span>Tots els tests han de passar amb <strong>12 passats, 0 fallits</strong>.</span>
+        </div>
+    </div>
+</div>
+
+{# ─── Cobertura de tests ─── #}
+<div class="api-card" data-anim="cyber-card">
+    <div class="api-card-header">
+        <div class="api-card-icon api-card-icon--blue">
+            <i class="bi bi-list-check"></i>
+        </div>
+        <h3 class="api-card-title">Cobertura de tests</h3>
+    </div>
+    <div class="api-card-body">
+        <p class="api-text">
+            L'script <code>test-jwt.ps1</code> es connecta al servidor Symfony en
+            <code>localhost:8080</code> i executa 12 tests que cobreixen:
+        </p>
+
+        <table class="api-params-table" style="margin-bottom:0;">
+            <thead><tr><th>Grup</th><th>Tests</th><th>Què comprova</th><th>Resultat esperat</th></tr></thead>
+            <tbody>
+                <tr><td rowspan="4" style="vertical-align:middle;font-weight:600;">Master Token</td><td>1.1</td><td>Master Token amb domini vàlid</td><td><span class="api-tag api-tag--green">200 + token</span></td></tr>
+                <tr><td>1.2</td><td>Master Token amb domini no autoritzat</td><td><span class="api-tag api-tag--red">403</span></td></tr>
+                <tr><td>1.3</td><td>Master Token sense Origin (fallback Host)</td><td><span class="api-tag api-tag--green">200 + token</span></td></tr>
+                <tr><td>1.4</td><td>Master Token sense Origin + host invàlid</td><td><span class="api-tag api-tag--red">403</span></td></tr>
+                <tr><td rowspan="3" style="vertical-align:middle;font-weight:600;">JWT protegit</td><td>2.1</td><td>Endpoint protegit amb JWT vàlid</td><td><span class="api-tag api-tag--green">200 + dades</span></td></tr>
+                <tr><td>2.2</td><td>Endpoint protegit sense JWT</td><td><span class="api-tag api-tag--red">401</span></td></tr>
+                <tr><td>2.3</td><td>Endpoint protegit amb JWT fals</td><td><span class="api-tag api-tag--red">401</span></td></tr>
+                <tr><td style="vertical-align:middle;font-weight:600;">Payload</td><td>3</td><td>Payload: camps i TTL del token</td><td><span class="api-tag api-tag--green">3600s, user_id, etc.</span></td></tr>
+                <tr><td style="vertical-align:middle;font-weight:600;">PHP syntax</td><td>4</td><td>Syntax check de tots els fitxers modificats</td><td><span class="api-tag api-tag--green">Sense errors</span></td></tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% endblock %}

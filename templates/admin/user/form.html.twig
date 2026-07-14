@@ -21,6 +21,7 @@
             </div>
         </div>
         <form method="post" action="{{ isNew ? path('admin_user_new') : path('admin_user_edit', {id: user.id}) }}" class="cyber-form-body">
+            <input type="hidden" name="_token" value="{{ csrf_token(isNew ? 'user-new' : 'user-edit-' ~ user.id) }}">
 
             <div class="cyber-form-group">
                 <label class="cyber-form-label">Nom</label>
@@ -71,6 +72,15 @@
                           placeholder="Un domini per línia&#10;ex: vorastudio.cat" rows="3">{{ user.allowedDomains is not null ? user.allowedDomains|join("\n") : '' }}</textarea>
                 <p class="cyber-form-hint" style="font-size:0.85rem;color:var(--s-muted);margin-top:4px">
                     Els JWT només seran vàlids des d'aquests dominis. Deixa buit = sense restricció.
+                </p>
+            </div>
+
+            <div class="cyber-form-group">
+                <label class="cyber-form-label">IPs permeses <span class="cyber-form-label__hint">(opcional)</span></label>
+                <textarea name="allowed_ips" class="cyber-form-input"
+                          placeholder="Una IP per línia&#10;ex: 134.0.10.83" rows="2">{{ user.allowedIps is not null ? user.allowedIps|join("\n") : '' }}</textarea>
+                <p class="cyber-form-hint" style="font-size:0.85rem;color:var(--s-muted);margin-top:4px">
+                    IPs del servidor frontend. Si es configuren, només es permetrà l'accés des d'aquestes IPs. Deixa buit = només validació per domini.
                 </p>
             </div>
 

@@ -1,4 +1,4 @@
-# VoraCMS — API REST Guide
+# VoraCMS — Guia de l'API REST
 
 > **Base URL (producció):** `https://voracms.voradata.cat`  
 > **Base URL (local):** `http://127.0.0.1:8000`
@@ -8,47 +8,50 @@
 ## Índex
 
 1. [Autenticació](#1-autenticació)
-2. [Tokens d'API](#2-tokens-dapi)
+2. [Master Token (públic/SSR)](#2-master-token-públicssr)
 3. [Endpoints](#3-endpoints)
 4. [Exemples d'ús](#4-exemples-dús)
 5. [CORS](#5-cors)
-6. [Domain Guard](#6-domain-guard)
+6. [Domain Guard (Bloqueig de Domini)](#6-domain-guard-bloqueig-de-domini)
 7. [Errors](#7-errors)
-8. [Slugs de projectes](#8-slugs-de-projectes)
+8. [Projectes i Slugs](#8-projectes-i-slugs)
 
 ---
 
 ## 1. Autenticació
 
-Tots els endpoints `/api/*` requereixen autenticació excepte `/api/auth/login`.
+Tots els endpoints sota `/api/*` requereixen autenticació excepte:
+* `/api/auth/login` (login manual)
+* `/api/public/token` (obtenció de Master Token)
+* `/api/public/*` (endpoints públics lliures de token)
 
-### 1.1 Mètodes d'autenticació
+L'autenticació es realitza mitjançant **JSON Web Token (JWT)** amb l'algorisme de signatura RSA asimètrica (RS256).
 
-| Mètode | Token | On s'obté | Caduca |
-|--------|-------|-----------|--------|
-| **JWT** | `Bearer eyJhbGciOi...` | `POST /api/auth/login` | 1 hora |
-| **apiToken** | `Bearer UJIv45gT...` | `GET /api/auth/me` (cal JWT) | Mai |
-
-### 1.2 Login (obtenir JWT)
-
+### 1.1 Header Requerit
+S'ha d'enviar el JWT a cada sol·licitud a la capçalera `Authorization`:
+```http
+Authorization: Bearer <JWT>
 ```
+
+### 1.2 Login (obtenir JWT manualment)
+```http
 POST /api/auth/login
 Content-Type: application/json
 
 {
-  "email": "admin@vora.es",
+  "email": "usuari@vorastudio.cat",
   "password": "..."
 }
 ```
 
-**Resposta correcta (200):**
+**Resposta correcta (200 OK):**
 ```json
 {
   "token": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9..."
 }
 ```
 
-**Error (401):**
+**Error de credencials (401):**
 ```json
 {
   "code": 401,
@@ -56,260 +59,128 @@ Content-Type: application/json
 }
 ```
 
-### 1.3 Obtindre dades de l'usuari (requereix JWT)
-
-```
+### 1.3 Obtenir dades de l'usuari (requereix JWT)
+```http
 GET /api/auth/me
-Authorization: Bearer <jwt>
+Authorization: Bearer <JWT>
 ```
-
-**Resposta (200):**
-```json
-{
-  "data": {
-    "slug": "vora-studio",
-    "apiToken": "UJIv45gTpMGckBdJjDg3UmkuqZzOWqHV",
-    "company": "Vora Studio",
-    "email": "admin@vora.es",
-    "name": "Vora Studio",
-    "allowedDomains": ["vorastudio.cat", "voracms.voradata.cat"]
-  }
-}
-```
-
-> El camp `apiToken` és el token fix per a frontends estáticos.
-> El camp `allowedDomains` indica quins origens CORS té permesos l'usuari.
 
 ---
 
-## 2. Tokens d'API
+## 2. Master Token (públic/SSR)
 
-### 2.1 Per a frontends estáticos (apiToken)
+Per a aplicacions que renderitzen en servidor (SSR) i necessiten consultar dades dinàmiques privades sense demanar credencials a l'usuari final, s'ofereix l'endpoint de Master Token.
 
-Els frontends (VoraStudio.cat, VictoriaTaylor.com, etc.) usen l'`apiToken` de l'usuari propietari del projecte.
-
-**Tokens per usuari (producció):**
-
-| Usuari | apiToken | Projectes |
-|--------|----------|-----------|
-| Vora Studio | `UJIv45gTpMGckBdJjDg3UmkuqZzOWqHV` | Web (vorastudio.cat) |
-| Xavi (Global Brands) | `7Y0zI9cG1wRiy9Dw1kwSOgFd5YB12rUL` | Victoria Taylor, Palmito House |
-| Aula Gastronòmica | `JIfJnaAQXCCtPehFFYBiM9UDagZEjZ3H` | Aula Gastronòmica |
-
-### 2.2 Capçalera requerida
-
-Totes les peticions a `/api/*` (excepte login) han d'incloure:
-
-```
-Authorization: Bearer <token>
+```http
+GET /api/public/token
 ```
 
-### 2.3 Exemple amb fetch
-
-```javascript
-const API_TOKEN = 'UJIv45gTpMGckBdJjDg3UmkuqZzOWqHV';
-
-fetch('https://voracms.voradata.cat/api/public/web/vorastudio-projects?locale=ca', {
-  headers: {
-    'Authorization': 'Bearer ' + API_TOKEN
-  }
-})
-.then(r => r.json())
-.then(data => console.log(data));
-```
+### 2.1 Flux de funcionament
+1. El frontend (ex. servidor Next.js) fa una crida a `GET /api/public/token`.
+2. El servidor PHP llegeix el domini solicitant des del header `Host` o `Origin`.
+3. Es verifica si algun usuari del CMS té aquest domini a la seva llista d'`allowedDomains` i, si té IP configurada, es valida amb `allowedIps`.
+4. Si és vàlid, el CMS retorna un JWT signat pel perfil d'aquell client actiu, amb una validesa d'**1 hora**.
 
 ---
 
 ## 3. Endpoints
 
-### 3.1 Contingut públic (per projecte + content type)
+### 3.1 Contingut Públic (sense token, per a SSG)
+Accés lliure per a webs estàtiques o de consum directe. Retorna les entrades **publicades** d'un projecte i tipus de contingut.
 
-Obté les entrades publicades d'un projecte i content type específic.
-
-```
+```http
 GET /api/public/{project_slug}/{content_type_slug}
 GET /api/public/{project_slug}/{content_type_slug}/{id}
 ```
 
-**Paràmetres:**
+* **Query Params:**
+  * `locale`: Filtra per idioma (`ca`, `es`, `en`). Si no s'especifica, retorna tots els idiomes.
 
-| Paràmetre | Descripció | Exemple |
-|-----------|-----------|---------|
-| `project_slug` | Slug del projecte | `web`, `victoria-taylor` |
-| `content_type_slug` | Slug del content type | `vorastudio-projects`, `noticia`, `event` |
-| `id` (opcional) | ID de l'entrada | `28` |
-
-**Query params:**
-
-| Query | Descripció | Exemple |
-|-------|-----------|---------|
-| `locale` | Filtrar per idioma | `ca`, `es`, `en` |
-
-**Exemples:**
-
-```
-GET /api/public/web/vorastudio-projects?locale=ca
-GET /api/public/victoria-taylor/noticia?locale=ca
-GET /api/public/victoria-taylor/noticia/42
-GET /api/public/victoria-taylor/event?locale=ca
-GET /api/public/victoria-taylor/artistes_victoria_taylor
-```
-
-**Resposta:**
-```json
-{
-  "data": [
-    {
-      "id": 28,
-      "status": "published",
-      "locale": "ca",
-      "createdAt": "2026-06-30T10:12:07+00:00",
-      "titol": "Aurex Immobles",
-      "descripcio": "Aurex neix amb la necessitat...",
-      "logo": [{ "id": 31, "url": "/uploads/media/31.jpg", "formats": {...} }],
-      "website": "www.aureximmobles.com",
-      "tags": "Briefing - Marketing - Consulting",
-      "repte": "Crear una marca forta...",
-      "estrategia": "Posicionar Aurex...",
-      "resultat": "Una imatge renovada...",
-      "galeria": [{ "id": 32, "url": "/uploads/media/32.jpg", ... }],
-      "slug_del_projecte": "aurex",
-      "packs": "Pack Integral",
-      "ordre": null
-    }
-  ]
-}
-```
-
-### 3.2 Artistes (format Victoria Taylor)
-
-```
+### 3.2 Artistes (Format Victoria Taylor)
+Retorna els artistes en un format pla optimitzat per a la integració amb la galeria de Victoria Taylor.
+```http
 GET /api/public/artistes
 ```
 
-Endpoint específic per a la web de Victoria Taylor. Retorna els artistes amb format compatible amb `artistas.js`.
+### 3.3 Contingut Scoped (requereix JWT)
+Retorna el contingut del client resolt a partir de l'usuari autenticat (mitjançant el filtre de Doctrine `user_id_filter`).
+* `GET /api/sections` — Llistar els tipus de contingut (taules/seccions)
+* `GET /api/{slug}` — Llistar entrades d'un tipus de contingut
+* `GET /api/{slug}/{id}` — Entrada individual
 
-### 3.3 Entrades per content type (scoped a l'usuari)
-
-```
-GET /api/{slug}
-GET /api/{slug}/{id}
-GET /api/sections
-```
-
-Aquests endpoints estan scoped a l'usuari autenticat (`UserIdFilter` de Doctrine).
-Un usuari només veu les seves pròpies entrades/projectes.
-
-| Endpoint | Descripció |
-|----------|-----------|
-| `GET /api/{slug}` | Llistat d'entrades publicades per content type |
-| `GET /api/{slug}/{id}` | Entrada individual |
-| `GET /api/sections` | Llistat de content types de l'usuari |
-
-### 3.4 Visites
-
-```
+### 3.4 Registre de Visites
+Registra una impressió/visita d'una entrada per a mètriques d'auditoria.
+```http
 POST /api/visit
-Authorization: Bearer <token>
 Content-Type: application/json
+Authorization: Bearer <JWT>
 
 {
   "entry_id": 28,
-  "path": "/projectes/aurex"
+  "path": "/projectes/aurex-immobles"
 }
 ```
-
-Registra una visita a una entrada. L'usuari s'obté del token.
 
 ---
 
 ## 4. Exemples d'ús
 
-### 4.1 Frontend VoraStudio (projectes-scroll.js)
-
+### 4.1 Carregar dades de forma pública (Vanilla JS)
 ```javascript
-const CMS_API_BASE = 'https://voracms.voradata.cat';
-const CMS_API_TOKEN = 'UJIv45gTpMGckBdJjDg3UmkuqZzOWqHV';
+const CMS_BASE = 'https://voracms.voradata.cat';
 
-async function loadCarouselFromCMS() {
-  const res = await fetch(CMS_API_BASE + '/api/public/web/vorastudio-projects?locale=ca', {
-    headers: { 'Authorization': 'Bearer ' + CMS_API_TOKEN }
-  });
+async function loadProjects() {
+  const res = await fetch(`${CMS_BASE}/api/public/web/vorastudio-projects?locale=ca`);
   const json = await res.json();
-  // json.data → array de projectes
+  console.log(json.data); // Llista de projectes publicats
 }
 ```
 
-### 4.2 Frontend Victoria Taylor (cms.js)
-
+### 4.2 Crida provinent de Servidor (SSR) amb Master Token (Node/Next.js)
 ```javascript
-const CMS_URL = 'https://voracms.voradata.cat';
-const CMS_API_TOKEN = 'UJIv45gTpMGckBdJjDg3UmkuqZzOWqHV';
+const CMS_BASE = 'https://voracms.voradata.cat';
 
-async function getCMSData(url) {
-  const response = await fetch(`${CMS_URL}${url}`, {
-    headers: { 'Authorization': 'Bearer ' + CMS_API_TOKEN }
+async function fetchFromSSR(endpoint) {
+  // 1. Obtenir Master Token
+  const tokenRes = await fetch(`${CMS_BASE}/api/public/token`, {
+    headers: {
+      'Host': 'vorastudio.cat' // Coincident amb allowedDomains
+    }
   });
-  return response.json();
+  const { token } = await tokenRes.json();
+
+  // 2. Cridar l'endpoint privat amb el JWT
+  const dataRes = await fetch(`${CMS_BASE}${endpoint}`, {
+    headers: {
+      'Authorization': 'Bearer ' + token
+    }
+  });
+  return dataRes.json();
 }
-```
-
-### 4.3 cURL (testing)
-
-```bash
-# Login
-curl -X POST https://voracms.voradata.cat/api/auth/login \
-  -H "Content-Type: application/json" \
-  -d '{"email":"admin@vora.es","password":"..."}'
-
-# Llistar projectes (amb JWT)
-curl -H "Authorization: Bearer eyJhbGci..." \
-  https://voracms.voradata.cat/api/public/web/vorastudio-projects?locale=ca
-
-# Llistar projectes (amb apiToken)
-curl -H "Authorization: Bearer UJIv45gTpMGckBdJjDg3UmkuqZzOWqHV" \
-  https://voracms.voradata.cat/api/public/web/vorastudio-projects?locale=ca
 ```
 
 ---
 
 ## 5. CORS
 
-Els endpoints `/api/public/*` retornen estos headers CORS:
-
-```
+Tots els endpoints sota `/api/public/*` retornen les capçaleres de CORS següents:
+```http
 Access-Control-Allow-Origin: *
 Access-Control-Allow-Methods: GET, OPTIONS
 Access-Control-Allow-Headers: Content-Type, Authorization
 ```
 
-Les peticions OPTIONS (preflight) són públiques (no requereixen token).
-
-### 5.1 Configuració per a dominis específics (opcional)
-
-Al `.htaccess` de producció:
-
-```apache
-SetEnvIf Origin "https://(www\.)?vorastudio\.cat" ORIGIN_ALLOWED=$0
-Header always set Access-Control-Allow-Origin "%{ORIGIN_ALLOWED}e" env=ORIGIN_ALLOWED
-Header always set Access-Control-Allow-Methods "GET, POST, OPTIONS"
-Header always set Access-Control-Allow-Headers "Content-Type, Authorization"
-```
+Les peticions pre-vuelo (OPTIONS) no requereixen cap tipus d'autenticació.
 
 ---
 
-## 6. Domain Guard
+## 6. Domain Guard (Bloqueig de Domini)
 
-L'`ApiDomainGuardSubscriber` verifica que l'origen de la petició estigui permès.
+L'`ApiDomainGuardSubscriber` verifica que l'origen de la petició estigui explícitament autoritzat per a l'usuari corresponent si aquest té la llista `allowedDomains` definida a la base de dades.
 
-```
-Usuari sense allowedDomains → tot permès
-Usuari amb allowedDomains   → només Origins que coincideixin
-Sense Origin header         → permès (dev, curl, testing)
-Origin no permès            → 403 "Domain not allowed: ..."
-```
-
-Els `allowedDomains` es configuren a la BD (columna `users.allowed_domains`, array JSON).
+* Si `allowedDomains` està buit: Es permeten tots els orígens.
+* Si no s'envia capçalera `Origin` (p. ex., des de curl o script de dev): Es permet l'accés.
+* Si el domini de la capçalera `Origin` no és a la llista: Retorna `403 Forbidden`.
 
 ---
 
@@ -317,56 +188,22 @@ Els `allowedDomains` es configuren a la BD (columna `users.allowed_domains`, arr
 
 | Codi | Missatge | Causa |
 |------|----------|-------|
-| 401 | `Authentication required` | No s'ha enviat token Bearer |
-| 401 | `Invalid API token` | Token no vàlid o inexistent |
-| 403 | `Domain not allowed: ...` | L'origen no està permès per a aquest usuari |
-| 404 | `Project not found` | El slug del projecte no existeix |
-| 404 | `Content type not found` | El slug del content type no existeix |
-| 404 | `Entry not found` | L'entrada no existeix o no pertany al content type |
-
-### 7.1 Format d'error
-
-```json
-{
-  "error": "Authentication required"
-}
-```
-
-```json
-{
-  "error": "Domain not allowed: otherdomain.com"
-}
-```
+| **400** | `Bad Request` | Manca de paràmetres obligatoris a la consulta. |
+| **401** | `Authentication required` | No s'ha enviat cap JWT o el format és incorrecte. |
+| **403** | `Domain not allowed: ...` | L'origen del frontend està bloquejat pel Domain Guard. |
+| **404** | `Project not found` | El slug del projecte no existeix. |
+| **404** | `Content type not found` | El tipus de contingut (secció) no existeix. |
 
 ---
 
-## 8. Slugs de projectes
+## 8. Projectes i Slugs
 
-Slugs disponibles a producció per a `GET /api/public/{project_slug}/...`:
+Llistat de projectes actius configurats al sistema per a la crida pública `/api/public/{project_slug}/...`:
 
-| Projecte | Slug | apiToken | Usuari propietari |
-|----------|------|----------|-------------------|
-| Web (VoraStudio) | `web` | `UJIv45g...` | Vora Studio |
-| Victoria Taylor | `victoria-taylor` | `7Y0zI9c...` | Xavi |
-| Palmito House | `palmito-house` | `7Y0zI9c...` | Xavi |
-| Aula Gastronòmica | `web-principal` | `JIfJnaA...` | Aula Gastronòmica |
-| Wiar | `wiar` | `7Y0zI9c...` | Xavi |
-
-### 8.1 Projectes individuals (vorastudio-projects)
-
-Slugs del camp `slug_del_projecte` per a la web de VoraStudio:
-
-| Projecte (entry) | slug_del_projecte |
-|-----------------|-------------------|
-| Aurex Immobles (39) | `aurex` |
-| Comercial Ros (28) | `cros` |
-| Wiar (40) | `wiar` |
-| InnovaFP (41) | *(buit)* |
-| Guardavan (42) | *(buit)* |
-| D'Tast (43) | `dtast` |
-| cFood (44) | `cfood` |
-| Spica (45) | `spica` |
-| Raymel (46) | `raymel` |
-
-> Aquests slugs es corresponen amb l'atribut `data-project` al HTML de vorastudio.cat.
-> Exemple: `<body data-project="aurex">`
+| Projecte | Slug | Propietari |
+|----------|------|------------|
+| Web (VoraStudio) | `web` | Vora Studio |
+| Victoria Taylor | `victoria-taylor` | Xavi |
+| Palmito House | `palmito-house` | Xavi |
+| Aula Gastronòmica | `web-principal` | Aula Gastronòmica |
+| Wiar | `wiar` | Xavi |

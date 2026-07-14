@@ -1,491 +1,227 @@
-# VoraCMS — API per al Frontend
+# VoraCMS — Guia de l'API per al Frontend
 
-VoraCMS és un **headless CMS multi-client**. No té frontend propi — exposa una API REST perquè qualsevol frontend (Astro, Next.js, Nuxt, HTML vanilla, React, etc.) consumeixi el contingut.
+VoraCMS és un **headless CMS multi-projecte i multi-client**. No disposa de frontend propi — exposa una API REST dissenyada perquè qualsevol frontend (Astro, Next.js, Nuxt, React, HTML vanilla, etc.) consumeixi el contingut de manera senzilla i segura.
 
-Cada **client** (tenant) té els seus propis tipus de contingut, entrades, usuaris i arxius, completament aïllats.
+Totes les dades estan completament aïllades per client i projecte.
 
 ---
 
 ## Índex
 
-- [Autenticació](#autenticació)
-- [Endpoints](#endpoints)
-  - [`GET /api/auth/me` — Perfil de l'usuari](#get-apiauthme)
-  - [`GET /api/sections` — Seccions (tipus de contingut)](#get-apisections)
-  - [`GET /api/{slug}` — Llistat d'entrades](#get-apislug)
-  - [`GET /api/{slug}/{id}` — Entrada individual](#get-apislugid)
-  - [`POST /api/visit` — Registrar visita](#post-apivisit)
-- [Formats dels camps](#formats-dels-camps)
-- [Codis d'error](#codis-derror)
-- [Exemples per framework](#exemples-per-framework)
-  - [Fetch natiu (vanilla JS)](#vanilla-js-fetch)
-  - [Astro](#astro)
-  - [Next.js](#nextjs)
-- [Flujo complet](#flujo-complet-per-al-frontend)
-- [Referència ràpida](#referència-ràpida)
+- [Mètodes d'Accés i Autenticació](#mètodes-daccés-i-autenticació)
+  - [1. Accés Públic (Recomanat per a webs estàtiques)](#1-accés-públic-recomanat-per-a-webs-estàtiques)
+  - [2. Accés Protegit amb JWT (Privat / Dashboard)](#2-accés-protegit-amb-jwt-privat--dashboard)
+  - [3. Accés Públic Dinàmic amb Master Token](#3-accés-públic-dinàmic-amb-master-token)
+- [Endpoints de l'API](#endpoints-de-lapi)
+  - [API Pública (`/api/public/*`)](#api-pública-apipublic)
+  - [API Autenticada (`/api/*`)](#api-autenticada-api)
+- [Formats dels Camps](#formats-dels-camps)
+- [Codis d'Error](#codis-derror)
+- [Exemples d'Integració per Framework](#exemples-dintegració-per-framework)
+  - [Fetch Natiu (Vanilla JS)](#fetch-natiu-vanilla-js)
+  - [Astro (Pàgines Estàtiques)](#astro-pàgines-estàtiques)
+  - [Next.js (App Router amb Master Token)](#nextjs-app-router-amb-master-token)
 
 ---
 
-## Autenticació
+## Mètodes d'Accés i Autenticació
 
-L'API utilitza **Bearer token** amb l'`apiToken` de l'usuari.
+VoraCMS disposa de tres fluxos clau per consumir el contingut segons les necessitats del teu frontend:
 
-### Obtenir el token
+### 1. Accés Públic (Recomanat per a webs estàtiques)
+No requereix cap tipus de token ni capçalera. És el mètode ideal per a llocs web públics o generadors de llocs estàtics (SSG).
+* **URL:** `/api/public/{project_slug}/{content_type_slug}`
+* **Exemple:** `https://voracms.voradata.cat/api/public/web/vorastudio-projects?locale=ca`
 
-L'`apiToken` es genera automàticament al crear l'usuari. El pots trobar a:
+### 2. Accés Protegit amb JWT (Privat / Dashboard)
+Requereix un JSON Web Token (JWT) vàlid que s'obté mitjançant credencials d'usuari. Ideal per a aplicacions privades, intranets o integracions del client.
+* **Header HTTP requerit:**
+  ```http
+  Authorization: Bearer <JWT_TOKEN>
+  ```
+* **Obtenció del token:** Fent una petició `POST /api/auth/login` amb les credencials de l'usuari. Té una caducitat d'**1 hora**.
 
-1. **Admin → Usuaris** → editar usuari → camp **API Token**
-2. O via endpoint `GET /api/auth/me` un cop autenticat (catch-22: necessites el token per obtenir-lo)
-
-> Durant el desenvolupament, copia l'`apiToken` des de l'admin.
-
-### Usar el token
-
-Inclou-lo a cada request com a `Bearer` al header `Authorization`:
-
-```
-Authorization: Bearer <apiToken>
-```
-
-### Scoping automàtic
-
-No cal passar `?client={slug}` ni cap paràmetre de tenant. L'`ApiTokenAuthenticator` detecta l'usuari a partir del token, i automàticament:
-
-- Filtra les entrades **només de l'usuari autenticat**
-- Filtra les seccions **només de l'usuari autenticat**
-- Aïlla completament les dades entre clients
+### 3. Accés Públic Dinàmic amb Master Token
+Si el teu frontend fa peticions dinàmiques des del servidor (SSR) i necessita accedir als endpoints autenticats `/api/*` sense demanar credencials manualment, pot auto-generar un JWT mitjançant l'endpoint de Master Token.
+* **Funcionament:** El frontend demana un token a `GET /api/public/token`.
+* **Seguretat:** El servidor valida que el domini (`Origin` / `Host`) i la IP sol·licitants estiguin explícitament autoritzats a la fitxa d'usuari del CMS. Si es valida, el CMS retorna un JWT vàlid per una hora.
 
 ---
 
-## Endpoints
+## Endpoints de l'API
 
-### `GET /api/auth/me`
+### API Pública (`/api/public/*`)
 
-Retorna les dades de l'usuari autenticat, inclòs el seu `apiToken`.
+Aquests endpoints tenen els CORS oberts (`Access-Control-Allow-Origin: *`) i es poden cridar directament des del navegador.
 
+#### Llistar entrades d'un projecte i secció
+```http
+GET /api/public/{project_slug}/{content_type_slug}
 ```
+* **Query Params:**
+  * `locale` (opcional): Filtra per idioma (`ca`, `es`, `en`). Si no es passa, retorna tots els idiomes.
+
+#### Detall d'una entrada
+```http
+GET /api/public/{project_slug}/{content_type_slug}/{id}
+```
+
+---
+
+### API Autenticada (`/api/*`)
+
+Requereixen incloure la capçalera `Authorization: Bearer <JWT>`.
+
+#### Obtenir JWT (Login)
+```http
+POST /api/auth/login
+Content-Type: application/json
+
+{
+  "email": "usuari@vorastudio.cat",
+  "password": "el-teu-password"
+}
+```
+**Resposta (200 OK):**
+```json
+{
+  "token": "eyJhbGciOiJSUzI1Ni..."
+}
+```
+
+#### Perfil de l'usuari
+```http
 GET /api/auth/me
-Authorization: Bearer <apiToken>
+```
+Retorna informació de l'usuari i els seus dominis autoritzats.
+
+#### Llistar seccions (Content Types) del projecte
+```http
+GET /api/sections
 ```
 
-**Resposta:**
-
-```json
-{
-  "data": {
-    "slug": "victoria-taylor",
-    "apiToken": "a1b2c3d4e5f6...",
-    "company": "Victoria Taylor Studio",
-    "email": "victoria@taylor.com",
-    "name": "Victoria Taylor"
-  }
-}
+#### Llistar entrades d'una secció
+```http
+GET /api/{content_type_slug}
 ```
 
-> El camp `slug` és l'identificador únic del client. El pots usar com a ruta al frontend (ex: `victoria-taylor.com`).
-
----
-
-### `GET /api/sections`
-
-Retorna les seccions (tipus de contingut) de l'usuari autenticat.
-
-```
-GET /api/sections?active=true
-Authorization: Bearer <apiToken>
-```
-
-| Paràmetre | Tipus | Per defecte | Descripció |
-|-----------|-------|-------------|------------|
-| `active`  | bool  | `true`      | Filtra només seccions actives |
-
-**Resposta:**
-
-```json
-{
-  "data": [
-    {
-      "id": 1,
-      "name": "Notícies",
-      "slug": "noticies",
-      "description": "Secció de notícies del restaurant",
-      "isActive": true
-    },
-    {
-      "id": 2,
-      "name": "Events",
-      "slug": "events",
-      "description": "Esdeveniments i promocions",
-      "isActive": true
-    }
-  ]
-}
-```
-
-**Ús al frontend:** Aquest endpoint et permet **descobrir** quines seccions té el client i construir la navegació dinàmicament.
-
----
-
-### `GET /api/{slug}`
-
-Retorna totes les entrades **publicades** d'una secció.
-
-```
-GET /api/noticies?locale=ca
-Authorization: Bearer <apiToken>
-```
-
-| Paràmetre | Tipus | Obligatori | Descripció |
-|-----------|-------|------------|------------|
-| `slug`    | string | ✅ | Slug del content type (ex: `noticies`, `events`) |
-| `locale`  | string | ❌ | Filtrar per idioma (`ca`, `es`, `en`). Sense filtre torna totes. |
-
-**Resposta:**
-
-```json
-{
-  "data": [
-    {
-      "id": 1,
-      "status": "published",
-      "locale": "ca",
-      "createdAt": "2026-06-10T12:00:00+00:00",
-      "updatedAt": "2026-06-10T12:00:00+00:00",
-      "publishedAt": "2026-06-10T12:00:00+00:00",
-      "titol": "Nova botiga a Girona",
-      "descripcio": "Hem obert una nova ubicació al centre",
-      "imatge": [
-        {
-          "id": 3,
-          "name": "botiga-nova.jpg",
-          "url": "/uploads/botiga-nova.jpg",
-          "formats": {
-            "small": { "url": "/uploads/botiga-nova.jpg" },
-            "thumbnail": { "url": "/uploads/botiga-nova.jpg" }
-          }
-        }
-      ],
-      "contingut": "<p>Text llarg amb format HTML</p>",
-      "data_esdeveniment": "2026-07-15T18:00:00"
-    }
-  ]
-}
-```
-
-> Els noms dels camps dinàmics (`titol`, `descripcio`, `imatge`, etc.) són els **slugs dels FieldDefinition** del content type. No són fixes.
-
----
-
-### `GET /api/{slug}/{id}`
-
-Retorna una entrada concreta pel seu ID.
-
-```
-GET /api/noticies/3
-Authorization: Bearer <apiToken>
-```
-
-**Resposta:**
-
-```json
-{
-  "data": {
-    "id": 3,
-    "status": "published",
-    "locale": "ca",
-    "createdAt": "2026-06-10T12:00:00+00:00",
-    "updatedAt": "2026-06-10T12:00:00+00:00",
-    "publishedAt": "2026-06-10T12:00:00+00:00",
-    "titol": "Nova botiga a Girona",
-    "imatge": [
-      {
-        "id": 3,
-        "name": "botiga-nova.jpg",
-        "url": "/uploads/botiga-nova.jpg",
-        "formats": {
-          "small": { "url": "/uploads/botiga-nova.jpg" },
-          "thumbnail": { "url": "/uploads/botiga-nova.jpg" }
-        }
-      }
-    ],
-    "contingut": "<p>Text llarg...</p>"
-  }
-}
-```
-
----
-
-### `POST /api/visit`
-
-Registra una visita a una entrada (per analytics).
-
-```
+#### Registrar visita (Analytics)
+```http
 POST /api/visit
 Content-Type: application/json
 
 {
-  "entry_id": 3,
-  "path": "/noticies/nova-botiga"
-}
-```
-
-**Resposta:**
-
-```json
-{
-  "ok": true
+  "entry_id": 42,
+  "path": "/projectes/el-meu-projecte"
 }
 ```
 
 ---
 
-## Formats dels camps
+## Formats dels Camps
+
+Les dades es retornen en format JSON estructurat compatible amb l'estàndard de Strapi v5:
 
 | Tipus de camp | Representació JSON |
 |--------------|-------------------|
 | `text` | string |
-| `textarea` | string (amb salts de línia) |
-| `richtext` | string (HTML) |
-| `image` | `[{ id, name, url, formats: { small, thumbnail } }]` |
-| `gallery` | `[{ id, name, url, formats }]` |
-| `date` | string ISO (`2026-06-30T14:30:00`) |
-| `datetime` | string ISO |
+| `textarea` | string (amb salts de línia `\n`) |
+| `richtext` | string (HTML apte per a renderitzat) |
+| `image` / `gallery` | Llistat de fitxers `[{ id, filename, url, mimeType, fileSize, altText }]` |
+| `date` / `datetime` | Format ISO 8601 (`2026-07-14T12:00:00+02:00`) |
 | `boolean` | `true` / `false` |
-| `number` | float / int |
-| `url` | string |
-| `email` | string |
-| `color` | string hex (`#FF5733`) |
-| `youtube` | `{ id, url, embed }` |
+| `number` | float / integer |
 
-### Imatges
-
-Les rutes que retorna l'API són relatives:
-
-```json
-"url": "/uploads/botiga.jpg"
-```
-
-El frontend ha d'anteposar la URL base del CMS:
-
-```js
-const imageUrl = `${API_BASE}${entry.imatge[0].url}`;
-```
+> [!IMPORTANT]
+> Les URLs de les imatges i fitxers adjunts retornades són **relatives** (ex: `/uploads/12/imatge.png`).
+> Al frontend s'ha d'afegir com a prefix la URL base del CMS: `const urlCompleta = CMS_URL + file.url;`.
 
 ---
 
-## Codis d'error
+## Codis d'Error
 
-| Codi | Significat | Acció del frontend |
-|------|-----------|-------------------|
-| `200` | Èxit | Processar `data` |
-| `400` | Paràmetres incorrectes | Revisar la crida |
-| `401` | Token invàlid o no enviat | Redirigir a login o demanar token |
-| `404` | Slug o ID no trobat | Mostrar 404 |
-| `500` | Error intern del servidor | Reintentar més tard |
-
-Format d'error:
-
-```json
-{
-  "error": "Descripció de l'error"
-}
-```
+| Codi | Missatge | Causa |
+|------|----------|-------|
+| **400** | `Bad Request` | Peticions mal estructurades o paràmetres absents. |
+| **401** | `Authentication required` | No s'ha enviat cap token de seguretat o ha caducat. |
+| **403** | `Domain not allowed: ...` | El domini des d'on fas la crida no està permès al teu perfil del CMS. |
+| **404** | `Not Found` | El projecte, tipus de contingut o entrada especificat no existeix. |
 
 ---
 
-## Exemples per framework
+## Exemples d'Integració per Framework
 
-### Vanilla JS (fetch)
+### Fetch Natiu (Vanilla JS)
+Per carregar projectes públics en un carousel des de la pròpia web corporativa de Vora Studio de forma pública i sense tokens:
 
 ```js
-const API_BASE = 'https://cms.domini.com';
-const TOKEN = 'el_api_token_de_l_usuari';
+const CMS_URL = 'https://voracms.voradata.cat';
 
-const headers = {
-  Authorization: `Bearer ${TOKEN}`
-};
-
-/* Descobrir seccions */
-async function getSections() {
-  const res = await fetch(`${API_BASE}/api/sections`, { headers });
-  if (!res.ok) return [];
-  return (await res.json()).data;
+async function carregarProjectes() {
+  try {
+    const res = await fetch(`${CMS_URL}/api/public/web/vorastudio-projects?locale=ca`);
+    if (!res.ok) throw new Error('Error al carregar el CMS');
+    
+    const { data } = await res.json();
+    // 'data' és un array amb els projectes de Vora Studio
+    console.log(data);
+  } catch (error) {
+    console.error(error);
+  }
 }
-
-/* Llistar entrades d'una secció */
-async function getEntries(slug, locale) {
-  const params = new URLSearchParams();
-  if (locale) params.set('locale', locale);
-  const qs = params.toString() ? `?${params}` : '';
-
-  const res = await fetch(`${API_BASE}/api/${slug}${qs}`, { headers });
-  if (!res.ok) return [];
-  return (await res.json()).data;
-}
-
-/* Entrada individual */
-async function getEntry(slug, id) {
-  const res = await fetch(`${API_BASE}/api/${slug}/${id}`, { headers });
-  if (!res.ok) return null;
-  return (await res.json()).data;
-}
-
-/* Ús */
-const seccions = await getSections();
-const noticies = await getEntries('noticies', 'ca');
-const entrada = await getEntry('noticies', 3);
 ```
 
-### Astro
+### Astro (Pàgines Estàtiques)
+Astro realitza la petició durant la fase de build:
 
 ```astro
 ---
-// src/pages/noticies.astro
-const API = 'https://cms.domini.com';
-const TOKEN = 'el_api_token';
+// src/pages/projectes.astro
+const CMS_URL = 'https://voracms.voradata.cat';
 
-const res = await fetch(`${API}/api/noticies?locale=ca`, {
-  headers: { Authorization: `Bearer ${TOKEN}` }
-});
-const entries = res.ok ? (await res.json()).data : [];
+const res = await fetch(`${CMS_URL}/api/public/web/vorastudio-projects?locale=ca`);
+const projects = res.ok ? (await res.json()).data : [];
 ---
 
-<h1>Notícies</h1>
-<ul>
-  {entries.map(entry => (
-    <li>
-      {entry.imatge?.[0] && (
-        <img src={API + entry.imatge[0].url} alt={entry.titol} width="800" height="400" loading="lazy" />
-      )}
-      <h2>{entry.titol}</h2>
-      <time datetime={entry.publishedAt}>
-        {new Date(entry.publishedAt).toLocaleDateString('ca')}
-      </time>
-      <p>{entry.descripcio}</p>
-      <a href={`/noticia/${entry.id}`}>Llegir més</a>
-    </li>
+<h1>Els nostres projectes</h1>
+<div class="grid">
+  {projects.map((project) => (
+    <article>
+      {project.logo?.[0] && <img src={CMS_URL + project.logo[0].url} alt={project.titol} />}
+      <h2>{project.titol}</h2>
+      <p>{project.descripcio}</p>
+    </article>
   ))}
-</ul>
+</div>
 ```
 
-### Next.js
+### Next.js (App Router amb Master Token)
+Exemple per a una aplicació Next.js amb renderitzat en el servidor (SSR) que s'autentica utilitzant el Master Token basat en la IP/Domini del servidor node:
 
 ```ts
-// lib/voracms.ts
-const API_BASE = process.env.NEXT_PUBLIC_VORACMS_URL!;
-const TOKEN = process.env.NEXT_PUBLIC_VORACMS_TOKEN!;
+// lib/cms.ts
+const CMS_URL = 'https://voracms.voradata.cat';
 
-const headers = { Authorization: `Bearer ${TOKEN}` };
-
-export async function getSections() {
-  const res = await fetch(`${API_BASE}/api/sections`, { headers, next: { revalidate: 300 } });
-  if (!res.ok) return [];
-  return (await res.json()).data;
-}
-
-export async function getEntries(slug: string, locale?: string) {
-  const params = new URLSearchParams();
-  if (locale) params.set('locale', locale);
-  const qs = params.toString() ? `?${params}` : '';
-
-  const res = await fetch(`${API_BASE}/api/${slug}${qs}`, {
-    headers,
-    next: { revalidate: 60 }
+async function getJwtToken() {
+  const res = await fetch(`${CMS_URL}/api/public/token`, {
+    headers: {
+      // El host ha de coincidir amb un dels dominis autoritzats de l'usuari
+      'Host': 'el-teu-domini-autoritzat.cat'
+    },
+    next: { revalidate: 3000 } // Fem cache del token (dura 1 hora)
   });
-  if (!res.ok) return [];
-  return (await res.json()).data;
+  if (!res.ok) throw new Error('No s\'ha pogut obtenir el Master Token');
+  const { token } = await res.json();
+  return token;
 }
 
-export async function getEntry(slug: string, id: number) {
-  const res = await fetch(`${API_BASE}/api/${slug}/${id}`, {
-    headers,
-    next: { revalidate: 60 }
+export async function getCmsData(endpoint: string) {
+  const token = await getJwtToken();
+  const res = await fetch(`${CMS_URL}${endpoint}`, {
+    headers: {
+      'Authorization': `Bearer ${token}`
+    }
   });
-  if (!res.ok) return null;
-  return (await res.json()).data;
+  return res.json();
 }
 ```
-
-```tsx
-// app/noticies/page.tsx
-import { getEntries } from '@/lib/voracms';
-
-export default async function NoticiesPage() {
-  const entries = await getEntries('noticies', 'ca');
-
-  return (
-    <div>
-      {entries.map(entry => (
-        <article key={entry.id}>
-          {entry.imatge?.[0] && (
-            <img src={entry.imatge[0].url} alt={entry.titol} width="800" height="400" />
-          )}
-          <h2>{entry.titol}</h2>
-          <p>{entry.descripcio}</p>
-        </article>
-      ))}
-    </div>
-  );
-}
-```
-
----
-
-## Flux complet per al frontend
-
-```
-Frontend                          VoraCMS API
-   │                                  │
-   │  GET /api/auth/me                │
-   │  Authorization: Bearer <token>   │
-   │─────────────────────────────────>│
-   │                                  │── ApiTokenAuthenticator: resol usuari
-   │  { data: { slug, name, ... } }  │
-   │<─────────────────────────────────│
-   │                                  │
-   │  GET /api/sections               │
-   │  Authorization: Bearer <token>   │
-   │─────────────────────────────────>│
-   │                                  │── Filtra per usuari autenticat
-   │  { data: [{ slug, name }] }     │
-   │<─────────────────────────────────│
-   │                                  │
-   │  Per cada secció:                │
-   │  GET /api/{slug}?locale=ca       │
-   │  Authorization: Bearer <token>   │
-   │─────────────────────────────────>│
-   │                                  │── EntryRepository: published + scoped
-   │  { data: [{ id, titol, ... }] } │
-   │<─────────────────────────────────│
-   │                                  │
-   │  GET /api/{slug}/{id}            │
-   │  Authorization: Bearer <token>   │
-   │─────────────────────────────────>│
-   │  { data: { id, titol, ... } }   │
-   │<─────────────────────────────────│
-```
-
-### Resum del flux
-
-1. Obtenir `apiToken` des de l'admin d'usuaris
-2. **Descobrir seccions** → `GET /api/sections` → obtens els slugs disponibles
-3. **Llistar entrades** → `GET /api/noticies?locale=ca` → entries d'una secció
-4. **Detall** → `GET /api/noticies/3` → entrada individual
-5. **Tracking** → `POST /api/visit` → registrar visita (opcional)
-
----
-
-## Referència ràpida
-
-```
-GET  /api/auth/me                    → Perfil usuari (token necessari per obtenir-lo)
-GET  /api/sections?active=true       → Llistat de seccions
-GET  /api/{slug}?locale=ca           → Llistat d'entrades publicades
-GET  /api/{slug}/{id}                → Entrada individual
-POST /api/visit                      → Registrar visita
-
-Headers:
-  Authorization: Bearer <apiToken>
-```
-
-> Per a qualsevol dubte, consulta l'admin del CMS o obre un issue al repositori.

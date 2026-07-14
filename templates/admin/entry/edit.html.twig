@@ -38,6 +38,7 @@
 <div class="cyber-form-card mx-auto">
 <div class="cyber-card cyber-card--flush" data-anim="cyber-card">
     <form method="post" id="entryForm" enctype="multipart/form-data" novalidate class="cyber-form-body">
+            <input type="hidden" name="_token" value="{{ csrf_token('entry-edit-' ~ entry.id) }}">
             <!-- Status: toggle switches -->
             <div class="s-status mb-3" role="radiogroup" aria-label="Estat de l'entrada">
                 <div class="s-status__toggles" id="statusSeg">

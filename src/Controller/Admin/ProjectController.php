@@ -213,6 +213,10 @@ class ProjectController extends AbstractController
         $preselectUserId = $request->query->getInt('user', 0);
 
         if ($request->isMethod('POST')) {
+            if (!$this->isCsrfTokenValid('project-edit-' . $project->getId(), $request->request->get('_token'))) {
+                $this->addFlash('error', 'Token de seguretat invàlid.');
+                return $this->redirectToRoute('admin_projects');
+            }
             $project->setName($request->request->get('name', ''));
             $project->setSlug($this->slugify($project->getName()));
             $project->setDescription($request->request->get('description', ''));

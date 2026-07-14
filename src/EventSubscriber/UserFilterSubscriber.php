@@ -31,6 +31,13 @@ class UserFilterSubscriber implements EventSubscriberInterface
 
     public function onController(ControllerEvent $event): void
     {
+        $request = $event->getRequest();
+
+        /* Rutes públiques — no aplicar filtre d'usuari */
+        if (str_starts_with($request->getPathInfo(), '/api/public/')) {
+            return;
+        }
+
         $token = $this->tokenStorage->getToken();
         if ($token === null) {
             return;
