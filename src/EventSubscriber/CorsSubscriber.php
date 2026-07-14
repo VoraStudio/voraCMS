@@ -100,7 +100,11 @@ class CorsSubscriber implements EventSubscriberInterface
             $originHost = parse_url($origin, PHP_URL_HOST) ?: $origin;
             $allowedHost = parse_url($allowed, PHP_URL_HOST) ?: $allowed;
 
-            if ($originHost === $allowedHost) {
+            // Normalització: treure www. per a comparar correctament amb o sense subdomini www
+            $originHostClean = preg_replace('/^www\./i', '', $originHost);
+            $allowedHostClean = preg_replace('/^www\./i', '', $allowedHost);
+
+            if ($originHostClean === $allowedHostClean || str_ends_with($originHostClean, '.' . $allowedHostClean)) {
                 return true;
             }
         }
