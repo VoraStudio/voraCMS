@@ -143,6 +143,11 @@ class MediaController extends AbstractController
         $projectId = $request->request->get('project_id');
         if ($projectId) {
             $project = $projectRepo->find($projectId);
+            if ($project !== null && !$this->isGranted('ROLE_ADMIN')) {
+                if ($project->getUser()?->getId() !== $user?->getId()) {
+                    return $this->json(['error' => 'No tens permís sobre aquest projecte.'], 403);
+                }
+            }
         }
 
         /* Suport múltiples fitxers (files[0], files[1]…) o un de sol (file) */

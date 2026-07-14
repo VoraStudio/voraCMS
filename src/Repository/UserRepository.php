@@ -61,4 +61,46 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
             ->getQuery()
             ->getOneOrNullResult();
     }
+
+    /* ── Tots els allowed_domains únics de tots els usuaris ── */
+    /** @return string[] */
+    public function findAllAllowedDomains(): array
+    {
+        $rows = $this->createQueryBuilder('u')
+            ->select('u.allowedDomains')
+            ->where('u.allowedDomains IS NOT NULL')
+            ->getQuery()
+            ->getResult();
+
+        $domains = [];
+        foreach ($rows as $row) {
+            $userDomains = $row['allowedDomains'] ?? [];
+            if (!empty($userDomains)) {
+                array_push($domains, ...$userDomains);
+            }
+        }
+
+        return array_values(array_unique($domains));
+    }
+
+    /* ── Tots els allowed_ips únics de tots els usuaris ── */
+    /** @return string[] */
+    public function findAllAllowedIps(): array
+    {
+        $rows = $this->createQueryBuilder('u')
+            ->select('u.allowedIps')
+            ->where('u.allowedIps IS NOT NULL')
+            ->getQuery()
+            ->getResult();
+
+        $ips = [];
+        foreach ($rows as $row) {
+            $userIps = $row['allowedIps'] ?? [];
+            if (!empty($userIps)) {
+                array_push($ips, ...$userIps);
+            }
+        }
+
+        return array_values(array_unique($ips));
+    }
 }

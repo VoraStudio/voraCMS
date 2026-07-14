@@ -36,6 +36,9 @@ readonly class JwtDomainValidator
         if (!in_array('localhost', $allowedDomains, true)) {
             $allowedDomains[] = 'localhost';
         }
+        if (!in_array('127.0.0.1', $allowedDomains, true)) {
+            $allowedDomains[] = '127.0.0.1';
+        }
 
         $request = $this->requestStack->getCurrentRequest();
         if (!$request) {

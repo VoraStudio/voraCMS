@@ -70,6 +70,10 @@ class UserController extends AbstractController
         $user = new User();
 
         if ($request->isMethod('POST')) {
+            if (!$this->isCsrfTokenValid('user-new', $request->request->get('_token'))) {
+                $this->addFlash('error', 'Token de seguretat invàlid.');
+                return $this->redirectToRoute('admin_user_index');
+            }
             $email = $request->request->get('email', '');
             $name = $request->request->get('name', '');
             $password = $request->request->get('password', '123');
@@ -88,6 +92,10 @@ class UserController extends AbstractController
             $allowedDomains = $request->request->get('allowed_domains', '');
             $domains = array_values(array_filter(array_map('trim', explode("\n", $allowedDomains))));
             $user->setAllowedDomains(!empty($domains) ? $domains : null);
+
+            $allowedIps = $request->request->get('allowed_ips', '');
+            $ips = array_values(array_filter(array_map('trim', explode("\n", $allowedIps))));
+            $user->setAllowedIps(!empty($ips) ? $ips : null);
 
             $errors = $validator->validate($user);
             if (count($errors) > 0) {
@@ -134,6 +142,10 @@ class UserController extends AbstractController
         $this->denyAccessUnlessGranted('ROLE_ADMIN');
 
         if ($request->isMethod('POST')) {
+            if (!$this->isCsrfTokenValid('user-edit-' . $user->getId(), $request->request->get('_token'))) {
+                $this->addFlash('error', 'Token de seguretat invàlid.');
+                return $this->redirectToRoute('admin_user_index');
+            }
             $user->setEmail($request->request->get('email', $user->getEmail()));
             $user->setName($request->request->get('name', $user->getName()));
             $user->setCompany($request->request->get('company', $user->getCompany()) ?: null);
@@ -149,6 +161,10 @@ class UserController extends AbstractController
             $allowedDomains = $request->request->get('allowed_domains', '');
             $domains = array_values(array_filter(array_map('trim', explode("\n", $allowedDomains))));
             $user->setAllowedDomains(!empty($domains) ? $domains : null);
+
+            $allowedIps = $request->request->get('allowed_ips', '');
+            $ips = array_values(array_filter(array_map('trim', explode("\n", $allowedIps))));
+            $user->setAllowedIps(!empty($ips) ? $ips : null);
 
             $password = $request->request->get('password', '');
             if (!empty($password)) {

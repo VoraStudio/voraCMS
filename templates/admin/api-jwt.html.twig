@@ -4,7 +4,7 @@
 
 {% block stylesheets %}
     {{ parent() }}
-    <link rel="stylesheet" href="{{ asset('css/admin/api-guide.css') }}?v=2.0">
+    <link rel="stylesheet" href="{{ asset('css/admin/api-guide.css') }}?v=3.0">
 {% endblock %}
 
 {% block content %}
@@ -24,7 +24,7 @@
             </p>
             <div class="api-hero-tags">
                 <span class="api-tag api-tag--orange">Bearer Auth</span>
-                <span class="api-tag api-tag--amber">Caducitat 7 dies</span>
+                <span class="api-tag api-tag--amber">Caducitat 1 hora</span>
                 <span class="api-tag api-tag--blue">Domain-aware</span>
             </div>
         </div>
@@ -40,7 +40,16 @@
         <h3 class="api-card-title">Master Token (sense login)</h3>
     </div>
     <div class="api-card-body">
-        <p class="api-text">Per a frontends públics que <strong>no tenen login</strong> (landing pages, webs corporatives), hi ha un endpoint públic que genera un JWT validant només el <strong>domini</strong> de la petició contra els <code>allowed_domains</code> dels usuaris.</p>
+        <p class="api-text">
+            El Master Token és un JWT que s'obté <strong>sense credencials</strong>. Serveix perquè els
+            frontends públics (landing pages, webs corporatives) puguin consumir l'API sense que un
+            humà hagi de fer login.
+        </p>
+        <p class="api-text">
+            La seva emissió està protegida per <strong>dos mecanismes</strong>: el domini des d'on es
+            demana (obligatori) i, opcionalment, la IP del servidor que el sol·licita. Cada client
+            (usuari del CMS) configura els seus propis dominis i IPs permeses.
+        </p>
 
         <div class="api-card-subtitle">Endpoint</div>
         <div class="api-code-block">
@@ -52,103 +61,138 @@ Host: vorastudio.cat
 → 403 { "error": "Domini no autoritzat" }</code></pre>
         </div>
 
-        <div class="api-card-subtitle">Com funciona</div>
+        <div class="api-card-subtitle">Flux complet d'emissió</div>
         <div class="api-flow">
             <div class="api-flow-step">
                 <div class="api-flow-num">1</div>
                 <div class="api-flow-content">
                     <h4>Petició al Master Token</h4>
-                    <p>El frontend fa <code>GET /api/public/token</code> (endpoint públic, no cal auth previ). <code>TokenMasterService</code> obté el <code>Host</code> i busca un usuari amb aquest domini a <code>allowed_domains</code>.</p>
+                    <p>El frontend fa <code>GET /api/public/token</code> (endpoint públic). <code>TokenMasterService</code> obté el <code>Host</code> i busca un usuari que tingui aquest domini a <code>allowed_domains</code>.</p>
+                    <p style="">Si cap usuari té el domini registrat → <strong>403 Domini no autoritzat</strong>.</p>
                 </div>
             </div>
             <div class="api-flow-arrow"><i class="bi bi-chevron-down"></i></div>
             <div class="api-flow-step">
                 <div class="api-flow-num">2</div>
                 <div class="api-flow-content">
-                    <h4>Validació + emissió</h4>
-                    <p>Si el domini existeix, genera un JWT via <code>JWTTokenManagerInterface::create($user)</code>. L'<code>allowed_domains</code> s'injecta automàticament al payload. Si no existeix → 403.</p>
+                    <h4>Validació de IP (si està configurada)</h4>
+                    <p>Un cop trobat l'usuari, es comprova si té <code>allowedIps</code> configurades a la base de dades:</p>
+                    <ul style="margin:0;padding-left:1.25rem;">
+                        <li><strong>Si té IPs configurades</strong> → es compara la IP del client (<code>REMOTE_ADDR</code>) contra la llista. Si no coincideix → <strong>403 Domini no autoritzat</strong>.</li>
+                        <li><strong>Si no té IPs configurades</strong> (null) → es salta la validació. Només es valida el domini.</li>
+                    </ul>
+                    <p style="">Això permet als clients amb IP fixa tancar l'emissió només al seu servidor SSR, mentre que clients sense IP fixa segueixen funcionant només amb domini.</p>
                 </div>
             </div>
             <div class="api-flow-arrow"><i class="bi bi-chevron-down"></i></div>
             <div class="api-flow-step">
                 <div class="api-flow-num">3</div>
                 <div class="api-flow-content">
-                    <h4>Logging automàtic</h4>
-                    <p>L'<code>ApiRequestLogger</code> registra <strong>totes</strong> les crides API a <code>api_request_log</code>: domini, endpoint, status, IP, User-Agent, temps de resposta, JTI del token emès.</p>
+                    <h4>Emissió del JWT</h4>
+                    <p>Si totes les validacions passen, <code>TokenMasterService</code> genera un JWT via <code>JWTTokenManagerInterface::create($user)</code>. El JWT inclou al payload: <code>user_id</code>, <code>user_slug</code>, <code>allowed_domains</code>. No inclou <code>roles</code> — els rols es llegeixen de BD a cada petició perquè els canvis de permisos siguin immediats.</p>
+                </div>
+            </div>
+            <div class="api-flow-arrow"><i class="bi bi-chevron-down"></i></div>
+            <div class="api-flow-step">
+                <div class="api-flow-num">4</div>
+                <div class="api-flow-content">
+                    <h4>Registre automàtic (auditoria)</h4>
+                    <p>L'<code>ApiRequestLogger</code> registra totes les crides a <code>api_request_log</code>: domini, endpoint, HTTP status, IP, User-Agent, temps de resposta i JTI del token emès. Qualsevol intent fallit queda traçat.</p>
                 </div>
             </div>
         </div>
 
         <div class="api-alert api-alert--info" style="margin-top:0.75rem;">
             <i class="bi bi-clock-fill"></i>
-            <span>TTL per defecte de <strong>7 dies</strong>, però el frontend en demana un de nou a cada càrrega de pàgina. La caducitat real és per page-load.</span>
+            <span>TTL del JWT: <strong>1 hora</strong> (<code>token_ttl: 3600</code>). CmsClient en guarda una còpia en cache local durant <strong>5 minuts</strong>. Si una crida retorna 401/403, el client esborra el cache i en demana un de nou automàticament.</span>
         </div>
 
-        <div class="api-card-subtitle">Exemple: Vanilla JS</div>
+        <div class="api-card-subtitle">Exemple: PHP amb CmsClient (SSR)</div>
         <div class="api-code-block">
-            <pre class="api-code"><code>const API = {
-  base: 'https://cms.domini.com', token: null,
+            <div class="api-code-header"><span>includes/CmsClient.php</span></div>
+            <pre class="api-code"><code>require_once __DIR__ . '/includes/CmsClient.php';
 
-  async fetchToken() {
-    const res = await fetch(`${this.base}/api/public/token`);
-    if (!res.ok) throw new Error('Domini no autoritzat');
-    this.token = (await res.json()).token;
-  },
+$cms = new CmsClient(
+    cmsUrl: 'https://voracms.voradata.cat',
+    origin: 'https://vorastudio.cat',
+);
 
-  async get(path) {
-    if (!this.token) await this.fetchToken();
-    const res = await fetch(`${this.base}${path}`, {
-      headers: { 'Authorization': `Bearer ${this.token}` },
-    });
-    if (res.status === 401) { this.token = null; return this.get(path); }
-    return res.json();
-  },
-};
+/* POST - registrar visita (el getToken és intern automàtic) */
+$cms->post('/api/visit', [
+    'entry_id'  => 5,
+    'path'      => '/',
+    'client_ip' => $_SERVER['REMOTE_ADDR'],
+    'user_agent'=> $_SERVER['HTTP_USER_AGENT'],
+]);
 
-const data = await API.get('/api/public/vorastudio/projects');</code></pre>
+/* GET - obtindre dades del CMS (SSR) */
+$data = $cms->fetch('/api/public/web/vorastudio-projects?locale=ca');</code></pre>
         </div>
 
-        <div class="api-card-subtitle" style="margin-top:1.5rem;">Serveis implicats</div>
+        <div style="background:#f5f5f5;border:1px solid #ddd;border-radius:8px;padding:1rem;margin-top:1rem;">
+            <p style="margin:0 0 0.5rem 0;font-weight:700;">Cache del JWT</p>
+            <p style="margin:0;">
+                CmsClient guarda el JWT en un fitxer a <code style="font-weight:600;">sys_get_temp_dir() . '/vorastudio_jwt_' . md5(__DIR__)</code>.
+                El hash de <code>__DIR__</code> garanteix que cada instal·lació del projecte tingui el seu
+                propi fitxer de cache, evitant col·lisions en servidors multi-inquilí.
+            </p>
+            <p style="margin:0.5rem 0 0 0;">
+                <strong>TTL de cache:</strong> 5 minuts (configurable via paràmetre <code>$cacheTtl</code>).
+                Si el token caduca (JWT TTL = 1h), la següent crida retorna 401/403 i CmsClient
+                esborra el cache automàticament i obtenint un token nou.
+            </p>
+        </div>
+
+        <div class="api-card-subtitle" style="margin-top:1.5rem;">Classes implicades</div>
         <table class="api-params-table" style="margin-bottom:0;">
             <thead><tr><th>Classe</th><th>Funció</th></tr></thead>
             <tbody>
-                <tr><td><code>TokenMasterService</code></td><td>Busca usuari per domini i genera JWT</td></tr>
-                <tr><td><code>UserRepository::findOneByDomain()</code></td><td>Cerca usuari amb el domini als seus <code>allowed_domains</code></td></tr>
-                <tr><td><code>ApiRequestLogger</code></td><td>Subscriber que registra totes les peticions API</td></tr>
-                <tr><td><code>ApiRequestLog</code></td><td>Entitat amb domini, endpoint, status, IP, UA, Origin, Referer, temps de resposta, JTI</td></tr>
+                <tr><td><code>PublicController::token()</code></td><td>Endpoint <code>GET /api/public/token</code>. Obté domini del Host i delega a TokenMasterService.</td></tr>
+                <tr><td><code>TokenMasterService::generateToken($domain, $clientIp)</code></td><td>Busca usuari per domini, valida IP si cal, i genera el JWT.</td></tr>
+                <tr><td><code>UserRepository::findOneByDomain()</code></td><td>Cerca un usuari amb el domini als seus <code>allowed_domains</code>.</td></tr>
+                <tr><td><code>User::getAllowedIps()</code></td><td>Retorna les IPs permeses per a aquest usuari, o null si no n'hi ha.</td></tr>
+                <tr><td><code>ApiRequestLogger</code></td><td>Subscriber que registra totes les peticions API (auditoria).</td></tr>
+                <tr><td><code>CmsClient</code></td><td>Client PHP que cachea el JWT i fa les crides SSR sense exposar el token al navegador.</td></tr>
             </tbody>
         </table>
+
+        <div class="api-alert api-alert--warning" style="margin-top:0.75rem;">
+            <i class="bi bi-exclamation-triangle-fill"></i>
+            <span><strong>No utilitzis el Master Token per a usuaris admin.</strong> El Master Token només hauria d'emprar-se per a frontends públics que necessiten accés de lectura/visites. Per a operacions d'escriptura o administració, utilitza el login amb credencials (<code>POST /api/auth/login</code>).</span>
+        </div>
     </div>
 </div>
 
-{# ─── Validació per client ─── #}
+{# ─── Validació per client (5 capes) ─── #}
 <div class="api-card" id="validacio-client" data-anim="cyber-card">
     <div class="api-card-header">
         <div class="api-card-icon api-card-icon--blue">
             <i class="bi bi-diagram-3-fill"></i>
         </div>
-        <h3 class="api-card-title">Validació de peticions per client</h3>
+        <h3 class="api-card-title">Validació de peticions per client (5 capes)</h3>
     </div>
     <div class="api-card-body">
         <p class="api-text">
-            Cada petició a l'API passa per <strong>cinc capes de validació</strong> en cadena, des del firewall fins al filtre
-            Doctrine. Aquest sistema garanteix que cada client només veu les seves dades, i que un token robat no serveix
-            des d'un domini no autoritzat.
+            Cada petició a l'API passa per <strong>cinc capes de validació</strong> en cadena, des del firewall
+            fins al filtre Doctrine. Aquest sistema garanteix que cada client només veu les seves dades,
+            i que un token robat no serveix des d'un domini o IP no autoritzats.
         </p>
 
-        <div class="api-card-subtitle">Diagrama de flux (petició qualsevol a /api/*)</div>
+        <div class="api-card-subtitle">Diagrama de flux (petició a /api/* amb JWT)</div>
         <div class="api-flow">
             <div class="api-flow-step">
                 <div class="api-flow-num">1</div>
                 <div class="api-flow-content">
-                    <h4>Firewall JWT</h4>
+                    <h4>Firewall JWT (signatura RSA + expiració)</h4>
                     <p>
                         Tota petició a <code>/api/*</code> passa pel firewall <code>api</code> amb <code>jwt: ~</code>.
-                        L'<code>LexikJWTAuthenticator</code> valida la <strong>signatura RSA</strong> i l'<strong>expiració</strong>
-                        del token. Sense token vàlid → <strong>401 JWT Token not found</strong>.
+                        <strong>LexikJWTAuthenticator</strong> valida la signatura RSA (PKCS#1 v1.5 + SHA-256)
+                        i l'expiració (<code>exp</code>) del token. Sense token vàlid → <strong>401 JWT Token not found</strong>.
+                        Aquesta capa no fa cap consulta a base de dades — tota la informació és al JWT.
                     </p>
-                    <p class="api-text-muted" style="font-size:0.8rem;margin:0.25rem 0 0;">
-                        Excepció: <code>GET /api/public/token</code> té <code>PUBLIC_ACCESS</code>.
+                    <p style="">
+                        Excepció: <code>GET /api/public/token</code> té <code>PUBLIC_ACCESS</code> perquè el
+                        Master Token s'ha d'obtenir sense JWT previ.
                     </p>
                 </div>
             </div>
@@ -159,11 +203,18 @@ const data = await API.get('/api/public/vorastudio/projects');</code></pre>
                     <h4>Domain Lock (JwtDomainValidator)</h4>
                     <p>
                         Al decodificar el JWT, <code>JwtClientIdSubscriber::onJwtDecoded()</code> crida
-                        <code>JwtDomainValidator::validateFromPayload()</code>. Compara el <strong>Host real de la petició</strong>
-                        contra els <code>allowed_domains</code> del payload. Si el domini no hi és → JWT marcat com a invàlid → <strong>401</strong>.
+                        <code>JwtDomainValidator::validateFromPayload()</code>. Compara el <strong>Host real
+                        de la petició HTTP</strong> contra els <code>allowed_domains</code> del payload
+                        (que van ser injectats al crear el JWT).
                     </p>
-                    <p class="api-text-muted" style="font-size:0.8rem;margin:0.25rem 0 0;">
-                        Així un token obtingut per <code>vorastudio.cat</code> no pot reutilitzar-se des de <code>altre-domini.com</code>.
+                    <p style="">
+                        La normalització treu <code>https://</code>, <code>www.</code>, trailing slash, i path.
+                        <code>localhost</code> s'afegeix sempre automàticament per a entorns de desenvolupament.
+                        Si el domini no coincideix → el token es marca com a invàlid → <strong>401</strong>.
+                    </p>
+                    <p style="">
+                        Així, un token obtingut per <code>vorastudio.cat</code> no pot reutilitzar-se des de
+                        <code>altre-domini.com</code>.
                     </p>
                 </div>
             </div>
@@ -171,19 +222,25 @@ const data = await API.get('/api/public/vorastudio/projects');</code></pre>
             <div class="api-flow-step">
                 <div class="api-flow-num">3</div>
                 <div class="api-flow-content">
-                    <h4>UserFilterSubscriber</h4>
+                    <h4>Ruta pública? UserFilterSubscriber decideix</h4>
                     <p>
-                        Abans d'executar el controlador, <code>UserFilterSubscriber::onController()</code> comprova
-                        l'usuari autenticat:
+                        Abans d'executar el controlador, <code>UserFilterSubscriber::onController()</code>
+                        inspecciona la ruta i l'usuari autenticat:
                     </p>
                     <ul style="margin:0;padding-left:1.25rem;">
                         <li>
-                            <strong>ROLE_ADMIN</strong> → <em>bypass</em>. No s'aplica cap filtre. L'usuari
-                            administrador veu <strong>totes</strong> les dades de tots els clients.
+                            <strong>Ruta <code>/api/public/*</code></strong> → <em>bypass total</em>.
+                            El filtre Doctrine <strong>no s'aplica mai</strong>, independentment del rol.
+                            Necessari perquè els endpoints públics (token, web, visit) funcionin sense
+            filtrar per usuari.
                         </li>
                         <li>
-                            <strong>Altres rols</strong> → activa el filtre Doctrine
-                            <code>user_id_filter</code> amb l'ID de l'usuari autenticat.
+                            <strong>ROLE_ADMIN</strong> (fora de <code>/api/public/*</code>) → <em>bypass</em>.
+                            L'admin veu totes les dades de tots els clients.
+                        </li>
+                        <li>
+                            <strong>Altres rols</strong> (fora de <code>/api/public/*</code>) → s'activa
+                            el filtre Doctrine <code>user_id_filter</code> amb l'ID de l'usuari autenticat.
                         </li>
                     </ul>
                 </div>
@@ -194,13 +251,12 @@ const data = await API.get('/api/public/vorastudio/projects');</code></pre>
                 <div class="api-flow-content">
                     <h4>UserIdFilter (Doctrine SQL Filter)</h4>
                     <p>
-                        El filtre <code>UserIdFilter::addFilterConstraint()</code> afegeix automàticament
-                        <code>WHERE user_id = :user_id</code> a <strong>totes</strong> les queries SQL d'entitats
-                        que tenen camp <code>user_id</code>.
+                        El filtre <code>UserIdFilter::addFilterConstraint()</code> injecta automàticament
+                        <code>WHERE user_id = :user_id</code> a <strong>totes</strong> les queries SQL
+                        d'entitats que tenen camp <code>user_id</code> (<code>Entry</code>, <code>Media</code>,
+                        <code>Visit</code>, etc.).
                     </p>
-                    <p style="margin-top:0.25rem;">
-                        <strong>Exemple amb usuari no-admin (id=17):</strong>
-                    </p>
+                    <p style="font-weight:600;">Exemple amb usuari no-admin (id=17):</p>
                     <pre class="api-code" style="margin:0;"><code>-- Sense filtre:
 SELECT * FROM entries WHERE status = 'published'
 
@@ -208,10 +264,9 @@ SELECT * FROM entries WHERE status = 'published'
 SELECT * FROM entries
 WHERE status = 'published'
   AND user_id = 17        ← INJECTAT AUTOMÀTICAMENT</code></pre>
-                    <p class="api-text-muted" style="font-size:0.8rem;margin:0.25rem 0 0;">
-                        El filtre s'aplica a <strong>totes</strong> les entitats que tenen <code>user_id</code>:
-                        <code>Entry</code>, <code>Media</code>, <code>Visit</code>, etc. Cap consulta pot
-                        escapar-ne.
+                    <p style="">
+                        El filtre s'aplica a <strong>totes</strong> les entitats amb <code>user_id</code>.
+                        Cap consulta pot escapar-ne.
                     </p>
                 </div>
             </div>
@@ -219,11 +274,12 @@ WHERE status = 'published'
             <div class="api-flow-step">
                 <div class="api-flow-num">5</div>
                 <div class="api-flow-content">
-                    <h4>Controlador</h4>
+                    <h4>Controlador (valideses finals)</h4>
                     <p>
-                        El controlador rep la petició amb l'usuari autenticat. Pot fer comprovacions addicionals
-                        com <code>$this->getUser()</code> o validar permisos, però l'aïllament de dades ja
-                        està garantit per la capa anterior (UserIdFilter).
+                        El controlador rep la petició amb l'usuari autenticat i les dades ja filtrades.
+                        Pot fer comprovacions addicionals com <code>$this->getUser()</code> o validar
+                        permisos específics, però l'aïllament de dades ja està garantit per la capa
+                        anterior (UserIdFilter).
                     </p>
                 </div>
             </div>
@@ -246,47 +302,40 @@ WHERE status = 'published'
                     <td><span class="api-tag api-tag--grey">❌ No</span></td>
                     <td><span class="api-tag api-tag--grey">❌ No</span></td>
                     <td><span class="api-tag api-tag--grey">❌ No</span></td>
-                    <td>Obert. Retorna JWT si el domini està a <code>allowed_domains</code> d'algun usuari.</td>
+                    <td>Obert. Retorna JWT si el domini (i opcionalment IP) estan autoritzats per a algun usuari.</td>
                 </tr>
                 <tr>
                     <td><code>GET /api/public/{proj}/{type}</code></td>
-                    <td><span class="api-tag api-tag--yellow">✅ Sí</span></td>
-                    <td><span class="api-tag api-tag--yellow">✅ Sí</span></td>
-                    <td><span class="api-tag api-tag--yellow">✅ <em>si no admin</em></span></td>
-                    <td>Dades públiques d'un projecte + content type. L'admin ho veu tot; un usuari normal veu només les seves.</td>
+                    <td><span class="api-tag api-tag--grey">❌ No (GET públic)</span></td>
+                    <td><span class="api-tag api-tag--grey">❌ No</span></td>
+                    <td><span class="api-tag api-tag--grey">❌ No (bypass per path)</span></td>
+                    <td>GET públic. <code>security.yaml</code> permet GET/HEAD/OPTIONS a <code>/api/public/*</code> sense JWT. POST requereix JWT.</td>
                 </tr>
                 <tr>
                     <td><code>GET /api/{slug}</code></td>
                     <td><span class="api-tag api-tag--yellow">✅ Sí</span></td>
                     <td><span class="api-tag api-tag--yellow">✅ Sí</span></td>
-                    <td><span class="api-tag api-tag--yellow">✅ <em>si no admin</em></span></td>
+                    <td><span class="api-tag api-tag--yellow">✅ si no admin</span></td>
                     <td>Llistat d'entrades d'un content type. Scoped a l'usuari autenticat.</td>
                 </tr>
                 <tr>
                     <td><code>GET /api/{slug}/{id}</code></td>
                     <td><span class="api-tag api-tag--yellow">✅ Sí</span></td>
                     <td><span class="api-tag api-tag--yellow">✅ Sí</span></td>
-                    <td><span class="api-tag api-tag--yellow">✅ <em>si no admin</em></span></td>
+                    <td><span class="api-tag api-tag--yellow">✅ si no admin</span></td>
                     <td>Entrada individual. Scoped a l'usuari autenticat.</td>
-                </tr>
-                <tr>
-                    <td><code>GET /api/sections</code></td>
-                    <td><span class="api-tag api-tag--yellow">✅ Sí</span></td>
-                    <td><span class="api-tag api-tag--yellow">✅ Sí</span></td>
-                    <td><span class="api-tag api-tag--yellow">✅ <em>si no admin</em></span></td>
-                    <td>Content types de l'usuari. El controlador fa <code>$this->getUser()</code>.</td>
                 </tr>
                 <tr>
                     <td><code>POST /api/visit</code></td>
                     <td><span class="api-tag api-tag--yellow">✅ Sí</span></td>
                     <td><span class="api-tag api-tag--yellow">✅ Sí</span></td>
-                    <td><span class="api-tag api-tag--yellow">✅ <em>si no admin</em></span></td>
-                    <td>Registra visita. L'entitat <code>Visit</code> té <code>user_id</code>.</td>
+                    <td><span class="api-tag api-tag--grey">❌ No (bypass per path)</span></td>
+                    <td>Registra visita. L'entitat <code>Visit</code> té <code>user_id</code> però la ruta <code>/api/public/*</code> salta el filtre.</td>
                 </tr>
             </tbody>
         </table>
 
-        <div class="api-card-subtitle" style="margin-top:1.5rem;">Exemple: dos clients, dades separades</div>
+        <div class="api-card-subtitle" style="margin-top:1.5rem;">Exemple: dos clients, dades aïllades</div>
         <p class="api-text">
             Suposa dos usuaris al CMS:
         </p>
@@ -297,58 +346,70 @@ WHERE status = 'published'
                     <th>ID</th>
                     <th>Role</th>
                     <th>allowed_domains</th>
+                    <th>allowed_ips</th>
                 </tr>
             </thead>
             <tbody>
                 <tr>
-                    <td><code>admin@vora.es</code></td>
-                    <td>16</td>
-                    <td><span class="api-tag api-tag--green">ROLE_ADMIN</span></td>
-                    <td><code>["vorastudio.cat", "voracms.voradata.cat"]</code></td>
+                    <td><code>vora@vora.es</code></td>
+                    <td>3</td>
+                    <td><span class="api-tag api-tag--orange">ROLE_MOD</span></td>
+                    <td><code>["vorastudio.cat", "localhost"]</code></td>
+                    <td><code>["134.0.10.83"]</code></td>
                 </tr>
                 <tr>
                     <td><code>xavi@vora.es</code></td>
-                    <td>17</td>
+                    <td>5</td>
                     <td><span class="api-tag api-tag--blue">ROLE_USUARIO</span></td>
                     <td><code>["victoriataylor.com"]</code></td>
+                    <td><code>null</code></td>
                 </tr>
             </tbody>
         </table>
 
-        <div class="api-flow" style="margin-top:0.75rem;">
-            <div class="api-flow-step" style="margin-bottom:0;">
-                <div class="api-flow-content">
-                    <h4>Petició A: VoraStudio des de vorastudio.cat</h4>
-                    <ol style="margin:0;padding-left:1.25rem;">
-                        <li>Obté token via <code>GET /api/public/token</code> des de <code>vorastudio.cat</code> → JWT per a l'usuari 16 (admin).</li>
-                        <li>Crida <code>GET /api/public/web/vorastudio-projects</code> amb el JWT.</li>
-                        <li>Domain Lock: <code>vorastudio.cat</code> està a <code>allowed_domains</code> → ✅.</li>
-                        <li>UserFilterSubscriber: ROLE_ADMIN → <strong>bypass</strong> → veu <strong>totes</strong> les entrades.</li>
-                    </ol>
+        <div style="margin-top:1rem;">
+            <div class="api-flow" style="padding:0;">
+                <div class="api-flow-step" style="margin-bottom:0.75rem;">
+                    <div class="api-flow-num">A</div>
+                    <div class="api-flow-content">
+                        <h4>VoraStudio (SSR) des de vorastudio.cat</h4>
+                        <ol style="margin:0;padding-left:1.25rem;">
+                            <li>CmsClient fa <code>GET /api/public/token</code> des de IP <code>134.0.10.83</code> amb <code>Host: vorastudio.cat</code> → JWT per a l'usuari 3 (vora, ROLE_MOD).</li>
+                            <li>IP <code>134.0.10.83</code> està a <code>allowedIps</code> de l'usuari → ✅.</li>
+                            <li>Crida <code>GET /api/public/web/vorastudio-projects</code> amb el JWT.</li>
+                            <li>Domain Lock: <code>vorastudio.cat</code> està a <code>allowed_domains</code> del payload → ✅.</li>
+                            <li>UserFilterSubscriber: ruta <code>/api/public/*</code> → <strong>bypass</strong> (no cal ROLE_ADMIN).</li>
+                        </ol>
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <div class="api-flow" style="margin-top:0.5rem;">
-            <div class="api-flow-step" style="margin-bottom:0;">
-                <div class="api-flow-content">
-                    <h4>Petició B: Taylor des de victoriataylor.com</h4>
-                    <ol style="margin:0;padding-left:1.25rem;">
-                        <li>Obté token via <code>GET /api/public/token</code> des de <code>victoriataylor.com</code> → JWT per a l'usuari 17 (xavi).</li>
-                        <li>Crida <code>GET /api/public/victoria-taylor/noticia</code> amb el JWT.</li>
-                        <li>Domain Lock: <code>victoriataylor.com</code> està a <code>allowed_domains</code> → ✅.</li>
-                        <li>UserFilterSubscriber: ROLE_USUARIO → activa <code>user_id_filter</code> amb <code>user_id = 17</code> → <strong>només</strong> veu les entrades de l'usuari 17.</li>
-                    </ol>
+            <div class="api-flow" style="padding:0;margin-top:0.5rem;">
+                <div class="api-flow-step">
+                    <div class="api-flow-num">B</div>
+                    <div class="api-flow-content">
+                        <h4>Victoria Taylor des de victoriataylor.com</h4>
+                        <ol style="margin:0;padding-left:1.25rem;">
+                            <li>CmsClient fa <code>GET /api/public/token</code> des de IP dinàmica (sense <code>allowedIps</code>) amb <code>Host: victoriataylor.com</code> → JWT per a l'usuari 5 (xavi, ROLE_USUARIO).</li>
+                            <li>L'usuari no té <code>allowedIps</code> → es salta validació de IP. Només domini.</li>
+                            <li>Crida <code>GET /api/public/victoria-taylor/noticia</code> amb el JWT.</li>
+                            <li>Domain Lock: <code>victoriataylor.com</code> està a <code>allowed_domains</code> → ✅.</li>
+                            <li>UserFilterSubscriber: ruta <code>/api/public/*</code> → <strong>bypass</strong>.</li>
+                        </ol>
+                    </div>
                 </div>
             </div>
         </div>
 
         <div class="api-alert api-alert--warning" style="margin-top:0.75rem;">
             <i class="bi bi-shield-exclamation"></i>
-            <span><strong>Cas de prova:</strong> si el token de VoraStudio (usuari 16, admin) es fa servir des de <code>victoriataylor.com</code>, el <strong>Domain Lock</strong> el rebutja perquè <code>victoriataylor.com</code> no està a <code>allowed_domains</code> de l'usuari 16. Si el token es fa servir des del domini correcte però per una entitat que no pertany a l'usuari, el <strong>UserIdFilter</strong> (per a no-admin) ho bloca a nivell de base de dades.</span>
+            <span><strong>Token robat:</strong> Si el JWT de VoraStudio es fa servir des de <code>victoriataylor.com</code>,
+            el <strong>Domain Lock</strong> el rebutja perquè <code>victoriataylor.com</code> no està a
+            <code>allowed_domains</code> del payload. Si es fa servir des d'un servidor amb IP <code>5.5.5.5</code>,
+            només el rebutja si l'usuari té <code>allowedIps</code> configurades i <code>5.5.5.5</code> no hi és.</span>
         </div>
 
-        <div class="api-card-subtitle" style="margin-top:1.5rem;">Serveis i classes implicades</div>
+        <div class="api-card-subtitle" style="margin-top:1.5rem;">Classes implicades</div>
         <table class="api-params-table" style="margin-bottom:0;">
             <thead><tr><th>Classe</th><th>Capa</th><th>Funció</th></tr></thead>
             <tbody>
@@ -360,7 +421,7 @@ WHERE status = 'published'
                 <tr>
                     <td><code>JwtClientIdSubscriber</code></td>
                     <td>2 — Esdeveniments JWT</td>
-                    <td>Injeta <code>user_id</code> i <code>allowed_domains</code> al payload; dispara validació de domini</td>
+                    <td>Injeta <code>user_id</code>, <code>user_slug</code>, <code>allowed_domains</code> al payload; dispara validació de domini</td>
                 </tr>
                 <tr>
                     <td><code>JwtDomainValidator</code></td>
@@ -370,7 +431,7 @@ WHERE status = 'published'
                 <tr>
                     <td><code>UserFilterSubscriber</code></td>
                     <td>3 — Kernel event</td>
-                    <td>Activa el filtre Doctrine si l'usuari no és admin</td>
+                    <td>Decideix si activa el filtre Doctrine segons ruta i rol</td>
                 </tr>
                 <tr>
                     <td><code>UserIdFilter</code></td>
@@ -380,39 +441,67 @@ WHERE status = 'published'
                 <tr>
                     <td><code>TokenMasterService</code></td>
                     <td>— Master Token</td>
-                    <td>Busca usuari per domini i genera JWT sense login</td>
+                    <td>Busca usuari per domini i IP, genera JWT sense login</td>
                 </tr>
             </tbody>
         </table>
     </div>
 </div>
 
-{# ─── Com funciona ─── #}
+{# ─── Com funciona (login → JWT → API) ─── #}
 <div class="api-card" id="com-funciona" data-anim="cyber-card">
     <div class="api-card-header">
         <div class="api-card-icon api-card-icon--blue">
             <i class="bi bi-diagram-3-fill"></i>
         </div>
-        <h3 class="api-card-title">Com funciona</h3>
+        <h3 class="api-card-title">Com funciona (login → JWT → API)</h3>
     </div>
     <div class="api-card-body">
-        <p class="api-text">El CMS utilitza <strong>JWT (JSON Web Token)</strong> signat amb <strong>RSA (SHA-256)</strong> per autenticar totes les peticions a l'API. No hi ha cap altre mètode d'autenticació disponible.</p>
+        <p class="api-text">
+            El CMS utilitza <strong>JWT signat amb RSA (SHA-256)</strong> per autenticar totes les peticions
+            a l'API. No hi ha sessions — cada petició porta el token. El flux complet cobreix des que un
+            usuari fa login fins que el JWT es verifica en cada crida.
+        </p>
 
-        <div class="api-card-subtitle">Flux complet pas a pas</div>
+        <div class="api-card-subtitle">Fluc complet pas a pas</div>
         <div class="api-flow">
             <div class="api-flow-step">
                 <div class="api-flow-num">1</div>
                 <div class="api-flow-content">
                     <h4>Login → POST /api/auth/login</h4>
-                    <p>El frontend envia <strong>email + password</strong>. El firewall <code>api_login</code> de <code>security.yaml</code> captura les credencials amb <code>json_login</code>. Abans de generar el token, <code>UserChecker::checkPreAuth()</code> comprova que l'usuari estigui <strong>actiu</strong> — si està inactiu, llança <code>DisabledException</code> i rebutja el login. <code>login_throttling</code> limita a 10 intents.</p>
+                    <p>
+                        El frontend envia <strong>email + password</strong> en JSON. El firewall
+                        <code>api_login</code> captura les credencials amb <code>json_login</code>.
+                        Abans de generar el token, <code>UserChecker::checkPreAuth()</code> comprova
+                        que l'usuari estigui <strong>actiu</strong> — si està inactiu, llança
+                        <code>DisabledException</code> i rebutja el login.
+                    </p>
+                    <p style="">
+                        <code>login_throttling</code> limita a 10 intents fallits per minut
+                        (combinació IP + email). Passat el límit, el login es bloca temporalment.
+                    </p>
                 </div>
             </div>
             <div class="api-flow-arrow"><i class="bi bi-chevron-down"></i></div>
             <div class="api-flow-step">
                 <div class="api-flow-num">2</div>
                 <div class="api-flow-content">
-                    <h4>Emissió del JWT (LexikJWTAuthenticationBundle)</h4>
-                    <p>El bundle signa el JWT amb <strong>RSA (SHA-256)</strong> i dispara l'esdeveniment <code>JWT_CREATED</code>. El subscriber <code>JwtClientIdSubscriber::onJwtCreated()</code> injecta al payload: <code>user_id</code>, <code>user_slug</code> i <code>allowed_domains</code> (extrets de l'entitat <code>User</code>). El JWT es retorna al client amb <code>success_handler</code> de Lexik.</p>
+                    <h4>Emissió del JWT</h4>
+                    <p>
+                        LexikJWTAuthenticationBundle signa el JWT amb <strong>RSA (SHA-256)</strong> i
+                        dispara l'esdeveniment <code>JWT_CREATED</code>.
+                        <code>JwtClientIdSubscriber::onJwtCreated()</code> injecta al payload:
+                    </p>
+                    <ul style="margin:0;padding-left:1.25rem;">
+                        <li><code>user_id</code> — ID intern de l'usuari (per al filtre Doctrine)</li>
+                        <li><code>user_slug</code> — slug únic de l'usuari</li>
+                        <li><code>allowed_domains</code> — llista de dominis permesos (extreta de l'entitat <code>User</code>)</li>
+                    </ul>
+                    <p style="margin-top:0.25rem;">
+                        <strong>No s'inclouen els rols</strong> al payload. Els rols es llegeixen
+                        de base de dades a cada petició: els canvis de permisos són immediats,
+                        sense esperar que el token caduqui.
+                    </p>
                 </div>
             </div>
             <div class="api-flow-arrow"><i class="bi bi-chevron-down"></i></div>
@@ -420,15 +509,38 @@ WHERE status = 'published'
                 <div class="api-flow-num">3</div>
                 <div class="api-flow-content">
                     <h4>Cada petició → verificar signatura RSA</h4>
-                    <p>El frontend envia <code>Authorization: Bearer &lt;JWT&gt;</code>. El firewall <code>api</code> (stateless) captura la petició. Lexik decodifica el token: si la <strong>signatura RSA</strong> no coincideix o el token ha <strong>expirat (exp)</strong>, retorna 401 immediatament. <strong>Zero consultes a base de dades</strong> — tota la informació necessària és al JWT.</p>
+                    <p>
+                        El frontend envia <code>Authorization: Bearer &lt;JWT&gt;</code>.
+                        El firewall <code>api</code> (stateless) captura la petició.
+                        Lexik decodifica el token: si la signatura RSA no coincideix o el token
+                        ha expirat (<code>exp</code>), retorna <strong>401</strong> immediatament.
+                    </p>
+                    <p style="">
+                        <strong>Zero consultes a base de dades</strong> en aquesta capa — tota la
+                        informació necessària és al JWT signat.
+                    </p>
                 </div>
             </div>
             <div class="api-flow-arrow"><i class="bi bi-chevron-down"></i></div>
             <div class="api-flow-step">
                 <div class="api-flow-num">4</div>
                 <div class="api-flow-content">
-                    <h4>Esdeveniment JWT_DECODED → JwtClientIdSubscriber</h4>
-                    <p>Lexik dispara <code>JWT_DECODED</code>. <code>JwtClientIdSubscriber::onJwtDecoded()</code> delega la validació de domini a <code>JwtDomainValidator::validateFromPayload()</code>. Aquest servei: (1) extreu <code>allowed_domains</code> del payload; (2) afegeix <code>localhost</code> si no hi és; (3) obté el <code>Host</code> real de la petició via <code>RequestStack</code>; (4) el normalitza internament (treu protocol, www, trailing slash, path); (5) compara contra cada domini permès. Si no coincideix cap → <code>markAsInvalid()</code> → 401.</p>
+                    <h4>Domain Lock (JWT_DECODED)</h4>
+                    <p>
+                        Lexik dispara <code>JWT_DECODED</code>.
+                        <code>JwtClientIdSubscriber::onJwtDecoded()</code> delega a
+                        <code>JwtDomainValidator::validateFromPayload()</code>:
+                    </p>
+                    <ol style="margin:0;padding-left:1.25rem;">
+                        <li>Extreu <code>allowed_domains</code> del payload</li>
+                        <li>Hi afegeix <code>localhost</code> automàticament (dev)</li>
+                        <li>Obté el <strong>Host</strong> real de la petició HTTP</li>
+                        <li>El normalitza: treu protocol, www, trailing slash, path</li>
+                        <li>Compara contra cada domini permès</li>
+                    </ol>
+                    <p style="">
+                        Si cap coincideix → el token es marca invàlid → <strong>401</strong>.
+                    </p>
                 </div>
             </div>
             <div class="api-flow-arrow"><i class="bi bi-chevron-down"></i></div>
@@ -436,36 +548,43 @@ WHERE status = 'published'
                 <div class="api-flow-num">5</div>
                 <div class="api-flow-content">
                     <h4>Resposta del controlador</h4>
-                    <p>La petició arriba al <strong>controlador</strong> corresponent (<code>EntryController</code>, <code>AuthController</code>, <code>PublicApiController</code>...). El controlador processa la petició, respecta l'aïllament multi-tenant per usuari, i retorna les dades en JSON.</p>
+                    <p>
+                        La petició arriba al controlador corresponent (<code>EntryController</code>,
+                        <code>PublicController</code>...). El controlador rep l'usuari autenticat
+                        i les dades ja filtrades per UserIdFilter, i retorna la resposta JSON.
+                    </p>
                 </div>
             </div>
         </div>
 
-        <div class="api-card-subtitle" style="margin-top:1.5rem;">Serveis i classes implicades</div>
+        <div class="api-card-subtitle" style="margin-top:1.5rem;">Classes implicades</div>
         <table class="api-params-table" style="margin-bottom:0;">
             <thead><tr><th>Classe</th><th>Funció</th></tr></thead>
             <tbody>
                 <tr><td><code>UserChecker</code></td><td>Filtre de login: bloca usuaris inactius</td></tr>
                 <tr><td><code>JwtClientIdSubscriber</code></td><td>Orquestrador d'esdeveniments JWT: injecta dades al payload i dispara validació</td></tr>
-                <tr><td><code>JwtDomainValidator</code></td><td>Validador de domini: normalitza Host de la petició i el compara contra <code>allowed_domains</code></td></tr>
-                <tr><td><code>AuthController</code></td><td>Endpoint <code>/api/auth/me</code>: retorna dades de l'usuari autenticat + el token actiu</td></tr>
-                <tr><td><code>UserController</code></td><td>CRUD d'usuaris al panell admin: gestiona <code>allowed_domains</code></td></tr>
+                <tr><td><code>JwtDomainValidator</code></td><td>Validador de domini: normalitza Host i el compara contra <code>allowed_domains</code></td></tr>
+                <tr><td><code>AuthController</code></td><td>Endpoint <code>/api/auth/me</code>: retorna dades de l'usuari autenticat</td></tr>
+                <tr><td><code>UserController</code></td><td>CRUD d'usuaris: gestiona <code>allowed_domains</code> i <code>allowed_ips</code></td></tr>
                 <tr><td>LexikJWTAuthenticationBundle</td><td>Bundle Symfony: signatura RSA, generació i validació de JWT</td></tr>
             </tbody>
         </table>
     </div>
 </div>
 
-{# ─── Obtenir JWT ─── #}
+{# ─── Obtenir JWT (login) ─── #}
 <div class="api-card" id="obtenir-jwt" data-anim="cyber-card">
     <div class="api-card-header">
         <div class="api-card-icon api-card-icon--orange">
             <i class="bi bi-box-arrow-in-right"></i>
         </div>
-        <h3 class="api-card-title">Obtenir JWT</h3>
+        <h3 class="api-card-title">Obtenir JWT (login)</h3>
     </div>
     <div class="api-card-body">
-        <p class="api-text">Fes una petició <code>POST</code> a l'endpoint de login amb les credencials de l'usuari. Les credencials són les mateixes que el panell admin.</p>
+        <p class="api-text">
+            Fes una petició <code>POST</code> a l'endpoint de login amb les credencials de l'usuari.
+            Les credencials són les mateixes que el panell admin.
+        </p>
 
         <div class="api-card-subtitle">Request</div>
         <div class="api-code-block">
@@ -488,7 +607,15 @@ Content-Type: application/json
 
         <div class="api-alert api-alert--info" style="margin-top:0.75rem;">
             <i class="bi bi-clock-fill"></i>
-            <span>El JWT caduca al cap de <strong>7 dies</strong>. No hi ha <code>refresh_token</code> — quan caduqui, hauràs de fer login de nou per obtenir-ne un de fresc.</span>
+            <span>El JWT caduca al cap de <strong>1 hora</strong> (<code>token_ttl: 3600</code>).
+            No hi ha <code>refresh_token</code> — quan caduqui, hauràs de fer login de nou per
+            obtenir-ne un de fresc.</span>
+        </div>
+
+        <div class="api-alert api-alert--warning" style="margin-top:0.5rem;">
+            <i class="bi bi-shield-exclamation"></i>
+            <span><strong>Límit de login:</strong> 10 intents fallits per minut (IP + email).
+            Si superes el límit, hauràs d'esperar abans de tornar-ho a intentar.</span>
         </div>
     </div>
 </div>
@@ -502,34 +629,43 @@ Content-Type: application/json
         <h3 class="api-card-title">Usar el JWT</h3>
     </div>
     <div class="api-card-body">
-        <p class="api-text">Envia l'header <code>Authorization: Bearer</code> amb el JWT a cada petició protegida. Totes les rutes <code>/api/*</code> (excepte <code>/api/auth/login</code>) requereixen autenticació.</p>
+        <p class="api-text">
+            Envia l'header <code>Authorization: Bearer</code> amb el JWT a cada petició protegida.
+            Totes les rutes <code>/api/*</code> (excepte <code>GET /api/public/*</code> i
+            <code>POST /api/auth/login</code>) requereixen autenticació.
+        </p>
 
+        <div class="api-card-subtitle">Header HTTP</div>
         <div class="api-code-block">
             <div class="api-code-header">
-                <span>Header HTTP</span>
-                <button class="api-copy-btn" data-copy="Authorization: Bearer eyJ...">
-                    <i class="bi bi-clipboard"></i>
-                </button>
+                <span>Authorization: Bearer &lt;JWT&gt;</span>
             </div>
-            <pre class="api-code"><code>Authorization: Bearer <span class="api-code--highlight">&lt;JWT&gt;</span></code></pre>
+            <pre class="api-code"><code>Authorization: Bearer eyJhbGciOiJSUzI1NiIs...</code></pre>
         </div>
 
-        <details class="api-details">
-            <summary class="api-details-summary"><i class="bi bi-code-slash"></i> Exemple: curl</summary>
-            <div class="api-code-block">
-                <pre class="api-code"><code>curl -H "Authorization: Bearer eyJh..." \
+        <div class="api-card-subtitle">Exemple: curl</div>
+        <div class="api-code-block">
+            <pre class="api-code"><code># Obtenir JWT
+TOKEN=$(curl -s -X POST https://cms.domini.com/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"usuari@domini.com","password":"..."}' \
+  | jq -r '.token')
+
+# Usar-lo en una crida a l'API
+curl -H "Authorization: Bearer $TOKEN" \
   https://cms.domini.com/api/noticies</code></pre>
-            </div>
-        </details>
+        </div>
 
         <div class="api-alert api-alert--info" style="margin-top:0.75rem;">
             <i class="bi bi-shield-fill-check"></i>
-            <span>El JWT es valida <strong>al payload</strong>, no al header <code>Origin</code>. La validació de domini comprova el <strong>Host de cada petició</strong> contra <code>allowed_domains</code> (que viatgen dins el JWT signat). Si el token es roba des d'un domini no autoritzat, el rebota amb 401.</span>
+            <span>La validació de domini comprova el <strong>Host de cada petició</strong> contra
+            <code>allowed_domains</code> (que viatgen dins el JWT signat). Si el token es roba
+            des d'un domini no autoritzat, el rebota amb 401.</span>
         </div>
     </div>
 </div>
 
-{# ─── Validació de domini ─── #}
+{# ─── Validació de domini (JwtDomainValidator) ─── #}
 <div class="api-card" data-anim="cyber-card">
     <div class="api-card-header">
         <div class="api-card-icon api-card-icon--orange">
@@ -538,20 +674,29 @@ Content-Type: application/json
         <h3 class="api-card-title">Validació de domini (JwtDomainValidator)</h3>
     </div>
     <div class="api-card-body">
-        <p class="api-text">Cada petició JWT a l'API passa pel servei <code>JwtDomainValidator</code>, cridat des de <code>JwtClientIdSubscriber</code> a l'esdeveniment <code>JWT_DECODED</code>. Valida que el <strong>Host real d'aquesta petició</strong> estigui dins els <code>allowed_domains</code> de l'usuari. La normalització del domini (treure protocol, www, path, trailing slash) la fa internament el mateix servei — no cal cap dependència externa.</p>
+        <p class="api-text">
+            <code>JwtDomainValidator</code> és el servei que garanteix que un JWT només sigui vàlid
+            des del domini per al qual va ser emès. Es crida des de <code>JwtClientIdSubscriber::onJwtDecoded()</code>
+            a l'esdeveniment <code>JWT_DECODED</code> — cada petició, cada vegada.
+        </p>
 
         <div class="api-alert api-alert--success" style="margin-top:0.75rem;">
             <i class="bi bi-info-circle-fill"></i>
-            <span>La validació de domini <strong>només</strong> s'aplica a les peticions que porten JWT (landing pages, eines externes). El <strong>login</strong> no la valida i el <strong>panell admin</strong> no l'usa (sessió PHP, no JWT).</span>
+            <span>La validació de domini <strong>només</strong> s'aplica a les peticions que porten JWT
+            (landing pages, eines externes). El login (<code>/api/auth/login</code>) no la valida i
+            el panell admin no l'usa (sessió PHP, no JWT).</span>
         </div>
 
-        <div class="api-card-subtitle">Com funciona (pas a pas dins JwtDomainValidator)</div>
+        <div class="api-card-subtitle">Algorisme complet (pas a pas)</div>
         <div class="api-flow">
             <div class="api-flow-step">
                 <div class="api-flow-num">1</div>
                 <div class="api-flow-content">
                     <h4>Comprovar si cal validar</h4>
-                    <p>Si el payload NO conté <code>user_id</code> (token d'usuari anònim), es permet el pas sense validació.</p>
+                    <p>
+                        Si el payload NO conté <code>user_id</code> (token d'usuari anònim),
+                        es permet el pas sense validació.
+                    </p>
                 </div>
             </div>
             <div class="api-flow-arrow"><i class="bi bi-chevron-down"></i></div>
@@ -559,7 +704,12 @@ Content-Type: application/json
                 <div class="api-flow-num">2</div>
                 <div class="api-flow-content">
                     <h4>Extreure allowed_domains del payload</h4>
-                    <p>Llegeix <code>allowed_domains</code> del payload del JWT. Aquest array va ser injectat per <code>JwtClientIdSubscriber::onJwtCreated()</code> al moment del login, extret de l'entitat <code>User</code>. Si l'usuari no en té → array buit.</p>
+                    <p>
+                        Llegeix <code>allowed_domains</code> del payload del JWT. Aquest array va ser
+                        injectat per <code>JwtClientIdSubscriber::onJwtCreated()</code> al moment de
+                        generar el token, extret de l'entitat <code>User</code>. Si l'usuari no en té
+                        → array buit.
+                    </p>
                 </div>
             </div>
             <div class="api-flow-arrow"><i class="bi bi-chevron-down"></i></div>
@@ -567,7 +717,11 @@ Content-Type: application/json
                 <div class="api-flow-num">3</div>
                 <div class="api-flow-content">
                     <h4>localhost sempre permès</h4>
-                    <p>El servei afegeix <strong>sempre</strong> <code>localhost</code> a la llista, encara que l'usuari no el tingui configurat. Això permet treballar en entorns de desenvolupament sense haver de configurar res.</p>
+                    <p>
+                        El servei afegeix <strong>sempre</strong> <code>localhost</code> a la llista,
+                        encara que l'usuari no el tingui configurat. Això permet treballar en entorns
+                        de desenvolupament sense haver de configurar res.
+                    </p>
                 </div>
             </div>
             <div class="api-flow-arrow"><i class="bi bi-chevron-down"></i></div>
@@ -575,7 +729,11 @@ Content-Type: application/json
                 <div class="api-flow-num">4</div>
                 <div class="api-flow-content">
                     <h4>Capturar el Host real de la petició</h4>
-                    <p>Obté el <strong>Host header</strong> de la petició HTTP actual via <code>RequestStack::getCurrentRequest()</code>. Aquest és el domini des d'on s'està fent la crida <strong>ara</strong>, no el que es va guardar al login.</p>
+                    <p>
+                        Obté el <strong>Host header</strong> de la petició HTTP actual via
+                        <code>RequestStack::getCurrentRequest()</code>. Aquest és el domini des d'on
+                        s'està fent la crida ara, no el que es va guardar al login.
+                    </p>
                 </div>
             </div>
             <div class="api-flow-arrow"><i class="bi bi-chevron-down"></i></div>
@@ -583,7 +741,18 @@ Content-Type: application/json
                 <div class="api-flow-num">5</div>
                 <div class="api-flow-content">
                     <h4>Normalitzar internament</h4>
-                    <p>El mètode privat <code>normalize()</code> neteja el domini: treu <code>https://</code>, treu <code>www.</code>, extrau només el host amb <code>parse_url()</code> (per si algú passa una URL completa), i elimina trailing slash. Així <code>"https://www.micliente.com/"</code> → <code>"micliente.com"</code>.</p>
+                    <p>
+                        El mètode <code>normalize()</code> neteja el domini:
+                    </p>
+                    <ul style="margin:0;padding-left:1.25rem;">
+                        <li>Treu <code>https://</code> o <code>http://</code></li>
+                        <li>Treu <code>www.</code></li>
+                        <li>Extreu només el host amb <code>parse_url()</code> (per si algú passa una URL completa)</li>
+                        <li>Elimina trailing slash i path</li>
+                    </ul>
+                    <p style="margin-top:0.25rem;">
+                        Exemple: <code>"https://www.micliente.com/pagina"</code> → <code>"micliente.com"</code>
+                    </p>
                 </div>
             </div>
             <div class="api-flow-arrow"><i class="bi bi-chevron-down"></i></div>
@@ -591,12 +760,17 @@ Content-Type: application/json
                 <div class="api-flow-num">6</div>
                 <div class="api-flow-content">
                     <h4>Comparar</h4>
-                    <p>Itera sobre <code>allowed_domains</code> i compara el Host normalitzat contra cada domini permès. Si coincideix exactament o és un <strong>subdomini</strong> (ex: <code>app.micliente.com</code> ⊆ <code>micliente.com</code>) → OK. Si cap coincideix → <code>return false</code> → <code>onJwtDecoded()</code> crida <code>markAsInvalid()</code> → el token es rebutja amb 401.</p>
+                    <p>
+                        Itera sobre <code>allowed_domains</code> i compara el Host normalitzat contra
+                        cada domini permès. Si coincideix exactament o és un <strong>subdomini</strong>
+                        (ex: <code>app.micliente.com</code> ⊆ <code>micliente.com</code>) → OK.
+                        Si cap coincideix → el token es marca invàlid → <strong>401</strong>.
+                    </p>
                 </div>
             </div>
         </div>
 
-        <div class="api-card-subtitle">Quan s'aplica?</div>
+        <div class="api-card-subtitle" style="margin-top:1.5rem;">Quan s'aplica?</div>
         <table class="api-params-table" style="margin-bottom:0;">
             <thead><tr><th>Petició</th><th>Auth</th><th>Domain validation</th></tr></thead>
             <tbody>
@@ -608,7 +782,7 @@ Content-Type: application/json
             </tbody>
         </table>
 
-        <div class="api-card-subtitle" style="margin-top:1.5rem;">Exemple pràctic</div>
+        <div class="api-card-subtitle" style="margin-top:1.5rem;">Exemples pràctics</div>
         <table class="api-params-table" style="margin-bottom:0;">
             <thead><tr><th>Host de la petició</th><th>allowed_domains</th><th>Resultat</th></tr></thead>
             <tbody>
@@ -622,126 +796,214 @@ Content-Type: application/json
     </div>
 </div>
 
-{# ─── Exemple: Vanilla JS (landing page) ─── #}
-<div class="api-card" data-anim="cyber-card">
+{# ─── SSR amb CmsClient ─── #}
+<div class="api-card" id="ssr" data-anim="cyber-card">
     <div class="api-card-header">
         <div class="api-card-icon api-card-icon--green">
-            <i class="bi bi-globe2"></i>
+            <i class="bi bi-server"></i>
         </div>
-        <h3 class="api-card-title">Exemple: Landing page (Vanilla JS)</h3>
+        <h3 class="api-card-title">SSR amb PHP (CmsClient)</h3>
     </div>
     <div class="api-card-body">
-        <p class="api-text">Per a les landing pages amb HTML + CSS + JS vanilla, fem servir <strong>fetch() nadiu</strong>. Res d'Axios ni llibreries externes — el navegador ja ho porta. El patró és un <strong>interceptor</strong> que afegeix el token a cada petició automàticament.</p>
+        <p class="api-text">
+            Per a les landing pages amb HTML + CSS + JS vanilla, les crides al CMS es fan
+            <strong>des del servidor</strong> (SSR). El JWT es gestiona íntegrament al PHP.
+            El navegador rep HTML pur — sense tokens, sense <code>sessionStorage</code>,
+            sense <code>api.js</code>.
+        </p>
 
-        <div class="api-alert api-alert--info" style="margin-top:0.75rem;">
-            <i class="bi bi-info-circle-fill"></i>
-            <span>El token es guarda a <code>sessionStorage</code> (no a <code>localStorage</code>). Així si l'usuari tanca la pestanya, el token es perd — més segur.</span>
+        <div class="api-alert api-alert--success" style="margin-top:0.75rem;">
+            <i class="bi bi-shield-fill-check"></i>
+            <span>El JWT <strong>no surt del servidor</strong>. Ni en HTML, ni en JS, ni en
+            localStorage. Això elimina el risc d'exposició a XSS i robatori de tokens.</span>
         </div>
 
-        <div class="api-card-subtitle">api.js — Client API complet</div>
+        <div class="api-card-subtitle">CmsClient.php — Client SSR</div>
         <div class="api-code-block">
-            <div class="api-code-header"><span>js/api.js</span></div>
-            <pre class="api-code"><code>const API = {
-  base: 'https://cms.domini.com',
-  token: null,
-
-  /* ─── Login ─── */
-  async login(email, password) {
-    const res = await fetch(`${this.base}/api/auth/login`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password }),
-    });
-    if (!res.ok) throw new Error('Login fallit');
-    const { token } = await res.json();
-    this.token = token;
-    sessionStorage.setItem('voracms_token', token);
-    return token;
-  },
-
-  /* ─── Interceptor: afegeix token automàticament ─── */
-  async request(path, options = {}) {
-    /* Recuperar token de sessionStorage si no el tenim */
-    if (!this.token) {
-      this.token = sessionStorage.getItem('voracms_token');
+            <div class="api-code-header"><span>includes/CmsClient.php (resum)</span></div>
+            <pre class="api-code"><code>class CmsClient
+{
+    public function __construct(
+        private string $cmsUrl,
+        private string $origin,
+        private int $cacheTtl = 300,
+        ?string $cacheDir = null,
+    ) {
+        /* Cache únic per instal·lació: evita col·lisions multi-inquilí */
+        $this->cacheFile = ($cacheDir ?? sys_get_temp_dir())
+            . '/vorastudio_jwt_' . md5(__DIR__);
     }
 
-    const headers = options.headers || {};
-    if (this.token) {
-      headers['Authorization'] = `Bearer ${this.token}`;
+    /* ─── Obté token (cache 5min o crida API) ─── */
+    public function getToken(): ?string
+    {
+        $token = $this->getCachedToken();
+        if ($token !== null) return $token;
+        return $this->fetchTokenFromApi();
     }
 
-    const res = await fetch(`${this.base}${path}`, {
-      ...options,
-      headers,
-    });
+    /* ─── GET amb retry automàtic en 401/403 ─── */
+    public function fetch(string $path): ?array
+    {
+        $result = $this->curlGet($url, $this->getToken());
 
-    /* Si el token ha caducat → 401 → fer login de nou */
-    if (res.status === 401) {
-      sessionStorage.removeItem('voracms_token');
-      this.token = null;
-      throw new Error('Token expired — cal fer login de nou');
+        if (in_array($result['http_code'], [401, 403], true)) {
+            $this->clearCache();
+            $result = $this->curlGet($url, $this->getToken());  // re-fetch
+        }
+
+        return json_decode($result['body'] ?? '', true);
     }
 
-    return res.json();
-  },
+    /* ─── POST amb retry automàtic en 401/403 ─── */
+    public function post(string $path, array $body): bool
+    {
+        $result = $this->curlPost($url, $body, $this->getToken());
 
-  /* ─── Mètodes curts ─── */
-  get(path)       { return this.request(path); },
-  post(path, body){ return this.request(path, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(body),
-  }); },
-};
+        if (in_array($result['http_code'], [401, 403], true)) {
+            $this->clearCache();
+            $result = $this->curlPost($url, $body, $this->getToken());
+        }
 
-/* ─── Inicialització al carregar la pàgina ─── */
-async function init() {
-  /* Carregar token guardat (si existeix) */
-  API.token = sessionStorage.getItem('voracms_token');
+        return $result['http_code'] === 200;
+    }
 
-  if (!API.token) {
-    /* Fer login amb credencials */
-    await API.login('usuari@domini.com', 'password');
-  }
+    /* ─── Cache local a sys_get_temp_dir() ─── */
+    private function getCachedToken(): ?string
+    {
+        if (!file_exists($this->cacheFile)) return null;
+        if ((time() - filemtime($this->cacheFile)) > $this->cacheTtl) {
+            @unlink($this->cacheFile);
+            return null;
+        }
+        return trim(file_get_contents($this->cacheFile));
+    }
 
-  /* Cridar a l'API pública amb JWT automàtic */
-  const data = await API.get('/api/public/web/vorastudio-projects');
-  console.log('Dades:', data);
-}
-init();</code></pre>
+    /* ─── Fetch token des de /api/public/token ─── */
+    private function fetchTokenFromApi(): ?string
+    {
+        $ch = curl_init($this->cmsUrl . '/api/public/token');
+        curl_setopt_array($ch, [
+            CURLOPT_HTTPHEADER => ['Origin: ' . $this->origin],
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_TIMEOUT => 10,
+        ]);
+        $body = curl_exec($ch);
+        $data = json_decode($body, true);
+        $token = $data['token'] ?? null;
+
+        if ($token) $this->saveTokenToCache($token);
+        return $token;
+    }
+}</code></pre>
         </div>
 
-        <div class="api-card-subtitle">Fluxe real</div>
+        <div class="api-card-subtitle">Flux SSR real</div>
         <div class="api-flow">
             <div class="api-flow-step">
                 <div class="api-flow-num">1</div>
                 <div class="api-flow-content">
-                    <h4>Carrega la pàgina</h4>
-                    <p>Comprova si hi ha token a <code>sessionStorage</code>. Si no, fa login amb les credencials.</p>
+                    <h4>Petició al PHP</h4>
+                    <p>
+                        El visitant accedeix a <code>index.php</code> des del navegador.
+                        El servidor PHP rep la petició.
+                    </p>
                 </div>
             </div>
             <div class="api-flow-arrow"><i class="bi bi-chevron-down"></i></div>
             <div class="api-flow-step">
                 <div class="api-flow-num">2</div>
                 <div class="api-flow-content">
-                    <h4>API.get('/api/public/...')</h4>
-                    <p>L'interceptor afegeix <code>Authorization: Bearer</code> automàticament. No cal pensar-hi a cada crida.</p>
+                    <h4>getToken() → cache o /api/public/token</h4>
+                    <p>
+                        Si el fitxer de cache té menys de 5 minuts, el reutilitza. Si no, fa
+                        cURL a <code>/api/public/token</code> amb <code>Origin: vorastudio.cat</code>
+                        i guarda el JWT al cache (a <code>sys_get_temp_dir()</code>, fora del web root).
+                    </p>
                 </div>
             </div>
             <div class="api-flow-arrow"><i class="bi bi-chevron-down"></i></div>
             <div class="api-flow-step">
                 <div class="api-flow-num">3</div>
                 <div class="api-flow-content">
-                    <h4>Resposta</h4>
-                    <p>Si tot va bé → dades JSON. Si el token ha expirat (401) → esborra token i obliga a login de nou.</p>
+                    <h4>Crida a l'API del CMS</h4>
+                    <p>
+                        El PHP fa GET o POST a l'API del CMS amb
+                        <code>Authorization: Bearer &lt;JWT&gt;</code>. Si el CMS retorna 401/403
+                        (token caducat), esborra el cache, re-fetch, i reintenta automàticament.
+                    </p>
                 </div>
             </div>
+            <div class="api-flow-arrow"><i class="bi bi-chevron-down"></i></div>
+            <div class="api-flow-step">
+                <div class="api-flow-num">4</div>
+                <div class="api-flow-content">
+                    <h4>Renderitzat HTML</h4>
+                    <p>
+                        El PHP combina les dades del CMS amb el template HTML i serveix la pàgina
+                        completa al navegador. El JWT <strong>no apareix enlloc</strong> del HTML:
+                        ni en scripts, ni en meta, ni en atributs data.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="api-card-subtitle" style="margin-top:1.5rem;">Exemple d'integració</div>
+        <div class="api-code-block">
+            <div class="api-code-header"><span>projectes/projecte.php</span></div>
+            <pre class="api-code"><code>require_once __DIR__ . '/includes/CmsClient.php';
+
+$cms = new CmsClient(
+    cmsUrl: 'https://voracms.voradata.cat',
+    origin: 'https://vorastudio.cat',
+);
+
+/* SSR: obtenir dades del CMS */
+$projectData = $cms->fetch(
+    '/api/public/web/vorastudio-projects?locale=ca'
+);
+
+/* SSR: registrar visita */
+$cms->post('/api/visit', [
+    'entry_id'   => $projectId,
+    'path'       => '/projectes/' . $slug,
+    'client_ip'  => $_SERVER['REMOTE_ADDR'],
+    'user_agent' => $_SERVER['HTTP_USER_AGENT'],
+]);
+?&gt;
+&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+    &lt;title&gt;&lt;?= htmlspecialchars($projectData['data']['title'] ?? '') ?&gt;&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;!-- El HTML es renderitza amb les dades del CMS --&gt;
+    &lt;h1&gt;&lt;?= htmlspecialchars($projectData['data']['title'] ?? '') ?&gt;&lt;/h1&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+        </div>
+
+        <div class="api-alert api-alert--warning" style="margin-top:0.75rem;">
+            <i class="bi bi-exclamation-triangle-fill"></i>
+            <span><strong>Per què cURL i no file_get_contents?</strong> L'entorn CDMON té
+            <code>proc_open()</code> deshabilitat, necessari per al wrapper HTTP de PHP.
+            cURL funciona sense <code>proc_open</code>. Sempre usa <code>curl_*</code>.</span>
+        </div>
+
+        <div style="background:#f5f5f5;border:1px solid #ddd;border-radius:8px;padding:1rem;margin-top:0.75rem;">
+            <p style="margin:0;font-weight:700;">Resum de seguretat del SSR</p>
+            <ul style="margin:0.5rem 0 0 0;padding-left:1.25rem;">
+                <li>El JWT es cacheja a <code>sys_get_temp_dir()</code> — <strong>fora del web root</strong></li>
+                <li>El nom del fitxer inclou <code>md5(__DIR__)</code> — únic per instal·lació, sense col·lisions</li>
+                <li>El JWT <strong>no s'envia mai al navegador</strong> — ni en HTML, ni en JS, ni en cookies</li>
+                <li>Retry automàtic en 401/403: si el token caduca, es renova sense intervenció</li>
+                <li>Cache TTL de 5 minuts (configurable) — redueix crides al CMS</li>
+            </ul>
         </div>
     </div>
 </div>
 
-{# ─── Payload ─── #}
+{# ─── Payload del JWT ─── #}
 <div class="api-card" data-anim="cyber-card">
     <div class="api-card-header">
         <div class="api-card-icon api-card-icon--blue">
@@ -750,12 +1012,16 @@ init();</code></pre>
         <h3 class="api-card-title">Payload del JWT</h3>
     </div>
     <div class="api-card-body">
-        <p class="api-text">El JWT conté informació addicional signada. El frontend pot llegir el payload (no cal desxifrar-lo, només verificar la signatura) per contextualitzar l'usuari.</p>
+        <p class="api-text">
+            El JWT conté informació addicional signada. El frontend pot llegir el payload
+            (no cal desxifrar-lo, només verificar la signatura) per contextualitzar l'usuari.
+        </p>
 
+        <div class="api-card-subtitle">Exemple de payload</div>
         <div class="api-code-block">
             <pre class="api-code"><code>{
   "iat": 1752000000,
-  "exp": 1752604800,
+  "exp": 1752003600,
   "username": "usuari@domini.com",
   "user_id": 42,
   "user_slug": "nom-usuari",
@@ -768,32 +1034,73 @@ init();</code></pre>
             <thead><tr><th>Camp</th><th>Tipus</th><th>Descripció</th></tr></thead>
             <tbody>
                 <tr><td><code>iat</code></td><td>timestamp</td><td>Data i hora d'emissió del token (Issued At)</td></tr>
-                <tr><td><code>exp</code></td><td>timestamp</td><td>Data i hora de caducitat (Expiration). Per defecte: 7 dies després de <code>iat</code></td></tr>
+                <tr>
+                    <td><code>exp</code></td>
+                    <td>timestamp</td>
+                    <td>
+                        Data i hora de caducitat (Expiration). Per defecte: <strong>1 hora</strong> després de
+                        <code>iat</code> (<code>token_ttl: 3600</code>)
+                    </td>
+                </tr>
                 <tr><td><code>username</code></td><td>string</td><td>Email de l'usuari autenticat</td></tr>
-                <tr><td><code>user_id</code></td><td>integer</td><td>ID intern de l'usuari al CMS</td></tr>
-                <tr><td><code>user_slug</code></td><td>string</td><td>Slug únic de l'usuari. Es fa servir per aïllar les dades a l'API</td></tr>
-                <tr><td><code>allowed_domains</code></td><td>array</td><td>Dominis permesos per a l'API d'aquest usuari (configurat al panell admin). El <strong>Host de cada petició</strong> es compara contra aquesta llista</td></tr>
+                <tr>
+                    <td><code>user_id</code></td>
+                    <td>integer</td>
+                    <td>
+                        ID intern de l'usuari al CMS. Es fa servir al <strong>UserIdFilter</strong> per
+                        injectar <code>WHERE user_id = :id</code> a totes les queries
+                    </td>
+                </tr>
+                <tr>
+                    <td><code>user_slug</code></td>
+                    <td>string</td>
+                    <td>
+                        Slug únic de l'usuari. Es fa servir per aïllar les dades a l'API i com a
+                        identificador en rutes
+                    </td>
+                </tr>
+                <tr>
+                    <td><code>allowed_domains</code></td>
+                    <td>array</td>
+                    <td>
+                        Dominis permesos per a l'API d'aquest usuari (configurat al panell admin).
+                        El <strong>Host de cada petició</strong> es compara contra aquesta llista
+                        a través de <code>JwtDomainValidator</code>
+                    </td>
+                </tr>
             </tbody>
         </table>
+
+        <div class="api-alert api-alert--info" style="margin-top:0.75rem;">
+            <i class="bi bi-info-circle-fill"></i>
+            <span><strong>Nota sobre els rols:</strong> El payload <strong>no inclou</strong>
+            <code>roles</code>. A diferència del camp <code>allowed_domains</code> (que viatja al
+            JWT per al Domain Lock), els rols es llegeixen de base de dades a cada petició perquè
+            els canvis de permisos siguin immediats sense esperar que el token caduqui.</span>
+        </div>
     </div>
 </div>
 
-{# ─── Configuració ─── #}
+{# ─── Configuració tècnica ─── #}
 <div class="api-card" data-anim="cyber-card">
     <div class="api-card-header">
         <div class="api-card-icon api-card-icon--amber">
             <i class="bi bi-gear-fill"></i>
         </div>
-        <h3 class="api-card-title">Configuració</h3>
+        <h3 class="api-card-title">Configuració tècnica</h3>
     </div>
     <div class="api-card-body">
-        <p class="api-text">El JWT es configura a través de <strong>LexikJWTAuthenticationBundle</strong> amb clau RSA generada automàticament. No cal configurar res manualment, però aquí tens els paràmetres tècnics per referència:</p>
+        <p class="api-text">
+            El JWT es configura a través de <strong>LexikJWTAuthenticationBundle</strong> amb clau RSA
+            generada automàticament. No cal configurar res manualment per començar, però aquí tens
+            els paràmetres tècnics per referència:
+        </p>
 
         <table class="api-params-table" style="margin-bottom:0;">
             <thead><tr><th>Paràmetre</th><th>Valor</th><th>Configurat a</th></tr></thead>
             <tbody>
                 <tr><td><strong>Algorisme de signatura</strong></td><td><code>RS256</code> (RSA PKCS#1 v1.5 + SHA-256)</td><td>Claus RSA generades amb OpenSSL</td></tr>
-                <tr><td><strong>TTL (Time To Live)</strong></td><td><code>604800</code> segons = <strong>7 dies</strong></td><td><code>config/packages/lexik_jwt_authentication.yaml</code></td></tr>
+                <tr><td><strong>TTL (Time To Live)</strong></td><td><code>3600</code> segons = <strong>1 hora</strong></td><td><code>config/packages/lexik_jwt_authentication.yaml</code></td></tr>
                 <tr><td><strong>Clau privada</strong></td><td><code>config/jwt/private.pem</code></td><td>Generada amb <code>openssl genrsa</code></td></tr>
                 <tr><td><strong>Clau pública</strong></td><td><code>config/jwt/public.pem</code></td><td>Derivada de la clau privada</td></tr>
                 <tr><td><strong>Firewall API</strong></td><td><code>jwt: ~</code> (autenticació JWT exclusiva)</td><td><code>config/packages/security.yaml</code></td></tr>
@@ -802,78 +1109,30 @@ init();</code></pre>
             </tbody>
         </table>
 
-        <div class="api-card-subtitle">Per què RSA i no HS256?</div>
-        <p class="api-text">RSA és un algorisme de <strong>clau asimètrica</strong>: la clau privada signa el token, la clau pública el verifica. Això significa que qualsevol servei que tingui la clau pública pot <strong>verificar el token sense necessitat de compartir secrets</strong>. Ideal per a arquitectures on el frontend i el CMS estan en servidors diferents.</p>
-    </div>
-</div>
+        <div class="api-card-subtitle" style="margin-top:1.5rem;">Per què RSA i no HS256?</div>
+        <p class="api-text">
+            RSA és un algorisme de <strong>clau asimètrica</strong>: la clau privada signa el token,
+            la clau pública el verifica. Això significa que qualsevol servei que tingui la clau pública
+            pot <strong>verificar el token sense necessitat de compartir secrets</strong>. Ideal per a
+            arquitectures on el frontend i el CMS estan en servidors diferents.
+        </p>
 
-{# ─── Per què només JWT ─── #}
-<div class="api-card" data-anim="cyber-card">
-    <div class="api-card-header">
-        <div class="api-card-icon api-card-icon--green">
-            <i class="bi bi-check-circle-fill"></i>
-        </div>
-        <h3 class="api-card-title">Per què només JWT?</h3>
-    </div>
-    <div class="api-card-body">
-        <p class="api-text">El CMS ha eliminat l'antic sistema d'<code>apiToken</code> fix. Ara l'única forma d'autenticació és JWT. Això comporta avantatges importants:</p>
-
+        <div class="api-card-subtitle" style="margin-top:1.5rem;">Per què només JWT?</div>
+        <p class="api-text">
+            El CMS ha eliminat l'antic sistema d'<code>apiToken</code> fix. Ara l'única forma
+            d'autenticació és JWT. Això comporta avantatges importants:
+        </p>
         <table class="api-params-table" style="margin-bottom:0;">
             <thead><tr><th></th><th>JWT</th></tr></thead>
             <tbody>
-                <tr><td><strong>Caducitat</strong></td><td>7 dies. Automàtica, sense tokens oblidats</td></tr>
+                <tr><td><strong>Caducitat</strong></td><td>1 hora (<code>token_ttl: 3600</code>). Automàtica, sense tokens oblidats</td></tr>
                 <tr><td><strong>Domain validation</strong></td><td>Al payload signat (no falsejable)</td></tr>
                 <tr><td><strong>Renovació</strong></td><td>Fer login de nou amb email + password</td></tr>
                 <tr><td><strong>Revocació</strong></td><td>Esperar caducitat o canviar la contrasenya (invalida el token)</td></tr>
-                <tr><td><strong>Informació d'usuari</strong></td><td>Inclosa al payload (no cal consulta a BD)</td></tr>
-                <tr><td><strong>Verificació</strong></td><td>Signatura RSA (cap servei pot falsejar-lo)</td></tr>
+                <tr><td><strong>Informació d'usuari</strong></td><td>Inclosa al payload (no cal consulta a BD per a dades bàsiques)</td></tr>
+                <tr><td><strong>Verificació</strong></td><td>Signatura RSA — cap servei pot falsejar-lo sense la clau privada</td></tr>
             </tbody>
         </table>
-    </div>
-</div>
-
-{# ─── Exemple amb Astro/Next.js ─── #}
-<div class="api-card" data-anim="cyber-card">
-    <div class="api-card-header">
-        <div class="api-card-icon api-card-icon--blue">
-            <i class="bi bi-stars"></i>
-        </div>
-        <h3 class="api-card-title">Exemple: Frontend Servidor</h3>
-    </div>
-    <div class="api-card-body">
-        <p class="api-text">Per a frontends servidor (Astro, Next.js, PHP...), el flux recomanat és obtenir el JWT al startup o al build i reutilitzar-lo fins que caduqui.</p>
-
-        <div class="api-code-block">
-            <div class="api-code-header"><span>Exemple: Astro / Next.js</span></div>
-            <pre class="api-code"><code>// .env
-VORACMS_EMAIL="client@domini.com"
-VORACMS_PASSWORD="xxx"
-VORACMS_URL="https://cms.domini.com"
-
-// lib/voracms.ts
-export async function getToken() {
-  const res = await fetch(`${VORACMS_URL}/api/auth/login`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      email: process.env.VORACMS_EMAIL,
-      password: process.env.VORACMS_PASSWORD,
-    }),
-  });
-  if (!res.ok) throw new Error('Auth failed');
-  const { token } = await res.json();
-  return token;
-}
-
-// En un build d'Astro o getServerSideProps de Next.js,
-// crides getToken() i fas servir el JWT per a les crides API.
-// El JWT dura 7 dies, així que el mateix build el pot reutilitzar.</code></pre>
-        </div>
-
-        <div class="api-alert api-alert--success" style="margin-top:0.75rem;">
-            <i class="bi bi-check-circle-fill"></i>
-            <span>Com que el JWT dura 7 dies, el pots emmagatzemar a memòria (no cal desar-lo a disc ni fer login a cada build). Si caduca durant el build, només has de fer login un altre cop.</span>
-        </div>
     </div>
 </div>
 

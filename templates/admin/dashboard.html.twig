@@ -352,6 +352,12 @@ document.addEventListener('DOMContentLoaded', function () {
   var sel = document.querySelectorAll('.d1-filter-select');
   for (var i = 0; i < sel.length; i++) {
     sel[i].addEventListener('change', function () {
+      if (this.id === 'clientSelect') {
+        var projSelect = document.getElementById('projectSelect');
+        if (projSelect) {
+          projSelect.value = 'all';
+        }
+      }
       this.form.submit();
     });
   }

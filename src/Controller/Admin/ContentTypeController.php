@@ -63,6 +63,10 @@ class ContentTypeController extends AbstractController
         }
 
         if ($request->isMethod('POST')) {
+            if (!$this->isCsrfTokenValid('content-type-new', $request->request->get('_token'))) {
+                $this->addFlash('error', 'Token de seguretat invàlid.');
+                return $this->redirectToRoute('admin_content_type_index');
+            }
             $ct = new ContentType();
             $ct->setName($request->request->get('name'));
             $ct->setSlug($request->request->get('slug'));
@@ -129,6 +133,10 @@ class ContentTypeController extends AbstractController
         $this->verifyOwnership($contentType);
 
         if ($request->isMethod('POST')) {
+            if (!$this->isCsrfTokenValid('content-type-edit-' . $contentType->getId(), $request->request->get('_token'))) {
+                $this->addFlash('error', 'Token de seguretat invàlid.');
+                return $this->redirectToRoute('admin_content_type_index');
+            }
             $contentType->setName($request->request->get('name'));
             $contentType->setDescription($request->request->get('description'));
             $contentType->setActive($request->request->get('active', true));

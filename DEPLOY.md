@@ -154,7 +154,33 @@ FallbackResource /index.php
 > `.env.local` en producción. El `.htaccess` usa `FallbackResource`, NO `mod_rewrite`
 > (que causa "10 internal redirects" en CDMON).
 
-### 11. Permisos
+### 11. Proteger dotfiles
+
+Afegir al `.htaccess` de l'arrel del projecte (si no existeix, crear-lo):
+
+```apache
+# Bloquejar accés a fitxers ocults (seguretat defense-in-depth)
+RewriteEngine On
+RewriteRule "(^|/)\." - [F]
+```
+
+> ⚠️ Això evita que `.env`, `.env.local`, `.jwt_cache` (si existeix) siguin accessibles via web.
+
+### 12. Usuari vorastudio (ROLE_MOD)
+
+El frontend (VoraStudio) necessita un usuari amb rol **ROLE_MOD** per obtenir el Master Token.
+
+⚠️ **No carregar els fixtures** — tenen un bug de doble hash que invalida la contrasenya.
+
+Crear manualment des del panell admin:
+1. Entrar a `https://voracms.voradata.cat/admin`
+2. Usuaris → Crear
+3. Email: `vora@vora.es`, Password: `<la que vulguis>`, Rol: `ROLE_MOD`
+4. Un cop creat, editar l'usuari i posar **IPs permeses** → `["134.0.10.83"]`
+
+> L'IP `134.0.10.83` és la IP de sortida de vorastudio.cat (confirmada amb `check-ip.php`).
+
+### 13. Permisos
 
 ```bash
 chmod -R 777 var/cache var/log
@@ -169,22 +195,17 @@ chmod -R 775 config/jwt/*.pem
 
 ### □ CORS para frontends externos
 
-Si frontends estáticos (Victoria Taylor, Palmito House) llaman a la API desde otro dominio, hay que permitir CORS.
+El CORS se resuelve automáticamente desde la base de datos. Cuando un admin añade
+dominios a un usuario desde el panel (**Admin → Usuarios → Editar → Dominios permesos**),
+el sistema CORS (`DbCorsOriginResolver`) los reconoce sin tocar ningún archivo.
 
-Opción A — Apache (recomendado si los dominios son fijos):
+No hace falta configurar nada en `.env`. Si el CORS no funciona para un nuevo frontend:
 
-```apache
-# public/.htaccess
-Header always set Access-Control-Allow-Origin "https://victoriataylor.com"
-Header always set Access-Control-Allow-Methods "GET, POST, OPTIONS"
-Header always set Access-Control-Allow-Headers "Authorization, Content-Type"
-```
+1. Entrar al admin → Usuarios → Editar el usuario correspondiente
+2. Asegurar que el campo **Dominios permesos** incluye el dominio del frontend
+3. Esperar a que el cache de Doctrine se refresque (o ejecutar `php bin/console cache:clear --env=prod`)
 
-Opción B — Bundle NelmioCors (más flexible):
-
-```bash
-composer require nelmio/cors-bundle
-```
+> ⚠️ El sistema CORS anterior (Apache `Header set`) ya no funciona porque `CorsSubscriber` sobreescribe els headers. Siempre usar la variable de entorno.
 
 ### □ Configurar PHP desde panel CDMON
 
@@ -221,6 +242,53 @@ tail -f /errors.log                       # Log de Apache
 tail -f /web/voracms/var/log/prod.log     # Log de Symfony (cuando exista)
 ```
 
+### □ Verificación post-deploy
+
+Después de cada deploy, verificar que el CMS responde:
+
+```bash
+# Health check simple
+curl -s -o /dev/null -w "%{http_code}" https://el-teu-cms.com/admin/login
+
+# Health check API pública
+curl -s -o /dev/null -w "%{http_code}" https://el-teu-cms.com/api/public/token
+
+# Debe responder 200 en ambos
+```
+
+---
+
+## Problemas conocidos (gotchas)
+
+### Fixtures rotos (doble hash)
+Los fixtures de `AppFixtures.php` tienen un bug que aplica `password_hash()` dos veces. **No cargar nunca `doctrine:fixtures:load`** en producción. Si necesitas un usuario nuevo, créalo desde el admin.
+
+### CmsClient no se despliega con GitHub Actions
+El workflow solo despliega el backend Symfony (el directorio del CMS). Los cambios en el frontend (`CmsClient.php`, templates PHP, CSS, JS) se suben **manualmente** por FTP o SSH. Después de actualizar manualmente, ejecutar en el servidor:
+
+```bash
+cd /ruta/al/cms
+php deploy.php
+```
+
+### JWT cache en el frontend
+El `CmsClient.php` cacheja el JWT a `sys_get_temp_dir()/vorastudio_jwt_{md5(__DIR__)}`. Si por algún motivo el JWT se corrompe (ej: se regeneran las keys del CMS), borrar el archivo de cache en el servidor:
+
+```bash
+rm -f /tmp/*_jwt_*
+```
+
+### IP de salida del frontend
+Si el frontend cambia de hosting o IP, actualizar el campo **IPs permeses** del usuario en el admin (Admin → Usuarios → Editar → IPs permeses). El sistema (`DbCorsOriginResolver`, `VisitController`) lo recoge automáticamente. Para verificar la IP de salida actual:
+
+```bash
+# Ejecutar desde el servidor del frontend:
+curl -s https://api.ipify.org
+```
+
+### Cambiar TTL del JWT
+El JWT caduca a la hora (`token_ttl: 3600`). Si algún frontend necesita más tiempo, cambiar en `config/packages/lexik_jwt_authentication.yaml`. Recordar que un TTL más largo = ventana más grande de riesgo si el token se filtra.
+
 ---
 
 ## Deploy automático con GitHub Actions
@@ -236,6 +304,7 @@ Cada `git push` a la rama `main` ejecuta automáticamente el deploy vía GitHub 
 | `SSH_HOST` | IP del servidor |
 | `SSH_USER` | Usuario SSH |
 | `SSH_KEY` | Clave privada SSH |
+| `SITE_URL` | URL del CMS (ej: `https://voracms.voradata.cat`) — para el health check |
 
 Los secrets se configuran en: **GitHub → Repo → Settings → Secrets and variables → Actions**
 
@@ -248,10 +317,13 @@ Los secrets se configuran en: **GitHub → Repo → Settings → Secrets and var
 | 3 | Servidor | `git pull origin main` |
 | 4 | Servidor | `cp .env.local .env` (Apache necesita `.env`) |
 | 5 | Servidor | `chmod -R 777 var/cache var/log` |
-| 6 | Servidor | `source .env.local && COLUMNS=120 php deploy.php` (limpia caché) |
-| 7 | Servidor | `COLUMNS=120 php bin/console doctrine:migrations:migrate` (falla si hi ha error) |
-| 8 | Servidor | `COLUMNS=120 php bin/console cache:warmup --env=prod` (regenera caché) |
-| 9 | Servidor | `chmod -R 777 var/cache var/log` + OPcache reset |
+| 6 | Servidor | `source .env.local && COLUMNS=120 php deploy.php` (neteja caché física + OPcache reset) |
+| 7 | Servidor | `COLUMNS=120 php bin/console doctrine:migrations:migrate` (falla si hi ha error — atura el deploy) |
+| 8 | Servidor | `COLUMNS=120 php bin/console cache:warmup --env=prod` (regenera caché de Symfony) |
+| 9 | Servidor | `chmod -R 777 var/cache var/log` + `php -r "opcache_reset();"` |
+| 10 | GitHub Runner | Health check: `curl $SITE_URL/admin/login` → espera `200` |
+
+> ⚠️ Si el health check falla, el workflow se marca como fallido. No hay rollback automático: revisar logs y corregir manualmente.
 
 > ⚠️ CDMON tiene `proc_open()` deshabilitado. Por eso el `composer install` se ejecuta
 > en el runner de GitHub (no en el servidor), y los comandos CLI llevan `COLUMNS=120`
@@ -371,5 +443,5 @@ Los `%` en la URL de la BD se interpretan como parámetros Symfony. Escapar con 
 
 ---
 
-> **Última actualización:** Julio 2026  
+> **Última actualización:** Julio 2026 (revisión seguridad + health check)  
 > **Deploy realizado por:** Pau (Vora Studio)

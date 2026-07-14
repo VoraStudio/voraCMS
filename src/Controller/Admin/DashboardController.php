@@ -73,6 +73,14 @@ class DashboardController extends AbstractController
             $projParam = $session->get('_project_id');
             if ($projParam) {
                 $projectId = (int) $projParam;
+                /* Validar que el projecte guardat a la sessió pertanyi realment al client actual */
+                if ($clientId) {
+                    $projObj = $projectRepo->find($projectId);
+                    if (!$projObj || $projObj->getUser()?->getId() !== $clientId) {
+                        $projectId = null;
+                        $session->remove('_project_id');
+                    }
+                }
             }
         }
 
@@ -421,6 +429,14 @@ class DashboardController extends AbstractController
 
         if (!$project) {
             throw $this->createNotFoundException('Projecte no trobat');
+        }
+
+        /* ─── Protecció: només administradors o el propietari poden activar el projecte ─── */
+        $currentUser = $this->getUser();
+        if (!$this->isGranted('ROLE_ADMIN') && $currentUser instanceof User) {
+            if ($project->getUser()?->getId() !== $currentUser->getId()) {
+                throw $this->createAccessDeniedException('No tens accés a aquest projecte.');
+            }
         }
 
         $request->getSession()->set('_project_id', $project->getId());

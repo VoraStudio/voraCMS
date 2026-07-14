@@ -17,6 +17,7 @@
 <div class="cyber-form-card mx-auto">
 <div class="cyber-card cyber-card--flush" data-anim="cyber-card">
     <form method="post" id="entryForm" enctype="multipart/form-data" novalidate class="cyber-form-body">
+            <input type="hidden" name="_token" value="{{ csrf_token('entry-new-' ~ contentType.id) }}">
             <div class="s-status mb-3" role="radiogroup" aria-label="Estat de l'entrada">
                 <div class="s-status__toggles" id="statusSeg">
                     <div class="s-toggle s-toggle--sel" data-value="published" tabindex="0" role="radio" aria-checked="true" style="--s-toggle-color:#22c55e">

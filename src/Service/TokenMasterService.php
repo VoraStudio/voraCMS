@@ -27,13 +27,17 @@ readonly class TokenMasterService
         private LoggerInterface $logger,
     ) {}
 
-    /**ara quin
+    /**
      * Genera un JWT per al domini donat.
      *
-     * @param string $domain El domini del frontend (ex: vorastudio.cat)
-     * @return string|null El JWT en format string, o null si el domini no està autoritzat
+     * Valida que el domini existeixi als allowed_domains d'algun usuari.
+     * Si l'usuari té allowed_ips configurades, també valida la IP del client.
+     *
+     * @param string $domain   El domini del frontend (ex: vorastudio.cat)
+     * @param string|null $clientIp IP del client (ex: 134.0.10.83), opcional
+     * @return string|null El JWT en format string, o null si no està autoritzat
      */
-    public function generateToken(string $domain): ?string
+    public function generateToken(string $domain, ?string $clientIp = null): ?string
     {
         /* Normalitzar: treure www. per si el client ve amb prefix */
         $domain = preg_replace('/^www\./i', '', $domain);
@@ -44,6 +48,19 @@ readonly class TokenMasterService
                 'domain' => $domain,
             ]);
             return null;
+        }
+
+        /* Si l'usuari té IPs permeses, validar-la */
+        $allowedIps = $user->getAllowedIps();
+        if (!empty($allowedIps) && $clientIp !== null) {
+            if (!in_array($clientIp, $allowedIps, true)) {
+                $this->logger->warning('TokenMasterService: IP no autoritzada per al domini', [
+                    'domain' => $domain,
+                    'client_ip' => $clientIp,
+                    'user_id' => $user->getId(),
+                ]);
+                return null;
+            }
         }
 
         try {

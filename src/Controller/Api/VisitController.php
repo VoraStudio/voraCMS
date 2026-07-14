@@ -3,13 +3,16 @@
 /* ===========================================================
    VisitController — Registre de visites des del frontend.
    POST /api/visit — Desa una visita amb usuari, entrada i IP.
+
+   Si la IP d'origen és de confiança (SSR), accepta client_ip
+   i user_agent del cos JSON per proxyar la IP real del visitant.
    =========================================================== */
 
 namespace App\Controller\Api;
 
-use App\Entity\Entry;
 use App\Entity\Visit;
 use App\Repository\EntryRepository;
+use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -19,12 +22,8 @@ use Symfony\Component\Routing\Attribute\Route;
 #[Route('/api/visit')]
 class VisitController extends AbstractController
 {
-    /* -----------------------------------------------------------
-       POST /api/visit — Registra una visita
-       Body: { entry_id: number (opcional), path: string }
-       ----------------------------------------------------------- */
     #[Route('', name: 'api_visit', methods: ['POST'])]
-    public function record(Request $request, EntityManagerInterface $em, EntryRepository $entryRepo): JsonResponse
+    public function record(Request $request, EntityManagerInterface $em, EntryRepository $entryRepo, UserRepository $userRepo): JsonResponse
     {
         $data = json_decode($request->getContent(), true);
 
@@ -37,12 +36,24 @@ class VisitController extends AbstractController
             return $this->json(['error' => 'Entrada no trobada'], 404);
         }
 
+        /* Determinar IP i User-Agent: confiar en el cos JSON si la IP origen és de confiança */
+        $clientIp = $request->getClientIp();
+        $userAgent = $request->headers->get('User-Agent');
+
+        /** @var string[] $trustedIps */
+        $trustedIps = $userRepo->findAllAllowedIps();
+
+        if (in_array($clientIp, $trustedIps, true)) {
+            $clientIp = $data['client_ip'] ?? $clientIp;
+            $userAgent = $data['user_agent'] ?? $userAgent;
+        }
+
         $visit = new Visit();
         $visit->setUser($entry->getUser());
         $visit->setEntry($entry);
         $visit->setPath($data['path'] ?? null);
-        $visit->setIp($request->getClientIp());
-        $visit->setUserAgent($request->headers->get('User-Agent'));
+        $visit->setIp($clientIp);
+        $visit->setUserAgent($userAgent);
 
         $em->persist($visit);
         $em->flush();

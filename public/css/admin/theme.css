@@ -440,9 +440,9 @@
 
   /* Text */
   --s-text: #111111;
-  --s-text-secondary: #555555;
-  --s-text-muted: #999999;
-  --s-text-label: #555555;
+  --s-text-secondary: #2d3748;
+  --s-text-muted: #5a6578;
+  --s-text-label: #1e293b;
 
   /* Inputs — Clean Figma style */
   --s-input-bg: #ffffff;
@@ -847,20 +847,20 @@
   border-bottom-color: rgba(249, 115, 22, 0.06);
 }
 [data-theme="light"] .api-text {
-  color: rgba(71, 85, 105, 0.7);
+  color: rgba(15, 23, 42, 0.82);
 }
 [data-theme="light"] .api-text strong {
-  color: rgba(15, 23, 42, 0.85);
+  color: #000000;
 }
 [data-theme="light"] .api-endpoint-head {
   background: rgba(0, 0, 0, 0.03);
   border-bottom-color: rgba(249, 115, 22, 0.06);
 }
 [data-theme="light"] .api-endpoint-url {
-  color: rgba(15, 23, 42, 0.8);
+  color: rgba(15, 23, 42, 0.95);
 }
 [data-theme="light"] .api-section-title {
-  color: rgba(15, 23, 42, 0.85);
+  color: rgba(15, 23, 42, 0.9);
   border-bottom-color: rgba(249, 115, 22, 0.08);
 }
 [data-theme="light"] .api-code-header {
@@ -868,22 +868,22 @@
 }
 [data-theme="light"] .api-code {
   background: rgba(0, 0, 0, 0.03);
-  color: rgba(71, 85, 105, 0.75);
+  color: rgba(15, 23, 42, 0.88);
 }
 [data-theme="light"] .api-flow-content h4 {
-  color: rgba(15, 23, 42, 0.85);
+  color: rgba(15, 23, 42, 0.9);
 }
 [data-theme="light"] .api-ref-item code {
-  color: rgba(15, 23, 42, 0.7);
+  color: rgba(15, 23, 42, 0.85);
 }
 [data-theme="light"] .api-params-table th {
-  color: rgba(71, 85, 105, 0.4);
+  color: rgba(15, 23, 42, 0.65);
 }
 [data-theme="light"] .api-params-table td {
-  color: rgba(71, 85, 105, 0.7);
+  color: rgba(15, 23, 42, 0.85);
 }
 [data-theme="light"] .api-types-table th {
-  color: rgba(71, 85, 105, 0.4);
+  color: rgba(15, 23, 42, 0.65);
 }
 [data-theme="light"] .cyber-project-card {
   background: #ffffff;

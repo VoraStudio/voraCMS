@@ -146,7 +146,7 @@ class PublicController extends AbstractController
             $domain = $request->getHost();
         }
 
-        $token = $tokenService->generateToken($domain);
+        $token = $tokenService->generateToken($domain, $request->getClientIp());
 
         if (!$token) {
             return $this->json(

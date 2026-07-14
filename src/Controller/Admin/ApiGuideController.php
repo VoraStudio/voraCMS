@@ -38,4 +38,12 @@ class ApiGuideController extends AbstractController
 
         return $this->render('admin/api-jwt.html.twig');
     }
+
+    #[Route('/tests', name: 'admin_api_guide_tests')]
+    public function tests(): Response
+    {
+        $this->denyAccessUnlessGranted('ROLE_ADMIN');
+
+        return $this->render('admin/api-tests.html.twig');
+    }
 }
