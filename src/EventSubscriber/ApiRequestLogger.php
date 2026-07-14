@@ -17,6 +17,7 @@
 namespace App\EventSubscriber;
 
 use App\Entity\ApiRequestLog;
+use App\Repository\ProjectRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
@@ -29,6 +30,7 @@ readonly class ApiRequestLogger
     public function __construct(
         private EntityManagerInterface $em,
         private LoggerInterface $logger,
+        private ProjectRepository $projectRepo,
     ) {}
 
     public function __invoke(ResponseEvent $event): void
@@ -68,6 +70,9 @@ readonly class ApiRequestLogger
             $log->setResponseTimeMs((int) round((microtime(true) - (float) $start) * 1000));
         }
 
+        /* ── Detectar projecte des de la URL ── */
+        $log->setProject($this->detectProject($path));
+
         /* ── Marcar com a token endpoint si escau ── */
         if ($path === '/api/public/token') {
             $this->enrichTokenEndpoint($log, $response);
@@ -83,6 +88,18 @@ readonly class ApiRequestLogger
                 'error' => $e->getMessage(),
             ]);
         }
+    }
+
+    /* ── Detecta el projecte des de la URL de l'API pública ── */
+    private function detectProject(string $path): ?\App\Entity\Project
+    {
+        if (preg_match('#^/api/public/(?P<slug>[a-z0-9_-]+)/#i', $path, $m)) {
+            $slug = $m['slug'];
+            if (!in_array($slug, ['token', 'artistes', 'web'], true)) {
+                return $this->projectRepo->findBySlug($slug);
+            }
+        }
+        return null;
     }
 
     /* ── Extreure jti del payload JWT (només base64, sense verificar firma) ── */

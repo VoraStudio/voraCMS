@@ -1453,6 +1453,7 @@ input[type="time"] {
 }
 
 .s-login-footer-img {
+  display: inline-block;
   height: 18px;
   width: auto;
   vertical-align: middle;
@@ -2239,6 +2240,8 @@ input[type="time"] {
     transform: translateY(0) scale(1);
   }
 }
+
+
 
 .s-login-footer {
   text-align: center;

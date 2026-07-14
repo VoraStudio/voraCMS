@@ -47,4 +47,62 @@ class VisitRepository extends ServiceEntityRepository
             ->getQuery()
             ->getSingleScalarResult();
     }
+
+    /* ── Visites totals per projecte ── */
+    public function countByProject(int $projectId): int
+    {
+        $conn = $this->getEntityManager()->getConnection();
+        $sql = 'SELECT COUNT(v.id)
+                FROM visit v
+                JOIN entry e ON e.id = v.entry_id
+                JOIN content_type ct ON ct.id = e.content_type_id
+                WHERE ct.project_id = :projectId';
+        return (int) $conn->fetchOne($sql, ['projectId' => $projectId]);
+    }
+
+    /* ── Última visita al projecte ── */
+    public function lastVisitByProject(int $projectId): ?\DateTimeImmutable
+    {
+        $conn = $this->getEntityManager()->getConnection();
+        $sql = 'SELECT MAX(v.visited_at)
+                FROM visit v
+                JOIN entry e ON e.id = v.entry_id
+                JOIN content_type ct ON ct.id = e.content_type_id
+                WHERE ct.project_id = :projectId';
+        $result = $conn->fetchOne($sql, ['projectId' => $projectId]);
+        return $result ? new \DateTimeImmutable($result) : null;
+    }
+
+    /* ── Visites per dia (últims 7 dies) ── */
+    public function countByDayLast7(): array
+    {
+        $sevenDaysAgo = new \DateTimeImmutable('-7 days midnight');
+
+        $conn = $this->getEntityManager()->getConnection();
+        $sql = 'SELECT DATE(v.visited_at) AS dia, COUNT(v.id) AS total
+                FROM visit v
+                WHERE v.visited_at >= :since
+                GROUP BY dia
+                ORDER BY dia ASC';
+        $stmt = $conn->executeQuery($sql, ['since' => $sevenDaysAgo->format('Y-m-d H:i:s')]);
+        $rows = $stmt->fetchAllAssociative();
+
+        /* Omplir amb 0 els dies sense visites */
+        $visitsByDay = [];
+        foreach ($rows as $r) {
+            $visitsByDay[$r['dia']] = (int) $r['total'];
+        }
+
+        $result = [];
+        $now = new \DateTimeImmutable('today');
+        for ($i = 6; $i >= 0; $i--) {
+            $day = $now->modify("-{$i} days")->format('Y-m-d');
+            $result[] = [
+                'date' => $day,
+                'total' => $visitsByDay[$day] ?? 0,
+            ];
+        }
+
+        return $result;
+    }
 }

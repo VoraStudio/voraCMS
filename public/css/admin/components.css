@@ -2,6 +2,8 @@
 .card {
   --bs-card-bg: transparent;
   background-color: var(--s-surface);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
   border: 1px solid var(--s-border);
   border-radius: var(--s-radius-lg);
   box-shadow: var(--s-shadow-md);

@@ -18,6 +18,7 @@ namespace App\Controller\Admin;
 
 use App\Entity\Entry;
 use App\Entity\User;
+use App\Repository\ApiRequestLogRepository;
 use App\Repository\ContentTypeRepository;
 use App\Repository\EntryRepository;
 use App\Repository\MediaRepository;
@@ -49,106 +50,361 @@ class DashboardController extends AbstractController
         EntityManagerInterface $em,
         VisitRepository $visitRepo,
         UserRepository $userRepo,
+        ApiRequestLogRepository $apiLogRepo,
     ): Response {
         $user = $this->getUser();
         $isAdmin = $this->isGranted('ROLE_ADMIN');
 
-        /* ═══════════════════════════════════════════════════════
-           ADMIN DASHBOARD — Global, tots els usuaris
-           ═══════════════════════════════════════════════════════ */
+        $projectId = null;
+        $clientId = null;
+
         if ($isAdmin) {
-            /* ── Total publicacions globals ── */
-            $totalPublishedGlobally = (int) $em->createQueryBuilder()
-                ->select('COUNT(e.id)')
-                ->from(Entry::class, 'e')
-                ->where('e.status = :status')
-                ->setParameter('status', Entry::STATUS_PUBLISHED)
+            $projParam = $request->query->get('projectId');
+            if ($projParam && $projParam !== 'all') {
+                $projectId = (int) $projParam;
+            }
+            $clientParam = $request->query->get('clientId');
+            if ($clientParam && $clientParam !== 'all') {
+                $clientId = (int) $clientParam;
+            }
+        } else {
+            $clientId = $user ? $user->getId() : null;
+            $session = $request->getSession();
+            $projParam = $session->get('_project_id');
+            if ($projParam) {
+                $projectId = (int) $projParam;
+            }
+        }
+
+        $projects = $projectRepo->findAll();
+        $clients = $userRepo->findAll();
+
+        $filteredProjects = $projects;
+        if ($clientId) {
+            $filteredProjects = array_values(array_filter($projects, function ($p) use ($clientId) {
+                return $p->getUser() && $p->getUser()->getId() === $clientId;
+            }));
+        }
+
+        // --- KPIs: Visits ---
+        $todayStart = new \DateTimeImmutable('today');
+        $yesterdayStart = new \DateTimeImmutable('yesterday');
+
+        $visitQb = $em->createQueryBuilder()
+            ->select('COUNT(v.id)')
+            ->from(\App\Entity\Visit::class, 'v')
+            ->join('v.entry', 'e')
+            ->join('e.contentType', 'ct');
+
+        if ($projectId) {
+            $visitQb->andWhere('ct.project = :projectId')
+                    ->setParameter('projectId', $projectId);
+        } elseif ($clientId) {
+            $visitQb->join('ct.project', 'p')
+                    ->andWhere('p.user = :clientId')
+                    ->setParameter('clientId', $clientId);
+        }
+
+        $visitQbToday = clone $visitQb;
+        $visitsToday = (int) $visitQbToday->andWhere('v.visitedAt >= :today')
+            ->setParameter('today', $todayStart)
+            ->getQuery()
+            ->getSingleScalarResult();
+
+        $visitQbYesterday = clone $visitQb;
+        $visitsYesterday = (int) $visitQbYesterday->andWhere('v.visitedAt >= :yesterday')
+            ->andWhere('v.visitedAt < :today')
+            ->setParameter('yesterday', $yesterdayStart)
+            ->setParameter('today', $todayStart)
+            ->getQuery()
+            ->getSingleScalarResult();
+
+        $visitTrend = 0.0;
+        if ($visitsYesterday > 0) {
+            $visitTrend = round((($visitsToday - $visitsYesterday) / $visitsYesterday) * 100, 1);
+        }
+
+        // --- KPIs: API Requests ---
+        $apiLogQb = $em->createQueryBuilder()
+            ->select('COUNT(r.id)')
+            ->from(\App\Entity\ApiRequestLog::class, 'r');
+
+        if ($projectId) {
+            $apiLogQb->andWhere('r.project = :projectId')
+                     ->setParameter('projectId', $projectId);
+        } elseif ($clientId) {
+            $apiLogQb->join('r.project', 'p')
+                     ->andWhere('p.user = :clientId')
+                     ->setParameter('clientId', $clientId);
+        }
+
+        $apiLogQbToday = clone $apiLogQb;
+        $apiToday = (int) $apiLogQbToday->andWhere('r.createdAt >= :today')
+            ->setParameter('today', $todayStart)
+            ->getQuery()
+            ->getSingleScalarResult();
+
+        $apiLogQbYesterday = clone $apiLogQb;
+        $apiYesterday = (int) $apiLogQbYesterday->andWhere('r.createdAt >= :yesterday')
+            ->andWhere('r.createdAt < :today')
+            ->setParameter('yesterday', $yesterdayStart)
+            ->setParameter('today', $todayStart)
+            ->getQuery()
+            ->getSingleScalarResult();
+
+        $apiTrend = 0.0;
+        if ($apiYesterday > 0) {
+            $apiTrend = round((($apiToday - $apiYesterday) / $apiYesterday) * 100, 1);
+        }
+
+        // Accepted & Denied today
+        $acceptedQb = clone $apiLogQb;
+        $acceptedToday = (int) $acceptedQb->andWhere('r.createdAt >= :today')
+            ->andWhere('r.statusCode >= 200')
+            ->andWhere('r.statusCode < 300')
+            ->setParameter('today', $todayStart)
+            ->getQuery()
+            ->getSingleScalarResult();
+
+        $deniedQb = clone $apiLogQb;
+        $deniedToday = (int) $deniedQb->andWhere('r.createdAt >= :today')
+            ->andWhere('r.statusCode >= 400')
+            ->setParameter('today', $todayStart)
+            ->getQuery()
+            ->getSingleScalarResult();
+
+        $successRate = 100.0;
+        if ($apiToday > 0) {
+            $successRate = round(($acceptedToday / $apiToday) * 100, 1);
+        }
+
+        // --- Weekly Charts ---
+        $weeklyRequests = [];
+        $weeklyAcceptedVsDenied = [];
+        $dayNamesCa = ['Mon' => 'Dl', 'Tue' => 'Dt', 'Wed' => 'Dc', 'Thu' => 'Dj', 'Fri' => 'Dv', 'Sat' => 'Ds', 'Sun' => 'Dg'];
+
+        $maxDailyRequests = 0;
+        $maxDailyAcceptedDenied = 0;
+
+        for ($i = 6; $i >= 0; $i--) {
+            $dayStart = $todayStart->modify("-{$i} days");
+            $dayEnd = $dayStart->modify('+1 day');
+
+            $dayQb = clone $apiLogQb;
+            $dayTotal = (int) $dayQb->andWhere('r.createdAt >= :dayStart')
+                ->andWhere('r.createdAt < :dayEnd')
+                ->setParameter('dayStart', $dayStart)
+                ->setParameter('dayEnd', $dayEnd)
                 ->getQuery()
                 ->getSingleScalarResult();
 
-            /* ── Visites d'avui ── */
-            $totalVisitsToday = $visitRepo->countTodayGlobal();
-
-            return $this->render('admin/dashboard.html.twig', [
-                'isAdmin' => true,
-                'metrics' => [
-                    'totalUsuaris' => $userRepo->count([]),
-                    'totalProyectos' => $projectRepo->count([]),
-                    'totalPublicaciones' => $totalPublishedGlobally,
-                    'totalVisites' => $totalVisitsToday,
-                ],
-                'latestUsers' => $userRepo->findBy([], ['createdAt' => 'DESC'], 5),
-                'latestProjects' => $projectRepo->findBy([], ['createdAt' => 'DESC'], 5),
-                'latestContentTypes' => $ctRepo->findLatestWithProject(5),
-            ]);
-        }
-
-        /* ═══════════════════════════════════════════════════════
-           MOD / USUARIO DASHBOARD — Scoped al seu usuari
-           ═══════════════════════════════════════════════════════ */
-        $session = $request->getSession();
-        $activeProjectId = $session->get('_project_id');
-
-        $projects = $isAdmin
-            ? $projectRepo->findActive()
-            : $projectRepo->findBy(['user' => $user, 'active' => true]);
-        $totalProjects = count($projects);
-
-        if ($totalProjects === 0) {
-            return $this->redirectToRoute('admin_project_new');
-        }
-
-        // Establecer el primer proyecto activo si no hay ninguno en sesión
-        if ($activeProjectId === null) {
-            $session->set('_project_id', $projects[0]->getId());
-            $activeProjectId = $projects[0]->getId();
-        }
-
-        /* ── Mètriques de cada projecte del usuari ── */
-        $projectsData = [];
-        $globalEntries = 0;
-        $globalPublished = 0;
-
-        foreach ($projects as $p) {
-            $projEntries = 0;
-            $projPublished = 0;
-
-            foreach ($p->getContentTypes() as $ct) {
-                if ($ct->isActive()) {
-                    $projEntries += count($ct->getEntries());
-                    foreach ($ct->getEntries() as $entry) {
-                        if ($entry->getStatus() === Entry::STATUS_PUBLISHED) {
-                            $projPublished++;
-                        }
-                    }
-                }
+            if ($dayTotal > $maxDailyRequests) {
+                $maxDailyRequests = $dayTotal;
             }
 
-            $projectsData[] = [
-                'project' => $p,
-                'totalSections' => count($p->getContentTypes()),
-                'totalEntries' => $projEntries,
-                'totalPublished' => $projPublished,
+            $dayAccQb = clone $apiLogQb;
+            $dayAccepted = (int) $dayAccQb->andWhere('r.createdAt >= :dayStart')
+                ->andWhere('r.createdAt < :dayEnd')
+                ->andWhere('r.statusCode >= 200')
+                ->andWhere('r.statusCode < 300')
+                ->setParameter('dayStart', $dayStart)
+                ->setParameter('dayEnd', $dayEnd)
+                ->getQuery()
+                ->getSingleScalarResult();
+
+            $dayDenQb = clone $apiLogQb;
+            $dayDenied = (int) $dayDenQb->andWhere('r.createdAt >= :dayStart')
+                ->andWhere('r.createdAt < :dayEnd')
+                ->andWhere('r.statusCode >= 400')
+                ->setParameter('dayStart', $dayStart)
+                ->setParameter('dayEnd', $dayEnd)
+                ->getQuery()
+                ->getSingleScalarResult();
+
+            if (($dayAccepted + $dayDenied) > $maxDailyAcceptedDenied) {
+                $maxDailyAcceptedDenied = $dayAccepted + $dayDenied;
+            }
+
+            $rawDayName = $dayStart->format('D');
+            $dayName = $dayNamesCa[$rawDayName] ?? $rawDayName;
+
+            $weeklyRequests[] = [
+                'day' => $dayName,
+                'total' => $dayTotal
             ];
 
-            $globalEntries += $projEntries;
-            $globalPublished += $projPublished;
+            $weeklyAcceptedVsDenied[] = [
+                'day' => $dayName,
+                'accepted' => $dayAccepted,
+                'denied' => $dayDenied
+            ];
         }
 
-        $userId = $user?? null ? $user->getId() : null;
-        $totalMedia = $userId !== null
-            ? count($mediaRepo->findByUser($userId))
-            : 0;
+        // --- Endpoints ---
+        $endpointQb = $em->createQueryBuilder()
+            ->select('r.method, r.endpoint, COUNT(r.id) AS total')
+            ->from(\App\Entity\ApiRequestLog::class, 'r');
+
+        if ($projectId) {
+            $endpointQb->andWhere('r.project = :projectId')
+                       ->setParameter('projectId', $projectId);
+        } elseif ($clientId) {
+            $endpointQb->join('r.project', 'p')
+                       ->andWhere('p.user = :clientId')
+                       ->setParameter('clientId', $clientId);
+        }
+
+        $topEndpoints = $endpointQb->groupBy('r.method, r.endpoint')
+            ->orderBy('total', 'DESC')
+            ->setMaxResults(4)
+            ->getQuery()
+            ->getResult();
+
+        // --- Recent Files ---
+        $mediaQb = $em->createQueryBuilder()
+            ->select('m')
+            ->from(\App\Entity\Media::class, 'm');
+
+        if ($projectId) {
+            $mediaQb->andWhere('m.project = :projectId')
+                    ->setParameter('projectId', $projectId);
+        } elseif ($clientId) {
+            $mediaQb->andWhere('m.user = :clientId')
+                    ->setParameter('clientId', $clientId);
+        }
+
+        $recentFiles = $mediaQb->orderBy('m.createdAt', 'DESC')
+            ->setMaxResults(3)
+            ->getQuery()
+            ->getResult();
+
+        // --- Storage ---
+        $storageQb = $em->createQueryBuilder()
+            ->select('SUM(m.fileSize) AS totalSize, COUNT(m.id) AS totalFiles')
+            ->from(\App\Entity\Media::class, 'm');
+
+        if ($projectId) {
+            $storageQb->andWhere('m.project = :projectId')
+                      ->setParameter('projectId', $projectId);
+        } elseif ($clientId) {
+            $storageQb->andWhere('m.user = :clientId')
+                      ->setParameter('clientId', $clientId);
+        }
+
+        $storageData = $storageQb->getQuery()->getSingleResult();
+        $totalBytes = (float) ($storageData['totalSize'] ?? 0);
+        $totalFiles = (int) ($storageData['totalFiles'] ?? 0);
+
+        $totalGB = round($totalBytes / (1024 * 1024 * 1024), 2);
+        $totalMB = round($totalBytes / (1024 * 1024), 1);
+
+        // --- Resource distribution ---
+        $imagesCountQb = $em->createQueryBuilder()
+            ->select('COUNT(m.id)')
+            ->from(\App\Entity\Media::class, 'm')
+            ->where("m.mimeType LIKE 'image/%'");
+
+        if ($projectId) {
+            $imagesCountQb->andWhere('m.project = :projectId')
+                          ->setParameter('projectId', $projectId);
+        } elseif ($clientId) {
+            $imagesCountQb->andWhere('m.user = :clientId')
+                          ->setParameter('clientId', $clientId);
+        }
+        $imagesCount = (int) $imagesCountQb->getQuery()->getSingleScalarResult();
+
+        $entriesCountQb = $em->createQueryBuilder()
+            ->select('COUNT(e.id)')
+            ->from(\App\Entity\Entry::class, 'e')
+            ->join('e.contentType', 'ct');
+
+        if ($projectId) {
+            $entriesCountQb->andWhere('ct.project = :projectId')
+                           ->setParameter('projectId', $projectId);
+        } elseif ($clientId) {
+            $entriesCountQb->join('ct.project', 'p')
+                           ->andWhere('p.user = :clientId')
+                           ->setParameter('clientId', $clientId);
+        }
+        $entriesCount = (int) $entriesCountQb->getQuery()->getSingleScalarResult();
+
+        $otherFilesQb = $em->createQueryBuilder()
+            ->select('COUNT(m.id)')
+            ->from(\App\Entity\Media::class, 'm')
+            ->where("m.mimeType NOT LIKE 'image/%'");
+
+        if ($projectId) {
+            $otherFilesQb->andWhere('m.project = :projectId')
+                         ->setParameter('projectId', $projectId);
+        } elseif ($clientId) {
+            $otherFilesQb->andWhere('m.user = :clientId')
+                         ->setParameter('clientId', $clientId);
+        }
+        $otherFilesCount = (int) $otherFilesQb->getQuery()->getSingleScalarResult();
+
+        $totalItems = $imagesCount + $entriesCount + $otherFilesCount;
+        $imagesPct = 0;
+        $entriesPct = 0;
+        $otherPct = 0;
+
+        if ($totalItems > 0) {
+            $imagesPct = (int) round(($imagesCount / $totalItems) * 100);
+            $entriesPct = (int) round(($entriesCount / $totalItems) * 100);
+            $otherPct = 100 - ($imagesPct + $entriesPct);
+        }
+
+        // --- Clients list ---
+        $latestUsersData = [];
+        $usersList = $userRepo->findBy([], ['createdAt' => 'DESC'], 4);
+        $colors = ['#f0a048', '#3b82f6', '#a855f7', '#10b981'];
+
+        foreach ($usersList as $index => $u) {
+            $uProjects = $u->getProjects();
+            $sectionsCount = 0;
+            foreach ($uProjects as $p) {
+                $sectionsCount += count($p->getContentTypes());
+            }
+
+            $latestUsersData[] = [
+                'user' => $u,
+                'color' => $colors[$index % count($colors)],
+                'projectsCount' => count($uProjects),
+                'sectionsCount' => $sectionsCount,
+            ];
+        }
 
         return $this->render('admin/dashboard.html.twig', [
-            'projectsData' => $projectsData,
-            'activeProjectId' => $activeProjectId,
-            'metrics' => [
-                'totalEntries' => $globalEntries,
-                'totalPublished' => $globalPublished,
-                'totalMedia' => $totalMedia,
-                'totalProjects' => $totalProjects,
-            ],
+            'isAdmin' => $isAdmin,
+            'projects' => $projects,
+            'clients' => $clients,
+            'filteredProjects' => $filteredProjects,
+            'selectedProjectId' => $projectId,
+            'selectedClientId' => $clientId,
+
+            'visitsToday' => $visitsToday,
+            'visitTrend' => $visitTrend,
+            'apiToday' => $apiToday,
+            'apiTrend' => $apiTrend,
+            'acceptedToday' => $acceptedToday,
+            'deniedToday' => $deniedToday,
+            'successRate' => $successRate,
+
+            'weeklyRequests' => $weeklyRequests,
+            'weeklyAcceptedVsDenied' => $weeklyAcceptedVsDenied,
+            'maxDailyRequests' => $maxDailyRequests,
+            'maxDailyAcceptedDenied' => $maxDailyAcceptedDenied,
+
+            'topEndpoints' => $topEndpoints,
+            'recentFiles' => $recentFiles,
+
+            'totalGB' => $totalGB,
+            'totalMB' => $totalMB,
+            'totalFiles' => $totalFiles,
+            'imagesPct' => $imagesPct,
+            'entriesPct' => $entriesPct,
+            'otherPct' => $otherPct,
+
+            'latestClients' => $latestUsersData,
         ]);
     }
 

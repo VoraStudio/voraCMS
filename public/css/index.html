@@ -1,0 +1,3899 @@
+<!doctype html>
+<html lang="ca">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>VoraStudio CMS — 5 Dashboard Proposals</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Syne:wght@400;600;700;800&family=Space+Grotesk:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      html {
+        scroll-behavior: smooth;
+      }
+      body {
+        font-family: "Inter", sans-serif;
+        background: #07070a;
+        color: #fff;
+        overflow-x: hidden;
+      }
+      button,
+      input,
+      select {
+        font: inherit;
+        border: none;
+        outline: none;
+        background: none;
+        cursor: pointer;
+      }
+      a {
+        text-decoration: none;
+        color: inherit;
+      }
+      ul {
+        list-style: none;
+      }
+
+      /* ── INDEX NAV ── */
+      .inav {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 9999;
+        background: rgba(7, 7, 10, 0.96);
+        backdrop-filter: blur(16px);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+        height: 50px;
+        display: flex;
+        align-items: center;
+        padding: 0 24px;
+        gap: 0;
+      }
+      .inav-brand {
+        font-family: "Syne", sans-serif;
+        font-size: 12px;
+        font-weight: 800;
+        letter-spacing: 0.08em;
+        color: #fff;
+        margin-right: 24px;
+        white-space: nowrap;
+        flex-shrink: 0;
+      }
+      .inav-links {
+        display: flex;
+        gap: 0;
+        overflow-x: auto;
+        scrollbar-width: none;
+      }
+      .inav-links::-webkit-scrollbar {
+        display: none;
+      }
+      .inav-links a {
+        font-size: 11px;
+        font-weight: 500;
+        color: rgba(255, 255, 255, 0.36);
+        padding: 0 14px;
+        height: 50px;
+        display: flex;
+        align-items: center;
+        border-bottom: 2px solid transparent;
+        white-space: nowrap;
+        transition:
+          color 0.2s,
+          border-color 0.2s;
+      }
+      .inav-links a:hover {
+        color: #fff;
+      }
+      .inav-links a.active {
+        color: #fff;
+        border-bottom-color: rgba(255, 255, 255, 0.4);
+      }
+
+      /* ── PAGE WRAPPER ── */
+      .pw {
+        padding-top: 50px;
+      }
+      .ph {
+        padding: 60px 52px 48px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      }
+      .ph-label {
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: rgba(255, 255, 255, 0.25);
+        margin-bottom: 12px;
+      }
+      .ph h1 {
+        font-family: "Syne", sans-serif;
+        font-size: clamp(1.8rem, 3.5vw, 3rem);
+        font-weight: 800;
+        color: #fff;
+        line-height: 1.1;
+        margin-bottom: 10px;
+      }
+      .ph p {
+        font-size: 14px;
+        color: rgba(255, 255, 255, 0.38);
+        max-width: 600px;
+        line-height: 1.7;
+      }
+      .ps {
+        padding: 72px 52px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        scroll-margin-top: 50px;
+      }
+      .ps-meta {
+        margin-bottom: 36px;
+      }
+      .ps-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: rgba(255, 255, 255, 0.22);
+        margin-bottom: 12px;
+      }
+      .ps-bnum {
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.07);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 10px;
+        color: rgba(255, 255, 255, 0.38);
+      }
+      .ps-title {
+        font-family: "Syne", sans-serif;
+        font-size: clamp(1.2rem, 2vw, 1.7rem);
+        font-weight: 700;
+        color: #fff;
+        margin-bottom: 6px;
+      }
+      .ps-desc {
+        font-size: 13px;
+        color: rgba(255, 255, 255, 0.35);
+        max-width: 700px;
+        line-height: 1.65;
+      }
+      .pwin {
+        border-radius: 16px;
+        overflow: hidden;
+        border: 1px solid rgba(255, 255, 255, 0.07);
+        max-width: 1100px;
+      }
+
+      @media (max-width: 700px) {
+        .ps,
+        .ph {
+          padding-left: 20px;
+          padding-right: 20px;
+        }
+      }
+
+      /* ════════════════════════════════════════════
+   SHARED MINI CHART UTILITIES (canvas-free SVG)
+════════════════════════════════════════════ */
+      .sparkline {
+        display: block;
+      }
+      .bar-track {
+        display: flex;
+        align-items: flex-end;
+        gap: 3px;
+        height: 40px;
+      }
+      .bar-col {
+        border-radius: 2px 2px 0 0;
+        min-width: 6px;
+        flex: 1;
+        transition: opacity 0.2s;
+      }
+      .bar-col:hover {
+        opacity: 0.7;
+      }
+
+      /* ════════════════════════════════════════════
+   P1 · AMBER COMMAND — tonos cálidos, rich data
+════════════════════════════════════════════ */
+      .d1 {
+        display: flex;
+        min-height: 700px;
+        background: #0d0d0f;
+        font-family: "Inter", sans-serif;
+      }
+
+      .d1-sb {
+        width: 200px;
+        flex-shrink: 0;
+        background: #0a0a0c;
+        border-right: 1px solid rgba(255, 255, 255, 0.06);
+        display: flex;
+        flex-direction: column;
+        padding: 0;
+      }
+      .d1-sb-logo {
+        padding: 18px 16px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .d1-sb-lm {
+        width: 32px;
+        height: 32px;
+        border-radius: 9px;
+        background: linear-gradient(135deg, #f5a04e, #d97325);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: "Syne", sans-serif;
+        font-size: 12px;
+        font-weight: 800;
+        color: #fff;
+        flex-shrink: 0;
+      }
+      .d1-sb-lt {
+        font-family: "Syne", sans-serif;
+        font-size: 13px;
+        font-weight: 700;
+        color: #fff;
+        line-height: 1.2;
+      }
+      .d1-sb-ls {
+        font-size: 10px;
+        color: rgba(255, 255, 255, 0.28);
+      }
+      .d1-sb-sec {
+        padding: 14px 12px 5px;
+        font-size: 9px;
+        font-weight: 700;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: rgba(255, 255, 255, 0.2);
+      }
+      .d1-sb-lk {
+        display: flex;
+        align-items: center;
+        gap: 9px;
+        padding: 8px 10px;
+        margin: 1px 6px;
+        border-radius: 7px;
+        font-size: 12px;
+        font-weight: 500;
+        color: rgba(255, 255, 255, 0.42);
+        cursor: pointer;
+        transition: all 0.15s;
+      }
+      .d1-sb-lk:hover {
+        background: rgba(255, 255, 255, 0.05);
+        color: rgba(255, 255, 255, 0.8);
+      }
+      .d1-sb-lk.act {
+        background: rgba(245, 160, 78, 0.1);
+        color: #f5a04e;
+      }
+      .d1-sb-ft {
+        margin-top: auto;
+        padding: 14px;
+        border-top: 1px solid rgba(255, 255, 255, 0.06);
+        display: flex;
+        align-items: center;
+        gap: 9px;
+      }
+      .d1-sb-av {
+        width: 28px;
+        height: 28px;
+        border-radius: 7px;
+        background: linear-gradient(135deg, #f5a04e, #d97325);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 10px;
+        font-weight: 700;
+        color: #fff;
+        flex-shrink: 0;
+      }
+
+      .d1-main {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+      }
+      .d1-hdr {
+        padding: 0 22px;
+        height: 52px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+      .d1-hdr-title {
+        font-family: "Syne", sans-serif;
+        font-size: 15px;
+        font-weight: 700;
+        color: #fff;
+        flex: 1;
+      }
+      .d1-hdr-chip {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        font-size: 11px;
+        font-weight: 600;
+        padding: 5px 12px;
+        border-radius: 6px;
+        border: 1px solid rgba(255, 255, 255, 0.09);
+        color: rgba(255, 255, 255, 0.45);
+      }
+      .d1-hdr-btn {
+        padding: 7px 16px;
+        border-radius: 7px;
+        background: linear-gradient(135deg, #f5a04e, #d97325);
+        color: #fff;
+        font-size: 12px;
+        font-weight: 700;
+      }
+
+      .d1-body {
+        flex: 1;
+        overflow-y: auto;
+        padding: 20px 22px;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+      }
+
+      /* KPI row */
+      .d1-kpis {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 12px;
+      }
+      @media (max-width: 700px) {
+        .d1-kpis {
+          grid-template-columns: 1fr 1fr;
+        }
+      }
+      .d1-kpi {
+        background: #141416;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 12px;
+        padding: 16px;
+      }
+      .d1-kpi-label {
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: rgba(255, 255, 255, 0.3);
+        margin-bottom: 8px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+      .d1-kpi-val {
+        font-family: "Syne", sans-serif;
+        font-size: 26px;
+        font-weight: 800;
+        color: #fff;
+        line-height: 1;
+        margin-bottom: 6px;
+      }
+      .d1-kpi-delta {
+        font-size: 11px;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+      }
+      .delta-up {
+        color: #22c55e;
+      }
+      .delta-dn {
+        color: #ef4444;
+      }
+      .delta-neu {
+        color: rgba(255, 255, 255, 0.3);
+      }
+
+      /* Chart + clients row */
+      .d1-row2 {
+        display: grid;
+        grid-template-columns: 1.6fr 1fr;
+        gap: 12px;
+      }
+      @media (max-width: 700px) {
+        .d1-row2 {
+          grid-template-columns: 1fr;
+        }
+      }
+      .d1-card {
+        background: #141416;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 12px;
+        padding: 16px;
+      }
+      .d1-card-title {
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: rgba(255, 255, 255, 0.3);
+        margin-bottom: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .d1-card-more {
+        font-size: 11px;
+        color: #f5a04e;
+        font-weight: 600;
+        text-transform: none;
+        letter-spacing: 0;
+        cursor: pointer;
+      }
+
+      /* bar chart */
+      .d1-chart-bars {
+        display: flex;
+        align-items: flex-end;
+        gap: 4px;
+        height: 80px;
+        padding-bottom: 4px;
+      }
+      .d1-bar-wrap {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 4px;
+        flex: 1;
+      }
+      .d1-bar {
+        width: 100%;
+        border-radius: 3px 3px 0 0;
+        min-height: 4px;
+        transition: opacity 0.2s;
+        cursor: pointer;
+      }
+      .d1-bar:hover {
+        opacity: 0.75;
+      }
+      .d1-bar-lbl {
+        font-size: 9px;
+        color: rgba(255, 255, 255, 0.3);
+        font-weight: 500;
+      }
+
+      /* activity chart line using SVG */
+      .d1-sparksvg {
+        width: 100%;
+        height: 60px;
+      }
+
+      /* client list */
+      .d1-cli-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 9px 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      }
+      .d1-cli-item:last-child {
+        border-bottom: none;
+      }
+      .d1-cli-av {
+        width: 32px;
+        height: 32px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 11px;
+        font-weight: 700;
+        color: #fff;
+        flex-shrink: 0;
+      }
+      .d1-cli-info {
+        flex: 1;
+        min-width: 0;
+      }
+      .d1-cli-name {
+        font-size: 13px;
+        font-weight: 600;
+        color: #fff;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .d1-cli-sub {
+        font-size: 11px;
+        color: rgba(255, 255, 255, 0.35);
+      }
+      .d1-cli-badge {
+        font-size: 10px;
+        font-weight: 700;
+        padding: 3px 8px;
+        border-radius: 4px;
+      }
+
+      /* row3 */
+      .d1-row3 {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 12px;
+      }
+      @media (max-width: 700px) {
+        .d1-row3 {
+          grid-template-columns: 1fr;
+        }
+      }
+      .d1-api-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 8px 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      }
+      .d1-api-item:last-child {
+        border-bottom: none;
+      }
+      .d1-api-method {
+        font-size: 10px;
+        font-weight: 700;
+        padding: 2px 7px;
+        border-radius: 3px;
+        flex-shrink: 0;
+        font-family: "DM Mono", monospace;
+      }
+      .d1-api-path {
+        font-size: 12px;
+        color: rgba(255, 255, 255, 0.65);
+        font-family: "DM Mono", monospace;
+        flex: 1;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      .d1-api-count {
+        font-size: 11px;
+        font-weight: 600;
+        color: rgba(255, 255, 255, 0.45);
+      }
+
+      .d1-file-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 8px 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      }
+      .d1-file-item:last-child {
+        border-bottom: none;
+      }
+      .d1-file-ic {
+        width: 30px;
+        height: 30px;
+        border-radius: 6px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+      }
+      .d1-file-info {
+        flex: 1;
+        min-width: 0;
+      }
+      .d1-file-name {
+        font-size: 12px;
+        font-weight: 500;
+        color: rgba(255, 255, 255, 0.8);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .d1-file-meta {
+        font-size: 11px;
+        color: rgba(255, 255, 255, 0.35);
+      }
+      .d1-file-size {
+        font-size: 11px;
+        color: rgba(255, 255, 255, 0.4);
+        flex-shrink: 0;
+      }
+
+      .d1-donut-wrap {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        margin-top: 4px;
+      }
+      .d1-donut-svg {
+        flex-shrink: 0;
+      }
+      .d1-donut-legend {
+        display: flex;
+        flex-direction: column;
+        gap: 7px;
+        flex: 1;
+      }
+      .d1-legend-item {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        font-size: 12px;
+        color: rgba(255, 255, 255, 0.65);
+      }
+      .d1-legend-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        flex-shrink: 0;
+      }
+      .d1-legend-val {
+        margin-left: auto;
+        font-weight: 600;
+        color: #fff;
+      }
+
+      /* progress bar */
+      .d1-prog-row {
+        margin-bottom: 10px;
+      }
+      .d1-prog-head {
+        display: flex;
+        justify-content: space-between;
+        font-size: 12px;
+        margin-bottom: 5px;
+      }
+      .d1-prog-lbl {
+        color: rgba(255, 255, 255, 0.65);
+      }
+      .d1-prog-val {
+        font-weight: 600;
+        color: #fff;
+      }
+      .d1-prog-track {
+        height: 5px;
+        background: rgba(255, 255, 255, 0.07);
+        border-radius: 3px;
+        overflow: hidden;
+      }
+      .d1-prog-fill {
+        height: 100%;
+        border-radius: 3px;
+        transition: width 0.8s ease;
+      }
+
+      /* ════════════════════════════════════════════
+   P2 · CLEAN LIGHT — mode clar Figma-style
+════════════════════════════════════════════ */
+      .d2 {
+        display: flex;
+        min-height: 700px;
+        background: #f5f3ee;
+        font-family: "Inter", sans-serif;
+      }
+      .d2-sb {
+        width: 196px;
+        flex-shrink: 0;
+        background: #fff;
+        border-right: 1.5px solid #eceae3;
+        display: flex;
+        flex-direction: column;
+      }
+      .d2-sb-logo {
+        padding: 18px 16px;
+        border-bottom: 1.5px solid #eceae3;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .d2-sb-lm {
+        width: 30px;
+        height: 30px;
+        border-radius: 8px;
+        background: #f0a048;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: "Syne", sans-serif;
+        font-size: 12px;
+        font-weight: 800;
+        color: #fff;
+      }
+      .d2-sb-lt2 {
+        font-family: "Syne", sans-serif;
+        font-size: 13px;
+        font-weight: 700;
+        color: #111;
+      }
+      .d2-sb-ls2 {
+        font-size: 10px;
+        color: #aaa;
+      }
+      .d2-sb-sec2 {
+        padding: 14px 12px 5px;
+        font-size: 9px;
+        font-weight: 700;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: #ccc;
+      }
+      .d2-sb-lk {
+        display: flex;
+        align-items: center;
+        gap: 9px;
+        padding: 8px 10px;
+        margin: 1px 6px;
+        border-radius: 7px;
+        font-size: 12px;
+        font-weight: 500;
+        color: #666;
+        cursor: pointer;
+        transition: all 0.15s;
+      }
+      .d2-sb-lk:hover {
+        background: #f5f3ee;
+        color: #111;
+      }
+      .d2-sb-lk.act {
+        background: #fff5e8;
+        color: #d97325;
+        font-weight: 600;
+      }
+      .d2-sb-ft {
+        margin-top: auto;
+        padding: 14px;
+        border-top: 1.5px solid #eceae3;
+        display: flex;
+        align-items: center;
+        gap: 9px;
+      }
+      .d2-sb-av {
+        width: 28px;
+        height: 28px;
+        border-radius: 7px;
+        background: #f0a048;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 10px;
+        font-weight: 700;
+        color: #fff;
+      }
+
+      .d2-main {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+      }
+      .d2-hdr {
+        padding: 0 22px;
+        height: 50px;
+        border-bottom: 1.5px solid #eceae3;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        background: #fff;
+      }
+      .d2-hdr-title {
+        font-family: "Syne", sans-serif;
+        font-size: 15px;
+        font-weight: 700;
+        color: #111;
+        flex: 1;
+      }
+      .d2-hdr-btn {
+        padding: 7px 16px;
+        border-radius: 7px;
+        background: #111;
+        color: #fff;
+        font-size: 12px;
+        font-weight: 700;
+      }
+
+      .d2-body {
+        flex: 1;
+        overflow-y: auto;
+        padding: 20px 22px;
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+      }
+
+      .d2-kpis {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 10px;
+      }
+      @media (max-width: 700px) {
+        .d2-kpis {
+          grid-template-columns: 1fr 1fr;
+        }
+      }
+      .d2-kpi {
+        background: #fff;
+        border: 1.5px solid #eceae3;
+        border-radius: 12px;
+        padding: 16px;
+      }
+      .d2-kpi-lbl {
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: #aaa;
+        margin-bottom: 8px;
+      }
+      .d2-kpi-val {
+        font-family: "Syne", sans-serif;
+        font-size: 24px;
+        font-weight: 800;
+        color: #111;
+        margin-bottom: 5px;
+      }
+      .d2-kpi-sub {
+        font-size: 11px;
+        font-weight: 600;
+      }
+
+      .d2-row2 {
+        display: grid;
+        grid-template-columns: 1.5fr 1fr;
+        gap: 10px;
+      }
+      @media (max-width: 700px) {
+        .d2-row2 {
+          grid-template-columns: 1fr;
+        }
+      }
+      .d2-card {
+        background: #fff;
+        border: 1.5px solid #eceae3;
+        border-radius: 12px;
+        padding: 16px;
+      }
+      .d2-card-title {
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: #aaa;
+        margin-bottom: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .d2-card-more2 {
+        font-size: 11px;
+        color: #d97325;
+        font-weight: 600;
+        text-transform: none;
+        letter-spacing: 0;
+      }
+
+      .d2-row3 {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 10px;
+      }
+      @media (max-width: 700px) {
+        .d2-row3 {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      .d2-cli-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 9px 0;
+        border-bottom: 1.5px solid #f5f3ee;
+      }
+      .d2-cli-item:last-child {
+        border-bottom: none;
+      }
+      .d2-cli-av {
+        width: 30px;
+        height: 30px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 10px;
+        font-weight: 700;
+        color: #fff;
+        flex-shrink: 0;
+      }
+      .d2-cli-name {
+        font-size: 13px;
+        font-weight: 600;
+        color: #111;
+      }
+      .d2-cli-sub2 {
+        font-size: 11px;
+        color: #999;
+      }
+      .d2-cli-badge2 {
+        font-size: 10px;
+        font-weight: 700;
+        padding: 2px 7px;
+        border-radius: 4px;
+        background: #f0fdf4;
+        color: #16a34a;
+      }
+
+      .d2-api-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 7px 0;
+        border-bottom: 1.5px solid #f5f3ee;
+      }
+      .d2-api-item:last-child {
+        border-bottom: none;
+      }
+      .d2-api-method2 {
+        font-size: 9px;
+        font-weight: 700;
+        padding: 2px 6px;
+        border-radius: 3px;
+        flex-shrink: 0;
+        font-family: "DM Mono", monospace;
+      }
+      .d2-api-path2 {
+        font-size: 11px;
+        color: #666;
+        font-family: "DM Mono", monospace;
+        flex: 1;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      .d2-api-count2 {
+        font-size: 11px;
+        font-weight: 600;
+        color: #333;
+      }
+
+      .d2-chart-bars {
+        display: flex;
+        align-items: flex-end;
+        gap: 3px;
+        height: 70px;
+        padding-bottom: 4px;
+      }
+      .d2-bar-wrap {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 3px;
+        flex: 1;
+      }
+      .d2-bar {
+        width: 100%;
+        border-radius: 2px 2px 0 0;
+        min-height: 3px;
+      }
+      .d2-bar-lbl2 {
+        font-size: 9px;
+        color: #bbb;
+        font-weight: 500;
+      }
+
+      .d2-prog-row {
+        margin-bottom: 9px;
+      }
+      .d2-prog-head {
+        display: flex;
+        justify-content: space-between;
+        font-size: 11px;
+        margin-bottom: 4px;
+        color: #555;
+      }
+      .d2-prog-val2 {
+        font-weight: 700;
+        color: #111;
+      }
+      .d2-prog-track {
+        height: 5px;
+        background: #f0f0e8;
+        border-radius: 3px;
+        overflow: hidden;
+      }
+      .d2-prog-fill {
+        height: 100%;
+        border-radius: 3px;
+      }
+
+      /* ════════════════════════════════════════════
+   P3 · SLATE EDITORIAL — 2 cols, accent azul
+════════════════════════════════════════════ */
+      .d3 {
+        display: flex;
+        min-height: 700px;
+        background: #0d1018;
+        font-family: "Inter", sans-serif;
+      }
+      .d3-sb {
+        width: 196px;
+        flex-shrink: 0;
+        background: #080b12;
+        border-right: 1px solid rgba(255, 255, 255, 0.06);
+        display: flex;
+        flex-direction: column;
+      }
+      .d3-sb-logo {
+        padding: 18px 16px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .d3-sb-lm {
+        width: 30px;
+        height: 30px;
+        border-radius: 8px;
+        background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: "Space Grotesk", sans-serif;
+        font-size: 12px;
+        font-weight: 700;
+        color: #fff;
+      }
+      .d3-sb-lt3 {
+        font-family: "Space Grotesk", sans-serif;
+        font-size: 13px;
+        font-weight: 700;
+        color: #fff;
+      }
+      .d3-sb-ls3 {
+        font-size: 10px;
+        color: rgba(255, 255, 255, 0.3);
+      }
+      .d3-sb-sec3 {
+        padding: 14px 12px 5px;
+        font-size: 9px;
+        font-weight: 700;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: rgba(255, 255, 255, 0.2);
+      }
+      .d3-sb-lk {
+        display: flex;
+        align-items: center;
+        gap: 9px;
+        padding: 8px 10px;
+        margin: 1px 6px;
+        border-radius: 7px;
+        font-size: 12px;
+        font-weight: 500;
+        color: rgba(255, 255, 255, 0.4);
+        cursor: pointer;
+        transition: all 0.15s;
+      }
+      .d3-sb-lk:hover {
+        background: rgba(255, 255, 255, 0.05);
+        color: rgba(255, 255, 255, 0.8);
+      }
+      .d3-sb-lk.act {
+        background: rgba(59, 130, 246, 0.12);
+        color: #60a5fa;
+      }
+      .d3-sb-ft {
+        margin-top: auto;
+        padding: 14px;
+        border-top: 1px solid rgba(255, 255, 255, 0.06);
+        display: flex;
+        align-items: center;
+        gap: 9px;
+      }
+      .d3-sb-av {
+        width: 28px;
+        height: 28px;
+        border-radius: 7px;
+        background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 10px;
+        font-weight: 700;
+        color: #fff;
+      }
+
+      .d3-main {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+      }
+      .d3-hdr {
+        padding: 0 22px;
+        height: 50px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+      .d3-hdr-title {
+        font-family: "Space Grotesk", sans-serif;
+        font-size: 15px;
+        font-weight: 700;
+        color: #fff;
+        flex: 1;
+      }
+      .d3-hdr-seg {
+        display: flex;
+        background: rgba(255, 255, 255, 0.06);
+        border-radius: 7px;
+        padding: 2px;
+        gap: 1px;
+      }
+      .d3-hdr-seg span {
+        padding: 4px 12px;
+        border-radius: 5px;
+        font-size: 11px;
+        font-weight: 600;
+        color: rgba(255, 255, 255, 0.4);
+        cursor: pointer;
+      }
+      .d3-hdr-seg span.sel {
+        background: rgba(255, 255, 255, 0.1);
+        color: #fff;
+      }
+      .d3-hdr-btn3 {
+        padding: 7px 16px;
+        border-radius: 7px;
+        background: #3b82f6;
+        color: #fff;
+        font-size: 12px;
+        font-weight: 700;
+      }
+
+      .d3-body {
+        flex: 1;
+        overflow-y: auto;
+        padding: 20px 22px;
+        display: grid;
+        grid-template-columns: 1fr 300px;
+        gap: 14px;
+        align-content: start;
+      }
+      @media (max-width: 800px) {
+        .d3-body {
+          grid-template-columns: 1fr;
+        }
+      }
+      .d3-left {
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+      }
+      .d3-right {
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+      }
+
+      .d3-kpis {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+      }
+      .d3-kpi {
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 11px;
+        padding: 14px;
+      }
+      .d3-kpi-lbl {
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: rgba(255, 255, 255, 0.28);
+        margin-bottom: 7px;
+      }
+      .d3-kpi-val {
+        font-family: "Space Grotesk", sans-serif;
+        font-size: 22px;
+        font-weight: 700;
+        color: #fff;
+        margin-bottom: 5px;
+      }
+      .d3-kpi-sub3 {
+        font-size: 11px;
+        font-weight: 600;
+      }
+
+      .d3-card {
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 11px;
+        padding: 14px;
+      }
+      .d3-card-title {
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 0.09em;
+        text-transform: uppercase;
+        color: rgba(255, 255, 255, 0.28);
+        margin-bottom: 13px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .d3-card-more3 {
+        font-size: 11px;
+        color: #60a5fa;
+        font-weight: 600;
+        text-transform: none;
+        letter-spacing: 0;
+      }
+
+      .d3-cli-item {
+        display: flex;
+        align-items: center;
+        gap: 9px;
+        padding: 8px 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      }
+      .d3-cli-item:last-child {
+        border-bottom: none;
+      }
+      .d3-cli-av3 {
+        width: 28px;
+        height: 28px;
+        border-radius: 7px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 10px;
+        font-weight: 700;
+        color: #fff;
+        flex-shrink: 0;
+      }
+      .d3-cli-name3 {
+        font-size: 12px;
+        font-weight: 600;
+        color: #fff;
+      }
+      .d3-cli-sub3 {
+        font-size: 10px;
+        color: rgba(255, 255, 255, 0.35);
+      }
+      .d3-stat {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        font-size: 11px;
+      }
+      .d3-stat-num {
+        font-weight: 600;
+        color: #fff;
+      }
+      .d3-stat-lbl3 {
+        color: rgba(255, 255, 255, 0.3);
+      }
+
+      .d3-heatmap {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        gap: 3px;
+        margin-top: 4px;
+      }
+      .d3-hm-cell {
+        aspect-ratio: 1;
+        border-radius: 2px;
+      }
+
+      .d3-top-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      }
+      .d3-top-item:last-child {
+        border-bottom: none;
+      }
+      .d3-top-rank {
+        font-size: 11px;
+        font-weight: 700;
+        color: rgba(255, 255, 255, 0.3);
+        width: 16px;
+        text-align: center;
+        flex-shrink: 0;
+      }
+      .d3-top-info {
+        flex: 1;
+        min-width: 0;
+      }
+      .d3-top-name {
+        font-size: 12px;
+        font-weight: 600;
+        color: #fff;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .d3-top-sub {
+        font-size: 10px;
+        color: rgba(255, 255, 255, 0.35);
+      }
+      .d3-top-val {
+        font-size: 12px;
+        font-weight: 700;
+        color: #60a5fa;
+        flex-shrink: 0;
+      }
+
+      /* ════════════════════════════════════════════
+   P4 · ICON SIDEBAR + BENTO GRID
+════════════════════════════════════════════ */
+      .d4 {
+        display: flex;
+        min-height: 700px;
+        background: #09090b;
+        font-family: "Inter", sans-serif;
+      }
+      .d4-sb {
+        width: 52px;
+        flex-shrink: 0;
+        background: #09090b;
+        border-right: 1px solid rgba(255, 255, 255, 0.06);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 14px 0;
+        gap: 4px;
+      }
+      .d4-sb-logo {
+        width: 32px;
+        height: 32px;
+        border-radius: 8px;
+        background: linear-gradient(135deg, #a855f7, #7c3aed);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: "Syne", sans-serif;
+        font-size: 11px;
+        font-weight: 800;
+        color: #fff;
+        margin-bottom: 10px;
+        flex-shrink: 0;
+      }
+      .d4-sb-ic {
+        width: 36px;
+        height: 36px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: rgba(255, 255, 255, 0.3);
+        cursor: pointer;
+        transition: all 0.15s;
+      }
+      .d4-sb-ic:hover {
+        background: rgba(255, 255, 255, 0.06);
+        color: rgba(255, 255, 255, 0.7);
+      }
+      .d4-sb-ic.act {
+        background: rgba(168, 85, 247, 0.12);
+        color: #a855f7;
+      }
+      .d4-sb-div {
+        height: 1px;
+        background: rgba(255, 255, 255, 0.07);
+        width: 28px;
+        margin: 5px 0;
+      }
+      .d4-sb-ft2 {
+        margin-top: auto;
+        width: 32px;
+        height: 32px;
+        border-radius: 8px;
+        background: linear-gradient(135deg, #a855f7, #7c3aed);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 10px;
+        font-weight: 700;
+        color: #fff;
+      }
+
+      .d4-main {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+      }
+      .d4-hdr {
+        padding: 0 20px;
+        height: 52px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+      .d4-hdr-bc {
+        font-size: 13px;
+        color: rgba(255, 255, 255, 0.3);
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        flex: 1;
+      }
+      .d4-hdr-bc strong {
+        color: #fff;
+      }
+      .d4-hdr-btn4 {
+        padding: 7px 16px;
+        border-radius: 8px;
+        background: rgba(168, 85, 247, 0.15);
+        color: #c084fc;
+        border: 1px solid rgba(168, 85, 247, 0.3);
+        font-size: 12px;
+        font-weight: 700;
+      }
+
+      .d4-body {
+        flex: 1;
+        overflow-y: auto;
+        padding: 18px 20px;
+        display: grid;
+        gap: 10px;
+        grid-template-columns: 1fr 1fr 1fr 1fr;
+        grid-template-rows: auto;
+      }
+      @media (max-width: 800px) {
+        .d4-body {
+          grid-template-columns: 1fr 1fr;
+        }
+      }
+      @media (max-width: 500px) {
+        .d4-body {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      /* bento tiles */
+      .d4-tile {
+        background: #141418;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 13px;
+        padding: 16px;
+      }
+      .d4-tile.span2 {
+        grid-column: span 2;
+      }
+      .d4-tile.span3 {
+        grid-column: span 3;
+      }
+      .d4-tile.span4 {
+        grid-column: span 4;
+      }
+      .d4-tile-lbl {
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: rgba(255, 255, 255, 0.28);
+        margin-bottom: 10px;
+      }
+      .d4-num {
+        font-family: "Syne", sans-serif;
+        font-size: 30px;
+        font-weight: 800;
+        line-height: 1;
+        color: #fff;
+      }
+      .d4-num-sub {
+        font-size: 11px;
+        font-weight: 600;
+        margin-top: 5px;
+      }
+      .d4-accent {
+        color: #a855f7;
+      }
+
+      /* stacked mini bars */
+      .d4-mini-bars {
+        display: flex;
+        gap: 2px;
+        height: 36px;
+        align-items: flex-end;
+        margin-top: 8px;
+      }
+      .d4-mb {
+        border-radius: 2px 2px 0 0;
+        flex: 1;
+        min-height: 2px;
+      }
+
+      /* activity feed */
+      .d4-feed {
+        display: flex;
+        flex-direction: column;
+        gap: 0;
+      }
+      .d4-feed-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        padding: 9px 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      }
+      .d4-feed-item:last-child {
+        border-bottom: none;
+      }
+      .d4-feed-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        flex-shrink: 0;
+        margin-top: 5px;
+      }
+      .d4-feed-text {
+        font-size: 12px;
+        color: rgba(255, 255, 255, 0.65);
+        line-height: 1.5;
+        flex: 1;
+      }
+      .d4-feed-time {
+        font-size: 10px;
+        color: rgba(255, 255, 255, 0.28);
+        flex-shrink: 0;
+        white-space: nowrap;
+      }
+
+      /* donut mini */
+      .d4-donut-row {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        margin-top: 8px;
+      }
+      .d4-dl {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        flex: 1;
+      }
+      .d4-dl-item {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 11px;
+        color: rgba(255, 255, 255, 0.6);
+      }
+      .d4-dl-dot {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        flex-shrink: 0;
+      }
+      .d4-dl-val {
+        margin-left: auto;
+        font-weight: 600;
+        color: #fff;
+      }
+
+      /* ════════════════════════════════════════════
+   P5 · GREEN TEAL — dashboard d'operacions
+════════════════════════════════════════════ */
+      .d5 {
+        display: flex;
+        min-height: 700px;
+        background: #0a1210;
+        font-family: "Inter", sans-serif;
+      }
+      .d5-sb {
+        width: 196px;
+        flex-shrink: 0;
+        background: #060f0c;
+        border-right: 1px solid rgba(255, 255, 255, 0.06);
+        display: flex;
+        flex-direction: column;
+      }
+      .d5-sb-logo {
+        padding: 18px 16px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .d5-sb-lm {
+        width: 30px;
+        height: 30px;
+        border-radius: 8px;
+        background: linear-gradient(135deg, #10b981, #059669);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: "Syne", sans-serif;
+        font-size: 12px;
+        font-weight: 800;
+        color: #fff;
+      }
+      .d5-sb-lt5 {
+        font-family: "Syne", sans-serif;
+        font-size: 13px;
+        font-weight: 700;
+        color: #fff;
+      }
+      .d5-sb-ls5 {
+        font-size: 10px;
+        color: rgba(255, 255, 255, 0.3);
+      }
+      .d5-sb-sec5 {
+        padding: 14px 12px 5px;
+        font-size: 9px;
+        font-weight: 700;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: rgba(255, 255, 255, 0.2);
+      }
+      .d5-sb-lk {
+        display: flex;
+        align-items: center;
+        gap: 9px;
+        padding: 8px 10px;
+        margin: 1px 6px;
+        border-radius: 7px;
+        font-size: 12px;
+        font-weight: 500;
+        color: rgba(255, 255, 255, 0.4);
+        cursor: pointer;
+        transition: all 0.15s;
+      }
+      .d5-sb-lk:hover {
+        background: rgba(255, 255, 255, 0.05);
+        color: rgba(255, 255, 255, 0.8);
+      }
+      .d5-sb-lk.act {
+        background: rgba(16, 185, 129, 0.1);
+        color: #34d399;
+      }
+      .d5-sb-ft {
+        margin-top: auto;
+        padding: 14px;
+        border-top: 1px solid rgba(255, 255, 255, 0.06);
+        display: flex;
+        align-items: center;
+        gap: 9px;
+      }
+      .d5-sb-av {
+        width: 28px;
+        height: 28px;
+        border-radius: 7px;
+        background: linear-gradient(135deg, #10b981, #059669);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 10px;
+        font-weight: 700;
+        color: #fff;
+      }
+
+      .d5-main {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+      }
+      .d5-hdr {
+        padding: 0 22px;
+        height: 50px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+      .d5-hdr-title {
+        font-family: "Syne", sans-serif;
+        font-size: 15px;
+        font-weight: 700;
+        color: #fff;
+        flex: 1;
+      }
+      .d5-hdr-dot {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        font-size: 11px;
+        font-weight: 600;
+        color: #34d399;
+      }
+      .d5-hdr-live-dot {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: #34d399;
+        animation: pulse5 1.5s infinite;
+      }
+      @keyframes pulse5 {
+        0%,
+        100% {
+          opacity: 1;
+          transform: scale(1);
+        }
+        50% {
+          opacity: 0.5;
+          transform: scale(0.8);
+        }
+      }
+      .d5-hdr-btn5 {
+        padding: 7px 16px;
+        border-radius: 7px;
+        background: linear-gradient(135deg, #10b981, #059669);
+        color: #fff;
+        font-size: 12px;
+        font-weight: 700;
+      }
+
+      .d5-body {
+        flex: 1;
+        overflow-y: auto;
+        padding: 20px 22px;
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+      }
+
+      .d5-kpis {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 10px;
+      }
+      @media (max-width: 700px) {
+        .d5-kpis {
+          grid-template-columns: 1fr 1fr;
+        }
+      }
+      .d5-kpi {
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.07);
+        border-radius: 11px;
+        padding: 14px;
+        position: relative;
+        overflow: hidden;
+      }
+      .d5-kpi::after {
+        content: "";
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 2px;
+      }
+      .d5-kpi.k-vis::after {
+        background: #10b981;
+      }
+      .d5-kpi.k-ok::after {
+        background: #22c55e;
+      }
+      .d5-kpi.k-dn::after {
+        background: #ef4444;
+      }
+      .d5-kpi.k-fil::after {
+        background: #f59e0b;
+      }
+      .d5-kpi-lbl {
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: rgba(255, 255, 255, 0.28);
+        margin-bottom: 7px;
+      }
+      .d5-kpi-val {
+        font-family: "Syne", sans-serif;
+        font-size: 24px;
+        font-weight: 800;
+        color: #fff;
+        margin-bottom: 5px;
+      }
+      .d5-kpi-sub5 {
+        font-size: 11px;
+        font-weight: 600;
+      }
+
+      .d5-row2 {
+        display: grid;
+        grid-template-columns: 1.4fr 1fr;
+        gap: 14px;
+      }
+      @media (max-width: 700px) {
+        .d5-row2 {
+          grid-template-columns: 1fr;
+        }
+      }
+      .d5-card {
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.07);
+        border-radius: 11px;
+        padding: 14px;
+      }
+      .d5-card-title {
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 0.09em;
+        text-transform: uppercase;
+        color: rgba(255, 255, 255, 0.28);
+        margin-bottom: 13px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .d5-card-more5 {
+        font-size: 11px;
+        color: #34d399;
+        font-weight: 600;
+        text-transform: none;
+        letter-spacing: 0;
+      }
+
+      .d5-cli-item {
+        display: flex;
+        align-items: center;
+        gap: 9px;
+        padding: 8px 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      }
+      .d5-cli-item:last-child {
+        border-bottom: none;
+      }
+      .d5-cli-av5 {
+        width: 28px;
+        height: 28px;
+        border-radius: 7px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 10px;
+        font-weight: 700;
+        color: #fff;
+        flex-shrink: 0;
+      }
+      .d5-cli-name5 {
+        font-size: 12px;
+        font-weight: 600;
+        color: #fff;
+      }
+      .d5-cli-sub5 {
+        font-size: 10px;
+        color: rgba(255, 255, 255, 0.35);
+      }
+      .d5-status-dot {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        font-size: 10px;
+        font-weight: 600;
+      }
+      .d5-sdot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+      }
+
+      .d5-row3 {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 14px;
+      }
+      @media (max-width: 700px) {
+        .d5-row3 {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      .d5-req-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 7px 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      }
+      .d5-req-item:last-child {
+        border-bottom: none;
+      }
+      .d5-req-badge {
+        font-size: 9px;
+        font-weight: 700;
+        padding: 2px 6px;
+        border-radius: 3px;
+        font-family: "DM Mono", monospace;
+        flex-shrink: 0;
+      }
+      .d5-req-path {
+        font-size: 11px;
+        color: rgba(255, 255, 255, 0.65);
+        font-family: "DM Mono", monospace;
+        flex: 1;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      .d5-req-count {
+        font-size: 11px;
+        font-weight: 700;
+        flex-shrink: 0;
+      }
+
+      .d5-chart-bars {
+        display: flex;
+        align-items: flex-end;
+        gap: 3px;
+        height: 65px;
+        padding-bottom: 4px;
+      }
+      .d5-bar-wrap {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 3px;
+        flex: 1;
+      }
+      .d5-bar {
+        width: 100%;
+        border-radius: 2px 2px 0 0;
+        min-height: 3px;
+      }
+      .d5-bar-lbl5 {
+        font-size: 8px;
+        color: rgba(255, 255, 255, 0.3);
+      }
+
+      .d5-prog-row {
+        margin-bottom: 9px;
+      }
+      .d5-prog-head {
+        display: flex;
+        justify-content: space-between;
+        font-size: 11px;
+        margin-bottom: 4px;
+      }
+      .d5-prog-lbl5 {
+        color: rgba(255, 255, 255, 0.6);
+      }
+      .d5-prog-val5 {
+        font-weight: 600;
+        color: #fff;
+      }
+      .d5-prog-track {
+        height: 5px;
+        background: rgba(255, 255, 255, 0.06);
+        border-radius: 3px;
+        overflow: hidden;
+      }
+      .d5-prog-fill {
+        height: 100%;
+        border-radius: 3px;
+      }
+
+      /* shared footer */
+      .sf {
+        padding: 32px 52px;
+        border-top: 1px solid rgba(255, 255, 255, 0.05);
+        display: flex;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+      .sf p {
+        font-size: 13px;
+        color: rgba(255, 255, 255, 0.15);
+      }
+    </style>
+  </head>
+  <body>
+    <!-- INDEX NAV -->
+    <nav class="inav">
+      <span class="inav-brand">VoraStudio CMS</span>
+      <div class="inav-links">
+        <a href="#p1">01 Amber</a>
+        <a href="#p2">02 Light</a>
+        <a href="#p3">03 Slate</a>
+        <a href="#p4">04 Bento</a>
+        <a href="#p5">05 Teal</a>
+      </div>
+    </nav>
+
+    <div class="pw">
+      <div class="ph">
+        <div class="ph-label">VoraStudio CMS · 5 Propostes de Dashboard</div>
+        <h1>Dashboard amb dades i mètriques</h1>
+        <p>
+          Cinc visions de dashboard per al CMS. Cada proposta mostra KPIs reals, gràfics d'activitat, estat de clients, peticions API
+          acceptades/denegades, fitxers pujats i recursos més utilitzats.
+        </p>
+      </div>
+
+      <!-- ══════════════════ P1 · AMBER COMMAND ══════════════════ -->
+      <section class="ps" id="p1">
+        <div class="ps-meta">
+          <div class="ps-badge">
+            <div class="ps-bnum">1</div>
+            Proposta
+          </div>
+          <div class="ps-title">Amber Command — Fosc premium, mètriques riques</div>
+          <div class="ps-desc">
+            Accent taronja VoraStudio. KPIs grans amb deltes, gràfics de barres setmanals, donut de recursos, API log i fitxers recents. Layout d'una
+            sola columna vertical.
+          </div>
+        </div>
+        <div class="pwin">
+          <div class="d1">
+            <!-- SIDEBAR -->
+            <div class="d1-sb">
+              <div class="d1-sb-logo">
+                <div class="d1-sb-lm">V</div>
+                <div>
+                  <div class="d1-sb-lt">Vora</div>
+                  <div class="d1-sb-ls">Studio CMS</div>
+                </div>
+              </div>
+              <div class="d1-sb-sec">General</div>
+              <div class="d1-sb-lk act">
+                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                  <rect x="3" y="3" width="7" height="7" />
+                  <rect x="14" y="3" width="7" height="7" />
+                  <rect x="3" y="14" width="7" height="7" />
+                  <rect x="14" y="14" width="7" height="7" />
+                </svg>
+                Dashboard
+              </div>
+              <div class="d1-sb-lk">
+                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                  <circle cx="12" cy="7" r="4" />
+                </svg>
+                Projectes
+              </div>
+              <div class="d1-sb-lk">
+                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                  <circle cx="9" cy="7" r="4" />
+                  <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+                  <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                </svg>
+                Usuaris
+              </div>
+              <div class="d1-sb-sec">Web</div>
+              <div class="d1-sb-lk">
+                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                  <polyline points="14,2 14,8 20,8" />
+                </svg>
+                Notícies
+              </div>
+              <div class="d1-sb-lk">
+                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                  <rect x="3" y="3" width="18" height="18" rx="2" />
+                  <circle cx="8.5" cy="8.5" r="1.5" />
+                  <polyline points="21,15 16,10 5,21" />
+                </svg>
+                Mediateca
+              </div>
+              <div class="d1-sb-sec">Dev</div>
+              <div class="d1-sb-lk">
+                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                  <polyline points="16,18 22,12 16,6" />
+                  <polyline points="8,6 2,12 8,18" />
+                </svg>
+                Guia API
+              </div>
+              <div class="d1-sb-ft">
+                <div class="d1-sb-av">VS</div>
+                <div>
+                  <div style="font-size: 12px; font-weight: 500; color: rgba(255, 255, 255, 0.7)">Vora Studio</div>
+                  <div style="font-size: 10px; color: rgba(255, 255, 255, 0.28)">Admin</div>
+                </div>
+              </div>
+            </div>
+            <!-- MAIN -->
+            <div class="d1-main">
+              <div class="d1-hdr">
+                <span class="d1-hdr-title">Dashboard</span>
+                <div class="d1-hdr-chip">
+                  <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <circle cx="12" cy="12" r="10" />
+                    <polyline points="12,6 12,12 16,14" />
+                  </svg>
+                  Últims 7 dies
+                </div>
+                <button class="d1-hdr-btn">+ Nou projecte</button>
+              </div>
+              <div class="d1-body">
+                <!-- KPIs -->
+                <div class="d1-kpis">
+                  <div class="d1-kpi">
+                    <div class="d1-kpi-label">
+                      <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                        <circle cx="12" cy="12" r="3" />
+                      </svg>
+                      Visites avui
+                    </div>
+                    <div class="d1-kpi-val" style="color: #f5a04e">2,847</div>
+                    <div class="d1-kpi-delta delta-up">↑ 18.4% vs ahir</div>
+                  </div>
+                  <div class="d1-kpi">
+                    <div class="d1-kpi-label">
+                      <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <polyline points="22,12 18,12 15,21 9,3 6,12 2,12" />
+                      </svg>
+                      Peticions API
+                    </div>
+                    <div class="d1-kpi-val">14,302</div>
+                    <div class="d1-kpi-delta delta-up">↑ 6.2% aquesta setmana</div>
+                  </div>
+                  <div class="d1-kpi">
+                    <div class="d1-kpi-label">
+                      <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                        <polyline points="22,4 12,14.01 9,11.01" />
+                      </svg>
+                      Acceptades
+                    </div>
+                    <div class="d1-kpi-val" style="color: #22c55e">13,891</div>
+                    <div class="d1-kpi-delta delta-up">97.1% tasa èxit</div>
+                  </div>
+                  <div class="d1-kpi">
+                    <div class="d1-kpi-label">
+                      <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <circle cx="12" cy="12" r="10" />
+                        <line x1="15" y1="9" x2="9" y2="15" />
+                        <line x1="9" y1="9" x2="15" y2="15" />
+                      </svg>
+                      Denegades
+                    </div>
+                    <div class="d1-kpi-val" style="color: #ef4444">411</div>
+                    <div class="d1-kpi-delta delta-dn">↑ 2.9% (2 nous errors)</div>
+                  </div>
+                </div>
+
+                <!-- CHART + CLIENTS -->
+                <div class="d1-row2">
+                  <div class="d1-card">
+                    <div class="d1-card-title">Peticions API setmanals <span class="d1-card-more">Veure tot</span></div>
+                    <!-- SVG Line Chart -->
+                    <svg class="d1-sparksvg" viewBox="0 0 420 80" preserveAspectRatio="none" style="margin-bottom: 8px">
+                      <defs>
+                        <linearGradient id="g1" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="0%" stop-color="#f5a04e" stop-opacity=".3" />
+                          <stop offset="100%" stop-color="#f5a04e" stop-opacity="0" />
+                        </linearGradient>
+                      </defs>
+                      <path
+                        d="M0,60 L60,45 L120,50 L180,30 L240,35 L300,20 L360,25 L420,15"
+                        fill="none"
+                        stroke="#f5a04e"
+                        stroke-width="2.5"
+                        stroke-linecap="round"
+                      />
+                      <path d="M0,60 L60,45 L120,50 L180,30 L240,35 L300,20 L360,25 L420,15 L420,80 L0,80Z" fill="url(#g1)" />
+                      <!-- dots -->
+                      <circle cx="420" cy="15" r="4" fill="#f5a04e" />
+                      <circle cx="300" cy="20" r="3" fill="#f5a04e" opacity=".7" />
+                    </svg>
+                    <!-- Bar chart accepted vs denied -->
+                    <div
+                      style="
+                        font-size: 10px;
+                        color: rgba(255, 255, 255, 0.3);
+                        margin-bottom: 6px;
+                        font-weight: 600;
+                        letter-spacing: 0.06em;
+                        text-transform: uppercase;
+                      "
+                    >
+                      Acceptades vs Denegades
+                    </div>
+                    <div class="d1-chart-bars">
+                      <!-- each d1-bar-wrap: tall bar = accepted, short = denied -->
+                      <div class="d1-bar-wrap">
+                        <div class="d1-bar" style="height: 65%; background: #22c55e"></div>
+                        <div class="d1-bar" style="height: 5%; background: #ef4444; margin-top: 1px"></div>
+                        <div class="d1-bar-lbl">Dl</div>
+                      </div>
+                      <div class="d1-bar-wrap">
+                        <div class="d1-bar" style="height: 80%; background: #22c55e"></div>
+                        <div class="d1-bar" style="height: 4%; background: #ef4444; margin-top: 1px"></div>
+                        <div class="d1-bar-lbl">Dt</div>
+                      </div>
+                      <div class="d1-bar-wrap">
+                        <div class="d1-bar" style="height: 55%; background: #22c55e"></div>
+                        <div class="d1-bar" style="height: 8%; background: #ef4444; margin-top: 1px"></div>
+                        <div class="d1-bar-lbl">Dc</div>
+                      </div>
+                      <div class="d1-bar-wrap">
+                        <div class="d1-bar" style="height: 90%; background: #22c55e"></div>
+                        <div class="d1-bar" style="height: 3%; background: #ef4444; margin-top: 1px"></div>
+                        <div class="d1-bar-lbl">Dj</div>
+                      </div>
+                      <div class="d1-bar-wrap">
+                        <div class="d1-bar" style="height: 70%; background: #22c55e"></div>
+                        <div class="d1-bar" style="height: 6%; background: #ef4444; margin-top: 1px"></div>
+                        <div class="d1-bar-lbl">Dv</div>
+                      </div>
+                      <div class="d1-bar-wrap">
+                        <div class="d1-bar" style="height: 45%; background: #22c55e"></div>
+                        <div class="d1-bar" style="height: 3%; background: #ef4444; margin-top: 1px"></div>
+                        <div class="d1-bar-lbl">Ds</div>
+                      </div>
+                      <div class="d1-bar-wrap">
+                        <div class="d1-bar" style="height: 30%; background: #22c55e"></div>
+                        <div class="d1-bar" style="height: 2%; background: #ef4444; margin-top: 1px"></div>
+                        <div class="d1-bar-lbl">Dg</div>
+                      </div>
+                    </div>
+                    <div style="display: flex; gap: 14px; margin-top: 8px">
+                      <span style="font-size: 11px; color: rgba(255, 255, 255, 0.45); display: flex; align-items: center; gap: 5px"
+                        ><span style="width: 8px; height: 8px; border-radius: 2px; background: #22c55e; display: inline-block"></span>Acceptades</span
+                      >
+                      <span style="font-size: 11px; color: rgba(255, 255, 255, 0.45); display: flex; align-items: center; gap: 5px"
+                        ><span style="width: 8px; height: 8px; border-radius: 2px; background: #ef4444; display: inline-block"></span>Denegades</span
+                      >
+                    </div>
+                  </div>
+                  <!-- CLIENTS -->
+                  <div class="d1-card">
+                    <div class="d1-card-title">Últims clients actius <span class="d1-card-more">Tots</span></div>
+                    <div class="d1-cli-item">
+                      <div class="d1-cli-av" style="background: #f0a048">A</div>
+                      <div class="d1-cli-info">
+                        <div class="d1-cli-name">Aula Gastronòmica</div>
+                        <div class="d1-cli-sub">3 projectes · 2 seccions</div>
+                      </div>
+                      <span class="d1-cli-badge" style="background: rgba(34, 197, 94, 0.12); color: #22c55e">Actiu</span>
+                    </div>
+                    <div class="d1-cli-item">
+                      <div class="d1-cli-av" style="background: #3b82f6">V</div>
+                      <div class="d1-cli-info">
+                        <div class="d1-cli-name">Vora Studio</div>
+                        <div class="d1-cli-sub">2 projectes · 3 seccions</div>
+                      </div>
+                      <span class="d1-cli-badge" style="background: rgba(34, 197, 94, 0.12); color: #22c55e">Actiu</span>
+                    </div>
+                    <div class="d1-cli-item">
+                      <div class="d1-cli-av" style="background: #a855f7">X</div>
+                      <div class="d1-cli-info">
+                        <div class="d1-cli-name">Xavi Global Brands</div>
+                        <div class="d1-cli-sub">4 projectes · 5 seccions</div>
+                      </div>
+                      <span class="d1-cli-badge" style="background: rgba(34, 197, 94, 0.12); color: #22c55e">Actiu</span>
+                    </div>
+                    <div class="d1-cli-item">
+                      <div class="d1-cli-av" style="background: #10b981">P</div>
+                      <div class="d1-cli-info">
+                        <div class="d1-cli-name">Palmito House</div>
+                        <div class="d1-cli-sub">1 projecte · 2 seccions</div>
+                      </div>
+                      <span class="d1-cli-badge" style="background: rgba(245, 158, 11, 0.12); color: #f59e0b">Inactiu</span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- ROW 3 -->
+                <div class="d1-row3">
+                  <!-- Endpoint log -->
+                  <div class="d1-card">
+                    <div class="d1-card-title">Endpoints més usats <span class="d1-card-more">API</span></div>
+                    <div class="d1-api-item">
+                      <span class="d1-api-method" style="background: rgba(34, 197, 94, 0.12); color: #22c55e">GET</span>
+                      <span class="d1-api-path">/api/projectes</span>
+                      <span class="d1-api-count">4,821</span>
+                    </div>
+                    <div class="d1-api-item">
+                      <span class="d1-api-method" style="background: rgba(59, 130, 246, 0.12); color: #60a5fa">GET</span>
+                      <span class="d1-api-path">/api/noticies</span>
+                      <span class="d1-api-count">3,204</span>
+                    </div>
+                    <div class="d1-api-item">
+                      <span class="d1-api-method" style="background: rgba(245, 158, 11, 0.12); color: #fbbf24">POST</span>
+                      <span class="d1-api-path">/api/media/upload</span>
+                      <span class="d1-api-count">1,042</span>
+                    </div>
+                    <div class="d1-api-item">
+                      <span class="d1-api-method" style="background: rgba(239, 68, 68, 0.12); color: #f87171">DEL</span>
+                      <span class="d1-api-path">/api/noticies/{id}</span>
+                      <span class="d1-api-count">87</span>
+                    </div>
+                  </div>
+                  <!-- Files -->
+                  <div class="d1-card">
+                    <div class="d1-card-title">Fitxers recents <span class="d1-card-more">Mediateca</span></div>
+                    <div class="d1-file-item">
+                      <div class="d1-file-ic" style="background: rgba(245, 160, 78, 0.12)">
+                        <svg width="14" height="14" fill="none" stroke="#f5a04e" stroke-width="1.8" viewBox="0 0 24 24">
+                          <rect x="3" y="3" width="18" height="18" rx="2" />
+                          <circle cx="8.5" cy="8.5" r="1.5" />
+                          <polyline points="21,15 16,10 5,21" />
+                        </svg>
+                      </div>
+                      <div class="d1-file-info">
+                        <div class="d1-file-name">hero-comercial-ros.webp</div>
+                        <div class="d1-file-meta">Comercial Ros · fa 2h</div>
+                      </div>
+                      <span class="d1-file-size">840KB</span>
+                    </div>
+                    <div class="d1-file-item">
+                      <div class="d1-file-ic" style="background: rgba(245, 160, 78, 0.12)">
+                        <svg width="14" height="14" fill="none" stroke="#f5a04e" stroke-width="1.8" viewBox="0 0 24 24">
+                          <rect x="3" y="3" width="18" height="18" rx="2" />
+                          <circle cx="8.5" cy="8.5" r="1.5" />
+                          <polyline points="21,15 16,10 5,21" />
+                        </svg>
+                      </div>
+                      <div class="d1-file-info">
+                        <div class="d1-file-name">logo-wiar.png</div>
+                        <div class="d1-file-meta">Wiar · fa 5h</div>
+                      </div>
+                      <span class="d1-file-size">128KB</span>
+                    </div>
+                    <div class="d1-file-item">
+                      <div class="d1-file-ic" style="background: rgba(59, 130, 246, 0.1)">
+                        <svg width="14" height="14" fill="none" stroke="#60a5fa" stroke-width="1.8" viewBox="0 0 24 24">
+                          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                          <polyline points="14,2 14,8 20,8" />
+                        </svg>
+                      </div>
+                      <div class="d1-file-info">
+                        <div class="d1-file-name">brief-palmito-v2.pdf</div>
+                        <div class="d1-file-meta">Palmito House · ahir</div>
+                      </div>
+                      <span class="d1-file-size">2.1MB</span>
+                    </div>
+                  </div>
+                  <!-- Resource donut -->
+                  <div class="d1-card">
+                    <div class="d1-card-title">Recursos més sol·licitats</div>
+                    <div class="d1-donut-wrap">
+                      <svg class="d1-donut-svg" width="80" height="80" viewBox="0 0 80 80">
+                        <circle cx="40" cy="40" r="30" fill="none" stroke="rgba(255,255,255,.06)" stroke-width="14" />
+                        <circle
+                          cx="40"
+                          cy="40"
+                          r="30"
+                          fill="none"
+                          stroke="#f5a04e"
+                          stroke-width="14"
+                          stroke-dasharray="113 75"
+                          stroke-dashoffset="0"
+                          stroke-linecap="butt"
+                          transform="rotate(-90 40 40)"
+                        />
+                        <circle
+                          cx="40"
+                          cy="40"
+                          r="30"
+                          fill="none"
+                          stroke="#3b82f6"
+                          stroke-width="14"
+                          stroke-dasharray="45 143"
+                          stroke-dashoffset="-113"
+                          stroke-linecap="butt"
+                          transform="rotate(-90 40 40)"
+                        />
+                        <circle
+                          cx="40"
+                          cy="40"
+                          r="30"
+                          fill="none"
+                          stroke="#22c55e"
+                          stroke-width="14"
+                          stroke-dasharray="25 163"
+                          stroke-dashoffset="-158"
+                          stroke-linecap="butt"
+                          transform="rotate(-90 40 40)"
+                        />
+                        <circle
+                          cx="40"
+                          cy="40"
+                          r="30"
+                          fill="none"
+                          stroke="#a855f7"
+                          stroke-width="14"
+                          stroke-dasharray="5 183"
+                          stroke-dashoffset="-183"
+                          stroke-linecap="butt"
+                          transform="rotate(-90 40 40)"
+                        />
+                      </svg>
+                      <div class="d1-donut-legend">
+                        <div class="d1-legend-item">
+                          <span class="d1-legend-dot" style="background: #f5a04e"></span>Imatges<span class="d1-legend-val">60%</span>
+                        </div>
+                        <div class="d1-legend-item">
+                          <span class="d1-legend-dot" style="background: #3b82f6"></span>Notícies<span class="d1-legend-val">24%</span>
+                        </div>
+                        <div class="d1-legend-item">
+                          <span class="d1-legend-dot" style="background: #22c55e"></span>Projectes<span class="d1-legend-val">13%</span>
+                        </div>
+                        <div class="d1-legend-item">
+                          <span class="d1-legend-dot" style="background: #a855f7"></span>Altres<span class="d1-legend-val">3%</span>
+                        </div>
+                      </div>
+                    </div>
+                    <div style="margin-top: 14px">
+                      <div class="d1-prog-row">
+                        <div class="d1-prog-head"><span class="d1-prog-lbl">Emmagatzematge</span><span class="d1-prog-val">4.2 GB / 10 GB</span></div>
+                        <div class="d1-prog-track"><div class="d1-prog-fill" style="width: 42%; background: #f5a04e"></div></div>
+                      </div>
+                      <div class="d1-prog-row">
+                        <div class="d1-prog-head"><span class="d1-prog-lbl">Fitxers totals</span><span class="d1-prog-val">1,204</span></div>
+                        <div class="d1-prog-track"><div class="d1-prog-fill" style="width: 67%; background: #3b82f6"></div></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ══════════════════ P2 · CLEAN LIGHT ══════════════════ -->
+      <section class="ps" id="p2">
+        <div class="ps-meta">
+          <div class="ps-badge">
+            <div class="ps-bnum">2</div>
+            Proposta
+          </div>
+          <div class="ps-title">Clean Light — Mode clar, estil Figma/Linear</div>
+          <div class="ps-desc">
+            Dashboard lluminós per a entorns diürns. Mateixa arquitectura de dades però en paleta blanca/crema amb accent taronja. Ideal si el CMS ha
+            de ser accessible en sales il·luminades.
+          </div>
+        </div>
+        <div class="pwin" style="border-color: rgba(0, 0, 0, 0.1)">
+          <div class="d2">
+            <div class="d2-sb">
+              <div class="d2-sb-logo">
+                <div class="d2-sb-lm">V</div>
+                <div>
+                  <div class="d2-sb-lt2">Vora</div>
+                  <div class="d2-sb-ls2">Studio CMS</div>
+                </div>
+              </div>
+              <div class="d2-sb-sec2">General</div>
+              <div class="d2-sb-lk act">
+                <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <rect x="3" y="3" width="7" height="7" />
+                  <rect x="14" y="3" width="7" height="7" />
+                  <rect x="3" y="14" width="7" height="7" />
+                  <rect x="14" y="14" width="7" height="7" />
+                </svg>
+                Dashboard
+              </div>
+              <div class="d2-sb-lk">
+                <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                  <circle cx="9" cy="7" r="4" />
+                </svg>
+                Projectes
+              </div>
+              <div class="d2-sb-lk">
+                <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                  <circle cx="12" cy="7" r="4" />
+                </svg>
+                Usuaris
+              </div>
+              <div class="d2-sb-sec2">Web</div>
+              <div class="d2-sb-lk">
+                <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                  <polyline points="14,2 14,8 20,8" />
+                </svg>
+                Notícies
+              </div>
+              <div class="d2-sb-lk">
+                <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <rect x="3" y="3" width="18" height="18" rx="2" />
+                  <circle cx="8.5" cy="8.5" r="1.5" />
+                  <polyline points="21,15 16,10 5,21" />
+                </svg>
+                Mediateca
+              </div>
+              <div class="d2-sb-ft">
+                <div class="d2-sb-av">VS</div>
+                <div>
+                  <div style="font-size: 12px; font-weight: 600; color: #222">Vora Studio</div>
+                  <div style="font-size: 10px; color: #aaa">Admin</div>
+                </div>
+              </div>
+            </div>
+            <div class="d2-main">
+              <div class="d2-hdr">
+                <span class="d2-hdr-title">Dashboard</span>
+                <button class="d2-hdr-btn">+ Nou projecte</button>
+              </div>
+              <div class="d2-body">
+                <div class="d2-kpis">
+                  <div class="d2-kpi">
+                    <div class="d2-kpi-lbl">Visites avui</div>
+                    <div class="d2-kpi-val" style="color: #d97325">2,847</div>
+                    <div class="d2-kpi-sub" style="color: #22c55e">↑ 18.4%</div>
+                  </div>
+                  <div class="d2-kpi">
+                    <div class="d2-kpi-lbl">Peticions API</div>
+                    <div class="d2-kpi-val">14,302</div>
+                    <div class="d2-kpi-sub" style="color: #22c55e">↑ 6.2%</div>
+                  </div>
+                  <div class="d2-kpi">
+                    <div class="d2-kpi-lbl">Acceptades</div>
+                    <div class="d2-kpi-val" style="color: #16a34a">13,891</div>
+                    <div class="d2-kpi-sub" style="color: #666">97.1% èxit</div>
+                  </div>
+                  <div class="d2-kpi">
+                    <div class="d2-kpi-lbl">Denegades</div>
+                    <div class="d2-kpi-val" style="color: #dc2626">411</div>
+                    <div class="d2-kpi-sub" style="color: #dc2626">↑ 2.9%</div>
+                  </div>
+                </div>
+                <div class="d2-row2">
+                  <div class="d2-card">
+                    <div class="d2-card-title">Activitat setmanal <span class="d2-card-more2">Detall</span></div>
+                    <div class="d2-chart-bars">
+                      <div class="d2-bar-wrap">
+                        <div class="d2-bar" style="height: 65%; background: #d97325; border-radius: 2px 2px 0 0"></div>
+                        <div class="d2-bar-lbl2">Dl</div>
+                      </div>
+                      <div class="d2-bar-wrap">
+                        <div class="d2-bar" style="height: 80%; background: #d97325; border-radius: 2px 2px 0 0"></div>
+                        <div class="d2-bar-lbl2">Dt</div>
+                      </div>
+                      <div class="d2-bar-wrap">
+                        <div class="d2-bar" style="height: 55%; background: #d97325; border-radius: 2px 2px 0 0"></div>
+                        <div class="d2-bar-lbl2">Dc</div>
+                      </div>
+                      <div class="d2-bar-wrap">
+                        <div class="d2-bar" style="height: 90%; background: #d97325; border-radius: 2px 2px 0 0"></div>
+                        <div class="d2-bar-lbl2">Dj</div>
+                      </div>
+                      <div class="d2-bar-wrap">
+                        <div class="d2-bar" style="height: 70%; background: #f0a048; border-radius: 2px 2px 0 0"></div>
+                        <div class="d2-bar-lbl2">Dv</div>
+                      </div>
+                      <div class="d2-bar-wrap">
+                        <div class="d2-bar" style="height: 40%; background: #fbbf80; border-radius: 2px 2px 0 0"></div>
+                        <div class="d2-bar-lbl2">Ds</div>
+                      </div>
+                      <div class="d2-bar-wrap">
+                        <div class="d2-bar" style="height: 25%; background: #fbbf80; border-radius: 2px 2px 0 0"></div>
+                        <div class="d2-bar-lbl2">Dg</div>
+                      </div>
+                    </div>
+                    <div style="margin-top: 12px">
+                      <div class="d2-prog-row">
+                        <div class="d2-prog-head"><span>Peticions acceptades</span><span class="d2-prog-val2">97.1%</span></div>
+                        <div class="d2-prog-track"><div class="d2-prog-fill" style="width: 97%; background: #16a34a"></div></div>
+                      </div>
+                      <div class="d2-prog-row">
+                        <div class="d2-prog-head"><span>Peticions denegades</span><span class="d2-prog-val2">2.9%</span></div>
+                        <div class="d2-prog-track"><div class="d2-prog-fill" style="width: 3%; background: #dc2626"></div></div>
+                      </div>
+                      <div class="d2-prog-row">
+                        <div class="d2-prog-head"><span>Emmagatzematge usat</span><span class="d2-prog-val2">4.2 / 10 GB</span></div>
+                        <div class="d2-prog-track"><div class="d2-prog-fill" style="width: 42%; background: #d97325"></div></div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="d2-card">
+                    <div class="d2-card-title">Clients <span class="d2-card-more2">Tots</span></div>
+                    <div class="d2-cli-item">
+                      <div class="d2-cli-av" style="background: #f0a048">A</div>
+                      <div>
+                        <div class="d2-cli-name">Aula Gastronòmica</div>
+                        <div class="d2-cli-sub2">3 projectes</div>
+                      </div>
+                      <span class="d2-cli-badge2">Actiu</span>
+                    </div>
+                    <div class="d2-cli-item">
+                      <div class="d2-cli-av" style="background: #3b82f6">V</div>
+                      <div>
+                        <div class="d2-cli-name">Vora Studio</div>
+                        <div class="d2-cli-sub2">2 projectes</div>
+                      </div>
+                      <span class="d2-cli-badge2">Actiu</span>
+                    </div>
+                    <div class="d2-cli-item">
+                      <div class="d2-cli-av" style="background: #a855f7">X</div>
+                      <div>
+                        <div class="d2-cli-name">Xavi Brands</div>
+                        <div class="d2-cli-sub2">4 projectes</div>
+                      </div>
+                      <span class="d2-cli-badge2">Actiu</span>
+                    </div>
+                    <div class="d2-cli-item">
+                      <div class="d2-cli-av" style="background: #10b981">P</div>
+                      <div>
+                        <div class="d2-cli-name">Palmito House</div>
+                        <div class="d2-cli-sub2">1 projecte</div>
+                      </div>
+                      <span style="font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 4px; background: #fef9ec; color: #9a6700"
+                        >Inactiu</span
+                      >
+                    </div>
+                  </div>
+                </div>
+                <div class="d2-row3">
+                  <div class="d2-card">
+                    <div class="d2-card-title">Endpoints API</div>
+                    <div class="d2-api-item">
+                      <span class="d2-api-method2" style="background: #dcfce7; color: #16a34a">GET</span
+                      ><span class="d2-api-path2">/api/projectes</span><span class="d2-api-count2">4,821</span>
+                    </div>
+                    <div class="d2-api-item">
+                      <span class="d2-api-method2" style="background: #dbeafe; color: #1d4ed8">GET</span
+                      ><span class="d2-api-path2">/api/noticies</span><span class="d2-api-count2">3,204</span>
+                    </div>
+                    <div class="d2-api-item">
+                      <span class="d2-api-method2" style="background: #fef3c7; color: #92400e">POST</span
+                      ><span class="d2-api-path2">/api/media/upload</span><span class="d2-api-count2">1,042</span>
+                    </div>
+                    <div class="d2-api-item">
+                      <span class="d2-api-method2" style="background: #fee2e2; color: #991b1b">DEL</span
+                      ><span class="d2-api-path2">/api/noticies/{id}</span><span class="d2-api-count2">87</span>
+                    </div>
+                  </div>
+                  <div class="d2-card">
+                    <div class="d2-card-title">Recursos</div>
+                    <div style="display: flex; align-items: center; gap: 12px">
+                      <svg width="70" height="70" viewBox="0 0 80 80">
+                        <circle cx="40" cy="40" r="30" fill="none" stroke="#f5f3ee" stroke-width="13" />
+                        <circle
+                          cx="40"
+                          cy="40"
+                          r="30"
+                          fill="none"
+                          stroke="#d97325"
+                          stroke-width="13"
+                          stroke-dasharray="113 75"
+                          stroke-dashoffset="0"
+                          transform="rotate(-90 40 40)"
+                        />
+                        <circle
+                          cx="40"
+                          cy="40"
+                          r="30"
+                          fill="none"
+                          stroke="#3b82f6"
+                          stroke-width="13"
+                          stroke-dasharray="45 143"
+                          stroke-dashoffset="-113"
+                          transform="rotate(-90 40 40)"
+                        />
+                        <circle
+                          cx="40"
+                          cy="40"
+                          r="30"
+                          fill="none"
+                          stroke="#16a34a"
+                          stroke-width="13"
+                          stroke-dasharray="25 163"
+                          stroke-dashoffset="-158"
+                          transform="rotate(-90 40 40)"
+                        />
+                      </svg>
+                      <div style="display: flex; flex-direction: column; gap: 5px; font-size: 11px; color: #555">
+                        <div style="display: flex; align-items: center; gap: 5px">
+                          <span style="width: 7px; height: 7px; border-radius: 50%; background: #d97325; display: inline-block"></span>Imatges
+                          <strong style="margin-left: auto; color: #111">60%</strong>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 5px">
+                          <span style="width: 7px; height: 7px; border-radius: 50%; background: #3b82f6; display: inline-block"></span>Notícies
+                          <strong style="margin-left: auto; color: #111">24%</strong>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 5px">
+                          <span style="width: 7px; height: 7px; border-radius: 50%; background: #16a34a; display: inline-block"></span>Projectes
+                          <strong style="margin-left: auto; color: #111">13%</strong>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="d2-card">
+                    <div class="d2-card-title">Fitxers recents</div>
+                    <div class="d2-cli-item">
+                      <div
+                        style="
+                          width: 28px;
+                          height: 28px;
+                          border-radius: 6px;
+                          background: #fff5e8;
+                          display: flex;
+                          align-items: center;
+                          justify-content: center;
+                          flex-shrink: 0;
+                        "
+                      >
+                        <svg width="13" height="13" fill="none" stroke="#d97325" stroke-width="2" viewBox="0 0 24 24">
+                          <rect x="3" y="3" width="18" height="18" rx="2" />
+                          <circle cx="8.5" cy="8.5" r="1.5" />
+                          <polyline points="21,15 16,10 5,21" />
+                        </svg>
+                      </div>
+                      <div>
+                        <div class="d2-cli-name">hero-comercial-ros.webp</div>
+                        <div class="d2-cli-sub2">840KB · fa 2h</div>
+                      </div>
+                    </div>
+                    <div class="d2-cli-item">
+                      <div
+                        style="
+                          width: 28px;
+                          height: 28px;
+                          border-radius: 6px;
+                          background: #fff5e8;
+                          display: flex;
+                          align-items: center;
+                          justify-content: center;
+                          flex-shrink: 0;
+                        "
+                      >
+                        <svg width="13" height="13" fill="none" stroke="#d97325" stroke-width="2" viewBox="0 0 24 24">
+                          <rect x="3" y="3" width="18" height="18" rx="2" />
+                          <circle cx="8.5" cy="8.5" r="1.5" />
+                          <polyline points="21,15 16,10 5,21" />
+                        </svg>
+                      </div>
+                      <div>
+                        <div class="d2-cli-name">logo-wiar.png</div>
+                        <div class="d2-cli-sub2">128KB · fa 5h</div>
+                      </div>
+                    </div>
+                    <div class="d2-cli-item">
+                      <div
+                        style="
+                          width: 28px;
+                          height: 28px;
+                          border-radius: 6px;
+                          background: #eff6ff;
+                          display: flex;
+                          align-items: center;
+                          justify-content: center;
+                          flex-shrink: 0;
+                        "
+                      >
+                        <svg width="13" height="13" fill="none" stroke="#3b82f6" stroke-width="2" viewBox="0 0 24 24">
+                          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                          <polyline points="14,2 14,8 20,8" />
+                        </svg>
+                      </div>
+                      <div>
+                        <div class="d2-cli-name">brief-palmito-v2.pdf</div>
+                        <div class="d2-cli-sub2">2.1MB · ahir</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ══════════════════ P3 · SLATE 2-COL ══════════════════ -->
+      <section class="ps" id="p3">
+        <div class="ps-meta">
+          <div class="ps-badge">
+            <div class="ps-bnum">3</div>
+            Proposta
+          </div>
+          <div class="ps-title">Slate 2 Columnes — Dades principals + panell lateral</div>
+          <div class="ps-desc">
+            Dashboard dividit: esquerra amb gràfics i activitat principal, dreta amb clients top, mapa de calor d'activitat i rànquings. Accent blau
+            professional. Sensació d'analytics tool.
+          </div>
+        </div>
+        <div class="pwin">
+          <div class="d3">
+            <div class="d3-sb">
+              <div class="d3-sb-logo">
+                <div class="d3-sb-lm">V</div>
+                <div>
+                  <div class="d3-sb-lt3">Vora</div>
+                  <div class="d3-sb-ls3">Studio CMS</div>
+                </div>
+              </div>
+              <div class="d3-sb-sec3">General</div>
+              <div class="d3-sb-lk act">
+                <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                  <rect x="3" y="3" width="7" height="7" />
+                  <rect x="14" y="3" width="7" height="7" />
+                  <rect x="3" y="14" width="7" height="7" />
+                  <rect x="14" y="14" width="7" height="7" />
+                </svg>
+                Dashboard
+              </div>
+              <div class="d3-sb-lk">
+                <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                  <circle cx="12" cy="7" r="4" />
+                </svg>
+                Projectes
+              </div>
+              <div class="d3-sb-lk">
+                <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                  <polyline points="14,2 14,8 20,8" />
+                </svg>
+                Notícies
+              </div>
+              <div class="d3-sb-lk">
+                <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                  <rect x="3" y="3" width="18" height="18" rx="2" />
+                  <circle cx="8.5" cy="8.5" r="1.5" />
+                  <polyline points="21,15 16,10 5,21" />
+                </svg>
+                Mediateca
+              </div>
+              <div class="d3-sb-ft">
+                <div class="d3-sb-av">VS</div>
+                <div>
+                  <div style="font-size: 12px; font-weight: 500; color: rgba(255, 255, 255, 0.7)">Vora Studio</div>
+                  <div style="font-size: 10px; color: rgba(255, 255, 255, 0.28)">Admin</div>
+                </div>
+              </div>
+            </div>
+            <div class="d3-main">
+              <div class="d3-hdr">
+                <span class="d3-hdr-title">Dashboard</span>
+                <div class="d3-hdr-seg"><span>Avui</span><span class="sel">7 dies</span><span>Mes</span></div>
+                <button class="d3-hdr-btn3">Exportar</button>
+              </div>
+              <div class="d3-body">
+                <div class="d3-left">
+                  <div class="d3-kpis">
+                    <div class="d3-kpi">
+                      <div class="d3-kpi-lbl">Visites</div>
+                      <div class="d3-kpi-val">2,847</div>
+                      <div class="d3-kpi-sub3" style="color: #22c55e">↑ 18.4%</div>
+                    </div>
+                    <div class="d3-kpi">
+                      <div class="d3-kpi-lbl">API reqs</div>
+                      <div class="d3-kpi-val">14.3K</div>
+                      <div class="d3-kpi-sub3" style="color: #22c55e">↑ 6.2%</div>
+                    </div>
+                    <div class="d3-kpi">
+                      <div class="d3-kpi-lbl">Acceptades</div>
+                      <div class="d3-kpi-val" style="color: #22c55e">97.1%</div>
+                      <div class="d3-kpi-sub3" style="color: rgba(255, 255, 255, 0.35)">13,891</div>
+                    </div>
+                    <div class="d3-kpi">
+                      <div class="d3-kpi-lbl">Denegades</div>
+                      <div class="d3-kpi-val" style="color: #ef4444">2.9%</div>
+                      <div class="d3-kpi-sub3" style="color: rgba(255, 255, 255, 0.35)">411 errors</div>
+                    </div>
+                  </div>
+                  <div class="d3-card">
+                    <div class="d3-card-title">Peticions per dia <span class="d3-card-more3">API log</span></div>
+                    <svg width="100%" height="70" viewBox="0 0 400 70" preserveAspectRatio="none">
+                      <defs>
+                        <linearGradient id="g3" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="0%" stop-color="#3b82f6" stop-opacity=".25" />
+                          <stop offset="100%" stop-color="#3b82f6" stop-opacity="0" />
+                        </linearGradient>
+                      </defs>
+                      <path
+                        d="M0,55 L57,40 L114,45 L171,25 L228,30 L285,15 L342,20 L400,10"
+                        fill="none"
+                        stroke="#3b82f6"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                      />
+                      <path d="M0,55 L57,40 L114,45 L171,25 L228,30 L285,15 L342,20 L400,10 L400,70 L0,70Z" fill="url(#g3)" />
+                      <!-- denied line -->
+                      <path
+                        d="M0,65 L57,62 L114,64 L171,60 L228,63 L285,58 L342,61 L400,57"
+                        fill="none"
+                        stroke="#ef4444"
+                        stroke-width="1.5"
+                        stroke-dasharray="4,3"
+                        opacity=".6"
+                      />
+                      <circle cx="400" cy="10" r="3.5" fill="#3b82f6" />
+                    </svg>
+                    <div style="display: flex; gap: 14px; margin-top: 6px">
+                      <span style="font-size: 11px; color: rgba(255, 255, 255, 0.4); display: flex; align-items: center; gap: 4px"
+                        ><span style="width: 12px; height: 2px; background: #3b82f6; display: inline-block; border-radius: 1px"></span
+                        >Acceptades</span
+                      >
+                      <span style="font-size: 11px; color: rgba(255, 255, 255, 0.4); display: flex; align-items: center; gap: 4px"
+                        ><span style="width: 12px; height: 0; border-top: 2px dashed #ef4444; display: inline-block"></span>Denegades</span
+                      >
+                    </div>
+                  </div>
+                  <div class="d3-card">
+                    <div class="d3-card-title">Endpoints més usats</div>
+                    <div class="d3-top-item">
+                      <span class="d3-top-rank">1</span>
+                      <div class="d3-top-info">
+                        <div class="d3-top-name">/api/projectes</div>
+                        <div class="d3-top-sub">GET · Aula, Vora, Xavi</div>
+                      </div>
+                      <span class="d3-top-val">4,821</span>
+                    </div>
+                    <div class="d3-top-item">
+                      <span class="d3-top-rank">2</span>
+                      <div class="d3-top-info">
+                        <div class="d3-top-name">/api/noticies</div>
+                        <div class="d3-top-sub">GET · Palmito, Vora</div>
+                      </div>
+                      <span class="d3-top-val">3,204</span>
+                    </div>
+                    <div class="d3-top-item">
+                      <span class="d3-top-rank">3</span>
+                      <div class="d3-top-info">
+                        <div class="d3-top-name">/api/media/upload</div>
+                        <div class="d3-top-sub">POST · tots</div>
+                      </div>
+                      <span class="d3-top-val">1,042</span>
+                    </div>
+                    <div class="d3-top-item">
+                      <span class="d3-top-rank">4</span>
+                      <div class="d3-top-info">
+                        <div class="d3-top-name">/api/sections</div>
+                        <div class="d3-top-sub">GET · Xavi</div>
+                      </div>
+                      <span class="d3-top-val">982</span>
+                    </div>
+                  </div>
+                </div>
+                <!-- RIGHT PANEL -->
+                <div class="d3-right">
+                  <div class="d3-card">
+                    <div class="d3-card-title">Clients</div>
+                    <div class="d3-cli-item">
+                      <div class="d3-cli-av3" style="background: #f0a048">A</div>
+                      <div>
+                        <div class="d3-cli-name3">Aula Gastr.</div>
+                        <div class="d3-cli-sub3">3 proj · 847 vis</div>
+                      </div>
+                      <div class="d3-stat"><span class="d3-stat-num" style="color: #22c55e">✓</span></div>
+                    </div>
+                    <div class="d3-cli-item">
+                      <div class="d3-cli-av3" style="background: #3b82f6">V</div>
+                      <div>
+                        <div class="d3-cli-name3">Vora Studio</div>
+                        <div class="d3-cli-sub3">2 proj · 1.2K vis</div>
+                      </div>
+                      <div class="d3-stat"><span class="d3-stat-num" style="color: #22c55e">✓</span></div>
+                    </div>
+                    <div class="d3-cli-item">
+                      <div class="d3-cli-av3" style="background: #a855f7">X</div>
+                      <div>
+                        <div class="d3-cli-name3">Xavi Brands</div>
+                        <div class="d3-cli-sub3">4 proj · 634 vis</div>
+                      </div>
+                      <div class="d3-stat"><span class="d3-stat-num" style="color: #22c55e">✓</span></div>
+                    </div>
+                    <div class="d3-cli-item">
+                      <div class="d3-cli-av3" style="background: #10b981">P</div>
+                      <div>
+                        <div class="d3-cli-name3">Palmito House</div>
+                        <div class="d3-cli-sub3">1 proj · 164 vis</div>
+                      </div>
+                      <div class="d3-stat"><span class="d3-stat-num" style="color: #f59e0b">○</span></div>
+                    </div>
+                  </div>
+                  <!-- Heatmap -->
+                  <div class="d3-card">
+                    <div class="d3-card-title">Activitat — últimes 4 setmanes</div>
+                    <div style="display: flex; gap: 2px; margin-bottom: 3px">
+                      <span style="font-size: 9px; color: rgba(255, 255, 255, 0.25); width: 22px">Dl</span>
+                      <span style="font-size: 9px; color: rgba(255, 255, 255, 0.25); width: 22px">Dt</span>
+                      <span style="font-size: 9px; color: rgba(255, 255, 255, 0.25); width: 22px">Dc</span>
+                      <span style="font-size: 9px; color: rgba(255, 255, 255, 0.25); width: 22px">Dj</span>
+                      <span style="font-size: 9px; color: rgba(255, 255, 255, 0.25); width: 22px">Dv</span>
+                      <span style="font-size: 9px; color: rgba(255, 255, 255, 0.25); width: 22px">Ds</span>
+                      <span style="font-size: 9px; color: rgba(255, 255, 255, 0.25); width: 22px">Dg</span>
+                    </div>
+                    <div class="d3-heatmap">
+                      <!-- 28 cells, varying opacity -->
+                      <div class="d3-hm-cell" style="background: rgba(59, 130, 246, 0.15)"></div>
+                      <div class="d3-hm-cell" style="background: rgba(59, 130, 246, 0.4)"></div>
+                      <div class="d3-hm-cell" style="background: rgba(59, 130, 246, 0.2)"></div>
+                      <div class="d3-hm-cell" style="background: rgba(59, 130, 246, 0.7)"></div>
+                      <div class="d3-hm-cell" style="background: rgba(59, 130, 246, 0.5)"></div>
+                      <div class="d3-hm-cell" style="background: rgba(59, 130, 246, 0.1)"></div>
+                      <div class="d3-hm-cell" style="background: rgba(59, 130, 246, 0.05)"></div>
+                      <div class="d3-hm-cell" style="background: rgba(59, 130, 246, 0.6)"></div>
+                      <div class="d3-hm-cell" style="background: rgba(59, 130, 246, 0.8)"></div>
+                      <div class="d3-hm-cell" style="background: rgba(59, 130, 246, 0.35)"></div>
+                      <div class="d3-hm-cell" style="background: rgba(59, 130, 246, 0.9)"></div>
+                      <div class="d3-hm-cell" style="background: rgba(59, 130, 246, 0.65)"></div>
+                      <div class="d3-hm-cell" style="background: rgba(59, 130, 246, 0.15)"></div>
+                      <div class="d3-hm-cell" style="background: rgba(59, 130, 246, 0.05)"></div>
+                      <div class="d3-hm-cell" style="background: rgba(59, 130, 246, 0.3)"></div>
+                      <div class="d3-hm-cell" style="background: rgba(59, 130, 246, 0.5)"></div>
+                      <div class="d3-hm-cell" style="background: rgba(59, 130, 246, 0.6)"></div>
+                      <div class="d3-hm-cell" style="background: rgba(59, 130, 246, 0.4)"></div>
+                      <div class="d3-hm-cell" style="background: rgba(59, 130, 246, 0.8)"></div>
+                      <div class="d3-hm-cell" style="background: rgba(59, 130, 246, 0.2)"></div>
+                      <div class="d3-hm-cell" style="background: rgba(59, 130, 246, 0.1)"></div>
+                      <div class="d3-hm-cell" style="background: rgba(59, 130, 246, 0.7)"></div>
+                      <div class="d3-hm-cell" style="background: rgba(59, 130, 246, 0.95)"></div>
+                      <div class="d3-hm-cell" style="background: rgba(59, 130, 246, 0.5)"></div>
+                      <div class="d3-hm-cell" style="background: rgba(59, 130, 246, 0.85)"></div>
+                      <div class="d3-hm-cell" style="background: rgba(59, 130, 246, 0.7)"></div>
+                      <div class="d3-hm-cell" style="background: rgba(59, 130, 246, 0.25)"></div>
+                      <div class="d3-hm-cell" style="background: rgba(59, 130, 246, 0.08)"></div>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 5px; margin-top: 8px; font-size: 10px; color: rgba(255, 255, 255, 0.28)">
+                      <span>Menys</span>
+                      <div style="display: flex; gap: 2px">
+                        <div style="width: 10px; height: 10px; border-radius: 2px; background: rgba(59, 130, 246, 0.08)"></div>
+                        <div style="width: 10px; height: 10px; border-radius: 2px; background: rgba(59, 130, 246, 0.3)"></div>
+                        <div style="width: 10px; height: 10px; border-radius: 2px; background: rgba(59, 130, 246, 0.6)"></div>
+                        <div style="width: 10px; height: 10px; border-radius: 2px; background: rgba(59, 130, 246, 0.9)"></div>
+                      </div>
+                      <span>Més</span>
+                    </div>
+                  </div>
+                  <div class="d3-card">
+                    <div class="d3-card-title">Recursos top</div>
+                    <div class="d1-prog-row">
+                      <div class="d1-prog-head"><span class="d1-prog-lbl">Imatges</span><span class="d1-prog-val">60%</span></div>
+                      <div class="d1-prog-track"><div class="d1-prog-fill" style="width: 60%; background: #3b82f6"></div></div>
+                    </div>
+                    <div class="d1-prog-row">
+                      <div class="d1-prog-head"><span class="d1-prog-lbl">Notícies</span><span class="d1-prog-val">24%</span></div>
+                      <div class="d1-prog-track"><div class="d1-prog-fill" style="width: 24%; background: #60a5fa"></div></div>
+                    </div>
+                    <div class="d1-prog-row">
+                      <div class="d1-prog-head"><span class="d1-prog-lbl">Projectes</span><span class="d1-prog-val">13%</span></div>
+                      <div class="d1-prog-track"><div class="d1-prog-fill" style="width: 13%; background: #93c5fd"></div></div>
+                    </div>
+                    <div class="d1-prog-row">
+                      <div class="d1-prog-head"><span class="d1-prog-lbl">Altres</span><span class="d1-prog-val">3%</span></div>
+                      <div class="d1-prog-track"><div class="d1-prog-fill" style="width: 3%; background: rgba(255, 255, 255, 0.2)"></div></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ══════════════════ P4 · BENTO PURPLE ══════════════════ -->
+      <section class="ps" id="p4">
+        <div class="ps-meta">
+          <div class="ps-badge">
+            <div class="ps-bnum">4</div>
+            Proposta
+          </div>
+          <div class="ps-title">Bento Purple — Sidebar d'icones, tiles modulars</div>
+          <div class="ps-desc">
+            Layout bento grid, sidebar minimalista com VS Code. Cada mètrica és un tile independent amb el seu micro-gràfic integrat. Feed d'activitat
+            en temps real. Accent porpra. Sensació de SaaS modern.
+          </div>
+        </div>
+        <div class="pwin">
+          <div class="d4">
+            <div class="d4-sb">
+              <div class="d4-sb-logo">V</div>
+              <div class="d4-sb-ic act" title="Dashboard">
+                <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                  <rect x="3" y="3" width="7" height="7" />
+                  <rect x="14" y="3" width="7" height="7" />
+                  <rect x="3" y="14" width="7" height="7" />
+                  <rect x="14" y="14" width="7" height="7" />
+                </svg>
+              </div>
+              <div class="d4-sb-ic" title="Projectes">
+                <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                  <rect x="3" y="3" width="18" height="18" rx="2" />
+                  <path d="M3 9h18M9 21V9" />
+                </svg>
+              </div>
+              <div class="d4-sb-ic" title="Usuaris">
+                <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                  <circle cx="12" cy="7" r="4" />
+                </svg>
+              </div>
+              <div class="d4-sb-div"></div>
+              <div class="d4-sb-ic" title="Notícies">
+                <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                  <polyline points="14,2 14,8 20,8" />
+                </svg>
+              </div>
+              <div class="d4-sb-ic" title="Mediateca">
+                <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                  <rect x="3" y="3" width="18" height="18" rx="2" />
+                  <circle cx="8.5" cy="8.5" r="1.5" />
+                  <polyline points="21,15 16,10 5,21" />
+                </svg>
+              </div>
+              <div class="d4-sb-div"></div>
+              <div class="d4-sb-ic" title="API">
+                <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                  <polyline points="16,18 22,12 16,6" />
+                  <polyline points="8,6 2,12 8,18" />
+                </svg>
+              </div>
+              <div class="d4-sb-ft2" title="Usuari">VS</div>
+            </div>
+            <div class="d4-main">
+              <div class="d4-hdr">
+                <div class="d4-hdr-bc">Dashboard <span>›</span> <strong>General</strong></div>
+                <button class="d4-hdr-btn4">+ Nou projecte</button>
+              </div>
+              <div class="d4-body">
+                <!-- Tile: Visites -->
+                <div class="d4-tile">
+                  <div class="d4-tile-lbl">Visites avui</div>
+                  <div class="d4-num" style="color: #c084fc">2,847</div>
+                  <div class="d4-num-sub" style="color: #22c55e">↑ 18.4%</div>
+                  <div class="d4-mini-bars">
+                    <div class="d4-mb" style="height: 40%; background: rgba(192, 132, 252, 0.3)"></div>
+                    <div class="d4-mb" style="height: 65%; background: rgba(192, 132, 252, 0.4)"></div>
+                    <div class="d4-mb" style="height: 50%; background: rgba(192, 132, 252, 0.3)"></div>
+                    <div class="d4-mb" style="height: 80%; background: rgba(192, 132, 252, 0.5)"></div>
+                    <div class="d4-mb" style="height: 60%; background: rgba(192, 132, 252, 0.4)"></div>
+                    <div class="d4-mb" style="height: 90%; background: #a855f7"></div>
+                  </div>
+                </div>
+                <!-- Tile: API Reqs -->
+                <div class="d4-tile">
+                  <div class="d4-tile-lbl">Peticions API</div>
+                  <div class="d4-num">14.3K</div>
+                  <div class="d4-num-sub" style="color: #22c55e">↑ 6.2%</div>
+                  <div class="d4-mini-bars">
+                    <div class="d4-mb" style="height: 55%; background: rgba(255, 255, 255, 0.1)"></div>
+                    <div class="d4-mb" style="height: 70%; background: rgba(255, 255, 255, 0.12)"></div>
+                    <div class="d4-mb" style="height: 45%; background: rgba(255, 255, 255, 0.1)"></div>
+                    <div class="d4-mb" style="height: 85%; background: rgba(255, 255, 255, 0.14)"></div>
+                    <div class="d4-mb" style="height: 65%; background: rgba(255, 255, 255, 0.12)"></div>
+                    <div class="d4-mb" style="height: 100%; background: rgba(255, 255, 255, 0.18)"></div>
+                  </div>
+                </div>
+                <!-- Tile: OK -->
+                <div class="d4-tile">
+                  <div class="d4-tile-lbl">Acceptades</div>
+                  <div class="d4-num" style="color: #4ade80">97.1%</div>
+                  <div class="d4-num-sub" style="color: rgba(255, 255, 255, 0.35)">13,891 ok</div>
+                  <div class="d4-mini-bars">
+                    <div class="d4-mb" style="height: 96%; background: rgba(74, 222, 128, 0.25)"></div>
+                    <div class="d4-mb" style="height: 97%; background: rgba(74, 222, 128, 0.3)"></div>
+                    <div class="d4-mb" style="height: 95%; background: rgba(74, 222, 128, 0.25)"></div>
+                    <div class="d4-mb" style="height: 98%; background: rgba(74, 222, 128, 0.35)"></div>
+                    <div class="d4-mb" style="height: 97%; background: rgba(74, 222, 128, 0.3)"></div>
+                    <div class="d4-mb" style="height: 97%; background: #22c55e"></div>
+                  </div>
+                </div>
+                <!-- Tile: Denied -->
+                <div class="d4-tile">
+                  <div class="d4-tile-lbl">Denegades</div>
+                  <div class="d4-num" style="color: #f87171">411</div>
+                  <div class="d4-num-sub" style="color: #ef4444">↑ 2 nous errors</div>
+                  <div class="d4-mini-bars">
+                    <div class="d4-mb" style="height: 20%; background: rgba(248, 113, 113, 0.2)"></div>
+                    <div class="d4-mb" style="height: 15%; background: rgba(248, 113, 113, 0.2)"></div>
+                    <div class="d4-mb" style="height: 30%; background: rgba(248, 113, 113, 0.3)"></div>
+                    <div class="d4-mb" style="height: 10%; background: rgba(248, 113, 113, 0.15)"></div>
+                    <div class="d4-mb" style="height: 25%; background: rgba(248, 113, 113, 0.25)"></div>
+                    <div class="d4-mb" style="height: 40%; background: #ef4444"></div>
+                  </div>
+                </div>
+                <!-- Tile: Clients span2 -->
+                <div class="d4-tile span2">
+                  <div class="d4-tile-lbl">Clients actius</div>
+                  <div class="d4-feed">
+                    <div class="d4-feed-item">
+                      <div
+                        style="
+                          width: 28px;
+                          height: 28px;
+                          border-radius: 7px;
+                          background: #f0a048;
+                          display: flex;
+                          align-items: center;
+                          justify-content: center;
+                          font-size: 10px;
+                          font-weight: 700;
+                          color: #fff;
+                          flex-shrink: 0;
+                        "
+                      >
+                        A
+                      </div>
+                      <div style="flex: 1; min-width: 0">
+                        <div style="font-size: 12px; font-weight: 600; color: #fff">Aula Gastronòmica</div>
+                        <div style="font-size: 10px; color: rgba(255, 255, 255, 0.35)">3 proj · 847 vis · última activitat fa 1h</div>
+                      </div>
+                      <span
+                        style="
+                          font-size: 10px;
+                          font-weight: 700;
+                          padding: 2px 7px;
+                          border-radius: 4px;
+                          background: rgba(74, 222, 128, 0.1);
+                          color: #4ade80;
+                          flex-shrink: 0;
+                        "
+                        >Actiu</span
+                      >
+                    </div>
+                    <div class="d4-feed-item">
+                      <div
+                        style="
+                          width: 28px;
+                          height: 28px;
+                          border-radius: 7px;
+                          background: #3b82f6;
+                          display: flex;
+                          align-items: center;
+                          justify-content: center;
+                          font-size: 10px;
+                          font-weight: 700;
+                          color: #fff;
+                          flex-shrink: 0;
+                        "
+                      >
+                        V
+                      </div>
+                      <div style="flex: 1; min-width: 0">
+                        <div style="font-size: 12px; font-weight: 600; color: #fff">Vora Studio</div>
+                        <div style="font-size: 10px; color: rgba(255, 255, 255, 0.35)">2 proj · 1.2K vis · última activitat fa 3h</div>
+                      </div>
+                      <span
+                        style="
+                          font-size: 10px;
+                          font-weight: 700;
+                          padding: 2px 7px;
+                          border-radius: 4px;
+                          background: rgba(74, 222, 128, 0.1);
+                          color: #4ade80;
+                          flex-shrink: 0;
+                        "
+                        >Actiu</span
+                      >
+                    </div>
+                    <div class="d4-feed-item">
+                      <div
+                        style="
+                          width: 28px;
+                          height: 28px;
+                          border-radius: 7px;
+                          background: #a855f7;
+                          display: flex;
+                          align-items: center;
+                          justify-content: center;
+                          font-size: 10px;
+                          font-weight: 700;
+                          color: #fff;
+                          flex-shrink: 0;
+                        "
+                      >
+                        X
+                      </div>
+                      <div style="flex: 1; min-width: 0">
+                        <div style="font-size: 12px; font-weight: 600; color: #fff">Xavi Global Brands</div>
+                        <div style="font-size: 10px; color: rgba(255, 255, 255, 0.35)">4 proj · 634 vis · última activitat fa 5h</div>
+                      </div>
+                      <span
+                        style="
+                          font-size: 10px;
+                          font-weight: 700;
+                          padding: 2px 7px;
+                          border-radius: 4px;
+                          background: rgba(74, 222, 128, 0.1);
+                          color: #4ade80;
+                          flex-shrink: 0;
+                        "
+                        >Actiu</span
+                      >
+                    </div>
+                  </div>
+                </div>
+                <!-- Tile: Activity feed span2 -->
+                <div class="d4-tile span2">
+                  <div class="d4-tile-lbl">Feed d'activitat recent</div>
+                  <div class="d4-feed">
+                    <div class="d4-feed-item">
+                      <div class="d4-feed-dot" style="background: #22c55e"></div>
+                      <div class="d4-feed-text">Aula Gastronòmica ha pujat <strong style="color: #fff">hero-aula-v3.webp</strong> (840KB)</div>
+                      <span class="d4-feed-time">fa 12m</span>
+                    </div>
+                    <div class="d4-feed-item">
+                      <div class="d4-feed-dot" style="background: #a855f7"></div>
+                      <div class="d4-feed-text">Xavi Brands ha creat un nou <strong style="color: #fff">projecte: Palmito 2026</strong></div>
+                      <span class="d4-feed-time">fa 1h</span>
+                    </div>
+                    <div class="d4-feed-item">
+                      <div class="d4-feed-dot" style="background: #ef4444"></div>
+                      <div class="d4-feed-text">Error 403 a <strong style="color: #fff">/api/noticies/42</strong> · token caducat</div>
+                      <span class="d4-feed-time">fa 2h</span>
+                    </div>
+                    <div class="d4-feed-item">
+                      <div class="d4-feed-dot" style="background: #60a5fa"></div>
+                      <div class="d4-feed-text">Vora Studio ha publicat la notícia <strong style="color: #fff">"Nou web Comercial Ros"</strong></div>
+                      <span class="d4-feed-time">fa 3h</span>
+                    </div>
+                  </div>
+                </div>
+                <!-- Tile: Resources donut -->
+                <div class="d4-tile">
+                  <div class="d4-tile-lbl">Recursos</div>
+                  <div class="d4-donut-row">
+                    <svg width="64" height="64" viewBox="0 0 80 80">
+                      <circle cx="40" cy="40" r="28" fill="none" stroke="rgba(255,255,255,.06)" stroke-width="12" />
+                      <circle
+                        cx="40"
+                        cy="40"
+                        r="28"
+                        fill="none"
+                        stroke="#a855f7"
+                        stroke-width="12"
+                        stroke-dasharray="106 70"
+                        transform="rotate(-90 40 40)"
+                      />
+                      <circle
+                        cx="40"
+                        cy="40"
+                        r="28"
+                        fill="none"
+                        stroke="#3b82f6"
+                        stroke-width="12"
+                        stroke-dasharray="42 134"
+                        stroke-dashoffset="-106"
+                        transform="rotate(-90 40 40)"
+                      />
+                      <circle
+                        cx="40"
+                        cy="40"
+                        r="28"
+                        fill="none"
+                        stroke="#22c55e"
+                        stroke-width="12"
+                        stroke-dasharray="23 153"
+                        stroke-dashoffset="-148"
+                        transform="rotate(-90 40 40)"
+                      />
+                    </svg>
+                    <div class="d4-dl">
+                      <div class="d4-dl-item">
+                        <span class="d4-dl-dot" style="background: #a855f7"></span>Imatges<span class="d4-dl-val">60%</span>
+                      </div>
+                      <div class="d4-dl-item">
+                        <span class="d4-dl-dot" style="background: #3b82f6"></span>Notícies<span class="d4-dl-val">24%</span>
+                      </div>
+                      <div class="d4-dl-item">
+                        <span class="d4-dl-dot" style="background: #22c55e"></span>Projectes<span class="d4-dl-val">13%</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <!-- Tile: Files span3 -->
+                <div class="d4-tile span3">
+                  <div class="d4-tile-lbl">Endpoints més cridats</div>
+                  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px 20px">
+                    <div class="d4-feed-item">
+                      <span
+                        style="
+                          font-size: 10px;
+                          font-weight: 700;
+                          padding: 2px 6px;
+                          border-radius: 3px;
+                          background: rgba(74, 222, 128, 0.1);
+                          color: #4ade80;
+                          font-family: &quot;DM Mono&quot;, monospace;
+                          flex-shrink: 0;
+                        "
+                        >GET</span
+                      ><span
+                        style="
+                          font-size: 11px;
+                          color: rgba(255, 255, 255, 0.6);
+                          font-family: &quot;DM Mono&quot;, monospace;
+                          flex: 1;
+                          overflow: hidden;
+                          text-overflow: ellipsis;
+                          white-space: nowrap;
+                        "
+                        >/api/projectes</span
+                      ><span style="font-size: 11px; font-weight: 700; color: #fff; flex-shrink: 0">4,821</span>
+                    </div>
+                    <div class="d4-feed-item">
+                      <span
+                        style="
+                          font-size: 10px;
+                          font-weight: 700;
+                          padding: 2px 6px;
+                          border-radius: 3px;
+                          background: rgba(74, 222, 128, 0.1);
+                          color: #4ade80;
+                          font-family: &quot;DM Mono&quot;, monospace;
+                          flex-shrink: 0;
+                        "
+                        >GET</span
+                      ><span
+                        style="
+                          font-size: 11px;
+                          color: rgba(255, 255, 255, 0.6);
+                          font-family: &quot;DM Mono&quot;, monospace;
+                          flex: 1;
+                          overflow: hidden;
+                          text-overflow: ellipsis;
+                          white-space: nowrap;
+                        "
+                        >/api/noticies</span
+                      ><span style="font-size: 11px; font-weight: 700; color: #fff; flex-shrink: 0">3,204</span>
+                    </div>
+                    <div class="d4-feed-item">
+                      <span
+                        style="
+                          font-size: 10px;
+                          font-weight: 700;
+                          padding: 2px 6px;
+                          border-radius: 3px;
+                          background: rgba(251, 191, 36, 0.1);
+                          color: #fbbf24;
+                          font-family: &quot;DM Mono&quot;, monospace;
+                          flex-shrink: 0;
+                        "
+                        >POST</span
+                      ><span
+                        style="
+                          font-size: 11px;
+                          color: rgba(255, 255, 255, 0.6);
+                          font-family: &quot;DM Mono&quot;, monospace;
+                          flex: 1;
+                          overflow: hidden;
+                          text-overflow: ellipsis;
+                          white-space: nowrap;
+                        "
+                        >/api/media/upload</span
+                      ><span style="font-size: 11px; font-weight: 700; color: #fff; flex-shrink: 0">1,042</span>
+                    </div>
+                    <div class="d4-feed-item">
+                      <span
+                        style="
+                          font-size: 10px;
+                          font-weight: 700;
+                          padding: 2px 6px;
+                          border-radius: 3px;
+                          background: rgba(239, 68, 68, 0.1);
+                          color: #f87171;
+                          font-family: &quot;DM Mono&quot;, monospace;
+                          flex-shrink: 0;
+                        "
+                        >DEL</span
+                      ><span
+                        style="
+                          font-size: 11px;
+                          color: rgba(255, 255, 255, 0.6);
+                          font-family: &quot;DM Mono&quot;, monospace;
+                          flex: 1;
+                          overflow: hidden;
+                          text-overflow: ellipsis;
+                          white-space: nowrap;
+                        "
+                        >/api/noticies/{id}</span
+                      ><span style="font-size: 11px; font-weight: 700; color: #fff; flex-shrink: 0">87</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ══════════════════ P5 · TEAL OPS ══════════════════ -->
+      <section class="ps" id="p5">
+        <div class="ps-meta">
+          <div class="ps-badge">
+            <div class="ps-bnum">5</div>
+            Proposta
+          </div>
+          <div class="ps-title">Teal Ops — Verd esmeralda, dashboard d'operacions</div>
+          <div class="ps-desc">
+            Orientat a monitorització operativa. Indicador de sistema live, KPIs amb barra de color inferior, gràfic de visites, llista de peticions
+            amb codis de resposta, storage per client. Accent teal fresc sobre fons fosc verd profund.
+          </div>
+        </div>
+        <div class="pwin">
+          <div class="d5">
+            <div class="d5-sb">
+              <div class="d5-sb-logo">
+                <div class="d5-sb-lm">V</div>
+                <div>
+                  <div class="d5-sb-lt5">Vora</div>
+                  <div class="d5-sb-ls5">Studio CMS</div>
+                </div>
+              </div>
+              <div class="d5-sb-sec5">General</div>
+              <div class="d5-sb-lk act">
+                <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                  <rect x="3" y="3" width="7" height="7" />
+                  <rect x="14" y="3" width="7" height="7" />
+                  <rect x="3" y="14" width="7" height="7" />
+                  <rect x="14" y="14" width="7" height="7" />
+                </svg>
+                Dashboard
+              </div>
+              <div class="d5-sb-lk">
+                <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                  <circle cx="12" cy="7" r="4" />
+                </svg>
+                Projectes
+              </div>
+              <div class="d5-sb-lk">
+                <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                  <polyline points="14,2 14,8 20,8" />
+                </svg>
+                Notícies
+              </div>
+              <div class="d5-sb-lk">
+                <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                  <rect x="3" y="3" width="18" height="18" rx="2" />
+                  <circle cx="8.5" cy="8.5" r="1.5" />
+                  <polyline points="21,15 16,10 5,21" />
+                </svg>
+                Mediateca
+              </div>
+              <div class="d5-sb-lk">
+                <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                  <polyline points="16,18 22,12 16,6" />
+                  <polyline points="8,6 2,12 8,18" />
+                </svg>
+                Guia API
+              </div>
+              <div class="d5-sb-ft">
+                <div class="d5-sb-av">VS</div>
+                <div>
+                  <div style="font-size: 12px; font-weight: 500; color: rgba(255, 255, 255, 0.7)">Vora Studio</div>
+                  <div style="font-size: 10px; color: rgba(255, 255, 255, 0.28)">Admin</div>
+                </div>
+              </div>
+            </div>
+            <div class="d5-main">
+              <div class="d5-hdr">
+                <span class="d5-hdr-title">Dashboard — Operacions</span>
+                <div class="d5-hdr-dot">
+                  <div class="d5-hdr-live-dot"></div>
+                  Sistema operatiu
+                </div>
+                <button class="d5-hdr-btn5">+ Nou projecte</button>
+              </div>
+              <div class="d5-body">
+                <div class="d5-kpis">
+                  <div class="d5-kpi k-vis">
+                    <div class="d5-kpi-lbl">Visites avui</div>
+                    <div class="d5-kpi-val">2,847</div>
+                    <div class="d5-kpi-sub5" style="color: #34d399">↑ 18.4% vs ahir</div>
+                  </div>
+                  <div class="d5-kpi k-ok">
+                    <div class="d5-kpi-lbl">Peticions OK</div>
+                    <div class="d5-kpi-val">13,891</div>
+                    <div class="d5-kpi-sub5" style="color: #4ade80">97.1% acceptades</div>
+                  </div>
+                  <div class="d5-kpi k-dn">
+                    <div class="d5-kpi-lbl">Denegades</div>
+                    <div class="d5-kpi-val">411</div>
+                    <div class="d5-kpi-sub5" style="color: #f87171">2.9% · 2 nous errors</div>
+                  </div>
+                  <div class="d5-kpi k-fil">
+                    <div class="d5-kpi-lbl">Fitxers pujats</div>
+                    <div class="d5-kpi-val">1,204</div>
+                    <div class="d5-kpi-sub5" style="color: #fbbf24">4.2 / 10 GB usats</div>
+                  </div>
+                </div>
+                <div class="d5-row2">
+                  <div class="d5-card">
+                    <div class="d5-card-title">Visites per hora (últimes 8h) <span class="d5-card-more5">Detall</span></div>
+                    <svg width="100%" height="75" viewBox="0 0 400 75" preserveAspectRatio="none">
+                      <defs>
+                        <linearGradient id="g5" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="0%" stop-color="#10b981" stop-opacity=".3" />
+                          <stop offset="100%" stop-color="#10b981" stop-opacity="0" />
+                        </linearGradient>
+                      </defs>
+                      <path
+                        d="M0,65 L50,55 L100,45 L150,35 L200,40 L250,20 L300,25 L350,15 L400,18"
+                        fill="none"
+                        stroke="#10b981"
+                        stroke-width="2.5"
+                        stroke-linecap="round"
+                      />
+                      <path d="M0,65 L50,55 L100,45 L150,35 L200,40 L250,20 L300,25 L350,15 L400,18 L400,75 L0,75Z" fill="url(#g5)" />
+                      <circle cx="400" cy="18" r="4" fill="#10b981" />
+                      <circle cx="250" cy="20" r="3" fill="#10b981" opacity=".7" />
+                    </svg>
+                    <div class="d5-chart-bars" style="margin-top: 4px">
+                      <div class="d5-bar-wrap">
+                        <div class="d5-bar" style="height: 45%; background: rgba(16, 185, 129, 0.3)"></div>
+                        <div class="d5-bar-lbl5">00h</div>
+                      </div>
+                      <div class="d5-bar-wrap">
+                        <div class="d5-bar" style="height: 30%; background: rgba(16, 185, 129, 0.3)"></div>
+                        <div class="d5-bar-lbl5">03h</div>
+                      </div>
+                      <div class="d5-bar-wrap">
+                        <div class="d5-bar" style="height: 55%; background: rgba(16, 185, 129, 0.4)"></div>
+                        <div class="d5-bar-lbl5">06h</div>
+                      </div>
+                      <div class="d5-bar-wrap">
+                        <div class="d5-bar" style="height: 80%; background: rgba(16, 185, 129, 0.5)"></div>
+                        <div class="d5-bar-lbl5">09h</div>
+                      </div>
+                      <div class="d5-bar-wrap">
+                        <div class="d5-bar" style="height: 70%; background: rgba(16, 185, 129, 0.5)"></div>
+                        <div class="d5-bar-lbl5">12h</div>
+                      </div>
+                      <div class="d5-bar-wrap">
+                        <div class="d5-bar" style="height: 90%; background: rgba(16, 185, 129, 0.6)"></div>
+                        <div class="d5-bar-lbl5">15h</div>
+                      </div>
+                      <div class="d5-bar-wrap">
+                        <div class="d5-bar" style="height: 100%; background: #10b981"></div>
+                        <div class="d5-bar-lbl5">18h</div>
+                      </div>
+                      <div class="d5-bar-wrap">
+                        <div class="d5-bar" style="height: 75%; background: rgba(16, 185, 129, 0.55)"></div>
+                        <div class="d5-bar-lbl5">21h</div>
+                      </div>
+                    </div>
+                  </div>
+                  <!-- Clients with storage -->
+                  <div class="d5-card">
+                    <div class="d5-card-title">Clients — Emmagatzematge</div>
+                    <div class="d5-cli-item">
+                      <div class="d5-cli-av5" style="background: #f0a048">A</div>
+                      <div style="flex: 1; min-width: 0">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 4px">
+                          <span class="d5-cli-name5">Aula Gastronòmica</span
+                          ><span style="font-size: 11px; color: rgba(255, 255, 255, 0.45)">1.8GB</span>
+                        </div>
+                        <div class="d5-prog-track"><div class="d5-prog-fill" style="width: 18%; background: #10b981"></div></div>
+                      </div>
+                    </div>
+                    <div class="d5-cli-item">
+                      <div class="d5-cli-av5" style="background: #3b82f6">V</div>
+                      <div style="flex: 1; min-width: 0">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 4px">
+                          <span class="d5-cli-name5">Vora Studio</span><span style="font-size: 11px; color: rgba(255, 255, 255, 0.45)">1.2GB</span>
+                        </div>
+                        <div class="d5-prog-track"><div class="d5-prog-fill" style="width: 12%; background: #34d399"></div></div>
+                      </div>
+                    </div>
+                    <div class="d5-cli-item">
+                      <div class="d5-cli-av5" style="background: #a855f7">X</div>
+                      <div style="flex: 1; min-width: 0">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 4px">
+                          <span class="d5-cli-name5">Xavi Brands</span><span style="font-size: 11px; color: rgba(255, 255, 255, 0.45)">0.9GB</span>
+                        </div>
+                        <div class="d5-prog-track"><div class="d5-prog-fill" style="width: 9%; background: #6ee7b7"></div></div>
+                      </div>
+                    </div>
+                    <div class="d5-cli-item">
+                      <div class="d5-cli-av5" style="background: #f59e0b">P</div>
+                      <div style="flex: 1; min-width: 0">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 4px">
+                          <span class="d5-cli-name5">Palmito House</span><span style="font-size: 11px; color: rgba(255, 255, 255, 0.45)">0.3GB</span>
+                        </div>
+                        <div class="d5-prog-track"><div class="d5-prog-fill" style="width: 3%; background: #a7f3d0"></div></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="d5-row3">
+                  <!-- API requests with status codes -->
+                  <div class="d5-card">
+                    <div class="d5-card-title">Peticions per codi</div>
+                    <div class="d5-req-item">
+                      <span class="d5-req-badge" style="background: rgba(74, 222, 128, 0.1); color: #4ade80">200</span
+                      ><span class="d5-req-path">/api/projectes</span><span class="d5-req-count" style="color: #4ade80">4,821</span>
+                    </div>
+                    <div class="d5-req-item">
+                      <span class="d5-req-badge" style="background: rgba(74, 222, 128, 0.1); color: #4ade80">200</span
+                      ><span class="d5-req-path">/api/noticies</span><span class="d5-req-count" style="color: #4ade80">3,204</span>
+                    </div>
+                    <div class="d5-req-item">
+                      <span class="d5-req-badge" style="background: rgba(251, 191, 36, 0.1); color: #fbbf24">201</span
+                      ><span class="d5-req-path">/api/media/upload</span><span class="d5-req-count" style="color: #fbbf24">1,042</span>
+                    </div>
+                    <div class="d5-req-item">
+                      <span class="d5-req-badge" style="background: rgba(248, 113, 113, 0.1); color: #f87171">403</span
+                      ><span class="d5-req-path">/api/noticies/42</span><span class="d5-req-count" style="color: #f87171">287</span>
+                    </div>
+                    <div class="d5-req-item">
+                      <span class="d5-req-badge" style="background: rgba(248, 113, 113, 0.1); color: #f87171">404</span
+                      ><span class="d5-req-path">/api/seccions/old</span><span class="d5-req-count" style="color: #f87171">124</span>
+                    </div>
+                  </div>
+                  <!-- Files -->
+                  <div class="d5-card">
+                    <div class="d5-card-title">Fitxers recents</div>
+                    <div class="d5-cli-item">
+                      <div
+                        style="
+                          width: 28px;
+                          height: 28px;
+                          border-radius: 6px;
+                          background: rgba(16, 185, 129, 0.1);
+                          display: flex;
+                          align-items: center;
+                          justify-content: center;
+                          flex-shrink: 0;
+                        "
+                      >
+                        <svg width="13" height="13" fill="none" stroke="#34d399" stroke-width="1.8" viewBox="0 0 24 24">
+                          <rect x="3" y="3" width="18" height="18" rx="2" />
+                          <circle cx="8.5" cy="8.5" r="1.5" />
+                          <polyline points="21,15 16,10 5,21" />
+                        </svg>
+                      </div>
+                      <div>
+                        <div class="d5-cli-name5">hero-comercial-ros.webp</div>
+                        <div class="d5-cli-sub5">Comercial Ros · 840KB · fa 2h</div>
+                      </div>
+                    </div>
+                    <div class="d5-cli-item">
+                      <div
+                        style="
+                          width: 28px;
+                          height: 28px;
+                          border-radius: 6px;
+                          background: rgba(16, 185, 129, 0.1);
+                          display: flex;
+                          align-items: center;
+                          justify-content: center;
+                          flex-shrink: 0;
+                        "
+                      >
+                        <svg width="13" height="13" fill="none" stroke="#34d399" stroke-width="1.8" viewBox="0 0 24 24">
+                          <rect x="3" y="3" width="18" height="18" rx="2" />
+                          <circle cx="8.5" cy="8.5" r="1.5" />
+                          <polyline points="21,15 16,10 5,21" />
+                        </svg>
+                      </div>
+                      <div>
+                        <div class="d5-cli-name5">logo-wiar-v2.png</div>
+                        <div class="d5-cli-sub5">Wiar · 128KB · fa 5h</div>
+                      </div>
+                    </div>
+                    <div class="d5-cli-item">
+                      <div
+                        style="
+                          width: 28px;
+                          height: 28px;
+                          border-radius: 6px;
+                          background: rgba(59, 130, 246, 0.1);
+                          display: flex;
+                          align-items: center;
+                          justify-content: center;
+                          flex-shrink: 0;
+                        "
+                      >
+                        <svg width="13" height="13" fill="none" stroke="#60a5fa" stroke-width="1.8" viewBox="0 0 24 24">
+                          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                          <polyline points="14,2 14,8 20,8" />
+                        </svg>
+                      </div>
+                      <div>
+                        <div class="d5-cli-name5">brief-palmito-v2.pdf</div>
+                        <div class="d5-cli-sub5">Palmito · 2.1MB · ahir</div>
+                      </div>
+                    </div>
+                    <div class="d5-cli-item">
+                      <div
+                        style="
+                          width: 28px;
+                          height: 28px;
+                          border-radius: 6px;
+                          background: rgba(16, 185, 129, 0.1);
+                          display: flex;
+                          align-items: center;
+                          justify-content: center;
+                          flex-shrink: 0;
+                        "
+                      >
+                        <svg width="13" height="13" fill="none" stroke="#34d399" stroke-width="1.8" viewBox="0 0 24 24">
+                          <rect x="3" y="3" width="18" height="18" rx="2" />
+                          <circle cx="8.5" cy="8.5" r="1.5" />
+                          <polyline points="21,15 16,10 5,21" />
+                        </svg>
+                      </div>
+                      <div>
+                        <div class="d5-cli-name5">gallery-aula-2026.webp</div>
+                        <div class="d5-cli-sub5">Aula Gastr. · 620KB · ahir</div>
+                      </div>
+                    </div>
+                  </div>
+                  <!-- Resource breakdown -->
+                  <div class="d5-card">
+                    <div class="d5-card-title">Recursos sol·licitats</div>
+                    <div class="d5-prog-row">
+                      <div class="d5-prog-head"><span class="d5-prog-lbl5">Imatges</span><span class="d5-prog-val5">60% · 7,381</span></div>
+                      <div class="d5-prog-track"><div class="d5-prog-fill" style="width: 60%; background: #10b981"></div></div>
+                    </div>
+                    <div class="d5-prog-row">
+                      <div class="d5-prog-head"><span class="d5-prog-lbl5">Notícies</span><span class="d5-prog-val5">24% · 2,952</span></div>
+                      <div class="d5-prog-track"><div class="d5-prog-fill" style="width: 24%; background: #34d399"></div></div>
+                    </div>
+                    <div class="d5-prog-row">
+                      <div class="d5-prog-head"><span class="d5-prog-lbl5">Projectes</span><span class="d5-prog-val5">13% · 1,599</span></div>
+                      <div class="d5-prog-track"><div class="d5-prog-fill" style="width: 13%; background: #6ee7b7"></div></div>
+                    </div>
+                    <div class="d5-prog-row">
+                      <div class="d5-prog-head"><span class="d5-prog-lbl5">Seccions</span><span class="d5-prog-val5">3% · 370</span></div>
+                      <div class="d5-prog-track"><div class="d5-prog-fill" style="width: 3%; background: #a7f3d0"></div></div>
+                    </div>
+                    <div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(255, 255, 255, 0.06)">
+                      <div
+                        style="display: flex; justify-content: space-between; font-size: 11px; color: rgba(255, 255, 255, 0.4); margin-bottom: 5px"
+                      >
+                        <span>Storage total usat</span><span style="color: #fff; font-weight: 600">4.2 / 10 GB</span>
+                      </div>
+                      <div class="d5-prog-track">
+                        <div class="d5-prog-fill" style="width: 42%; background: linear-gradient(90deg, #10b981, #059669)"></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <footer class="sf">
+        <p>VoraStudio CMS · 5 Propostes de Dashboard · Symfony</p>
+        <p>2026</p>
+      </footer>
+    </div>
+
+    <script>
+      const secs = document.querySelectorAll("section[id]");
+      const links = document.querySelectorAll(".inav-links a");
+      const io = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((e) => {
+            if (e.isIntersecting) {
+              links.forEach((a) => a.classList.remove("active"));
+              const a = document.querySelector(`.inav-links a[href="#${e.target.id}"]`);
+              if (a) a.classList.add("active");
+            }
+          });
+        },
+        { rootMargin: "-30% 0px -60% 0px" },
+      );
+      secs.forEach((s) => io.observe(s));
+    </script>
+  </body>
+</html>

@@ -5,13 +5,16 @@
 :root {
   /* Background system — Soft Dark */
   --s-bg: #0a0a0c;
-  --s-surface: #141418;
+  --s-main-bg: linear-gradient(135deg, rgba(10, 10, 12, 0.82) 0%, rgba(10, 10, 12, 0.82) 100%), url("/img/fons.webp");
+  --s-topbar-bg: transparent;
+  --s-surface: rgba(20, 20, 24, 0.72);
+  --s-surface-translucent: rgba(20, 20, 24, 0.35);
   --s-surface-secondary: rgba(255, 255, 255, 0.03);
   --s-border: rgba(255, 255, 255, 0.09);
   --s-border-light: rgba(255, 255, 255, 0.06);
 
   /* Sidebar */
-  --s-sidebar-bg: #0f0f13;
+  --s-sidebar-bg: rgba(10, 10, 12, 0.25);
   --s-sidebar-hover: rgba(255, 255, 255, 0.05);
   --s-sidebar-active: rgba(249, 115, 22, 0.15);
   --s-sidebar-text: rgba(255, 255, 255, 0.8);
