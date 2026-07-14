@@ -90,35 +90,89 @@ class ApiRequestLogRepository extends ServiceEntityRepository
         return $result;
     }
 
-    /* ── Top origins consumint l'API avui ── */
-    public function topOriginsToday(int $limit = 5): array
+    /* ════════════════════════════════════════════════════════════
+       MÈTRIQUES PER PROJECTE
+       ════════════════════════════════════════════════════════════ */
+
+    /* ── Total crides API d'un projecte ── */
+    public function countByProject(int $projectId): int
     {
-        $today = new \DateTimeImmutable('today');
-        return $this->createQueryBuilder('r')
-            ->select('r.origin, COUNT(r.id) AS total')
-            ->where('r.createdAt >= :today')
-            ->andWhere('r.origin IS NOT NULL')
-            ->andWhere("r.origin != ''")
-            ->groupBy('r.origin')
-            ->orderBy('total', 'DESC')
-            ->setParameter('today', $today)
-            ->setMaxResults($limit)
+        return (int) $this->createQueryBuilder('r')
+            ->select('COUNT(r.id)')
+            ->where('IDENTITY(r.project) = :pid')
+            ->setParameter('pid', $projectId)
             ->getQuery()
-            ->getResult();
+            ->getSingleScalarResult();
     }
 
-    /* ── Crides per endpoint avui (top) ── */
-    public function topEndpointsToday(int $limit = 5): array
+    /* ── Crides per rang de status d'un projecte ── */
+    public function countByProjectAndStatus(int $projectId, int $min, int $max): int
     {
-        $today = new \DateTimeImmutable('today');
-        return $this->createQueryBuilder('r')
+        return (int) $this->createQueryBuilder('r')
+            ->select('COUNT(r.id)')
+            ->where('IDENTITY(r.project) = :pid')
+            ->andWhere('r.statusCode >= :min')
+            ->andWhere('r.statusCode <= :max')
+            ->setParameter('pid', $projectId)
+            ->setParameter('min', $min)
+            ->setParameter('max', $max)
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
+
+    /* ── Endpoint més usat d'un projecte ── */
+    public function topEndpointByProject(int $projectId): ?string
+    {
+        $result = $this->createQueryBuilder('r')
             ->select('r.endpoint, COUNT(r.id) AS total')
-            ->where('r.createdAt >= :today')
+            ->where('IDENTITY(r.project) = :pid')
             ->groupBy('r.endpoint')
             ->orderBy('total', 'DESC')
-            ->setParameter('today', $today)
-            ->setMaxResults($limit)
+            ->setParameter('pid', $projectId)
+            ->setMaxResults(1)
             ->getQuery()
-            ->getResult();
+            ->getOneOrNullResult();
+        return $result['endpoint'] ?? null;
+    }
+
+    /* ── Temps de resposta mig d'un projecte (ms) ── */
+    public function averageResponseTimeByProject(int $projectId): int
+    {
+        $result = (int) $this->createQueryBuilder('r')
+            ->select('AVG(r.responseTimeMs)')
+            ->where('IDENTITY(r.project) = :pid')
+            ->andWhere('r.responseTimeMs IS NOT NULL')
+            ->setParameter('pid', $projectId)
+            ->getQuery()
+            ->getSingleScalarResult();
+        return $result;
+    }
+
+    /* ── Token grants d'un projecte (des del seu endpoint) ── */
+    public function countTokenGrantsByProject(int $projectId): int
+    {
+        return (int) $this->createQueryBuilder('r')
+            ->select('COUNT(r.id)')
+            ->where('IDENTITY(r.project) = :pid')
+            ->andWhere('r.endpoint = :ep')
+            ->andWhere('r.statusCode = 200')
+            ->setParameter('pid', $projectId)
+            ->setParameter('ep', '/api/public/token')
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
+
+    /* ── Token denials d'un projecte ── */
+    public function countTokenDenialsByProject(int $projectId): int
+    {
+        return (int) $this->createQueryBuilder('r')
+            ->select('COUNT(r.id)')
+            ->where('IDENTITY(r.project) = :pid')
+            ->andWhere('r.endpoint = :ep')
+            ->andWhere('r.statusCode = 403')
+            ->setParameter('pid', $projectId)
+            ->setParameter('ep', '/api/public/token')
+            ->getQuery()
+            ->getSingleScalarResult();
     }
 }

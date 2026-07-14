@@ -8,17 +8,23 @@
 
 namespace App\Entity;
 
+use App\Entity\Project;
 use App\Repository\ApiRequestLogRepository;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: ApiRequestLogRepository::class)]
 #[ORM\Index(columns: ['domain', 'created_at'])]
+#[ORM\Index(columns: ['project_id', 'created_at'])]
 class ApiRequestLog
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
     private ?int $id = null;
+
+    #[ORM\ManyToOne]
+    #[ORM\JoinColumn(nullable: true, onDelete: 'SET NULL')]
+    private ?Project $project = null;
 
     #[ORM\Column(length: 255)]
     private ?string $domain = null;
@@ -71,6 +77,9 @@ class ApiRequestLog
     }
 
     public function getId(): ?int { return $this->id; }
+
+    public function getProject(): ?Project { return $this->project; }
+    public function setProject(?Project $project): static { $this->project = $project; return $this; }
 
     public function getDomain(): ?string { return $this->domain; }
     public function setDomain(string $domain): static { $this->domain = $domain; return $this; }

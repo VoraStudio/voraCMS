@@ -2,6 +2,11 @@
 
 {% block stylesheets %}
     {{ parent() }}
+    {# Google Fonts for dashboard #}
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Syne:wght@400;600;700;800&family=Space+Grotesk:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+
     {# VoraAdmin modular stylesheets #}
     <link rel="stylesheet" href="{{ asset('css/admin/layout.css') }}?v=2.0">
     <link rel="stylesheet" href="{{ asset('css/admin/components.css') }}?v=2.0">
@@ -137,9 +142,14 @@
         </div>
 
         {# ─── Action Bar (just a sota del topbar) ─── #}
-        <div class="s-action-bar">
+        {% set topbarActionsHtml %}
             {% block topbar_actions %}{% endblock %}
-        </div>
+        {% endset %}
+        {% if topbarActionsHtml|trim is not empty %}
+            <div class="s-action-bar">
+                {{ topbarActionsHtml|raw }}
+            </div>
+        {% endif %}
 
         <div class="s-content">
             {% block content %}{% endblock %}
