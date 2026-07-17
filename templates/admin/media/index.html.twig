@@ -38,6 +38,23 @@
     </form>
   </div>
 
+  {# ─── Batch toolbar (hidden per defecte) ─── #}
+  <div class="media-index__batch-toolbar" id="batchToolbar" hidden>
+    <span class="media-index__batch-count" id="batchCount">0 seleccionades</span>
+    <button type="button" class="media-index__batch-move" id="batchMoveBtn">
+      <i class="bi bi-folder-symlink"></i> Mou al projecte
+    </button>
+    <button type="button" class="media-index__batch-clear" id="batchClearBtn">
+      <i class="bi bi-x-lg"></i> Desseleccionar
+    </button>
+  </div>
+
+  {# ─── Form ocult per al batch move ─── #}
+  <form id="batchMoveForm" method="post" action="{{ path('admin_media_batch_move') }}" class="d-none">
+    <input type="hidden" name="_token" value="{{ csrf_token('batch-move') }}">
+    <input type="hidden" name="project_id" id="batchProjectId" value="">
+  </form>
+
   {# ─── Client → Project accordion ─── #}
   <div class="media-picker__projects" id="mediaBrowser">
 
@@ -76,11 +93,14 @@
               {% for m in pgroup.items %}
               <div class="media-picker__item media-index__item" data-id="{{ m.id }}" data-url="{{ m.path }}">
                 <div class="media-picker__item-thumb">
+                  <label class="media-index__item-check">
+                    <input type="checkbox" name="media_ids[]" value="{{ m.id }}" class="js-media-check">
+                  </label>
                   <img src="{{ m.path }}" alt="{{ m.originalFilename }}" loading="lazy">
                   <button type="button" class="media-picker__item-delete" aria-label="Eliminar imatge" title="Eliminar"
                     data-confirm="Eliminaràs «{{ m.originalFilename }}». Aquesta acció no es pot desfer."
                     data-form="del-media-{{ m.id }}"><i class="bi bi-x"></i></button>
-                  <form method="post" action="{{ path('admin_media_delete', {'id': m.id}) }}" id="del-media-{{ m.id }}" class="d-none">
+                  <form method="post" action="{{ path('admin_media_delete', {'id': m.id }) }}" id="del-media-{{ m.id }}" class="d-none">
                     <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ m.id) }}">
                   </form>
                 </div>
@@ -144,11 +164,14 @@
               {% for m in pgroup.items %}
               <div class="media-picker__item media-index__item" data-id="{{ m.id }}" data-url="{{ m.path }}">
                 <div class="media-picker__item-thumb">
+                  <label class="media-index__item-check">
+                    <input type="checkbox" name="media_ids[]" value="{{ m.id }}" class="js-media-check">
+                  </label>
                   <img src="{{ m.path }}" alt="{{ m.originalFilename }}" loading="lazy">
                   <button type="button" class="media-picker__item-delete" aria-label="Eliminar imatge" title="Eliminar"
                     data-confirm="Eliminaràs «{{ m.originalFilename }}». Aquesta acció no es pot desfer."
                     data-form="del-media-{{ m.id }}"><i class="bi bi-x"></i></button>
-                  <form method="post" action="{{ path('admin_media_delete', {'id': m.id}) }}" id="del-media-{{ m.id }}" class="d-none">
+                  <form method="post" action="{{ path('admin_media_delete', {'id': m.id }) }}" id="del-media-{{ m.id }}" class="d-none">
                     <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ m.id) }}">
                   </form>
                 </div>
@@ -185,5 +208,5 @@
 {% block javascripts %}
 {{ parent() }}
 {% include 'admin/components/_help_faq.html.twig' with { form_context: 'media_index' } %}
-<script src="{{ asset('js/media-index.js') }}?v=2.0"></script>
+<script src="{{ asset('js/media-index.js') }}?v=3.0"></script>
 {% endblock %}

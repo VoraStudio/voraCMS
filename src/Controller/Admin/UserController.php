@@ -108,8 +108,9 @@ class UserController extends AbstractController
 
                 /* Crear projecte per defecte per l'usuari */
                 $defaultProject = new Project();
-                $defaultProject->setName('Web Principal');
-                $defaultProject->setSlug('web-principal');
+                $projectName = $user->getName() ? 'Web Principal - ' . $user->getName() : 'Web Principal';
+                $defaultProject->setName($projectName);
+                $defaultProject->setSlug($slugGenerator->generate($user->getName() ?: 'web-principal'));
                 $defaultProject->setDescription('Projecte per defecte');
                 $defaultProject->setColor('#787878');
                 $defaultProject->setActive(true);

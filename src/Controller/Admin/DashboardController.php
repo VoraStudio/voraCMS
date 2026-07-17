@@ -100,16 +100,15 @@ class DashboardController extends AbstractController
 
         $visitQb = $em->createQueryBuilder()
             ->select('COUNT(v.id)')
-            ->from(\App\Entity\Visit::class, 'v')
-            ->join('v.entry', 'e')
-            ->join('e.contentType', 'ct');
+            ->from(\App\Entity\Visit::class, 'v');
 
         if ($projectId) {
-            $visitQb->andWhere('ct.project = :projectId')
+            $visitQb->join('v.entry', 'e')
+                    ->join('e.contentType', 'ct')
+                    ->andWhere('ct.project = :projectId')
                     ->setParameter('projectId', $projectId);
         } elseif ($clientId) {
-            $visitQb->join('ct.project', 'p')
-                    ->andWhere('p.user = :clientId')
+            $visitQb->andWhere('v.user = :clientId')
                     ->setParameter('clientId', $clientId);
         }
 
@@ -323,15 +322,14 @@ class DashboardController extends AbstractController
 
         $entriesCountQb = $em->createQueryBuilder()
             ->select('COUNT(e.id)')
-            ->from(\App\Entity\Entry::class, 'e')
-            ->join('e.contentType', 'ct');
+            ->from(\App\Entity\Entry::class, 'e');
 
         if ($projectId) {
-            $entriesCountQb->andWhere('ct.project = :projectId')
+            $entriesCountQb->join('e.contentType', 'ct')
+                           ->andWhere('ct.project = :projectId')
                            ->setParameter('projectId', $projectId);
         } elseif ($clientId) {
-            $entriesCountQb->join('ct.project', 'p')
-                           ->andWhere('p.user = :clientId')
+            $entriesCountQb->andWhere('e.user = :clientId')
                            ->setParameter('clientId', $clientId);
         }
         $entriesCount = (int) $entriesCountQb->getQuery()->getSingleScalarResult();
