@@ -1125,3 +1125,108 @@
 [data-theme="light"] .media-picker__send-btn:disabled span {
   color: rgba(0, 0, 0, 0.25);
 }
+
+/* ─── Batch toolbar ─── */
+.media-index__batch-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 16px;
+  margin-bottom: 16px;
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.1), rgba(249, 115, 22, 0.06));
+  border: 1px solid rgba(245, 158, 11, 0.2);
+  border-radius: 10px;
+}
+
+.media-index__batch-count {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.85);
+  margin-right: auto;
+}
+
+.media-index__batch-move,
+.media-index__batch-clear {
+  padding: 6px 14px;
+  border-radius: 8px;
+  border: none;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s;
+}
+
+.media-index__batch-move {
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  color: #fff;
+}
+
+.media-index__batch-move:hover {
+  box-shadow: 0 2px 8px rgba(245, 158, 11, 0.35);
+}
+
+.media-index__batch-clear {
+  background: rgba(148, 163, 184, 0.12);
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.media-index__batch-clear:hover {
+  background: rgba(239, 68, 68, 0.15);
+  color: #ef4444;
+}
+
+/* ─── Checkbox a la thumbnail ─── */
+.media-index__item-check {
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  z-index: 2;
+  width: 22px;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.45);
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background 0.2s;
+  opacity: 0;
+}
+
+.media-index__item:hover .media-index__item-check {
+  opacity: 1;
+}
+
+.media-index__item-check:has(input:checked) {
+  opacity: 1;
+  background: rgba(245, 158, 11, 0.85);
+}
+
+.media-index__item-check input {
+  width: 14px;
+  height: 14px;
+  cursor: pointer;
+  accent-color: #f59e0b;
+}
+
+[data-theme="light"] .media-index__batch-count {
+  color: rgba(15, 23, 42, 0.85);
+}
+
+[data-theme="light"] .media-index__batch-toolbar {
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.06), rgba(249, 115, 22, 0.03));
+  border-color: rgba(245, 158, 11, 0.15);
+}
+
+[data-theme="light"] .media-index__batch-clear {
+  color: rgba(71, 85, 105, 0.7);
+  background: rgba(0, 0, 0, 0.04);
+}
+
+[data-theme="light"] .media-index__batch-clear:hover {
+  background: rgba(239, 68, 68, 0.08);
+  color: #dc2626;
+}

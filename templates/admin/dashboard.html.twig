@@ -37,6 +37,22 @@
         {% endif %}
 
         <div class="d1-body">
+            {# ─── Empty state per a usuaris no-admin sense dades ─── #}
+            {% if not isAdmin and visitsToday == 0 and apiToday == 0 and totalFiles == 0 %}
+            <div class="d1-empty-state">
+                <div class="d1-empty-state-icon">
+                    <svg width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" opacity="0.3">
+                        <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+                    </svg>
+                </div>
+                <div class="d1-empty-state-text">
+                    <strong>No hi ha dades disponibles</strong>
+                    <p>Les mètriques del dashboard apareixeran quan els teus projectes rebin visites i crides a l'API. 
+                    Pots començar visitant la <a href="{{ path('admin_projects') }}">pàgina de projectes</a> per seleccionar-ne un.</p>
+                </div>
+            </div>
+            {% endif %}
+
             {# ─── KPIs ─── #}
             <div class="d1-kpis">
                 <!-- Visites avui -->

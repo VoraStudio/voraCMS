@@ -241,6 +241,52 @@ class MediaController extends AbstractController
     }
 
     /* -----------------------------------------------------------
+       batchMove — Mou múltiples imatges a un altre projecte.
+       ----------------------------------------------------------- */
+    #[Route('/batch-move', name: 'admin_media_batch_move', methods: ['POST'])]
+    public function batchMove(Request $request, EntityManagerInterface $em, ProjectRepository $projectRepo): JsonResponse
+    {
+        $this->denyAccessUnlessGranted('ROLE_ADMIN');
+
+        if (!$this->isCsrfTokenValid('batch-move', $request->request->get('_token'))) {
+            return $this->json(['error' => 'Token invàlid.'], 403);
+        }
+
+        $mediaIds = $request->request->all('media_ids');
+        $projectId = $request->request->get('project_id');
+
+        if (empty($mediaIds)) {
+            return $this->json(['error' => 'No s\'han seleccionat imatges.'], 400);
+        }
+
+        $project = null;
+        if ($projectId) {
+            $project = $projectRepo->find($projectId);
+            if (!$project) {
+                return $this->json(['error' => 'Projecte no trobat.'], 404);
+            }
+        }
+
+        $mediaItems = $em->getRepository(Media::class)->findBy(['id' => $mediaIds]);
+
+        if (empty($mediaItems)) {
+            return $this->json(['error' => 'No s\'han trobat les imatges.'], 404);
+        }
+
+        foreach ($mediaItems as $media) {
+            $media->setProject($project);
+        }
+
+        $em->flush();
+
+        return $this->json([
+            'ok'     => true,
+            'moved'  => count($mediaItems),
+            'to'     => $project?->getName() ?? 'Sense projecte',
+        ]);
+    }
+
+    /* -----------------------------------------------------------
        picker — Modal de selecció de fitxers multimèdia.
        ----------------------------------------------------------- */
     #[Route('/picker', name: 'admin_media_picker')]

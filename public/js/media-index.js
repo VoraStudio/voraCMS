@@ -219,6 +219,143 @@
       }).catch(function () {});
     });
 
+    /* ─── Batch selection ─── */
+    var toolbar = document.getElementById('batchToolbar');
+    var countEl = document.getElementById('batchCount');
+    var moveBtn = document.getElementById('batchMoveBtn');
+    var clearBtn = document.getElementById('batchClearBtn');
+    var batchForm = document.getElementById('batchMoveForm');
+    var batchProjectId = document.getElementById('batchProjectId');
+
+    function updateBatchToolbar () {
+      var checked = document.querySelectorAll('.js-media-check:checked');
+      var total = checked.length;
+      if (total === 0) {
+        toolbar.hidden = true;
+        return;
+      }
+      toolbar.hidden = false;
+      countEl.textContent = total + ' seleccionada' + (total !== 1 ? 's' : '');
+    }
+
+    /* Click on checkbox → update toolbar */
+    browser.addEventListener('change', function (e) {
+      if (e.target.classList.contains('js-media-check')) {
+        updateBatchToolbar();
+      }
+    });
+
+    /* Click on item (not on checkbox or delete or copy) → toggle checkbox */
+    browser.addEventListener('click', function (e) {
+      var item = e.target.closest('.media-index__item');
+      if (!item) return;
+      if (e.target.closest('.media-picker__item-delete')) return;
+      if (e.target.closest('.media-index__item-copy')) return;
+      if (e.target.closest('.media-index__item-check')) return;
+
+      var cb = item.querySelector('.js-media-check');
+      if (cb) {
+        cb.checked = !cb.checked;
+        updateBatchToolbar();
+      }
+    });
+
+    /* Clear selection */
+    if (clearBtn) {
+      clearBtn.addEventListener('click', function () {
+        document.querySelectorAll('.js-media-check:checked').forEach(function (cb) {
+          cb.checked = false;
+        });
+        updateBatchToolbar();
+      });
+    }
+
+    /* Move selected → project selector */
+    if (moveBtn) {
+      moveBtn.addEventListener('click', function () {
+        /* Recollir projectes dels projectGroups (generats al Twig) */
+        var projectOptions = [];
+
+        var optgroups = document.querySelectorAll('#uploadForm optgroup');
+        optgroups.forEach(function (og) {
+          Array.from(og.options).forEach(function (opt) {
+            if (opt.value) {
+              projectOptions.push({ id: opt.value, label: og.label + ' → ' + opt.text });
+            }
+          });
+        });
+
+        /* Construir llista HTML per al selector SweetAlert */
+        var html = '<select id="swal-project-select" class="swal2-input" style="height:auto;padding:8px;">';
+        html += '<option value="">Sense projecte</option>';
+        projectOptions.forEach(function (p) {
+          html += '<option value="' + p.id + '">' + p.label + '</option>';
+        });
+        html += '</select>';
+
+        /* Obtenir els IDs seleccionats */
+        var ids = [];
+        document.querySelectorAll('.js-media-check:checked').forEach(function (cb) {
+          ids.push(cb.value);
+        });
+
+        Swal.fire({
+          icon: 'question',
+          title: 'Moure ' + ids.length + ' imatge' + (ids.length !== 1 ? 's' : ''),
+          html: '<label style="display:block;text-align:left;margin-bottom:6px;font-size:.85rem;color:#666;">Projecte destí:</label>' + html,
+          showCancelButton: true,
+          confirmButtonText: 'Moure',
+          cancelButtonText: 'Cancel·lar',
+          confirmButtonColor: '#f59e0b',
+          reverseButtons: true,
+          preConfirm: function () {
+            var sel = document.getElementById('swal-project-select');
+            return sel ? sel.value : '';
+          }
+        }).then(function (result) {
+          if (!result.isConfirmed) return;
+
+          var projectId = result.value;
+          batchProjectId.value = projectId || '';
+
+          /* Afegir els IDs seleccionats al form */
+          ids.forEach(function (id) {
+            var inp = document.createElement('input');
+            inp.type = 'hidden';
+            inp.name = 'media_ids[]';
+            inp.value = id;
+            batchForm.appendChild(inp);
+          });
+
+          /* Enviar via fetch */
+          var formData = new FormData(batchForm);
+          fetch(batchForm.action, {
+            method: 'POST',
+            body: formData
+          })
+          .then(function (res) { return res.json(); })
+          .then(function (data) {
+            if (data.error) {
+              Swal.fire({ icon: 'error', title: 'Error', text: data.error });
+              return;
+            }
+            Swal.fire({
+              icon: 'success',
+              title: 'Fet!',
+              text: data.moved + ' imatge' + (data.moved !== 1 ? 's' : '') + ' moguda' + (data.moved !== 1 ? 's' : '') + ' a «' + data.to + '»',
+              timer: 2000,
+              showConfirmButton: false
+            }).then(function () {
+              location.reload();
+            });
+          })
+          .catch(function () {
+            Swal.fire({ icon: 'error', title: 'Error', text: 'No s\'han pogut moure les imatges.' });
+          });
+        });
+      });
+    }
+
   });
 
 })();
