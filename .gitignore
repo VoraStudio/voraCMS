@@ -13,3 +13,6 @@
 
 # Credenciales locales (nunca subir)
 /SECRETS.md
+
+# Uploads de usuarios (no trackear — se perderían con git stash --include-untracked)
+/public/uploads/
