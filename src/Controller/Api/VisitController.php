@@ -27,13 +27,17 @@ class VisitController extends AbstractController
     {
         $data = json_decode($request->getContent(), true);
 
-        if (!$data || !isset($data['entry_id'])) {
-            return $this->json(['error' => 'entry_id requerit'], 400);
+        if (!$data) {
+            return $this->json(['error' => 'Cos JSON requerit'], 400);
         }
 
-        $entry = $entryRepo->find($data['entry_id']);
-        if (!$entry || !$entry->getUser()) {
-            return $this->json(['error' => 'Entrada no trobada'], 404);
+        /* entry_id opcional: si no es proporciona, usem l'usuari autenticat del JWT */
+        $entry = null;
+        if (!empty($data['entry_id'])) {
+            $entry = $entryRepo->find($data['entry_id']);
+            if (!$entry || !$entry->getUser()) {
+                return $this->json(['error' => 'Entrada no trobada'], 404);
+            }
         }
 
         /* Determinar IP i User-Agent: confiar en el cos JSON si la IP origen és de confiança */
@@ -49,7 +53,7 @@ class VisitController extends AbstractController
         }
 
         $visit = new Visit();
-        $visit->setUser($entry->getUser());
+        $visit->setUser($entry ? $entry->getUser() : $this->getUser());
         $visit->setEntry($entry);
         $visit->setPath($data['path'] ?? null);
         $visit->setIp($clientIp);
