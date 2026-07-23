@@ -48,8 +48,14 @@ class MediaService
 
         $safeFilename = uniqid() . '_' . time() . '.' . $extension;
 
-        /* ─── Directori per usuari ─── */
-        $userUploadDir = $this->uploadDir . '/' . $user->getId();
+        /* ─── Determinar l'usuari propietari: si hi ha projecte i qui puja és admin, usar el client del projecte ─── */
+        $owner = $user;
+        if ($project && $project->getUser()) {
+            $owner = $project->getUser();
+        }
+
+        /* ─── Directori per usuari propietari ─── */
+        $userUploadDir = $this->uploadDir . '/' . $owner->getId();
         if (!is_dir($userUploadDir)) {
             mkdir($userUploadDir, 0775, true);
         }
@@ -64,10 +70,10 @@ class MediaService
         $media->setOriginalFilename($originalName);
         $media->setExtension($extension);
         $media->setMimeType($mimeType);
-        $media->setPath('/uploads/' . $user->getId() . '/' . $safeFilename);
+        $media->setPath('/uploads/' . $owner->getId() . '/' . $safeFilename);
         $media->setFileSize($fileSize);
         $media->setUploadedBy($user);
-        $media->setUser($user);
+        $media->setUser($owner);
         $media->setProject($project);
 
         $this->em->persist($media);
