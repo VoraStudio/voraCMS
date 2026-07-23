@@ -240,11 +240,12 @@
                     {% for f in recentFiles %}
                         {% set isImage = f.mimeType starts with 'image/' %}
                         <div class="d1-file-item">
-                            <div class="d1-file-ic" style="background: {% if isImage %}rgba(245, 160, 78, 0.12){% else %}rgba(59, 130, 246, 0.1){% endif %};">
+                            <div class="d1-file-thumb" style="background: {% if isImage %}rgba(253, 224, 71, 0.08){% else %}rgba(59, 130, 246, 0.08){% endif %};">
                                 {% if isImage %}
-                                    <i class="bi bi-image" style="color: var(--s-primary);"></i>
+                                    <img src="{{ asset(f.path) }}" alt="{{ f.originalFilename }}" class="d1-file-thumb-img" loading="lazy"
+                                         onclick="openPreview(this.src, '{{ f.originalFilename|e('js') }}')" />
                                 {% else %}
-                                    <i class="bi bi-file-earmark-text" style="color: #60a5fa;"></i>
+                                    <i class="bi bi-file-earmark-text" style="font-size: 18px; color: #60a5fa;"></i>
                                 {% endif %}
                             </div>
                             <div class="d1-file-info">
@@ -257,6 +258,15 @@
                     {% else %}
                         <div class="cyber-list-empty">No hi ha fitxers recents</div>
                     {% endfor %}
+                </div>
+
+                <!-- Lightbox preview (ocult per defecte) -->
+                <div id="preview-overlay" class="d1-preview-overlay" onclick="closePreview()" style="display: none;">
+                    <div class="d1-preview-modal" onclick="event.stopPropagation()">
+                        <button class="d1-preview-close" onclick="closePreview()">&times;</button>
+                        <img id="preview-img" src="" alt="" class="d1-preview-img" />
+                        <div id="preview-caption" class="d1-preview-caption"></div>
+                    </div>
                 </div>
 
                 <!-- resources donut -->
