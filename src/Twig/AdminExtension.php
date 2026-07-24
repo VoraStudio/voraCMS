@@ -16,6 +16,7 @@
 
 namespace App\Twig;
 
+use App\Entity\User;
 use App\Repository\ContentTypeRepository;
 use App\Repository\ProjectRepository;
 use Symfony\Bundle\SecurityBundle\Security;
@@ -39,6 +40,7 @@ class AdminExtension extends AbstractExtension implements GlobalsInterface
         return [
             new TwigFunction('admin_content_types', [$this, 'getContentTypes']),
             new TwigFunction('admin_active_project', [$this, 'getActiveProject']),
+            new TwigFunction('admin_projects', [$this, 'getProjects']),
         ];
     }
 
@@ -103,6 +105,27 @@ class AdminExtension extends AbstractExtension implements GlobalsInterface
         if (!$value) return null;
         $decoded = json_decode($value, true);
         return is_array($decoded) ? $decoded : null;
+    }
+
+    public function getProjects(): array
+    {
+        $currentUser = $this->security->getUser();
+        if (!$currentUser instanceof User) {
+            return [];
+        }
+
+        $isAdmin = $this->security->isGranted('ROLE_ADMIN');
+        if (!$isAdmin) {
+            return $this->projectRepo->findBy(['user' => $currentUser], ['id' => 'DESC']);
+        }
+
+        $request = $this->requestStack->getCurrentRequest();
+        $userId = $request ? $request->query->getInt('user', 0) : 0;
+        if ($userId > 0) {
+            return $this->projectRepo->findBy(['user' => $userId], ['id' => 'DESC']);
+        }
+
+        return $this->projectRepo->findAllOrderedByUser();
     }
 
     /* -----------------------------------------------------------

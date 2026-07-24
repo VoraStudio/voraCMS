@@ -1,5 +1,12 @@
 {% extends 'admin/layout.html.twig' %}
 
+{% set breadcrumbs = [
+    {label: 'Dashboard', url: path('admin_dashboard')},
+    {label: 'Guia API', url: path('admin_api_guide')},
+    {label: 'Consola de Tests'}
+] %}
+{% set page_desc = 'Consola interactiva per fer proves en viu de peticions HTTP i tokens' %}
+
 {% block page_title %}Tests · Guia API{% endblock %}
 
 {% block stylesheets %}

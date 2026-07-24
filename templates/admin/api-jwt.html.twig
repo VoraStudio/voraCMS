@@ -1,5 +1,12 @@
 {% extends 'admin/layout.html.twig' %}
 
+{% set breadcrumbs = [
+    {label: 'Dashboard', url: path('admin_dashboard')},
+    {label: 'Guia API', url: path('admin_api_guide')},
+    {label: 'JWT'}
+] %}
+{% set page_desc = 'Autenticació mitjançant tokens JWT (JSON Web Tokens) i signatures' %}
+
 {% block page_title %}JWT · Guia API{% endblock %}
 
 {% block stylesheets %}

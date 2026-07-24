@@ -3,15 +3,15 @@
    ═══════════════════════════════════════════════════ */
 
 :root {
-  /* Background system — Soft Dark */
-  --s-bg: #0a0a0c;
-  --s-main-bg: linear-gradient(135deg, rgba(10, 10, 12, 0.82) 0%, rgba(10, 10, 12, 0.82) 100%), url("/img/fons.webp");
+  /* Background system — Deep control-room dark */
+  --s-bg: #08080a;
+  --s-main-bg: linear-gradient(175deg, #08080a 0%, #0b0808 30%, #0e0907 60%, #100908 100%);
   --s-topbar-bg: transparent;
-  --s-surface: rgba(20, 20, 24, 0.72);
-  --s-surface-translucent: rgba(20, 20, 24, 0.35);
+  --s-surface: rgba(255, 255, 255, 0.035);
+  --s-surface-translucent: rgba(255, 255, 255, 0.025);
   --s-surface-secondary: rgba(255, 255, 255, 0.03);
-  --s-border: rgba(255, 255, 255, 0.09);
-  --s-border-light: rgba(255, 255, 255, 0.06);
+  --s-border: rgba(255, 255, 255, 0.25);
+  --s-border-light: rgba(255, 255, 255, 0.15);
 
   /* Sidebar */
   --s-sidebar-bg: rgba(10, 10, 12, 0.25);
@@ -21,11 +21,17 @@
   --s-sidebar-text-hover: #ffffff;
   --s-sidebar-divider: rgba(255, 255, 255, 0.06);
 
-  /* Brand — VoraStudio Warm Orange */
+  /* Brand — VoraStudio Warm Orange (flat value kept for base; always use gradients in UI) */
   --s-primary: #f97316;
   --s-primary-hover: #ea580c;
   --s-primary-light: rgba(249, 115, 22, 0.1);
   --s-primary-gradient: linear-gradient(135deg, #fb923c 0%, #f97316 50%, #ea580c 100%);
+
+  /* Brand gradients — NEVER use flat orange in UI elements */
+  --s-gradient: linear-gradient(135deg, #f97316, #fbbf24);
+  --s-gradient-2: linear-gradient(135deg, #ea580c, #f59e0b);
+  --s-gradient-glow: radial-gradient(ellipse at 30% 20%, rgba(249,115,22,0.08) 0%, transparent 60%);
+  --s-border-gradient: linear-gradient(135deg, rgba(249,115,22,0.15), rgba(251,191,36,0.08));
 
   /* Accent */
   --s-accent: #f59e0b;

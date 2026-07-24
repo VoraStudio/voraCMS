@@ -1,5 +1,12 @@
 {% extends 'admin/layout.html.twig' %}
 
+{% set breadcrumbs = [
+    {label: 'Dashboard', url: path('admin_dashboard')},
+    {label: 'Guia API', url: path('admin_api_guide')},
+    {label: 'Seguretat'}
+] %}
+{% set page_desc = 'Autenticació, rols de seguretat i restriccions d\'accés a l\'API' %}
+
 {% block page_title %}Seguretat · Guia API{% endblock %}
 
 {% block stylesheets %}

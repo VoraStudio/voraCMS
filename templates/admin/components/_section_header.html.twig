@@ -6,6 +6,22 @@
             <i class="bi {{ icon|default('bi-file-text') }}"></i>
         </div>
         <div>
+            {% if breadcrumbs is defined and breadcrumbs is not empty %}
+            <div class="cyber-breadcrumbs">
+                {% for bc in breadcrumbs %}
+                    {% if loop.last %}
+                        <span class="cyber-breadcrumb-item active">{{ bc.label }}</span>
+                    {% else %}
+                        {% if bc.url is defined and bc.url %}
+                            <a href="{{ bc.url }}" class="cyber-breadcrumb-item">{{ bc.label }}</a>
+                        {% else %}
+                            <span class="cyber-breadcrumb-item">{{ bc.label }}</span>
+                        {% endif %}
+                        <span class="cyber-breadcrumb-separator">/</span>
+                    {% endif %}
+                {% endfor %}
+            </div>
+            {% endif %}
             <h2 class="cyber-section-title">{{ title }}</h2>
             {% if description is defined and description %}
             <p class="cyber-section-desc">{{ description }}</p>

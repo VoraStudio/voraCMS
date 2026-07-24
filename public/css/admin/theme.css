@@ -411,15 +411,15 @@
   color: rgba(71, 85, 105, 0.5);
 }
 [data-theme="light"] {
-  /* Surface / bg */
-  --s-bg: #f5f5f5;
-  --s-main-bg: linear-gradient(135deg, rgba(245, 245, 245, 0.5) 0%, rgba(245, 245, 245, 0.5) 100%), url('/img/fons.webp');
+  /* Surface / bg — warm corporate */
+  --s-bg: #f5f2eb;
+  --s-main-bg: linear-gradient(175deg, #f5f2eb 0%, #f6f0e8 30%, #f7efe4 60%, #f5ece0 100%);
   --s-topbar-bg: transparent;
-  --s-surface: rgba(255, 255, 255, 0.72);
-  --s-surface-translucent: rgba(255, 255, 255, 0.35);
+  --s-surface: rgba(255, 255, 255, 0.78);
+  --s-surface-translucent: rgba(255, 255, 255, 0.55);
   --s-surface-secondary: #ffffff;
-  --s-border: rgba(0, 0, 0, 0.08);
-  --s-border-light: rgba(0, 0, 0, 0.05);
+  --s-border: rgba(0, 0, 0, 0.12);
+  --s-border-light: rgba(0, 0, 0, 0.08);
 
   /* Sidebar */
   --s-sidebar-bg: rgba(255, 255, 255, 0.25);
@@ -460,10 +460,26 @@
 }
 [data-theme="light"] body {
   background: var(--s-main-bg, var(--s-bg));
-  background-size: cover;
-  background-position: center;
-  background-attachment: fixed;
-  background-repeat: no-repeat;
+}
+
+/* === Body glow overlay (dark mode default) === */
+body {
+  position: relative;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background: radial-gradient(ellipse at 70% 20%, rgba(249,115,22,0.06) 0%, transparent 50%),
+              radial-gradient(ellipse at 20% 80%, rgba(249,115,22,0.03) 0%, transparent 50%);
+}
+
+[data-theme="light"] body::before {
+  background: radial-gradient(ellipse at 70% 20%, rgba(249,115,22,0.04) 0%, transparent 50%),
+              radial-gradient(ellipse at 20% 80%, rgba(249,115,22,0.02) 0%, transparent 50%);
 }
 [data-theme="light"] .cyber-table thead th {
   color: rgba(15, 23, 42, 0.9);

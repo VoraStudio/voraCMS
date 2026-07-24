@@ -5,7 +5,7 @@
     {# Google Fonts for dashboard #}
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Syne:wght@400;600;700;800&family=Space+Grotesk:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Merriweather:wght@400;700;900&family=JetBrains+Mono:wght@400;500;600;700&family=Syne:wght@400;600;700;800&family=Space+Grotesk:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 
     {# VoraAdmin modular stylesheets #}
     <link rel="stylesheet" href="{{ asset('css/admin/layout.css') }}?v=2.0">
@@ -18,6 +18,7 @@
     <link rel="stylesheet" href="{{ asset('css/admin/api-guide.css') }}?v=2.0">
     <link rel="stylesheet" href="{{ asset('css/admin/vt-preview.css') }}?v=2.0">
     <link rel="stylesheet" href="{{ asset('css/admin/theme.css') }}?v=2.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" integrity="sha512-Kc323vGBEqzTmouAECnVceyQqyqdsSiqLQISBL29aUW4U/M7pSPA/gEUZQqv1cwx4OnYxTxve5UMg5GT6L4JJg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 {% endblock %}
 
 {% block javascripts %}
@@ -130,9 +131,40 @@
                 <button class="s-sidebar-toggle">
                     <i class="bi bi-list"></i>
                 </button>
-                <h1 class="s-topbar-title">{% block page_title %}VoraCMS{% endblock %}</h1>
+                <div class="s-topbar-header-area">
+                    {% if breadcrumbs is defined and breadcrumbs is not empty %}
+                        <div class="s-topbar-breadcrumbs">
+                            {% for bc in breadcrumbs %}
+                                {% if loop.last %}
+                                    <span class="cyber-breadcrumb-item active">{{ bc.label }}</span>
+                                {% else %}
+                                    {% if bc.url is defined and bc.url %}
+                                        <a href="{{ bc.url }}" class="cyber-breadcrumb-item">{{ bc.label }}</a>
+                                    {% else %}
+                                        <span class="cyber-breadcrumb-item">{{ bc.label }}</span>
+                                    {% endif %}
+                                    <span class="cyber-breadcrumb-separator">/</span>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                    <h1 class="s-topbar-title-gradient">{{ block('page_title') }}</h1>
+                    {% if page_desc is defined and page_desc %}
+                        <p class="s-topbar-desc">{{ page_desc }}</p>
+                    {% elseif description is defined and description %}
+                        <p class="s-topbar-desc">{{ description }}</p>
+                    {% endif %}
+                </div>
             </div>
             <div class="s-topbar-actions">
+                <!-- Topbar Search -->
+                <div class="d2-search-wrapper d2-search-wrapper--topbar">
+                    <input type="text" id="projectSearch" class="d2-search-input" placeholder="Buscar...">
+                    <button type="button" class="d2-search-btn" title="Buscar">
+                        <i class="bi bi-search"></i>
+                    </button>
+                </div>
+
                 {# ─── Theme toggle ─── #}
                 <button class="s-theme-toggle" id="themeToggle" title="Canviar tema">
                     <i class="bi bi-sun-fill s-theme-icon-light"></i>

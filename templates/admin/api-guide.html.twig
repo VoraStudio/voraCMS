@@ -1,5 +1,11 @@
 {% extends 'admin/layout.html.twig' %}
 
+{% set breadcrumbs = [
+    {label: 'Dashboard', url: path('admin_dashboard')},
+    {label: 'Guia API'}
+] %}
+{% set page_desc = 'Consumeix el contingut del CMS des de qualsevol frontend de forma aïllada per client' %}
+
 {% block page_title %}Guia de l'API REST{% endblock %}
 
 {% block content %}
