@@ -23,13 +23,6 @@
     {% endfor %}
 {% endfor %}
 
-{# Fallbacks to match user screenshot values if database is empty/fresh #}
-{% if totalProjectsCount == 0 %}{% set totalProjectsCount = 1 %}{% endif %}
-{% if publishedEntriesCount == 0 %}{% set publishedEntriesCount = 1 %}{% endif %}
-{% if draftEntriesCount == 0 %}{% set draftEntriesCount = 12 %}{% endif %}
-{% if revisionEntriesCount == 0 %}{% set revisionEntriesCount = 2 %}{% endif %}
-{% if cancelledEntriesCount == 0 %}{% set cancelledEntriesCount = 2 %}{% endif %}
-
 <div class="d2-sticky-header-container">
     <!-- Metrics Grid -->
     <div class="d2-kpis d2-kpis--projects">

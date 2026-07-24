@@ -2170,6 +2170,16 @@
   border-color: #f97316;
 }
 
+.d2-filter-select option {
+  background: #111111;
+  color: #f97316;
+}
+
+[data-theme="light"] .d2-filter-select option {
+  background: #fff;
+  color: #333;
+}
+
 .d2-filter-clear {
   font-family: var(--d2-font-body);
   font-size: 12px;
@@ -4146,8 +4156,9 @@
 }
 
 .d2-select-filter option {
-  background: #1e1e24;
-  color: #fff;
+  background: #111111;
+  color: #f97316;
+  border: 1px solid rgba(249, 115, 22, 0.3);
 }
 [data-theme="light"] .d2-select-filter option {
   background: #fff;
