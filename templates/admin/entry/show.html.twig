@@ -1,14 +1,22 @@
 {% extends 'admin/layout.html.twig' %}
 
-{% block page_title %}
 {% set entryTitle = '' %}
 {% for fv in entry.fieldValues|sort((a, b) => a.fieldDefinition.sortOrder <=> b.fieldDefinition.sortOrder) %}
     {% if fv.fieldDefinition.fieldType in ['text', 'textarea'] and fv.value and not entryTitle %}
         {% set entryTitle = fv.value %}
     {% endif %}
 {% endfor %}
-{{ entryTitle ?: (contentType.name ~ ' #' ~ entry.id) }}
-{% endblock %}
+{% set calculatedTitle = entryTitle ?: (contentType.name ~ ' #' ~ entry.id) %}
+
+{% set breadcrumbs = [
+    {label: 'Dashboard', url: path('admin_dashboard')},
+    {label: 'Projectes', url: path('admin_projects')},
+    {label: contentType.name, url: path('admin_entry_by_type', {slug: contentType.slug})},
+    {label: calculatedTitle}
+] %}
+{% set page_desc = 'Detalls de l\'entrada' %}
+
+{% block page_title %}{{ calculatedTitle }}{% endblock %}
 
 {% block topbar_actions %}
 <div class="topbar-actions-group">
@@ -31,7 +39,9 @@
 {% endblock %}
 
 {% block content %}
-<div class="cyber-form-card">
+{% include 'admin/project/_project_header_bar.html.twig' %}
+
+<div class="d2-body">
 {% set sortedFields = entry.fieldValues|sort((a, b) => a.fieldDefinition.sortOrder <=> b.fieldDefinition.sortOrder) %}
 
 <div class="row g-4">
@@ -55,7 +65,7 @@
                                 <span class="cyber-status-text--draft">No publicat</span>
                             {% elseif entry.status == 'scheduled' %}
                                 <span class="cyber-status-dot" style="background:#3b82f6"></span>
-                                <span class="cyber-status-text" style="color:#3b82f6">Programat</span>
+                                <span class="cyber-status-text--scheduled">Programat</span>
                             {% else %}
                                 <span class="cyber-status-dot cyber-status-dot--archived"></span>
                                 <span class="cyber-status-text--archived">Arxivat</span>

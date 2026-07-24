@@ -1,14 +1,22 @@
 {% extends 'admin/layout.html.twig' %}
 
-{% block page_title %}
 {% set entryTitle = '' %}
 {% for fv in entry.fieldValues|sort((a, b) => a.fieldDefinition.sortOrder <=> b.fieldDefinition.sortOrder) %}
     {% if fv.fieldDefinition.fieldType in ['text', 'textarea'] and fv.value and not entryTitle %}
         {% set entryTitle = fv.value %}
     {% endif %}
 {% endfor %}
-{{ entryTitle ?: (contentType.name ~ ' #' ~ entry.id) }}
-{% endblock %}
+{% set calculatedTitle = entryTitle ?: (contentType.name ~ ' #' ~ entry.id) %}
+
+{% set breadcrumbs = [
+    {label: 'Dashboard', url: path('admin_dashboard')},
+    {label: 'Projectes', url: path('admin_projects')},
+    {label: contentType.name, url: path('admin_entry_by_type', {slug: contentType.slug})},
+    {label: 'Editar: ' ~ calculatedTitle}
+] %}
+{% set page_desc = 'Modifica els camps de l\'entrada' %}
+
+{% block page_title %}{{ calculatedTitle }}{% endblock %}
 
 {% block stylesheets %}
 {{ parent() }}
@@ -35,7 +43,9 @@
 {% endblock %}
 
 {% block content %}
-<div class="cyber-form-card mx-auto">
+{% include 'admin/project/_project_header_bar.html.twig' %}
+
+<div class="d2-body">
 <div class="cyber-card cyber-card--flush" data-anim="cyber-card">
     <form method="post" id="entryForm" enctype="multipart/form-data" novalidate class="cyber-form-body">
             <input type="hidden" name="_token" value="{{ csrf_token('entry-edit-' ~ entry.id) }}">
@@ -52,7 +62,7 @@
                         <span class="s-toggle__icon"><i class="bi bi-archive"></i></span>
                         <span class="s-toggle__label">{% if entry.status == 'archived' %}Arxivat{% else %}No arxivat{% endif %}</span>
                     </div>
-                    <div class="s-toggle{% if entry.status == 'scheduled' %} s-toggle--sel{% endif %}" data-value="scheduled" tabindex="0" role="radio" aria-checked="{% if entry.status == 'scheduled' %}true{% else %}false{% endif %}" style="{% if entry.status == 'scheduled' %}--s-toggle-color:#3b82f6{% endif %}">
+                    <div class="s-toggle{% if entry.status == 'scheduled' %} s-toggle--sel{% endif %}" data-value="scheduled" tabindex="0" role="radio" aria-checked="{% if entry.status == 'scheduled' %}true{% else %}false{% endif %}" style="{% if entry.status == 'scheduled' %}--s-toggle-color:#f97316{% endif %}">
                         <span class="s-toggle__switch"></span>
                         <span class="s-toggle__icon"><i class="bi bi-clock-history"></i></span>
                         <span class="s-toggle__label">{% if entry.status == 'scheduled' %}Programat{% else %}No programat{% endif %}</span>

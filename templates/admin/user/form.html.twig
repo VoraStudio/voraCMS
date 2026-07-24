@@ -1,5 +1,12 @@
 {% extends 'admin/layout.html.twig' %}
 
+{% set breadcrumbs = [
+    {label: 'Dashboard', url: path('admin_dashboard')},
+    {label: 'Usuaris', url: path('admin_user_index')},
+    {label: isNew ? 'Nou usuari' : 'Editar usuari'}
+] %}
+{% set page_desc = isNew ? 'Crea un nou compte d\'usuari en el sistema' : 'Modifica els detalls i permisos del compte' %}
+
 {% block page_title %}{{ isNew ? 'Nou usuari' : 'Editar usuari' }}{% endblock %}
 
 {% block topbar_actions %}
@@ -9,7 +16,7 @@
 {% endblock %}
 
 {% block content %}
-<div class="cyber-form-card">
+<div class="d2-body">
     <div class="cyber-card cyber-card--flush" data-anim="cyber-card">
         <div class="cyber-form-header">
             <div class="cyber-form-header-icon">

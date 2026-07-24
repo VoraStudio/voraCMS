@@ -1,5 +1,11 @@
 {% extends 'admin/layout.html.twig' %}
 
+{% set breadcrumbs = [
+    {label: 'Dashboard', url: path('admin_dashboard')},
+    {label: 'Tipus per defecte'}
+] %}
+{% set page_desc = 'Plantilles base disponibles. Les que tenen "Auto clonar" actiu es clonen automàticament en crear un projecte nou' %}
+
 {% block page_title %}Tipus per defecte{% endblock %}
 
 {% block topbar_actions %}
@@ -9,15 +15,9 @@
 {% endblock %}
 
 {% block content %}
-<div class="cyber-form-card">
-{% include 'admin/components/_section_header.html.twig' with {
-    title: 'Tipus per defecte',
-    description: 'Plantilles base disponibles. Les que tenen "Auto clonar" actiu es clonen automàticament en crear un projecte nou',
-    icon: 'bi-layers-fill',
-    stats: [
-        {value: templates|length, label: 'Plantilles'}
-    ]
-} %}
+{% include 'admin/project/_project_header_bar.html.twig' %}
+<div class="d2-body">
+
 
 <div class="cyber-tabs mb-4">
     <a href="{{ path('admin_content_type_index') }}" class="cyber-tab">

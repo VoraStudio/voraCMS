@@ -1,5 +1,12 @@
 {% extends 'admin/layout.html.twig' %}
 
+{% set breadcrumbs = [
+    {label: 'Dashboard', url: path('admin_dashboard')},
+    {label: 'Projectes', url: path('admin_projects')},
+    {label: contentType.name}
+] %}
+{% set page_desc = contentType.description ?: "Gestiona les entrades d'aquesta secció" %}
+
 {% block page_title %}{{ contentType.name }}{% endblock %}
 
 {% block topbar_actions %}
@@ -16,16 +23,8 @@
 {% endblock %}
 
 {% block content %}
-<div class="cyber-form-card">
-{% include 'admin/components/_section_header.html.twig' with {
-    title: contentType.name,
-    description: contentType.description ?: 'Gestiona les entrades d\'aquesta secció',
-    icon: 'bi-file-text',
-    stats: [
-        {value: entries|length, label: 'Total'},
-        {value: entries|filter(e => e.active)|length, label: 'Actius', modifier: 'active'}
-    ]
-} %}
+{% include 'admin/project/_project_header_bar.html.twig' %}
+<div class="d2-body">
 
 <div class="cyber-card cyber-card--table cyber-card--flush" data-anim="cyber-card">
     <table class="cyber-table">
@@ -83,8 +82,8 @@
                             <span class="cyber-status-dot cyber-status-dot--draft"></span>
                             <span class="cyber-status-text--draft">No publicat</span>
                         {% elseif entry.status == 'scheduled' %}
-                            <span class="cyber-status-dot" style="background:#3b82f6"></span>
-                            <span class="cyber-status-text" style="color:#3b82f6">Programat</span>
+                            <span class="cyber-status-dot cyber-status-dot--scheduled"></span>
+                            <span class="cyber-status-text--scheduled">Programat</span>
                         {% else %}
                             <span class="cyber-status-dot cyber-status-dot--archived"></span>
                             <span class="cyber-status-text--archived">Arxivat</span>
@@ -140,7 +139,7 @@
                 <td colspan="6" class="cyber-empty">
                     <div class="cyber-empty-icon"><i class="bi bi-file-text"></i></div>
                     <p class="cyber-empty-text">No hi ha entrades encara</p>
-                    <a href="{{ path('admin_entry_new', {slug: contentType.slug}) }}" class="cyber-btn-primary cyber-btn--action">
+                    <a href="{{ path('admin_entry_new', {slug: contentType.slug}) }}" class="cyber-btn cyber-btn--projects">
                         <i class="bi bi-plus-lg"></i> <span>Crear primera entrada</span>
                     </a>
                 </td>

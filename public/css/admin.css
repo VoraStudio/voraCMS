@@ -8,7 +8,7 @@
 body {
   background: #0c0e24;
   color: var(--s-text);
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
   font-size: 0.875rem;
   line-height: 1.6;
   min-height: 100vh;
@@ -249,7 +249,7 @@ body {
 
 .modal-header .modal-title {
   color: #fff;
-  font-size: 0.95rem;
+  font-size: 1.05rem;
   font-weight: 650;
 }
 
@@ -952,7 +952,7 @@ body {
 }
 
 .form-label {
-  font-size: 0.8rem;
+  font-size: 0.85rem;
   font-weight: 600;
   color: rgba(255, 255, 255, 0.7);
   margin-bottom: 6px;
@@ -1158,7 +1158,7 @@ input[type="time"] {
 
 .cyber-card-header__title {
   margin: 0;
-  font-size: 0.7rem;
+  font-size: 0.8rem;
   text-transform: uppercase;
   letter-spacing: 0.08em;
   color: var(--s-text-secondary);
@@ -1279,7 +1279,7 @@ input[type="time"] {
 }
 
 .cyber-cell__title {
-  font-size: 0.82rem;
+  font-size: 0.92rem;
   font-weight: 600;
   color: var(--s-text);
   line-height: 1.3;
@@ -1849,7 +1849,7 @@ input[type="time"] {
 }
 
 .cyber-section-header--section .cyber-section-title {
-  font-size: clamp(0.85rem, 1.5vw, 1rem);
+  font-size: clamp(0.95rem, 1.8vw, 1.15rem);
 }
 
 .cyber-section-header--section .cyber-section-desc {
@@ -2728,7 +2728,7 @@ input[type="time"] {
 }
 
 .cyber-section-title {
-  font-size: clamp(1rem, 2vw, 1.35rem);
+  font-size: clamp(1.1rem, 2.2vw, 1.5rem);
   font-weight: 700;
   margin: 0;
   line-height: 1.25;
@@ -3248,24 +3248,24 @@ input[type="time"] {
   color: rgb(239, 68, 68);
 }
 
-/* Draft / Esborrany */
+/* Draft / Esborrany — Rojo (No publicat) */
 .cyber-status-dot--draft {
-  background: #ffa726;
-  box-shadow: 0 0 6px rgba(255, 167, 38, 0.35);
+  background: #ef4444;
+  box-shadow: 0 0 6px rgba(239, 68, 68, 0.35);
 }
 
 .cyber-status-text--draft {
-  color: #ffa726;
+  color: #ef4444;
 }
 
-/* Archived / Arxivat */
+/* Archived / Arxivat — Amarillo */
 .cyber-status-dot--archived {
-  background: #94a3b8;
-  box-shadow: 0 0 6px rgba(148, 163, 184, 0.2);
+  background: #f59e0b;
+  box-shadow: 0 0 6px rgba(245, 158, 11, 0.3);
 }
 
 .cyber-status-text--archived {
-  color: #94a3b8;
+  color: #f59e0b;
 }
 
 [data-theme="light"] .cyber-status-text {
@@ -3626,8 +3626,7 @@ input[type="time"] {
 
 /* ─── Cyber Form ─── */
 .cyber-form-card {
-  max-width: 600px;
-  margin: 0 auto;
+  max-width: 100%;
 }
 
 .cyber-form-group {
@@ -3770,7 +3769,7 @@ input[type="time"] {
 }
 
 .project-selector__title {
-  font-size: 0.82rem;
+  font-size: 0.92rem;
   font-weight: 600;
   color: var(--s-text);
 }
@@ -3841,7 +3840,7 @@ input[type="time"] {
 }
 
 [data-theme="light"] .cyber-form-input {
-  background: rgba(255, 255, 255, 0.8);
+  background: #ffffff;
   color: rgba(15, 23, 42, 0.85);
   border-color: rgba(148, 163, 184, 0.35);
 }
@@ -3875,11 +3874,12 @@ input[type="time"] {
 
 /* ─── Light Mode: Solid gradients, no border ─── */
 [data-theme="light"] .cyber-btn {
-  color: rgba(71, 85, 105, 0.75);
-  background: linear-gradient(135deg, #f8fafc, #e2e8f0);
+  color: rgba(15, 23, 42, 0.75);
+  background: #ffffff;
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06), 0 0 0 1px rgba(0, 0, 0, 0.06);
+  border: none;
 }
 
 [data-theme="light"] .cyber-btn::before {
@@ -3887,18 +3887,18 @@ input[type="time"] {
 }
 
 [data-theme="light"] .cyber-btn i {
-  color: rgba(71, 85, 105, 0.55);
+  color: rgba(15, 23, 42, 0.5);
 }
 
 [data-theme="light"] .cyber-btn:hover {
-  background: linear-gradient(135deg, #e2e8f0, #cbd5e1);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  background: #f8fafc;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(0, 0, 0, 0.1);
 }
 
 [data-theme="light"] .cyber-btn--projects {
   color: #fff;
-  background: linear-gradient(135deg, #7dd3fc, #0e7490);
-  box-shadow: 0 2px 8px rgba(14, 116, 144, 0.15);
+  background: linear-gradient(135deg, #f97316, #f59e0b);
+  box-shadow: 0 2px 8px rgba(249, 115, 22, 0.2);
 }
 
 [data-theme="light"] .cyber-btn--projects i {
@@ -3906,15 +3906,15 @@ input[type="time"] {
 }
 
 [data-theme="light"] .cyber-btn--projects:hover {
-  background: linear-gradient(135deg, #38bdf8, #155e75);
-  box-shadow: 0 4px 24px rgba(14, 116, 144, 0.35);
+  background: linear-gradient(135deg, #ea580c, #d97706);
+  box-shadow: 0 4px 20px rgba(249, 115, 22, 0.4);
   color: #fff;
 }
 
 [data-theme="light"] .cyber-btn--projects-inactive {
   color: rgba(71, 85, 105, 0.5);
-  background: linear-gradient(135deg, #f8fafc, #cbd5e1);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  background: #ffffff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06), 0 0 0 1px rgba(0, 0, 0, 0.06);
 }
 
 [data-theme="light"] .cyber-btn--projects-inactive i {
@@ -4026,8 +4026,8 @@ input[type="time"] {
 
 [data-theme="light"] .cyber-form-submit {
   color: #fff;
-  background: linear-gradient(135deg, #38bdf8 0%, #06b6d4 50%, #2563eb 100%);
-  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.15);
+  background: linear-gradient(135deg, #f97316, #f59e0b);
+  box-shadow: 0 2px 8px rgba(249, 115, 22, 0.2);
 }
 
 [data-theme="light"] .cyber-form-submit i {
@@ -4036,8 +4036,8 @@ input[type="time"] {
 
 [data-theme="light"] .cyber-form-submit:hover {
   color: #fff;
-  background: linear-gradient(135deg, #7dd3fc 0%, #0891b2 50%, #1d4ed8 100%);
-  box-shadow: 0 6px 28px rgba(37, 99, 235, 0.35);
+  background: linear-gradient(135deg, #ea580c, #d97706);
+  box-shadow: 0 6px 24px rgba(249, 115, 22, 0.4);
 }
 
 [data-theme="light"] .cyber-form-submit:active {
@@ -4139,8 +4139,8 @@ input[type="time"] {
 
 [data-theme="light"] .cyber-btn-primary {
   color: #fff;
-  background: linear-gradient(135deg, #38bdf8 0%, #06b6d4 50%, #2563eb 100%);
-  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.15);
+  background: linear-gradient(135deg, #f97316, #f59e0b);
+  box-shadow: 0 2px 8px rgba(249, 115, 22, 0.2);
 }
 
 [data-theme="light"] .cyber-btn-primary i {
@@ -4149,8 +4149,8 @@ input[type="time"] {
 
 [data-theme="light"] .cyber-btn-primary:hover {
   color: #fff;
-  background: linear-gradient(135deg, #7dd3fc 0%, #0891b2 50%, #1d4ed8 100%);
-  box-shadow: 0 6px 28px rgba(37, 99, 235, 0.35);
+  background: linear-gradient(135deg, #ea580c, #d97706);
+  box-shadow: 0 6px 24px rgba(249, 115, 22, 0.4);
 }
 
 [data-theme="light"] .cyber-btn-primary:hover i {
@@ -6348,7 +6348,7 @@ input[type="time"] {
 }
 
 .media-client-card__name {
-  font-size: 0.9rem;
+  font-size: 1rem;
   font-weight: 600;
   color: var(--s-text);
   letter-spacing: -0.01em;
@@ -6401,7 +6401,7 @@ input[type="time"] {
 }
 
 .media-project-card__name {
-  font-size: 0.85rem;
+  font-size: 0.95rem;
   font-weight: 500;
   color: var(--s-text);
   white-space: nowrap;

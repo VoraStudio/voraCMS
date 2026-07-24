@@ -1,5 +1,13 @@
 {% extends 'admin/layout.html.twig' %}
 
+{% set breadcrumbs = [
+    {label: 'Dashboard', url: path('admin_dashboard')},
+    {label: 'Projectes', url: path('admin_projects')},
+    {label: contentType.name, url: path('admin_entry_by_type', {slug: contentType.slug})},
+    {label: 'Nova entrada'}
+] %}
+{% set page_desc = 'Crea una nova entrada per a aquesta secció de contingut' %}
+
 {% block page_title %}Nova entrada: {{ contentType.name }}{% endblock %}
 
 {% block stylesheets %}
@@ -14,7 +22,9 @@
 {% endblock %}
 
 {% block content %}
-<div class="cyber-form-card mx-auto">
+{% include 'admin/project/_project_header_bar.html.twig' %}
+
+<div class="d2-body">
 <div class="cyber-card cyber-card--flush" data-anim="cyber-card">
     <form method="post" id="entryForm" enctype="multipart/form-data" novalidate class="cyber-form-body">
             <input type="hidden" name="_token" value="{{ csrf_token('entry-new-' ~ contentType.id) }}">

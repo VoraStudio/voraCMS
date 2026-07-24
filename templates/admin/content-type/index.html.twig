@@ -1,5 +1,11 @@
 {% extends 'admin/layout.html.twig' %}
 
+{% set breadcrumbs = [
+    {label: 'Dashboard', url: path('admin_dashboard')},
+    {label: 'Tipus de contingut'}
+] %}
+{% set page_desc = 'Totes les seccions de contingut de tots els projectes' %}
+
 {% block page_title %}Tipus de contingut{% endblock %}
 
 {% block topbar_actions %}
@@ -14,16 +20,9 @@
 {% endblock %}
 
 {% block content %}
-<div class="cyber-form-card">
-{% include 'admin/components/_section_header.html.twig' with {
-    title: 'Tipus de contingut',
-    description: 'Totes les seccions de contingut de tots els projectes',
-    icon: 'bi-layers-fill',
-    stats: [
-        {value: contentTypes|length, label: 'Total'},
-        {value: contentTypes|filter(ct => ct.active)|length, label: 'Actius', modifier: 'active'}
-    ]
-} %}
+{% include 'admin/project/_project_header_bar.html.twig' %}
+<div class="d2-body">
+
 
 <div class="cyber-card cyber-card--table cyber-card--flush" data-anim="cyber-card">
     <table class="cyber-table">

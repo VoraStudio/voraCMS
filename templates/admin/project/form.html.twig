@@ -1,5 +1,12 @@
 {% extends 'admin/layout.html.twig' %}
 
+{% set breadcrumbs = [
+    {label: 'Dashboard', url: path('admin_dashboard')},
+    {label: 'Projectes', url: path('admin_projects')},
+    {label: isNew ? 'Nou projecte' : 'Editar projecte'}
+] %}
+{% set page_desc = isNew ? 'Crea un nou projecte per al CMS' : 'Edita els detalls del projecte' %}
+
 {% block page_title %}{{ isNew ? 'Nou projecte' : 'Editar: ' ~ project.name }}{% endblock %}
 
 {% block topbar_actions %}
@@ -9,7 +16,9 @@
 {% endblock %}
 
 {% block content %}
-<div class="cyber-form-card">
+{% include 'admin/project/_project_header_bar.html.twig' %}
+
+<div class="d2-body">
 <div class="cyber-card cyber-card--flush" data-anim="cyber-card">
     <div class="cyber-form-body">
         <form method="post" class="row g-4">

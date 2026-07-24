@@ -1,392 +1,553 @@
 {% extends 'admin/layout.html.twig' %}
 
+{% set breadcrumbs = [
+    {label: 'Zona actual', url: path('admin_dashboard')},
+    {label: 'Dashboard'}
+] %}
+{% set page_desc = 'Resum de l\'activitat dels teus projectes i estadístiques' %}
+
 {% block page_title %}Dashboard{% endblock %}
 
 {% block topbar_actions %}{% endblock %}
 
 {% block content %}
-    <div class="s-dashboard">
-        
-        {# ─── Selectores de Filtro (ROLE_ADMIN) ─── #}
-        {% if isAdmin %}
-            <div class="d1-filters mb-4">
-                <form method="get" action="{{ path('admin_dashboard') }}" class="d-flex gap-3 flex-wrap align-items-center">
-                    <div class="d1-filter-group">
-                        <label class="d1-filter-label" for="clientSelect">Client:</label>
-                        <select name="clientId" id="clientSelect" class="d1-filter-select">
-                            <option value="all">Tots els clients</option>
-                            {% for c in clients %}
-                                <option value="{{ c.id }}" {% if selectedClientId == c.id %}selected{% endif %}>{{ c.name }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    <div class="d1-filter-group">
-                        <label class="d1-filter-label" for="projectSelect">Projecte:</label>
-                        <select name="projectId" id="projectSelect" class="d1-filter-select">
-                            <option value="all">Tots els projectes</option>
-                            {% for p in filteredProjects %}
-                                <option value="{{ p.id }}" {% if selectedProjectId == p.id %}selected{% endif %}>{{ p.name }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    {% if selectedClientId or selectedProjectId %}
-                        <a href="{{ path('admin_dashboard') }}" class="d1-card-more ms-2" style="font-size: 12px; text-decoration: none;">Neteja filtres</a>
-                    {% endif %}
-                </form>
-            </div>
-        {% endif %}
+<div class="d2-body">
 
-        <div class="d1-body">
-            {# ─── Empty state per a usuaris no-admin sense dades ─── #}
-            {% if not isAdmin and visitsToday == 0 and apiToday == 0 and totalFiles == 0 %}
-            <div class="d1-empty-state">
-                <div class="d1-empty-state-icon">
-                    <svg width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" opacity="0.3">
-                        <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
-                    </svg>
-                </div>
-                <div class="d1-empty-state-text">
-                    <strong>No hi ha dades disponibles</strong>
-                    <p>Les mètriques del dashboard apareixeran quan els teus projectes rebin visites i crides a l'API. 
-                    Pots començar visitant la <a href="{{ path('admin_projects') }}">pàgina de projectes</a> per seleccionar-ne un.</p>
-                </div>
+    {# ─── Admin filters ─── #}
+    {% if isAdmin %}
+    <div class="d2-filters">
+        <form method="get" action="{{ path('admin_dashboard') }}" class="d2-filters-form">
+            <div class="d2-filter-group">
+                <label class="d2-filter-label" for="clientSelect">Client</label>
+                <select name="clientId" id="clientSelect" class="d2-filter-select">
+                    <option value="all">Tots els clients</option>
+                    {% for c in clients %}
+                        <option value="{{ c.id }}" {% if selectedClientId == c.id %}selected{% endif %}>{{ c.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="d2-filter-group">
+                <label class="d2-filter-label" for="projectSelect">Projecte</label>
+                <select name="projectId" id="projectSelect" class="d2-filter-select">
+                    <option value="all">Tots els projectes</option>
+                    {% for p in filteredProjects %}
+                        <option value="{{ p.id }}" {% if selectedProjectId == p.id %}selected{% endif %}>{{ p.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            {% if selectedClientId or selectedProjectId %}
+                <a href="{{ path('admin_dashboard') }}" class="d2-filter-clear">Neteja filtres</a>
+            {% endif %}
+        </form>
+    </div>
+    {% endif %}
+
+    {# ─── Empty state (non-admin with no data) ─── #}
+    {% if not isAdmin and visitsToday == 0 and apiToday == 0 and totalFiles == 0 %}
+    <div class="d2-empty-state">
+        <div class="d2-empty-state-icon">
+            <svg width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" opacity="0.3">
+                <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+            </svg>
+        </div>
+        <div class="d2-empty-state-text">
+            <strong>No hi ha dades disponibles</strong>
+            <p>Les mètriques del dashboard apareixeran quan els teus projectes rebin visites i crides a l'API.
+            Pots començar visitant la <a href="{{ path('admin_projects') }}">pàgina de projectes</a> per seleccionar-ne un.</p>
+        </div>
+    </div>
+    {% endif %}
+
+    {# ─── Notifications bar ─── #}
+    <div class="d2-statusbar">
+        <div class="d2-statusbar-left">
+            <span class="d2-statusbar-greeting">{{ app.user ? app.user.name : 'Admin' }}</span>
+            <span class="d2-statusbar-sep"></span>
+            <div class="d2-notify-item">
+                <span class="d2-notify-dot d2-notify-dot--visits"></span>
+                <span class="d2-notify-text">{{ visitsToday }} visites avui</span>
+            </div>
+            {% if isAdmin %}
+            <div class="d2-notify-item">
+                <span class="d2-notify-dot d2-notify-dot--api"></span>
+                <span class="d2-notify-text">{{ apiToday }} peticions API</span>
+            </div>
+            {% if deniedToday > 0 %}
+            <div class="d2-notify-item d2-notify-item--alert">
+                <span class="d2-notify-dot d2-notify-dot--alert"></span>
+                <span class="d2-notify-text">{{ deniedToday }} errors avui</span>
             </div>
             {% endif %}
+            {% endif %}
+            {% if lastVisitAgo %}
+            <div class="d2-notify-item d2-notify-item--muted">
+                <span class="d2-notify-text">Última visita: {{ lastVisitAgo }}</span>
+            </div>
+            {% endif %}
+        </div>
+        <div class="d2-statusbar-right">
+            <span class="d2-notify-date">{{ "now"|date('d/m/Y') }}</span>
+        </div>
+    </div>
 
-            {# ─── KPIs ─── #}
-            <div class="d1-kpis">
-                <!-- Visites avui -->
-                <div class="d1-kpi" data-anim="metric">
-                    <div class="d1-kpi-label">
-                        <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="margin-right: 4px;">
-                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-                            <circle cx="12" cy="12" r="3" />
-                        </svg>
-                        Visites avui
-                    </div>
-                    <div class="d1-kpi-val">{{ visitsToday|number_format(0, ',', '.') }}</div>
-                    {% if visitTrend > 0 %}
-                        <div class="d1-kpi-delta delta-up">↑ {{ visitTrend }}% vs ahir</div>
-                    {% elseif visitTrend < 0 %}
-                        <div class="d1-kpi-delta delta-dn">↓ {{ visitTrend|abs }}% vs ahir</div>
-                    {% else %}
-                        <div class="d1-kpi-delta delta-neu">0% vs ahir</div>
-                    {% endif %}
+    {# ═══════════════════════════════════
+       SECTION 1: Seguiment
+       ═══════════════════════════════════ #}
+    {# ─── KPI Grid ─── #}
+    <div class="d2-kpis">
+        {% if isAdmin %}
+        {# --- Admin KPIs --- #}
+        <div class="d2-kpi">
+            <div class="d2-kpi-label">
+                <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                Visites avui
+            </div>
+            <div class="d2-kpi-val">{{ visitsToday|number_format(0, ',', '.') }}</div>
+            {% if visitTrend > 0 %}
+                <div class="d2-kpi-delta d2-up">↑ {{ visitTrend }}% vs ahir</div>
+            {% elseif visitTrend < 0 %}
+                <div class="d2-kpi-delta d2-down">↓ {{ visitTrend|abs }}% vs ahir</div>
+            {% else %}
+                <div class="d2-kpi-delta d2-neu">0% vs ahir</div>
+            {% endif %}
+        </div>
+
+        <div class="d2-kpi">
+            <div class="d2-kpi-label">
+                <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="22,12 18,12 15,21 9,3 6,12 2,12"/></svg>
+                Peticions API
+            </div>
+            <div class="d2-kpi-val">{{ apiToday|number_format(0, ',', '.') }}</div>
+            {% if apiTrend > 0 %}
+                <div class="d2-kpi-delta d2-up">↑ {{ apiTrend }}% vs ahir</div>
+            {% elseif apiTrend < 0 %}
+                <div class="d2-kpi-delta d2-down">↓ {{ apiTrend|abs }}% vs ahir</div>
+            {% else %}
+                <div class="d2-kpi-delta d2-neu">0% vs ahir</div>
+            {% endif %}
+        </div>
+
+        <div class="d2-kpi">
+            <div class="d2-kpi-label">
+                <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22,4 12,14.01 9,11.01"/></svg>
+                Acceptades
+            </div>
+            <div class="d2-kpi-val">{{ acceptedToday|number_format(0, ',', '.') }}</div>
+            <div class="d2-kpi-delta d2-up">{{ successRate }}% taxa èxit</div>
+        </div>
+
+        <div class="d2-kpi">
+            <div class="d2-kpi-label">
+                <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+                Denegades
+            </div>
+            <div class="d2-kpi-val">{{ deniedToday|number_format(0, ',', '.') }}</div>
+            {% if deniedToday > 0 %}
+                <div class="d2-kpi-delta d2-down">↑ {{ deniedToday }} errors avui</div>
+            {% else %}
+                <div class="d2-kpi-delta d2-neu">Sense errors</div>
+            {% endif %}
+        </div>
+        {% else %}
+        {# --- Client KPIs --- #}
+        <div class="d2-kpi">
+            <div class="d2-kpi-label">
+                <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                Visites avui
+            </div>
+            <div class="d2-kpi-val">{{ visitsToday|number_format(0, ',', '.') }}</div>
+            {% if visitTrend > 0 %}
+                <div class="d2-kpi-delta d2-up">↑ {{ visitTrend }}% vs ahir</div>
+            {% elseif visitTrend < 0 %}
+                <div class="d2-kpi-delta d2-down">↓ {{ visitTrend|abs }}% vs ahir</div>
+            {% else %}
+                <div class="d2-kpi-delta d2-neu">0% vs ahir</div>
+            {% endif %}
+        </div>
+
+        <div class="d2-kpi">
+            <div class="d2-kpi-label">
+                <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                Visites setmanals
+            </div>
+            <div class="d2-kpi-val">{{ visitsWeek|number_format(0, ',', '.') }}</div>
+            <div class="d2-kpi-delta d2-neu">Últims 7 dies</div>
+        </div>
+
+        <div class="d2-kpi">
+            <div class="d2-kpi-label">
+                <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="22,12 18,12 15,21 9,3 6,12 2,12"/></svg>
+                Pic de visites
+            </div>
+            <div class="d2-kpi-val">{{ visitPeak|number_format(0, ',', '.') }}</div>
+            <div class="d2-kpi-delta d2-up">{{ visitPeakDay ?: '—' }}</div>
+        </div>
+
+        <div class="d2-kpi">
+            <div class="d2-kpi-label">
+                <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                Última visita
+            </div>
+            <div class="d2-kpi-val">
+                {% if lastVisit %}{{ lastVisitAgo }}{% else %}—{% endif %}
+            </div>
+            <div class="d2-kpi-delta d2-neu">
+                {% if lastVisit %}{{ lastVisit|date('d/m/Y H:i') }}{% else %}Sense visites encara{% endif %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    {# ─── Grid 2-cols: Chart + Top Pages ─── #}
+    <div class="d2-grid-2">
+        {% if isAdmin %}
+        {# --- Admin: API weekly chart --- #}
+        <div class="d2-panel">
+            <div class="d2-panel-head">
+                <span class="d2-panel-title">Peticions API setmanals</span>
+                <span class="d2-panel-badge">Últims 7 dies</span>
+            </div>
+            <div class="d2-panel-body">
+                {% set maxVal = maxDailyRequests > 0 ? maxDailyRequests : 1 %}
+                {% set points = [] %}
+                {% for i, dayData in weeklyRequests %}
+                    {% set x = i * 62 %}
+                    {% set y = 62 - ((dayData.total / maxVal) * 42) %}
+                    {% set points = points|merge([x ~ ',' ~ y]) %}
+                {% endfor %}
+                {% set pathD = 'M' ~ points|join(' L') %}
+                {% set areaD = pathD ~ ' L372,70 L0,70Z' %}
+                {% set lastY = 62 - ((weeklyRequests[6].total / maxVal) * 42) %}
+
+                <svg class="d2-sparkline" viewBox="0 0 372 70" preserveAspectRatio="none">
+                    <defs>
+                        <linearGradient id="d2g1" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stop-color="#f97316" stop-opacity=".25"/>
+                            <stop offset="100%" stop-color="#f97316" stop-opacity="0"/>
+                        </linearGradient>
+                    </defs>
+                    <path d="{{ pathD }}" fill="none" stroke="url(#d2g1)" stroke-width="2.5" stroke-linecap="round"/>
+                    <path d="{{ areaD }}" fill="url(#d2g1)"/>
+                    <circle cx="372" cy="{{ lastY }}" r="3.5" fill="#f97316"/>
+                </svg>
+
+                <div class="d2-chart-subtitle">Acceptades vs Denegades</div>
+                <div class="d2-bar-chart">
+                    {% set maxBar = maxDailyAcceptedDenied > 0 ? maxDailyAcceptedDenied : 1 %}
+                    {% for dayData in weeklyAcceptedVsDenied %}
+                        {% set accH = (dayData.accepted / maxBar) * 95 %}
+                        {% set denH = (dayData.denied / maxBar) * 95 %}
+                        <div class="d2-bar-wrap">
+                            <div class="d2-bar d2-bar--green" style="height: {{ accH > 3 ? accH : 3 }}%;"></div>
+                            <div class="d2-bar d2-bar--red" style="height: {{ denH > 2 ? denH : 2 }}%;"></div>
+                            <div class="d2-bar-lbl">{{ dayData.day }}</div>
+                        </div>
+                    {% endfor %}
                 </div>
 
-                <!-- Peticions API -->
-                <div class="d1-kpi" data-anim="metric">
-                    <div class="d1-kpi-label">
-                        <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="margin-right: 4px;">
-                            <polyline points="22,12 18,12 15,21 9,3 6,12 2,12" />
-                        </svg>
-                        Peticions API
-                    </div>
-                    <div class="d1-kpi-val">{{ apiToday|number_format(0, ',', '.') }}</div>
-                    {% if apiTrend > 0 %}
-                        <div class="d1-kpi-delta delta-up">↑ {{ apiTrend }}% vs ahir</div>
-                    {% elseif apiTrend < 0 %}
-                        <div class="d1-kpi-delta delta-dn">↓ {{ apiTrend|abs }}% vs ahir</div>
-                    {% else %}
-                        <div class="d1-kpi-delta delta-neu">0% vs ahir</div>
-                    {% endif %}
-                </div>
-
-                <!-- Acceptades -->
-                <div class="d1-kpi" data-anim="metric">
-                    <div class="d1-kpi-label">
-                        <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="margin-right: 4px;">
-                            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
-                            <polyline points="22,4 12,14.01 9,11.01" />
-                        </svg>
-                        Acceptades
-                    </div>
-                    <div class="d1-kpi-val">{{ acceptedToday|number_format(0, ',', '.') }}</div>
-                    <div class="d1-kpi-delta delta-up">{{ successRate }}% tasa èxit</div>
-                </div>
-
-                <!-- Denegades -->
-                <div class="d1-kpi" data-anim="metric">
-                    <div class="d1-kpi-label">
-                        <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="margin-right: 4px;">
-                            <circle cx="12" cy="12" r="10" />
-                            <line x1="15" y1="9" x2="9" y2="15" />
-                            <line x1="9" y1="9" x2="15" y2="15" />
-                        </svg>
-                        Denegades
-                    </div>
-                    <div class="d1-kpi-val">{{ deniedToday|number_format(0, ',', '.') }}</div>
-                    {% if deniedToday > 0 %}
-                        <div class="d1-kpi-delta delta-dn">↑ {{ deniedToday }} errors avui</div>
-                    {% else %}
-                        <div class="d1-kpi-delta delta-neu">Sense errors</div>
-                    {% endif %}
+                <div class="d2-chart-legend">
+                    <span class="d2-legend-item"><span class="d2-legend-dot d2-legend-dot--green"></span>Acceptades</span>
+                    <span class="d2-legend-item"><span class="d2-legend-dot d2-legend-dot--red"></span>Denegades</span>
                 </div>
             </div>
-
-            {# ─── GRÀFICS I CLIENTS ─── #}
-            <div class="d1-row2 mt-3">
-                <!-- Gràfics API -->
-                <div class="d1-card">
-                    <div class="d1-card-title">Peticions API setmanals <span class="d1-card-more">Últims 7 dies</span></div>
-                    
-                    {# Dibuixar camí dinàmic de línies SVG per Twig #}
-                    {% set maxVal = maxDailyRequests > 0 ? maxDailyRequests : 1 %}
-                    {% set points = [] %}
-                    {% for i, dayData in weeklyRequests %}
-                        {% set x = i * 70 %}
-                        {% set y = 70 - ((dayData.total / maxVal) * 50) %}
-                        {% set points = points|merge([x ~ ',' ~ y]) %}
-                    {% endfor %}
-                    {% set pathD = 'M' ~ points|join(' L') %}
-                    {% set areaD = pathD ~ ' L420,80 L0,80Z' %}
-                    {% set lastY = 70 - ((weeklyRequests[6].total / maxVal) * 50) %}
-
-                    <svg class="d1-sparksvg" viewBox="0 0 420 80" preserveAspectRatio="none" style="margin-bottom: 12px;">
-                        <defs>
-                            <linearGradient id="g1" x1="0" y1="0" x2="0" y2="1">
-                                <stop offset="0%" stop-color="var(--s-primary)" stop-opacity=".3" />
-                                <stop offset="100%" stop-color="var(--s-primary)" stop-opacity="0" />
-                            </linearGradient>
-                        </defs>
-                        <path d="{{ pathD }}" fill="none" stroke="var(--s-primary)" stroke-width="2.5" stroke-linecap="round" />
-                        <path d="{{ areaD }}" fill="url(#g1)" />
-                        <circle cx="420" cy="{{ lastY }}" r="4" fill="var(--s-primary)" />
-                    </svg>
-
-                    <div style="font-size: 10px; color: var(--s-text-secondary); opacity: 0.8; margin-bottom: 8px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase;">
-                        Acceptades vs Denegades
-                    </div>
-                    
-                    <div class="d1-chart-bars">
-                        {% set maxBarVal = maxDailyAcceptedDenied > 0 ? maxDailyAcceptedDenied : 1 %}
-                        {% for dayData in weeklyAcceptedVsDenied %}
-                            {% set accHeight = (dayData.accepted / maxBarVal) * 85 %}
-                            {% set denHeight = (dayData.denied / maxBarVal) * 85 %}
-                            <div class="d1-bar-wrap">
-                                <div class="d1-bar" style="height: {{ accHeight > 4 ? accHeight : 4 }}%; background: #22c55e;"></div>
-                                <div class="d1-bar" style="height: {{ denHeight > 2 ? denHeight : 2 }}%; background: #ef4444; margin-top: 1px;"></div>
-                                <div class="d1-bar-lbl">{{ dayData.day }}</div>
-                            </div>
-                        {% endfor %}
-                    </div>
-
-                    <div style="display: flex; gap: 14px; margin-top: 10px;">
-                        <span style="font-size: 11px; color: var(--s-text-secondary); display: flex; align-items: center; gap: 5px;">
-                            <span style="width: 8px; height: 8px; border-radius: 2px; background: #22c55e; display: inline-block;"></span>Acceptades
-                        </span>
-                        <span style="font-size: 11px; color: var(--s-text-secondary); display: flex; align-items: center; gap: 5px;">
-                            <span style="width: 8px; height: 8px; border-radius: 2px; background: #ef4444; display: inline-block;"></span>Denegades
-                        </span>
-                    </div>
-                </div>
-
-                <!-- Clients list (admin only) -->
-                {% if isAdmin %}
-                <div class="d1-card">
-                    <div class="d1-card-title">Últims clients actius <a href="{{ path('admin_user_index') }}" class="d1-card-more">Tots</a></div>
-                    {% for c in latestClients %}
-                        <div class="d1-cli-item">
-                            <div class="d1-cli-av" style="background: {{ c.color }};">{{ c.user.name|first|upper }}</div>
-                            <div class="d1-cli-info">
-                                <div class="d1-cli-name">{{ c.user.name }}</div>
-                                <div class="d1-cli-sub">{{ c.projectsCount }} {% if c.projectsCount == 1 %}projecte{% else %}projectes{% endif %} · {{ c.sectionsCount }} {% if c.sectionsCount == 1 %}secció{% else %}seccions{% endif %}</div>
-                            </div>
-                            {% if c.user.isActive %}
-                                <span class="d1-cli-badge" style="background: rgba(34, 197, 94, 0.12); color: #22c55e;">Actiu</span>
-                            {% else %}
-                                <span class="d1-cli-badge" style="background: rgba(245, 158, 11, 0.12); color: #f59e0b;">Inactiu</span>
-                            {% endif %}
+        </div>
+        {% else %}
+        {# --- Client: weekly visits chart --- #}
+        <div class="d2-panel">
+            <div class="d2-panel-head">
+                <span class="d2-panel-title">Visites setmanals</span>
+                <span class="d2-panel-badge">Últims 7 dies</span>
+            </div>
+            <div class="d2-panel-body">
+                {% set maxV = maxDailyVisits > 0 ? maxDailyVisits : 1 %}
+                <div class="d2-bar-chart">
+                    {% for dayData in weeklyVisits %}
+                        {% set barH = (dayData.total / maxV) * 95 %}
+                        <div class="d2-bar-wrap">
+                            <div class="d2-bar d2-bar--gradient" style="height: {{ barH > 3 ? barH : 3 }}%;"></div>
+                            <div class="d2-bar-lbl">{{ dayData.day }}</div>
                         </div>
-                    {% else %}
-                        <div class="cyber-list-empty">No hi ha clients actius</div>
                     {% endfor %}
                 </div>
+            </div>
+        </div>
+        {% endif %}
+
+        {% if isAdmin %}
+        {# --- Admin: Clients list --- #}
+        <div class="d2-panel">
+            <div class="d2-panel-head">
+                <span class="d2-panel-title">Últims clients actius</span>
+                <a href="{{ path('admin_user_index') }}" class="d2-panel-link">Tots</a>
+            </div>
+            <div class="d2-panel-body d2-panel-body--flush">
+                {% for c in latestClients %}
+                <div class="d2-cli-row">
+                    <div class="d2-cli-av" style="background: {{ c.color }};">{{ c.user.name|first|upper }}</div>
+                    <div class="d2-cli-info">
+                        <div class="d2-cli-name">{{ c.user.name }}</div>
+                        <div class="d2-cli-sub">{{ c.projectsCount }} {% if c.projectsCount == 1 %}projecte{% else %}projectes{% endif %} · {{ c.sectionsCount }} {% if c.sectionsCount == 1 %}secció{% else %}seccions{% endif %}</div>
+                    </div>
+                    {% if c.user.isActive %}
+                    <span class="d2-cli-badge d2-cli-badge--active">Actiu</span>
+                    {% else %}
+                    <span class="d2-cli-badge d2-cli-badge--inactive">Inactiu</span>
+                    {% endif %}
+                </div>
+                {% else %}
+                <div class="d2-empty-row">No hi ha clients actius</div>
+                {% endfor %}
+            </div>
+        </div>
+        {% else %}
+        {# --- Client: Top pages --- #}
+        <div class="d2-panel">
+            <div class="d2-panel-head">
+                <span class="d2-panel-title">Pàgines més visitades</span>
+                <span class="d2-panel-badge">Aquesta setmana</span>
+            </div>
+            <div class="d2-panel-body">
+                {% if topPages is not empty %}
+                    {% set maxPageCount = topPages[0].visitCount > 0 ? topPages[0].visitCount : 1 %}
+                    {% for page in topPages %}
+                    <div class="d2-path-row">
+                        <span class="d2-path-cell">{{ page.path ?: '/' }}</span>
+                        <div class="d2-path-bar-wrap">
+                            <div class="d2-mini-track d2-mini-track--sm">
+                                <div class="d2-mini-fill d2-mini-fill--gradient" style="width: {{ ((page.visitCount / maxPageCount) * 100)|round }}%;"></div>
+                            </div>
+                        </div>
+                        <span class="d2-path-count">{{ page.visitCount }}</span>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="d2-empty-row">No hi ha prou dades de visites</div>
                 {% endif %}
             </div>
+        </div>
+        {% endif %}
+    </div>
 
-            {# ─── DETALLS D'API, FITXERS Y RECURSOS ─── #}
-            <div class="d1-row3 mt-3">
-                <!-- Endpoints -->
-                <div class="d1-card">
-                    <div class="d1-card-title">Endpoints més usats <a href="{{ path('admin_api_guide') }}" class="d1-card-more">API</a></div>
-                    {% for ep in topEndpoints %}
-                        {% set methodColor = '#22c55e' %}
-                        {% set methodBg = 'rgba(34, 197, 94, 0.12)' %}
-                        {% if ep.method == 'POST' %}
-                            {% set methodColor = '#fbbf24' %}
-                            {% set methodBg = 'rgba(245, 158, 11, 0.12)' %}
-                        {% elseif ep.method == 'PUT' or ep.method == 'PATCH' %}
-                            {% set methodColor = '#3b82f6' %}
-                            {% set methodBg = 'rgba(59, 130, 246, 0.12)' %}
-                        {% elseif ep.method == 'DELETE' %}
-                            {% set methodColor = '#f87171' %}
-                            {% set methodBg = 'rgba(239, 68, 68, 0.12)' %}
-                        {% endif %}
-                        
-                        <div class="d1-api-item">
-                            <span class="d1-api-method" style="background: {{ methodBg }}; color: {{ methodColor }};">{{ ep.method }}</span>
-                            <span class="d1-api-path" title="{{ ep.endpoint }}">{{ ep.endpoint }}</span>
-                            <span class="d1-api-count">{{ ep.total|number_format(0, ',', '.') }}</span>
+    {# ─── Últimes notícies (Full width and taller) ─── #}
+    <div class="d2-panel">
+        <div class="d2-panel-head">
+            <span class="d2-panel-title">Últimes notícies</span>
+            <a href="{{ path('admin_projects') }}" class="d2-panel-link">Tots els projectes</a>
+        </div>
+        <div class="d2-panel-body">
+            <div class="d2-news-grid d2-news-grid--taller">
+                {% for entry in latestEntries|slice(0, 4) %}
+                <a href="#" class="d2-news-card" title="{{ entry.title }}">
+                    <div class="d2-news-card__thumb">
+                        <img src="{{ entry.imageUrl }}" alt="{{ entry.title }}" loading="lazy" class="d2-news-card__img">
+                    </div>
+                    <div class="d2-news-card__body">
+                        <div class="d2-news-card__title">{{ entry.title }}</div>
+                        <div class="d2-news-card__excerpt">{{ entry.excerpt }}</div>
+                        <div class="d2-news-card__meta">
+                            <span class="d2-news-card__date">{{ entry.createdAt|date('d/m/Y') }}</span>
+                            <span class="d2-news-card__project" style="color:{{ entry.projectColor }};">{{ entry.projectName }}</span>
+                            {% if entry.status == 'draft' %}
+                            <span class="d2-news-card__status d2-news-card__status--draft">Esborrany</span>
+                            {% endif %}
                         </div>
-                    {% else %}
-                        <div class="cyber-list-empty">Sense registres de crides a l'API</div>
-                    {% endfor %}
-                </div>
+                    </div>
+                </a>
+                {% else %}
+                <div class="d2-empty-row">Sense notícies recents</div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
 
-                <!-- Recent Files -->
-                <div class="d1-card">
-                    <div class="d1-card-title">Fitxers recents <a href="{{ path('admin_media_index') }}" class="d1-card-more">Mediateca</a></div>
+    {# ─── Grid 2-cols: Resources vs Files ─── #}
+    <div class="d2-grid-2">
+        {# --- Left column: Fitxers recents --- #}
+        <div class="d2-panel" style="margin-bottom: 0;">
+            <div class="d2-panel-head">
+                <span class="d2-panel-title">Fitxers recents</span>
+                <a href="{{ path('admin_media_index') }}" class="d2-panel-link">Mediateca</a>
+            </div>
+            <div class="d2-panel-body">
+                <div class="d2-file-grid">
                     {% for f in recentFiles %}
                         {% set isImage = f.mimeType starts with 'image/' %}
-                        <div class="d1-file-item">
-                            <div class="d1-file-thumb" style="background: {% if isImage %}rgba(253, 224, 71, 0.08){% else %}rgba(59, 130, 246, 0.08){% endif %};">
-                                {% if isImage %}
-                                    <img src="{{ asset(f.path) }}" alt="{{ f.originalFilename }}" class="d1-file-thumb-img" loading="lazy"
-                                         onclick="openPreview(this.src, '{{ f.originalFilename|e('js') }}')" />
-                                {% else %}
-                                    <i class="bi bi-file-earmark-text" style="font-size: 18px; color: #60a5fa;"></i>
-                                {% endif %}
-                            </div>
-                            <div class="d1-file-info">
-                                <div class="d1-file-name" title="{{ f.originalFilename }}">{{ f.originalFilename }}</div>
-                                <div class="d1-file-meta">{% if f.project %}{{ f.project.name }}{% else %}Sense projecte{% endif %} · {{ f.createdAt|date('d/m H:i') }}</div>
-                            </div>
-                            {% set sizeKB = (f.fileSize / 1024)|round(1) %}
-                            <span class="d1-file-size">{% if sizeKB > 1024 %}{{ (sizeKB / 1024)|round(1) }}MB{% else %}{{ sizeKB }}KB{% endif %}</span>
+                        {% set sizeKB = (f.fileSize / 1024)|round(0) %}
+                        {% set sizeStr = sizeKB > 1024 ? (sizeKB / 1024)|round(1) ~ 'MB' : sizeKB ~ 'KB' %}
+                        {% set projName = f.project ? f.project.name : 'Sense projecte' %}
+                        <div class="d2-file-thumb">
+                            {% if isImage %}
+                                <img src="{{ asset(f.path) }}" alt="{{ f.originalFilename }}" class="d2-file-thumb-img" loading="lazy"
+                                     onclick="openPreview(this.src, '{{ f.originalFilename|e('js') }}', '{{ projName|e('js') }}', '{{ f.createdAt|date('d/m/Y H:i')|e('js') }}', '{{ sizeStr|e('js') }}')"/>
+                            {% else %}
+                                <i class="bi bi-file-earmark-text d2-file-icon"></i>
+                            {% endif %}
                         </div>
                     {% else %}
-                        <div class="cyber-list-empty">No hi ha fitxers recents</div>
+                        <div class="d2-empty-row">No hi ha fitxers recents</div>
                     {% endfor %}
                 </div>
+            </div>
+        </div>
 
-                <!-- Lightbox preview (ocult per defecte) -->
-                <div id="preview-overlay" class="d1-preview-overlay" onclick="closePreview()" style="display: none;">
-                    <div class="d1-preview-modal" onclick="event.stopPropagation()">
-                        <button class="d1-preview-close" onclick="closePreview()">&times;</button>
-                        <img id="preview-img" src="" alt="" class="d1-preview-img" />
-                        <div id="preview-caption" class="d1-preview-caption"></div>
+        {# --- Right column: Resources / Donut --- #}
+        <div class="d2-panel" style="margin-bottom: 0;">
+            <div class="d2-panel-head">
+                <span class="d2-panel-title">Recursos sol·licitats</span>
+            </div>
+            <div class="d2-panel-body">
+                {% set circ = 188 %}
+                {% set imgDash = (imagesPct / 100) * circ %}
+                {% set entDash = (entriesPct / 100) * circ %}
+                {% set othDash = (otherPct / 100) * circ %}
+                {% set imgOff = 0 %}
+                {% set entOff = -imgDash %}
+                {% set othOff = -(imgDash + entDash) %}
+
+                <div class="d2-donut-wrap">
+                    <svg class="d2-donut-svg" width="80" height="80" viewBox="0 0 80 80">
+                        <circle cx="40" cy="40" r="30" fill="none" stroke="rgba(255,255,255,.06)" stroke-width="14"/>
+                        {% if imagesPct > 0 %}
+                        <circle cx="40" cy="40" r="30" fill="none" stroke="url(#d2dg)"
+                            stroke-width="14" stroke-dasharray="{{ imgDash }} {{ circ - imgDash }}"
+                            stroke-dashoffset="{{ imgOff }}" stroke-linecap="butt" transform="rotate(-90 40 40)"/>
+                        {% endif %}
+                        {% if entriesPct > 0 %}
+                        <circle cx="40" cy="40" r="30" fill="none" stroke="#3b82f6"
+                            stroke-width="14" stroke-dasharray="{{ entDash }} {{ circ - entDash }}"
+                            stroke-dashoffset="{{ entOff }}" stroke-linecap="butt" transform="rotate(-90 40 40)"/>
+                        {% endif %}
+                        {% if otherPct > 0 %}
+                        <circle cx="40" cy="40" r="30" fill="none" stroke="#22c55e"
+                            stroke-width="14" stroke-dasharray="{{ othDash }} {{ circ - othDash }}"
+                            stroke-dashoffset="{{ othOff }}" stroke-linecap="butt" transform="rotate(-90 40 40)"/>
+                        {% endif %}
+                        <defs>
+                            <linearGradient id="d2dg" x1="0" y1="0" x2="1" y2="1">
+                                <stop offset="0%" stop-color="#f97316"/>
+                                <stop offset="100%" stop-color="#fbbf24"/>
+                            </linearGradient>
+                        </defs>
+                    </svg>
+
+                    <div class="d2-donut-legend">
+                        <div class="d2-legend-row"><span class="d2-legend-dot d2-legend-dot--orange"></span>Imatges<span class="d2-legend-pct">{{ imagesPct }}%</span></div>
+                        <div class="d2-legend-row"><span class="d2-legend-dot d2-legend-dot--blue"></span>Entrades<span class="d2-legend-pct">{{ entriesPct }}%</span></div>
+                        <div class="d2-legend-row"><span class="d2-legend-dot d2-legend-dot--green"></span>Altres<span class="d2-legend-pct">{{ otherPct }}%</span></div>
                     </div>
                 </div>
 
-                <!-- resources donut -->
-                <div class="d1-card">
-                    <div class="d1-card-title">Recursos més sol·licitats</div>
-                    
-                    {% set circ = 188 %}
-                    {% set imgDash = (imagesPct / 100) * circ %}
-                    {% set entDash = (entriesPct / 100) * circ %}
-                    {% set othDash = (otherPct / 100) * circ %}
-
-                    {% set imgOffset = 0 %}
-                    {% set entOffset = -imgDash %}
-                    {% set othOffset = -(imgDash + entDash) %}
-
-                    <div class="d1-donut-wrap">
-                        <svg class="d1-donut-svg" width="80" height="80" viewBox="0 0 80 80">
-                            <circle cx="40" cy="40" r="30" fill="none" stroke="rgba(255,255,255,.06)" stroke-width="14" />
-                            {% if imagesPct > 0 %}
-                            <circle
-                              cx="40"
-                              cy="40"
-                              r="30"
-                              fill="none"
-                              stroke="var(--s-primary)"
-                              stroke-width="14"
-                              stroke-dasharray="{{ imgDash }} {{ circ - imgDash }}"
-                              stroke-dashoffset="{{ imgOffset }}"
-                              stroke-linecap="butt"
-                              transform="rotate(-90 40 40)"
-                            />
-                            {% endif %}
-                            {% if entriesPct > 0 %}
-                            <circle
-                              cx="40"
-                              cy="40"
-                              r="30"
-                              fill="none"
-                              stroke="#3b82f6"
-                              stroke-width="14"
-                              stroke-dasharray="{{ entDash }} {{ circ - entDash }}"
-                              stroke-dashoffset="{{ entOffset }}"
-                              stroke-linecap="butt"
-                              transform="rotate(-90 40 40)"
-                            />
-                            {% endif %}
-                            {% if otherPct > 0 %}
-                            <circle
-                              cx="40"
-                              cy="40"
-                              r="30"
-                              fill="none"
-                              stroke="#22c55e"
-                              stroke-width="14"
-                              stroke-dasharray="{{ othDash }} {{ circ - othDash }}"
-                              stroke-dashoffset="{{ othOffset }}"
-                              stroke-linecap="butt"
-                              transform="rotate(-90 40 40)"
-                            />
-                            {% endif %}
-                        </svg>
-                        
-                        <div class="d1-donut-legend">
-                            <div class="d1-legend-item">
-                              <span class="d1-legend-dot" style="background: var(--s-primary);"></span>Imatges<span class="d1-legend-val">{{ imagesPct }}%</span>
-                            </div>
-                            <div class="d1-legend-item">
-                              <span class="d1-legend-dot" style="background: #3b82f6;"></span>Entrades<span class="d1-legend-val">{{ entriesPct }}%</span>
-                            </div>
-                            <div class="d1-legend-item">
-                              <span class="d1-legend-dot" style="background: #22c55e;"></span>Altres<span class="d1-legend-val">{{ otherPct }}%</span>
-                            </div>
+                <div class="d2-storage-section">
+                    <div class="d2-storage-row">
+                        <div class="d2-storage-head">
+                            <span class="d2-storage-lbl">Emmagatzematge</span>
+                            <span class="d2-storage-val">{% if totalGB > 0.1 %}{{ totalGB }} GB{% else %}{{ totalMB }} MB{% endif %} / 10 GB</span>
                         </div>
+                        {% set quotaPct = ((totalGB / 10) * 100)|round %}
+                        <div class="d2-mini-track"><div class="d2-mini-fill" style="width: {{ quotaPct < 100 ? quotaPct : 100 }}%;"></div></div>
                     </div>
-
-                    <div style="margin-top: 14px;">
-                        <div class="d1-prog-row">
-                            {% set quotaGB = 10 %}
-                            {% set quotaPct = ((totalGB / quotaGB) * 100)|round %}
-                            <div class="d1-prog-head">
-                                <span class="d1-prog-lbl">Emmagatzematge</span>
-                                <span class="d1-prog-val">{% if totalGB > 0.1 %}{{ totalGB }} GB{% else %}{{ totalMB }} MB{% endif %} / {{ quotaGB }} GB</span>
-                            </div>
-                            <div class="d1-prog-track"><div class="d1-prog-fill" style="width: {{ quotaPct < 100 ? quotaPct : 100 }}%; background: var(--s-primary);"></div></div>
+                    <div class="d2-storage-row">
+                        <div class="d2-storage-head">
+                            <span class="d2-storage-lbl">Fitxers totals</span>
+                            <span class="d2-storage-val">{{ totalFiles }} / 5.000</span>
                         </div>
-                        <div class="d1-prog-row">
-                            <div class="d1-prog-head">
-                                <span class="d1-prog-lbl">Fitxers totals</span>
-                                <span class="d1-prog-val">{{ totalFiles }}</span>
-                            </div>
-                            {% set filesQuota = 5000 %}
-                            {% set filesPct = ((totalFiles / filesQuota) * 100)|round %}
-                            <div class="d1-prog-track"><div class="d1-prog-fill" style="width: {{ filesPct < 100 ? filesPct : 100 }}%; background: #3b82f6;"></div></div>
-                        </div>
+                        {% set fpct = ((totalFiles / 5000) * 100)|round %}
+                        <div class="d2-mini-track"><div class="d2-mini-fill" style="width: {{ fpct < 100 ? fpct : 100 }}%;"></div></div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
-
 {% include 'admin/components/_help_faq.html.twig' with { form_context: 'dashboard' } %}
+
+<!-- Lightbox preview -->
+<div id="preview-overlay" class="d2-preview-overlay" onclick="closePreview()" style="display: none;">
+    <div class="d2-preview-modal" onclick="event.stopPropagation()">
+        <button class="d2-preview-close" onclick="closePreview()">&times;</button>
+        <img id="preview-img" src="" alt="" class="d2-preview-img"/>
+        <div class="d2-preview-details">
+            <div id="preview-caption" class="d2-preview-filename"></div>
+            <div class="d2-preview-meta-row">
+                <span id="preview-project" class="d2-preview-meta"></span>
+                <span id="preview-date" class="d2-preview-meta"></span>
+                <span id="preview-size" class="d2-preview-meta"></span>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}
 
 {% block javascripts %}
 {{ parent() }}
 <script>
 document.addEventListener('DOMContentLoaded', function () {
-  var sel = document.querySelectorAll('.d1-filter-select');
+  var sel = document.querySelectorAll('.d2-filter-select');
   for (var i = 0; i < sel.length; i++) {
     sel[i].addEventListener('change', function () {
       if (this.id === 'clientSelect') {
         var projSelect = document.getElementById('projectSelect');
-        if (projSelect) {
-          projSelect.value = 'all';
-        }
+        if (projSelect) projSelect.value = 'all';
       }
       this.form.submit();
     });
   }
+
+  // Dashboard search logic (Option B)
+  var searchInput = document.getElementById('projectSearch');
+  if (searchInput) {
+    searchInput.addEventListener('input', function () {
+      var query = this.value.toLowerCase().trim();
+
+      // 1. Filter news cards
+      var newsCards = document.querySelectorAll('.d2-news-card');
+      newsCards.forEach(function (card) {
+        var title = (card.querySelector('.d2-news-card__title')?.textContent || '').toLowerCase();
+        var excerpt = (card.querySelector('.d2-news-card__excerpt')?.textContent || '').toLowerCase();
+        var project = (card.querySelector('.d2-news-card__project')?.textContent || '').toLowerCase();
+        var match = !query || title.indexOf(query) !== -1 || excerpt.indexOf(query) !== -1 || project.indexOf(query) !== -1;
+        card.style.setProperty('display', match ? 'flex' : 'none', 'important');
+      });
+
+      // 2. Filter active clients
+      var clientRows = document.querySelectorAll('.d2-cli-row');
+      clientRows.forEach(function (row) {
+        var name = (row.querySelector('.d2-cli-name')?.textContent || '').toLowerCase();
+        var sub = (row.querySelector('.d2-cli-sub')?.textContent || '').toLowerCase();
+        var match = !query || name.indexOf(query) !== -1 || sub.indexOf(query) !== -1;
+        row.style.setProperty('display', match ? 'flex' : 'none', 'important');
+      });
+
+      // 3. Filter recent files
+      var fileThumbs = document.querySelectorAll('.d2-file-thumb');
+      fileThumbs.forEach(function (thumb) {
+        var img = thumb.querySelector('img');
+        var alt = img ? (img.getAttribute('alt') || '') : '';
+        var match = !query || alt.toLowerCase().indexOf(query) !== -1;
+        thumb.style.setProperty('display', match ? 'block' : 'none', 'important');
+      });
+    });
+  }
 });
+
+function openPreview(src, filename, project, date, size) {
+  var overlay = document.getElementById('preview-overlay');
+  var img = document.getElementById('preview-img');
+  if (overlay) overlay.style.display = 'flex';
+  if (img) img.src = src;
+  var cap = document.getElementById('preview-caption');
+  if (cap) cap.textContent = filename || '';
+  var proj = document.getElementById('preview-project');
+  if (proj) proj.textContent = project || '';
+  var dat = document.getElementById('preview-date');
+  if (dat) dat.textContent = date || '';
+  var sz = document.getElementById('preview-size');
+  if (sz) sz.textContent = size || '';
+}
+
+function closePreview() {
+  var overlay = document.getElementById('preview-overlay');
+  if (overlay) overlay.style.display = 'none';
+}
 </script>
 {% endblock %}

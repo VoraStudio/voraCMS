@@ -1,5 +1,12 @@
 {% extends 'admin/layout.html.twig' %}
 
+{% set breadcrumbs = [
+    {label: 'Dashboard', url: path('admin_dashboard')},
+    {label: 'Tipus per defecte', url: path('admin_base_content_index')},
+    {label: 'Nova plantilla'}
+] %}
+{% set page_desc = 'Crea una nova plantilla de contingut per defecte' %}
+
 {% block page_title %}Nova plantilla base{% endblock %}
 
 {% block topbar_actions %}
@@ -9,7 +16,8 @@
 {% endblock %}
 
 {% block content %}
-<div class="cyber-form-card">
+{% include 'admin/project/_project_header_bar.html.twig' %}
+<div class="d2-body">
     <div class="cyber-card cyber-card--flush" data-anim="cyber-card">
         <div class="cyber-form-header">
             <div class="cyber-form-header-icon">

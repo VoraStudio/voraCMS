@@ -1,18 +1,16 @@
 {% extends 'admin/layout.html.twig' %}
 
+{% set breadcrumbs = [
+    {label: 'Dashboard', url: path('admin_dashboard')},
+    {label: 'Usuaris'}
+] %}
+{% set page_desc = 'Gestiona els usuaris i els seus permisos' %}
+
 {% block page_title %}Usuaris{% endblock %}
 
 {% block content %}
-<div class="cyber-form-card">
-{% include 'admin/components/_section_header.html.twig' with {
-    title: 'Usuaris',
-    description: 'Gestiona els usuaris i els seus permisos',
-    icon: 'bi-people-fill',
-    stats: [
-        {value: users|length, label: 'Total'},
-        {value: users|filter(u => u.active)|length, label: 'Actius', modifier: 'active'}
-    ]
-} %}
+<div class="d2-body">
+
 <div class="cyber-content-actions">
     <a href="{{ path('admin_user_new') }}" class="cyber-btn cyber-btn--projects" data-anim="cyber-btn">
         <i class="bi bi-plus-lg"></i> <span>Nou usuari</span>

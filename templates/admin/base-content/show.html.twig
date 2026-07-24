@@ -1,5 +1,12 @@
 {% extends 'admin/layout.html.twig' %}
 
+{% set breadcrumbs = [
+    {label: 'Dashboard', url: path('admin_dashboard')},
+    {label: 'Tipus per defecte', url: path('admin_base_content_index')},
+    {label: template.name}
+] %}
+{% set page_desc = 'Detalls i definició dels camps de la plantilla base' %}
+
 {% block page_title %}Plantilla: {{ template.name }}{% endblock %}
 
 {% block topbar_actions %}
@@ -14,7 +21,8 @@
 {% endblock %}
 
 {% block content %}
-<div class="cyber-form-card">
+{% include 'admin/project/_project_header_bar.html.twig' %}
+<div class="d2-body">
     <div class="cyber-card cyber-card--flush" data-anim="cyber-card">
         <div class="cyber-form-header">
             <div class="cyber-form-header-icon">
