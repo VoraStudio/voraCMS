@@ -131,6 +131,97 @@ class DashboardController extends AbstractController
             $visitTrend = round((($visitsToday - $visitsYesterday) / $visitsYesterday) * 100, 1);
         }
 
+        // --- Client KPIs: Weekly visits ---
+        $weekStart = $todayStart->modify('-6 days');
+        $visitQbWeek = clone $visitQb;
+        $visitsWeek = (int) $visitQbWeek->andWhere('v.visitedAt >= :weekStart')
+            ->setParameter('weekStart', $weekStart)
+            ->getQuery()
+            ->getSingleScalarResult();
+
+        // Peak daily visits this week + weekly chart data
+        $visitPeak = 0;
+        $visitPeakDay = null;
+        $weeklyVisits = [];
+        $maxDailyVisits = 0;
+        $dayNamesCa = ['Monday' => 'Dilluns', 'Tuesday' => 'Dimarts', 'Wednesday' => 'Dimecres', 'Thursday' => 'Dijous', 'Friday' => 'Divendres', 'Saturday' => 'Dissabte', 'Sunday' => 'Diumenge'];
+        for ($i = 6; $i >= 0; $i--) {
+            $dayStart = $todayStart->modify("-{$i} days");
+            $dayEnd = $dayStart->modify('+1 day');
+            $dayQb = clone $visitQb;
+            $dayTotal = (int) $dayQb->andWhere('v.visitedAt >= :dayStart')
+                ->andWhere('v.visitedAt < :dayEnd')
+                ->setParameter('dayStart', $dayStart)
+                ->setParameter('dayEnd', $dayEnd)
+                ->getQuery()
+                ->getSingleScalarResult();
+            if ($dayTotal > $visitPeak) {
+                $visitPeak = $dayTotal;
+                $rawDay = $dayStart->format('l');
+                $visitPeakDay = $dayNamesCa[$rawDay] ?? $rawDay;
+            }
+            if ($dayTotal > $maxDailyVisits) {
+                $maxDailyVisits = $dayTotal;
+            }
+            $rawDayName = $dayStart->format('D');
+            $shortDay = $dayNamesCa[$dayStart->format('l')] ?? $rawDayName;
+            $weeklyVisits[] = [
+                'day' => mb_substr($shortDay, 0, 2),
+                'total' => $dayTotal
+            ];
+        }
+
+        // Last visit timestamp
+        $lastVisitQb = clone $visitQb;
+        $lastVisitRow = $lastVisitQb->select('v.visitedAt')
+            ->orderBy('v.visitedAt', 'DESC')
+            ->setMaxResults(1)
+            ->getQuery()
+            ->getOneOrNullResult();
+        $lastVisit = $lastVisitRow ? $lastVisitRow['visitedAt'] : null;
+
+        // Friendly last-visit string
+        $lastVisitAgo = null;
+        if ($lastVisit) {
+            $now = new \DateTimeImmutable();
+            $diff = $now->getTimestamp() - $lastVisit->getTimestamp();
+            if ($diff < 60) {
+                $lastVisitAgo = 'Fa uns segons';
+            } elseif ($diff < 3600) {
+                $mins = floor($diff / 60);
+                $lastVisitAgo = "Fa $mins min";
+            } elseif ($diff < 86400) {
+                $hours = floor($diff / 3600);
+                $lastVisitAgo = "Fa $hours h";
+            } elseif ($diff < 604800) {
+                $days = floor($diff / 86400);
+                $lastVisitAgo = "Fa $days dies";
+            } else {
+                $lastVisitAgo = $lastVisit->format('d/m/Y');
+            }
+        }
+
+        // Top pages this week
+        $topPagesQb = $em->createQueryBuilder()
+            ->select('v.path, COUNT(v.id) AS visitCount')
+            ->from(\App\Entity\Visit::class, 'v')
+            ->andWhere('v.visitedAt >= :weekStart')
+            ->setParameter('weekStart', $weekStart);
+        if ($projectId) {
+            $topPagesQb->join('v.entry', 'e')
+                       ->join('e.contentType', 'ct')
+                       ->andWhere('ct.project = :projectId')
+                       ->setParameter('projectId', $projectId);
+        } elseif ($clientId) {
+            $topPagesQb->andWhere('v.user = :clientId')
+                       ->setParameter('clientId', $clientId);
+        }
+        $topPages = $topPagesQb->groupBy('v.path')
+            ->orderBy('visitCount', 'DESC')
+            ->setMaxResults(5)
+            ->getQuery()
+            ->getResult();
+
         // --- KPIs: API Requests ---
         $apiLogQb = $em->createQueryBuilder()
             ->select('COUNT(r.id)')
@@ -281,7 +372,7 @@ class DashboardController extends AbstractController
         }
 
         $recentFiles = $mediaQb->orderBy('m.createdAt', 'DESC')
-            ->setMaxResults(3)
+            ->setMaxResults(5)
             ->getQuery()
             ->getResult();
 
@@ -389,12 +480,20 @@ class DashboardController extends AbstractController
 
             'visitsToday' => $visitsToday,
             'visitTrend' => $visitTrend,
+            'visitsWeek' => $visitsWeek,
+            'visitPeak' => $visitPeak,
+            'visitPeakDay' => $visitPeakDay,
+            'lastVisit' => $lastVisit,
+            'lastVisitAgo' => $lastVisitAgo,
+            'topPages' => $topPages,
+            'weeklyVisits' => $weeklyVisits,
+            'maxDailyVisits' => $maxDailyVisits,
+
             'apiToday' => $apiToday,
             'apiTrend' => $apiTrend,
             'acceptedToday' => $acceptedToday,
             'deniedToday' => $deniedToday,
             'successRate' => $successRate,
-
             'weeklyRequests' => $weeklyRequests,
             'weeklyAcceptedVsDenied' => $weeklyAcceptedVsDenied,
             'maxDailyRequests' => $maxDailyRequests,
@@ -410,6 +509,7 @@ class DashboardController extends AbstractController
             'entriesPct' => $entriesPct,
             'otherPct' => $otherPct,
 
+            'latestEntries' => [],
             'latestClients' => $latestUsersData,
         ]);
     }
