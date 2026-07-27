@@ -88,6 +88,9 @@ class DashboardController extends AbstractController
         $projects = $projectRepo->findAll();
         $clients = $userRepo->findAll();
 
+        // Les metriques sempre es mostren per usuari, no per projecte
+        if ($clientId) $projectId = null;
+
         $filteredProjects = $projects;
         if ($clientId) {
             $filteredProjects = array_values(array_filter($projects, function ($p) use ($clientId) {

@@ -194,11 +194,16 @@ document.addEventListener('DOMContentLoaded', function () {
     // 4. Hide empty panels
     var panels = document.querySelectorAll('.d2-panel');
     panels.forEach(function (panel) {
-      var rows = panel.querySelectorAll('.d2-project-row');
+      var projectRows = panel.querySelectorAll('.d2-project-row');
+      var cyberRows = panel.querySelectorAll('.cyber-row');
       var grid = panel.querySelector('.project-cards-grid');
       var hasVisibleRows = false;
 
-      rows.forEach(function (row) {
+      projectRows.forEach(function (row) {
+        if (row.style.display !== 'none') hasVisibleRows = true;
+      });
+
+      cyberRows.forEach(function (row) {
         if (row.style.display !== 'none') hasVisibleRows = true;
       });
 
@@ -220,6 +225,7 @@ document.addEventListener('DOMContentLoaded', function () {
   if (orderFilter) {
     orderFilter.addEventListener('change', function () {
       var order = this.value;
+      // Index view: d2-project-row sorting
       var panels = document.querySelectorAll('.d2-panel-body--flush');
       panels.forEach(function (container) {
         var rows = Array.from(container.querySelectorAll('.d2-project-row'));
@@ -239,6 +245,25 @@ document.addEventListener('DOMContentLoaded', function () {
         });
         rows.forEach(function (row) {
           container.appendChild(row);
+        });
+      });
+      // Show page: cyber-row sorting inside each table
+      var tables = document.querySelectorAll('.d2-panel .cyber-table tbody');
+      tables.forEach(function (tbody) {
+        var rows = Array.from(tbody.querySelectorAll('.cyber-row'));
+        rows.sort(function (a, b) {
+          var dateA = a.querySelector('.cyber-cell--date')?.textContent?.trim() || '';
+          var dateB = b.querySelector('.cyber-cell--date')?.textContent?.trim() || '';
+          if (order === 'name') {
+            var nameA = a.querySelector('.cyber-cell__title')?.textContent?.trim().toLowerCase() || '';
+            var nameB = b.querySelector('.cyber-cell__title')?.textContent?.trim().toLowerCase() || '';
+            return nameA.localeCompare(nameB);
+          }
+          // Default: newer first or oldest first
+          return order === 'oldest' ? dateA.localeCompare(dateB) : dateB.localeCompare(dateA);
+        });
+        rows.forEach(function (row) {
+          tbody.appendChild(row);
         });
       });
     });
