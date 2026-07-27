@@ -551,6 +551,7 @@ class DashboardController extends AbstractController
             }
 
             $latestEntries[] = [
+                'id' => $entry->getId(),
                 'title' => $title ?: '(Sense títol)',
                 'imageUrl' => $imageUrl,
                 'excerpt' => $excerpt,
@@ -602,6 +603,7 @@ class DashboardController extends AbstractController
                 }
 
                 $latestEntries[] = [
+                    'id' => $entry->getId(),
                     'title' => $title ?: '(Sense títol)',
                     'imageUrl' => $imageUrl,
                     'excerpt' => $excerpt,

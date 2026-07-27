@@ -345,7 +345,7 @@
         <div class="d2-panel-body">
             <div class="d2-news-grid d2-news-grid--taller">
                 {% for entry in latestEntries|slice(0, 4) %}
-                <a href="#" class="d2-news-card" title="{{ entry.title }}">
+                <a href="{{ path('admin_entry_edit', {id: entry.id}) }}" class="d2-news-card" title="{{ entry.title }}">
                     <div class="d2-news-card__thumb">
                         {% if entry.imageUrl %}
                         <img src="{{ asset(entry.imageUrl) }}" alt="{{ entry.title }}" loading="lazy" class="d2-news-card__img">
