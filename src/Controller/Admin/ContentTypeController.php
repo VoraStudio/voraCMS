@@ -293,7 +293,7 @@ class ContentTypeController extends AbstractController
 
     private function detectFeature(string $slug): string
     {
-        if (str_contains($slug, 'noticia')) return 'noticies';
+        if (str_contains($slug, 'notici')) return 'noticies';
         if (str_contains($slug, 'event')) return 'events';
         return 'custom';
     }

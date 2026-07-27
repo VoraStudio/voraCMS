@@ -377,3 +377,28 @@
 .cyber-btn--icon.toggle-btn i {
   font-size: 1.05rem;
 }
+
+/* --- Entry status badges in project table rows --- */
+.d2-entry-states {
+  display: flex;
+  gap: 28px;
+  align-items: center;
+}
+
+.d2-entry-state {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.d2-entry-state .d2-status-icon--publicats { color: rgb(34, 197, 94); font-size: 0.85rem; }
+.d2-entry-state .d2-status-icon--esboranys { color: rgb(249, 115, 22); font-size: 0.85rem; }
+.d2-entry-state .d2-status-icon--revisio { color: rgb(234, 179, 8); font-size: 0.85rem; }
+.d2-entry-state .d2-status-icon--cancelat { color: rgb(59, 130, 246); font-size: 0.85rem; }
+
+.d2-entry-state--empty {
+  opacity: 0.3;
+}

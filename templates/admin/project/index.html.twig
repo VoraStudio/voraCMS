@@ -90,9 +90,36 @@
     </div>
 {% endmacro %}
 
+{% macro status_badges(projTypes) %}
+    {% set pub = 0 %}{% set drf = 0 %}{% set arc = 0 %}{% set sch = 0 %}
+    {% for ct in projTypes %}
+        {% for e in ct.entries %}
+            {% if e.status == 'published' %}{% set pub = pub + 1 %}
+            {% elseif e.status == 'draft' %}{% set drf = drf + 1 %}
+            {% elseif e.status == 'archived' %}{% set arc = arc + 1 %}
+            {% elseif e.status == 'scheduled' %}{% set sch = sch + 1 %}
+            {% endif %}
+        {% endfor %}
+    {% endfor %}
+    <div class="d2-entry-states">
+        <span class="d2-entry-state {{ pub == 0 ? 'd2-entry-state--empty' : '' }}">
+            <i class="fa-solid fa-circle-check d2-status-icon--publicats"></i> {{ pub }}
+        </span>
+        <span class="d2-entry-state d2-entry-state--draft {{ drf == 0 ? 'd2-entry-state--empty' : '' }}">
+            <i class="fa-solid fa-file-pen d2-status-icon--esboranys"></i> {{ drf }}
+        </span>
+        <span class="d2-entry-state d2-entry-state--archived {{ arc == 0 ? 'd2-entry-state--empty' : '' }}">
+            <i class="fa-solid fa-hourglass-half d2-status-icon--revisio"></i> {{ arc }}
+        </span>
+        <span class="d2-entry-state d2-entry-state--scheduled {{ sch == 0 ? 'd2-entry-state--empty' : '' }}">
+            <i class="fa-solid fa-clock d2-status-icon--cancelat"></i> {{ sch }}
+        </span>
+    </div>
+{% endmacro %}
+
 {% if filterUser is defined and filterUser %}
 {# ═══════════════════════════════════
-   Single-user view (filterUser)
+   Single-user view (filterUser) — table view
    ═══════════════════════════════════ #}
 {% if is_granted('ROLE_ADMIN') %}
 <div class="d2-back-row">
@@ -105,9 +132,65 @@
 {% set allProjects = mainProject ? [mainProject]|merge(otherProjects) : otherProjects %}
 
 {% if allProjects|length > 0 %}
+<div class="d2-panel">
+    <div class="d2-panel-body d2-panel-body--flush">
+        <table class="cyber-table">
+            <thead>
+                <tr>
+                    <th>Projecte</th>
+                    <th>Entrades</th>
+                    <th>Publicades</th>
+                    <th>Estat</th>
+                    <th>Accions</th>
+                </tr>
+            </thead>
+            <tbody>
     {% for proj in allProjects %}
-        {{ _self.project_card(proj, filterUser.id) }}
+    {% set projTypes = admin_content_types_for_project(proj) %}
+    {% set totalEntries = projTypes|reduce((carry, ct) => carry + ct.entries|length, 0) %}
+                <tr class="cyber-row {{ proj.active ? 'row-active' : 'row-inactive' }}" data-id="{{ proj.id }}">
+                    <td class="cyber-cell">
+                        <div class="cyber-cell__project-info">
+                            <span class="cyber-badge" style="width:8px;height:8px;border-radius:50%;padding:0;display:inline-block;background:{{ proj.color ?: '#4945FF' }};flex-shrink:0;"></span>
+                            <div class="table-project-name">
+                                <a href="{{ path('admin_switch_project', {id: proj.id, _redirect: path('admin_project_show', {id: proj.id})}) }}"
+                                   style="color:inherit;text-decoration:none;">{{ proj.name }}</a>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="cyber-cell"><span style="font-weight:800;font-size:0.9rem;background:linear-gradient(135deg,#f97316,#fbbf24);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">{{ totalEntries }}</span></td>
+                    <td class="cyber-cell">{{ _self.status_badges(projTypes) }}</td>
+                    <td class="cyber-cell">
+                        {% if proj.active %}
+                            <span class="cyber-status-dot cyber-status-dot--active" style="display:inline-block;margin-right:4px;"></span>
+                            <span class="cyber-status-text">Actiu</span>
+                        {% else %}
+                            <span class="cyber-status-dot" style="display:inline-block;background:rgba(148,163,184,0.4);margin-right:4px;"></span>
+                            <span class="cyber-status-text--draft">Inactiu</span>
+                        {% endif %}
+                    </td>
+                    <td class="cyber-cell" style="text-align:right;white-space:nowrap;">
+                        <a href="{{ path('admin_switch_project', {id: proj.id, _redirect: path('admin_project_show', {id: proj.id})}) }}"
+                           class="cyber-btn cyber-btn--icon" title="Veure projecte" style="margin-right:4px;">
+                            <i class="bi bi-eye"></i>
+                        </a>
+                        {% if is_granted('ROLE_ADMIN') %}
+                        <a href="{{ path('admin_project_edit', {id: proj.id}) }}"
+                           class="cyber-btn cyber-btn--icon cyber-btn--edit" title="Editar" style="margin-right:4px;">
+                            <i class="bi bi-pencil"></i>
+                        </a>
+                        <a href="{{ path('admin_content_type_new') }}"
+                           class="cyber-btn cyber-btn--icon" title="Nova secció" style="margin-right:4px;">
+                            <i class="bi bi-plus-lg"></i>
+                        </a>
+                        {% endif %}
+                    </td>
+                </tr>
     {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
 {% else %}
 <div class="d2-empty-state">
     <div class="d2-empty-state-icon">
@@ -125,6 +208,7 @@
 {% elseif projects is defined and is_granted('ROLE_ADMIN') %}
 {# ═══════════════════════════════════
    All projects view (grouped by client) — admin only
+   Table view, no cards
    ═══════════════════════════════════ #}
 {% set currentUserId = -1 %}
 {% for project in projects %}
@@ -132,7 +216,7 @@
 
 {% if pid != currentUserId %}
   {% set currentUserId = pid %}
-  {% if not loop.first %}</div></div>{% endif %}
+  {% if not loop.first %}</tbody></table></div></div>{% endif %}
 
 <div class="d2-panel">
     <div class="d2-panel-head">
@@ -159,10 +243,69 @@
             {% endif %}
         </div>
     </div>
-    <div class="d2-panel-body">
+    <div class="d2-panel-body d2-panel-body--flush">
+         <table class="cyber-table cyber-table--projects">
+            <thead>
+                <tr>
+                    <th>Projecte</th>
+                    <th>Entrades</th>
+                    <th>Publicades</th>
+                    <th>Estat</th>
+                    <th>Accions</th>
+                </tr>
+            </thead>
+            <tbody>
 {% endif %}
-        {{ _self.project_card(project, pid) }}
-{% if loop.last %}</div></div>{% endif %}
+                <tr class="cyber-row {{ project.active ? 'row-active' : 'row-inactive' }}" data-id="{{ project.id }}">
+                    <td class="cyber-cell">
+                        <div class="cyber-cell__project-info">
+                            <span class="cyber-badge" style="width:8px;height:8px;border-radius:50%;padding:0;display:inline-block;background:{{ project.color ?: '#4945FF' }};flex-shrink:0;"></span>
+                            <div class="table-project-name">
+                                <a href="{{ path('admin_switch_project', {id: project.id, _redirect: path('admin_project_show', {id: project.id})}) }}"
+                                   style="color:inherit;text-decoration:none;">{{ project.name }}</a>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="cyber-cell">
+                        {% set projTypes = admin_content_types_for_project(project) %}
+                        {% set totalEntries = projTypes|reduce((carry, ct) => carry + ct.entries|length, 0) %}
+                        <span style="font-weight:800;font-size:0.9rem;background:linear-gradient(135deg,#f97316,#fbbf24);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">{{ totalEntries }}</span>
+                    </td>
+                    <td class="cyber-cell">{{ _self.status_badges(projTypes) }}</td>
+                    <td class="cyber-cell">
+                        {% if project.active %}
+                            <span class="cyber-status-dot cyber-status-dot--active" style="display:inline-block;margin-right:4px;"></span>
+                            <span class="cyber-status-text">Actiu</span>
+                        {% else %}
+                            <span class="cyber-status-dot" style="display:inline-block;background:rgba(148,163,184,0.4);margin-right:4px;"></span>
+                            <span class="cyber-status-text--draft">Inactiu</span>
+                        {% endif %}
+                    </td>
+                    <td class="cyber-cell" style="text-align:right;white-space:nowrap;">
+                        <a href="{{ path('admin_switch_project', {id: project.id, _redirect: path('admin_project_show', {id: project.id})}) }}"
+                           class="cyber-btn cyber-btn--icon" title="Veure projecte" style="margin-right:4px;">
+                            <i class="bi bi-eye"></i>
+                        </a>
+                        <a href="{{ path('admin_project_edit', {id: project.id}) }}"
+                           class="cyber-btn cyber-btn--icon cyber-btn--edit" title="Editar" style="margin-right:4px;">
+                            <i class="bi bi-pencil"></i>
+                        </a>
+                        {% if project.id not in protectedProjectIds|default([]) %}
+                        <form method="post" action="{{ path('admin_project_delete', {id: project.id}) }}"
+                              class="cyber-form--inline" id="del-project-{{ project.id }}" style="display:inline;">
+                            <input type="hidden" name="_token" value="{{ csrf_token('delete-project-' ~ project.id) }}">
+                            <button type="button"
+                                    class="cyber-btn cyber-btn--icon cyber-btn--delete"
+                                    title="Eliminar"
+                                    data-confirm="Segur que vols eliminar el projecte {{ project.name }}?"
+                                    data-form="del-project-{{ project.id }}">
+                                <i class="bi bi-trash3"></i>
+                            </button>
+                        </form>
+                        {% endif %}
+                    </td>
+                </tr>
+{% if loop.last %}</tbody></table></div></div>{% endif %}
 {% else %}
 <div class="d2-empty-state">
     <div class="d2-empty-state-icon">

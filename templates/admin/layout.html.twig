@@ -59,7 +59,7 @@
             {% endif %}
 
             {# ─── Seccions (gestió de tipus de contingut i plantilles globals) ─── #}
-            {% if activeProject is defined and activeProject and is_granted('ROLE_ADMIN') %}
+            {% if is_granted('ROLE_ADMIN') %}
             <a class="s-sidebar-link{% if app.request.get('_route') starts with 'admin_content_type_' or app.request.get('_route') starts with 'admin_base_content_' %} active{% endif %}" href="{{ path('admin_content_type_index') }}">
                 <i class="bi bi-layers-fill"></i> Tipus de contingut
             </a>
