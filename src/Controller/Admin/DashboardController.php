@@ -17,6 +17,7 @@
 namespace App\Controller\Admin;
 
 use App\Entity\Entry;
+use App\Entity\FieldDefinition;
 use App\Entity\User;
 use App\Repository\ApiRequestLogRepository;
 use App\Repository\ContentTypeRepository;
@@ -201,26 +202,56 @@ class DashboardController extends AbstractController
             }
         }
 
-        // Top pages this week
+        // Top pages this week (des d'api_request_log)
         $topPagesQb = $em->createQueryBuilder()
-            ->select('v.path, COUNT(v.id) AS visitCount')
-            ->from(\App\Entity\Visit::class, 'v')
-            ->andWhere('v.visitedAt >= :weekStart')
-            ->setParameter('weekStart', $weekStart);
+            ->select('r.endpoint, COUNT(r.id) AS visitCount')
+            ->from(\App\Entity\ApiRequestLog::class, 'r')
+            ->andWhere('r.createdAt >= :weekStart')
+            ->setParameter('weekStart', $weekStart)
+            ->andWhere("r.endpoint NOT LIKE '/api/public/token'")
+            ->andWhere("r.endpoint NOT LIKE '/api/visit'");
         if ($projectId) {
-            $topPagesQb->join('v.entry', 'e')
-                       ->join('e.contentType', 'ct')
-                       ->andWhere('ct.project = :projectId')
+            $topPagesQb->andWhere('r.project = :projectId')
                        ->setParameter('projectId', $projectId);
         } elseif ($clientId) {
-            $topPagesQb->andWhere('v.user = :clientId')
+            $topPagesQb->andWhere('r.project IN (SELECT p2.id FROM App\Entity\Project p2 WHERE p2.user = :clientId)')
                        ->setParameter('clientId', $clientId);
         }
-        $topPages = $topPagesQb->groupBy('v.path')
+        $topResults = $topPagesQb->groupBy('r.endpoint')
             ->orderBy('visitCount', 'DESC')
             ->setMaxResults(5)
             ->getQuery()
             ->getResult();
+
+        /* Map endpoints to friendly names */
+        $topPages = [];
+        foreach ($topResults as $row) {
+            $endpoint = $row['endpoint'];
+            $parts = explode('/', trim($endpoint, '/'));
+            $lastSlug = end($parts);
+            $friendly = str_replace(['_', '-'], ' ', $lastSlug);
+            $friendly = mb_convert_case($friendly, MB_CASE_TITLE, 'UTF-8');
+
+            /* Try to get project name from the endpoint */
+            $projName = '';
+            if (preg_match('#^/api/public/(?P<pslug>[a-z0-9_-]+)#i', $endpoint, $m)) {
+                $pSlug = $m['pslug'];
+                if (!in_array($pSlug, ['token', 'artistes', 'web'], true)) {
+                    $proj = $projectRepo->findBySlug($pSlug);
+                    if ($proj) { $projName = $proj->getName(); }
+                } elseif ($pSlug === 'web') {
+                    $projName = 'Web principal';
+                }
+            }
+            if ($projName) {
+                $friendly .= ' — ' . $projName;
+            }
+
+            $topPages[] = [
+                'path' => $friendly,
+                'visitCount' => (int) $row['visitCount'],
+            ];
+        }
 
         // --- KPIs: API Requests ---
         $apiLogQb = $em->createQueryBuilder()
@@ -376,6 +407,19 @@ class DashboardController extends AbstractController
             ->getQuery()
             ->getResult();
 
+        /* Fallback: si el projecte actiu no té fitxers, mostrar els últims 4 del usuari */
+        if (empty($recentFiles) && $projectId && $clientId) {
+            $recentFiles = $em->createQueryBuilder()
+                ->select('m')
+                ->from(\App\Entity\Media::class, 'm')
+                ->where('m.user = :clientId')
+                ->setParameter('clientId', $clientId)
+                ->orderBy('m.createdAt', 'DESC')
+                ->setMaxResults(4)
+                ->getQuery()
+                ->getResult();
+        }
+
         // --- Storage ---
         $storageQb = $em->createQueryBuilder()
             ->select('SUM(m.fileSize) AS totalSize, COUNT(m.id) AS totalFiles')
@@ -450,6 +494,125 @@ class DashboardController extends AbstractController
             $otherPct = 100 - ($imagesPct + $entriesPct);
         }
 
+        // --- Latest Entries ---
+        $entryQb = $em->createQueryBuilder()
+            ->select('e')
+            ->from(\App\Entity\Entry::class, 'e')
+            ->orderBy('e.createdAt', 'DESC')
+            ->setMaxResults(4);
+
+        if ($projectId) {
+            $entryQb->join('e.contentType', 'lect')
+                    ->andWhere('lect.project = :projectId')
+                    ->setParameter('projectId', $projectId);
+
+            // Filtrar per features del projecte
+            $project = $projectRepo->find($projectId);
+            if ($project) {
+                $features = $project->getContentFeatures();
+                if (!empty($features)) {
+                    $entryQb->andWhere('lect.feature IN (:features)')
+                            ->setParameter('features', $features);
+                }
+            }
+        } elseif ($clientId) {
+            $entryQb->andWhere('e.user = :clientId')
+                    ->setParameter('clientId', $clientId);
+        }
+
+        $latestEntries = [];
+        foreach ($entryQb->getQuery()->getResult() as $entry) {
+            $title = '';
+            $excerpt = '';
+            $imageUrl = null;
+            $projectName = $entry->getContentType()?->getProject()?->getName() ?? '';
+            $projectColor = $entry->getContentType()?->getProject()?->getColor() ?? '#f97316';
+
+            foreach ($entry->getFieldValues() as $fv) {
+                $slug = $fv->getFieldDefinition()?->getSlug();
+                $type = $fv->getFieldDefinition()?->getFieldType();
+                $val = $fv->getValue();
+                if (!$val) { continue; }
+
+                if ($slug === 'titol' && !$title) {
+                    $title = $val;
+                } elseif (in_array($slug, ['imatge', 'logo', 'imatge_principal'], true)
+                    && in_array($type, [FieldDefinition::TYPE_IMAGE, FieldDefinition::TYPE_GALLERY], true)
+                    && !$imageUrl
+                ) {
+                    $ids = array_filter(explode(',', $val));
+                    if (!empty($ids) && is_numeric($ids[0])) {
+                        $media = $em->find(\App\Entity\Media::class, (int) $ids[0]);
+                        if ($media) { $imageUrl = $media->getPath(); }
+                    }
+                } elseif ($slug === 'descripcio' && !$excerpt) {
+                    $excerpt = mb_substr(strip_tags($val), 0, 150);
+                }
+            }
+
+            $latestEntries[] = [
+                'title' => $title ?: '(Sense títol)',
+                'imageUrl' => $imageUrl,
+                'excerpt' => $excerpt,
+                'createdAt' => $entry->getCreatedAt(),
+                'projectName' => $projectName,
+                'projectColor' => $projectColor,
+                'status' => $entry->getStatus(),
+            ];
+        }
+
+        /* Fallback: si no hi ha entrades al projecte actiu, mostrar les últimes 4 del usuari */
+        if (empty($latestEntries) && $projectId && $clientId) {
+            $entryQb = $em->createQueryBuilder()
+                ->select('e')
+                ->from(\App\Entity\Entry::class, 'e')
+                ->where('e.user = :clientId')
+                ->setParameter('clientId', $clientId)
+                ->orderBy('e.createdAt', 'DESC')
+                ->setMaxResults(4);
+
+            $latestEntries = [];
+            foreach ($entryQb->getQuery()->getResult() as $entry) {
+                $title = '';
+                $excerpt = '';
+                $imageUrl = null;
+                $projectName = $entry->getContentType()?->getProject()?->getName() ?? '';
+                $projectColor = $entry->getContentType()?->getProject()?->getColor() ?? '#f97316';
+
+                foreach ($entry->getFieldValues() as $fv) {
+                    $slug = $fv->getFieldDefinition()?->getSlug();
+                    $type = $fv->getFieldDefinition()?->getFieldType();
+                    $val = $fv->getValue();
+                    if (!$val) { continue; }
+
+                    if ($slug === 'titol' && !$title) {
+                        $title = $val;
+                    } elseif (in_array($slug, ['imatge', 'logo', 'imatge_principal'], true)
+                        && in_array($type, [FieldDefinition::TYPE_IMAGE, FieldDefinition::TYPE_GALLERY], true)
+                        && !$imageUrl
+                    ) {
+                        $ids = array_filter(explode(',', $val));
+                        if (!empty($ids) && is_numeric($ids[0])) {
+                            $media = $em->find(\App\Entity\Media::class, (int) $ids[0]);
+                            if ($media) { $imageUrl = $media->getPath(); }
+                        }
+                    } elseif ($slug === 'descripcio' && !$excerpt) {
+                        $excerpt = mb_substr(strip_tags($val), 0, 150);
+                    }
+                }
+
+                $latestEntries[] = [
+                    'title' => $title ?: '(Sense títol)',
+                    'imageUrl' => $imageUrl,
+                    'excerpt' => $excerpt,
+                    'createdAt' => $entry->getCreatedAt(),
+                    'projectName' => $projectName,
+                    'projectColor' => $projectColor,
+                    'status' => $entry->getStatus(),
+                ];
+            }
+        }
+
         // --- Clients list ---
         $latestUsersData = [];
         $usersList = $userRepo->findBy([], ['createdAt' => 'DESC'], 4);
@@ -509,7 +672,7 @@ class DashboardController extends AbstractController
             'entriesPct' => $entriesPct,
             'otherPct' => $otherPct,
 
-            'latestEntries' => [],
+            'latestEntries' => $latestEntries,
             'latestClients' => $latestUsersData,
         ]);
     }

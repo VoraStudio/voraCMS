@@ -63,7 +63,18 @@
                         </select>
                     </div>
                 </div>
-                <div class="col-md-6 d-flex align-items-end">
+                <div class="col-md-3">
+                    <div class="cyber-form-group mb-0">
+                        <label class="cyber-form-label">Feature</label>
+                        <select name="feature" class="cyber-form-input cyber-form-input--select">
+                            <option value="noticies">Notícies</option>
+                            <option value="events">Events</option>
+                            <option value="custom" selected>Contingut personalitzat</option>
+                        </select>
+                        <small class="field-help-text">Auto-detectat pel slug, però pots canviar-ho.</small>
+                    </div>
+                </div>
+                <div class="col-md-3 d-flex align-items-end">
                     <label class="s-toggle s-toggle--chk mb-0" style="--s-toggle-color:var(--s-accent)" for="ct-active">
                         <input type="checkbox" name="active" class="s-toggle__inp-cb" id="ct-active" checked value="1">
                         <span class="s-toggle__switch"></span>

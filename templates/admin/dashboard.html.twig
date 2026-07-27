@@ -238,8 +238,8 @@
                         {% set accH = (dayData.accepted / maxBar) * 95 %}
                         {% set denH = (dayData.denied / maxBar) * 95 %}
                         <div class="d2-bar-wrap">
-                            <div class="d2-bar d2-bar--green" style="height: {{ accH > 3 ? accH : 3 }}%;"></div>
-                            <div class="d2-bar d2-bar--red" style="height: {{ denH > 2 ? denH : 2 }}%;"></div>
+                            <div class="d2-bar d2-bar--green" style="height: {{ accH > 3 ? accH : 3 }}%;" title="{{ dayData.accepted }} acceptades"></div>
+                            <div class="d2-bar d2-bar--red" style="height: {{ denH > 2 ? denH : 2 }}%;" title="{{ dayData.denied }} denegades"></div>
                             <div class="d2-bar-lbl">{{ dayData.day }}</div>
                         </div>
                     {% endfor %}
@@ -264,7 +264,7 @@
                     {% for dayData in weeklyVisits %}
                         {% set barH = (dayData.total / maxV) * 95 %}
                         <div class="d2-bar-wrap">
-                            <div class="d2-bar d2-bar--gradient" style="height: {{ barH > 3 ? barH : 3 }}%;"></div>
+                            <div class="d2-bar d2-bar--gradient" style="height: {{ barH > 3 ? barH : 3 }}%;" title="{{ dayData.total }} visites"></div>
                             <div class="d2-bar-lbl">{{ dayData.day }}</div>
                         </div>
                     {% endfor %}
@@ -303,8 +303,8 @@
         {# --- Client: Top pages --- #}
         <div class="d2-panel">
             <div class="d2-panel-head">
-                <span class="d2-panel-title">Pàgines més visitades</span>
-                <span class="d2-panel-badge">Aquesta setmana</span>
+                <span class="d2-panel-title">Seccions més consultades</span>
+                <span class="d2-panel-badge">Última setmana</span>
             </div>
             <div class="d2-panel-body">
                 {% if topPages is not empty %}
@@ -314,7 +314,7 @@
                         <span class="d2-path-cell">{{ page.path ?: '/' }}</span>
                         <div class="d2-path-bar-wrap">
                             <div class="d2-mini-track d2-mini-track--sm">
-                                <div class="d2-mini-fill d2-mini-fill--gradient" style="width: {{ ((page.visitCount / maxPageCount) * 100)|round }}%;"></div>
+                                <div class="d2-mini-fill d2-mini-fill--gradient" style="width: {{ ((page.visitCount / maxPageCount) * 100)|round }}%;" title="{{ page.visitCount }} visites"></div>
                             </div>
                         </div>
                         <span class="d2-path-count">{{ page.visitCount }}</span>
@@ -329,9 +329,17 @@
     </div>
 
     {# ─── Últimes notícies (Full width and taller) ─── #}
+    {% set featuresTitle = 'Últimes entrades' %}
+    {% if activeProject is defined and activeProject.contentFeatures is defined %}
+        {% if 'noticies' in activeProject.contentFeatures %}
+            {% set featuresTitle = 'Últimes notícies' %}
+        {% elseif 'custom' in activeProject.contentFeatures %}
+            {% set featuresTitle = 'Contingut recent' %}
+        {% endif %}
+    {% endif %}
     <div class="d2-panel">
         <div class="d2-panel-head">
-            <span class="d2-panel-title">Últimes notícies</span>
+            <span class="d2-panel-title">{{ featuresTitle }}</span>
             <a href="{{ path('admin_projects') }}" class="d2-panel-link">Tots els projectes</a>
         </div>
         <div class="d2-panel-body">
@@ -339,7 +347,15 @@
                 {% for entry in latestEntries|slice(0, 4) %}
                 <a href="#" class="d2-news-card" title="{{ entry.title }}">
                     <div class="d2-news-card__thumb">
-                        <img src="{{ entry.imageUrl }}" alt="{{ entry.title }}" loading="lazy" class="d2-news-card__img">
+                        {% if entry.imageUrl %}
+                        <img src="{{ asset(entry.imageUrl) }}" alt="{{ entry.title }}" loading="lazy" class="d2-news-card__img">
+                        {% else %}
+                        <div class="d2-news-card__placeholder">
+                            <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" opacity="0.3">
+                                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21,15 16,10 5,21"/>
+                            </svg>
+                        </div>
+                        {% endif %}
                     </div>
                     <div class="d2-news-card__body">
                         <div class="d2-news-card__title">{{ entry.title }}</div>
@@ -354,7 +370,7 @@
                     </div>
                 </a>
                 {% else %}
-                <div class="d2-empty-row">Sense notícies recents</div>
+                <div class="d2-empty-row">Sense entrades recents</div>
                 {% endfor %}
             </div>
         </div>

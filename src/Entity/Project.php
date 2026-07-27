@@ -36,6 +36,9 @@ class Project
     #[ORM\Column(options: ['default' => true])]
     private ?bool $active = true;
 
+    #[ORM\Column(type: 'json', options: ['default' => '["noticies","events","custom"]'])]
+    private array $contentFeatures = ['noticies', 'events', 'custom'];
+
     #[ORM\ManyToOne(inversedBy: 'projects')]
     #[ORM\JoinColumn(nullable: false)]
     private ?User $user = null;
@@ -68,6 +71,14 @@ class Project
 
     public function isActive(): ?bool { return $this->active; }
     public function setActive(bool $active): static { $this->active = $active; return $this; }
+
+    public function getContentFeatures(): array { return $this->contentFeatures ?? ['noticies', 'events', 'custom']; }
+    public function setContentFeatures(array $contentFeatures): static
+    {
+        $allowed = ['noticies', 'events', 'custom'];
+        $this->contentFeatures = array_values(array_intersect($contentFeatures, $allowed));
+        return $this;
+    }
 
     public function getUser(): ?User { return $this->user; }
     public function setUser(?User $user): static { $this->user = $user; return $this; }

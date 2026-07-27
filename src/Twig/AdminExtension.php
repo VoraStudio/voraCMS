@@ -16,6 +16,7 @@
 
 namespace App\Twig;
 
+use App\Entity\ContentType;
 use App\Entity\User;
 use App\Repository\ContentTypeRepository;
 use App\Repository\ProjectRepository;
@@ -39,6 +40,7 @@ class AdminExtension extends AbstractExtension implements GlobalsInterface
     {
         return [
             new TwigFunction('admin_content_types', [$this, 'getContentTypes']),
+            new TwigFunction('admin_content_types_for_project', [$this, 'getContentTypesForProject']),
             new TwigFunction('admin_active_project', [$this, 'getActiveProject']),
             new TwigFunction('admin_projects', [$this, 'getProjects']),
         ];
@@ -77,7 +79,46 @@ class AdminExtension extends AbstractExtension implements GlobalsInterface
             return [];
         }
 
-        return $this->ctRepo->findActive($projectId);
+        $project = $this->projectRepo->find($projectId);
+        if (!$project) {
+            return [];
+        }
+
+        return $this->resolveContentTypes($project);
+    }
+
+    /**
+     * Retorna els ContentTypes visibles per a un projecte:
+     * els propis del projecte (filtrats per features) + plantilles base
+     * per a features habilitades que no tinguin un CT propi.
+     */
+    public function getContentTypesForProject($project): array
+    {
+        if (!$project) return [];
+        return $this->resolveContentTypes($project);
+    }
+
+    private function resolveContentTypes($project): array
+    {
+        $features = $project->getContentFeatures();
+
+        // 1. ContentTypes propis del projecte, filtrats per features
+        $projectTypes = $this->ctRepo->findActive($project->getId());
+        $filtered = array_values(array_filter($projectTypes, function ($ct) use ($features) {
+            return in_array($ct->getFeature(), $features, true);
+        }));
+
+        // 2. Features que ja tenen CT propi
+        $covered = array_unique(array_map(fn($ct) => $ct->getFeature(), $filtered));
+        $missing = array_diff($features, $covered);
+
+        // 3. Fallback a plantilles base per a features sense CT propi
+        if (!empty($missing)) {
+            $baseTypes = $this->ctRepo->findBaseByFeatures($missing);
+            $filtered = array_merge($filtered, $baseTypes);
+        }
+
+        return $filtered;
     }
 
     /* -----------------------------------------------------------

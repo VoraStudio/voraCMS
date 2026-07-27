@@ -57,12 +57,14 @@ class ProjectController extends AbstractController
         $currentUser = $this->getUser();
         $isAdmin = $this->isGranted('ROLE_ADMIN');
 
+        /* Llegir projecte actiu de sessió */
+        $sessionProjectId = $request->getSession()->get('_project_id');
+
         /* Per a no-admin, forcem filtre per usuari actual */
         if (!$isAdmin && $currentUser instanceof User) {
             $filterUser = $currentUser;
             $projects = $projectRepo->findBy(['user' => $filterUser], ['id' => 'DESC']);
-            $mainProject = $projects[0] ?? null;
-            $otherProjects = array_slice($projects, 1);
+            list($mainProject, $otherProjects) = $this->splitMainFromOther($projects, $sessionProjectId);
             $protectedProjectIds = $this->computeProtectedIds($projects);
 
             return $this->render('admin/project/index.html.twig', [
@@ -84,8 +86,7 @@ class ProjectController extends AbstractController
             $filterUser = $userRepo->find($userId);
             $projects = $projectRepo->findBy(['user' => $filterUser], ['id' => 'DESC']);
             if (!empty($projects)) {
-                $mainProject = $projects[0];
-                $otherProjects = array_slice($projects, 1);
+                list($mainProject, $otherProjects) = $this->splitMainFromOther($projects, $sessionProjectId);
             }
         } else {
             $projects = $projectRepo->findAllOrderedByUser();
@@ -100,6 +101,35 @@ class ProjectController extends AbstractController
             'filterUser' => $filterUser,
             'protectedProjectIds' => $protectedProjectIds,
         ]);
+    }
+
+    /**
+     * Separa els projectes en main (el de sessió, o el primer per ID) i altres.
+     */
+    private function splitMainFromOther(array $projects, ?int $sessionProjectId): array
+    {
+        if (empty($projects)) {
+            return [null, []];
+        }
+
+        $main = null;
+        $others = [];
+
+        foreach ($projects as $p) {
+            if ($sessionProjectId !== null && $p->getId() === $sessionProjectId) {
+                $main = $p;
+            } else {
+                $others[] = $p;
+            }
+        }
+
+        // Si no hi ha projecte a sessió o no es troba, el primer per ID és el main
+        if ($main === null) {
+            $main = $projects[0];
+            $others = array_slice($projects, 1);
+        }
+
+        return [$main, $others];
     }
 
     /** Compute project IDs that are protected (sole project of their user) */
@@ -153,7 +183,21 @@ class ProjectController extends AbstractController
 
         $request->getSession()->set('_project_id', $project->getId());
 
-        $contentTypes = $ctRepo->findActive($project->getId());
+        $features = $project->getContentFeatures();
+
+        // 1. ContentTypes propis del projecte, filtrats per features
+        $projectTypes = $ctRepo->findActive($project->getId());
+        $contentTypes = array_values(array_filter($projectTypes, function ($ct) use ($features) {
+            return in_array($ct->getFeature(), $features, true);
+        }));
+
+        // 2. Fallback a plantilles base per a features sense CT propi
+        $covered = array_unique(array_map(fn($ct) => $ct->getFeature(), $contentTypes));
+        $missing = array_diff($features, $covered);
+        if (!empty($missing)) {
+            $baseTypes = $ctRepo->findBaseByFeatures($missing);
+            $contentTypes = array_merge($contentTypes, $baseTypes);
+        }
         $sections = [];
         foreach ($contentTypes as $ct) {
             $entries = $ct->getEntries();
@@ -245,6 +289,7 @@ class ProjectController extends AbstractController
                     $ct->setDescription($template->getDescription());
                     $ct->setActive(true);
                     $ct->setBase(false);
+                    $ct->setFeature($this->detectFeature($template->getSlug()));
                     $ct->setUser($targetUser);
                     $ct->setProject($project);
 
@@ -311,6 +356,9 @@ class ProjectController extends AbstractController
             $project->setDescription($request->request->get('description', ''));
             $project->setColor($request->request->get('color', $project->getColor() ?? '#4945FF'));
             $project->setActive((bool) $request->request->get('active', true));
+
+            $features = $request->request->all('content_features');
+            $project->setContentFeatures(is_array($features) ? $features : []);
 
             $targetUserId = $request->request->getInt('user_id');
             if ($targetUserId > 0) {
@@ -397,6 +445,13 @@ class ProjectController extends AbstractController
 
         $this->addFlash('success', $project->isActive() ? 'Projecte activat.' : 'Projecte desactivat.');
         return $this->redirectToRoute('admin_projects');
+    }
+
+    private function detectFeature(string $slug): string
+    {
+        if (str_contains($slug, 'noticia')) return 'noticies';
+        if (str_contains($slug, 'event')) return 'events';
+        return 'custom';
     }
 
     /* ─── Converteix un text en slug net ─── */

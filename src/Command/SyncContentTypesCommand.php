@@ -85,6 +85,7 @@ class SyncContentTypesCommand extends Command
         $ct->setActive(true);
         $ct->setBase(false);
         $ct->setAutoClone(false);
+        $ct->setFeature($this->detectFeature($base->getSlug()));
         $ct->setUser($owner);
         $ct->setProject($project);
 
@@ -149,6 +150,13 @@ class SyncContentTypesCommand extends Command
         } else {
             $io->writeln('    → Cap canvi necessari');
         }
+    }
+
+    private function detectFeature(string $slug): string
+    {
+        if (str_contains($slug, 'noticia')) return 'noticies';
+        if (str_contains($slug, 'event')) return 'events';
+        return 'custom';
     }
 
     private function fixOldSlugs(SymfonyStyle $io): void

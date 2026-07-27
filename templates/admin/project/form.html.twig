@@ -59,6 +59,39 @@
                         <small class="field-help-text">Tria un color per identificar el projecte visualment.</small>
                     </div>
 
+                    <div class="col-12">
+                        <label class="form-label">Features del projecte</label>
+                        <small class="field-help-text" style="display:block;margin-bottom:8px;opacity:.6;">
+                            Controla quines seccions veu el client al seu panell.
+                        </small>
+                        <div class="d-flex flex-row gap-3 flex-wrap">
+                            <label class="s-toggle s-toggle--chk" style="--s-toggle-color:var(--s-accent)">
+                                <input type="checkbox" name="content_features[]" class="s-toggle__inp-cb" value="noticies"
+                                    {% if 'noticies' in project.contentFeatures %}checked{% endif %}>
+                                <span class="s-toggle__switch"></span>
+                                <span class="s-toggle__icon"><i class="bi bi-newspaper"></i></span>
+                                <span class="s-toggle__lbl-cb s-toggle__lbl-cb--on">Notícies</span>
+                                <span class="s-toggle__lbl-cb s-toggle__lbl-cb--off">Notícies</span>
+                            </label>
+                            <label class="s-toggle s-toggle--chk" style="--s-toggle-color:var(--s-accent)">
+                                <input type="checkbox" name="content_features[]" class="s-toggle__inp-cb" value="events"
+                                    {% if 'events' in project.contentFeatures %}checked{% endif %}>
+                                <span class="s-toggle__switch"></span>
+                                <span class="s-toggle__icon"><i class="bi bi-calendar-event"></i></span>
+                                <span class="s-toggle__lbl-cb s-toggle__lbl-cb--on">Events</span>
+                                <span class="s-toggle__lbl-cb s-toggle__lbl-cb--off">Events</span>
+                            </label>
+                            <label class="s-toggle s-toggle--chk" style="--s-toggle-color:var(--s-accent)">
+                                <input type="checkbox" name="content_features[]" class="s-toggle__inp-cb" value="custom"
+                                    {% if 'custom' in project.contentFeatures %}checked{% endif %}>
+                                <span class="s-toggle__switch"></span>
+                                <span class="s-toggle__icon"><i class="bi bi-puzzle"></i></span>
+                                <span class="s-toggle__lbl-cb s-toggle__lbl-cb--on">Contingut personalitzat</span>
+                                <span class="s-toggle__lbl-cb s-toggle__lbl-cb--off">Contingut personalitzat</span>
+                            </label>
+                        </div>
+                    </div>
+
                     {% if not isNew %}
                     <div class="col-12">
                         <label class="s-toggle s-toggle--chk" style="--s-toggle-color:var(--s-accent)">

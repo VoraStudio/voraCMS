@@ -73,6 +73,14 @@ class ContentTypeController extends AbstractController
             $ct->setDescription($request->request->get('description'));
             $ct->setActive($request->request->get('active', true));
 
+            /* Feature: usar el valor del formulari o auto-detect pel slug */
+            $feature = $request->request->get('feature');
+            if ($feature && in_array($feature, ['noticies', 'events', 'custom'], true)) {
+                $ct->setFeature($feature);
+            } else {
+                $ct->setFeature($this->detectFeature($ct->getSlug() ?? ''));
+            }
+
             /* Assignar al projecte seleccionat */
             $projectId = $request->request->get('project_id');
             $project = $projectId ? $projectRepo->find($projectId) : null;
@@ -140,6 +148,14 @@ class ContentTypeController extends AbstractController
             $contentType->setName($request->request->get('name'));
             $contentType->setDescription($request->request->get('description'));
             $contentType->setActive($request->request->get('active', true));
+
+            /* Feature: usar el valor del formulari o auto-detect */
+            $feature = $request->request->get('feature');
+            if ($feature && in_array($feature, ['noticies', 'events', 'custom'], true)) {
+                $contentType->setFeature($feature);
+            } else {
+                $contentType->setFeature($this->detectFeature($contentType->getSlug() ?? ''));
+            }
 
             /* Assignar al projecte seleccionat */
             $projectId = $request->request->get('project_id');
@@ -273,5 +289,12 @@ class ContentTypeController extends AbstractController
         $text = str_replace(['á','é','í','ó','ú','à','è','ì','ò','ù','ñ'], ['a','e','i','o','u','a','e','i','o','u','n'], $text);
         $text = preg_replace('/[^a-z0-9]+/', '_', $text);
         return trim($text, '_');
+    }
+
+    private function detectFeature(string $slug): string
+    {
+        if (str_contains($slug, 'noticia')) return 'noticies';
+        if (str_contains($slug, 'event')) return 'events';
+        return 'custom';
     }
 }

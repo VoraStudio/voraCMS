@@ -63,7 +63,17 @@
                         </select>
                     </div>
                 </div>
-                <div class="col-md-6 d-flex align-items-end">
+                <div class="col-md-3">
+                    <div class="cyber-form-group mb-0">
+                        <label class="cyber-form-label">Feature</label>
+                        <select name="feature" class="cyber-form-input cyber-form-input--select">
+                            <option value="noticies" {% if contentType.feature == 'noticies' %}selected{% endif %}>Notícies</option>
+                            <option value="events" {% if contentType.feature == 'events' %}selected{% endif %}>Events</option>
+                            <option value="custom" {% if contentType.feature == 'custom' %}selected{% endif %}>Contingut personalitzat</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-3 d-flex align-items-end">
                     <label class="s-toggle s-toggle--chk mb-0" style="--s-toggle-color:var(--s-accent)" for="ct-active">
                         <input type="checkbox" name="active" class="s-toggle__inp-cb" id="ct-active" {% if contentType.active %}checked{% endif %} value="1">
                         <span class="s-toggle__switch"></span>

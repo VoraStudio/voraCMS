@@ -6,22 +6,34 @@
 {% set draftEntriesCount = 0 %}
 {% set revisionEntriesCount = 0 %}
 {% set cancelledEntriesCount = 0 %}
+{% set thisWeekActivity = 0 %}
+{% set lastWeekActivity = 0 %}
+{% set thisWeekStart = date('now')|date_modify('monday this week') %}
+{% set lastWeekStart = thisWeekStart|date_modify('-7 days') %}
 
 {% for p in headerProjects %}
-    {% for ct in p.contentTypes %}
+    {% set headerFilteredTypes = admin_content_types_for_project(p) %}
+    {% for ct in headerFilteredTypes %}
         {% for e in ct.entries %}
             {% if e.status == 'published' %}
                 {% set publishedEntriesCount = publishedEntriesCount + 1 %}
             {% elseif e.status == 'draft' %}
                 {% set draftEntriesCount = draftEntriesCount + 1 %}
             {% elseif e.status == 'scheduled' %}
-                {% set revisionEntriesCount = revisionEntriesCount + 1 %}
-            {% elseif e.status == 'archived' %}
                 {% set cancelledEntriesCount = cancelledEntriesCount + 1 %}
+            {% elseif e.status == 'archived' %}
+                {% set revisionEntriesCount = revisionEntriesCount + 1 %}
+            {% endif %}
+            {% if e.createdAt and e.createdAt >= thisWeekStart %}
+                {% set thisWeekActivity = thisWeekActivity + 1 %}
+            {% elseif e.createdAt and e.createdAt >= lastWeekStart and e.createdAt < thisWeekStart %}
+                {% set lastWeekActivity = lastWeekActivity + 1 %}
             {% endif %}
         {% endfor %}
     {% endfor %}
 {% endfor %}
+
+{% set activityChange = thisWeekActivity %}
 
 <div class="d2-sticky-header-container">
     <!-- Metrics Grid -->
@@ -75,7 +87,7 @@
         <div class="d2-kpi">
             <div class="d2-kpi-top-row">
                 <i class="fa-solid fa-chart-line d2-status-icon--publicats"></i>
-                <div class="d2-kpi-val" style="color: #22c55e; background: none; -webkit-text-fill-color: #22c55e;">+15%</div>
+                <div class="d2-kpi-val" style="color: #22c55e; background: none; -webkit-text-fill-color: #22c55e;">+{{ activityChange }}%</div>
             </div>
             <div class="d2-kpi-label">Activitat</div>
         </div>

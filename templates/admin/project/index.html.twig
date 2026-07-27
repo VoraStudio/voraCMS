@@ -15,13 +15,85 @@
 
 {% include 'admin/project/_project_header_bar.html.twig' with {title_override: 'Projectes:'} %}
 
+{% macro project_card(project, filterUserId) %}
+    {% set pColor = project.color ?: '#4945FF' %}
+    {% set projTypes = admin_content_types_for_project(project) %}
+    {% set pLink = path('admin_switch_project', {id: project.id, _redirect: path('admin_projects', filterUserId > 0 ? {user: filterUserId} : {})}) %}
+    <div class="d2-panel" data-project-id="{{ project.id }}">
+        <div class="d2-panel-head">
+            <div class="d2-panel-head-left">
+                <div class="d2-project-head-icon" style="background:{{ pColor }}20; border-color:{{ pColor }}40; color:{{ pColor }};">
+                    <i class="bi bi-folder2-open"></i>
+                </div>
+                <div>
+                    <div class="d2-panel-title">{{ project.name }}</div>
+                    {% if project.description %}
+                    <div class="d2-panel-subtitle">{{ project.description }}</div>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="d2-panel-head-right">
+                {% if is_granted('ROLE_ADMIN') %}
+                <a href="{{ path('admin_switch_project', {id: project.id, _redirect: path('admin_content_type_new')}) }}"
+                   class="cyber-btn-primary cyber-btn--compact" style="margin-right:8px;">
+                    <i class="bi bi-plus-lg"></i> <span>Nova secció</span>
+                </a>
+                <a href="{{ path('admin_project_edit', {id: project.id}) }}" class="cyber-btn cyber-btn--icon cyber-btn--edit" title="Editar projecte">
+                    <i class="bi bi-pencil"></i>
+                </a>
+                {% endif %}
+            </div>
+        </div>
+        <div class="d2-panel-body">
+            <div class="row g-3 project-cards-grid">
+                {% for ct in projTypes %}
+                {% set entriesCount = ct.entries|length %}
+                {% set ctLink = path('admin_switch_project', {id: project.id, _redirect: path('admin_entry_by_type', {slug: ct.slug})}) %}
+                <div class="col-md-6 col-lg-4">
+                    <div class="cyber-card project-content-card" data-anim="cyber-card" data-link="{{ ctLink }}">
+                        <div class="project-content-card__header">
+                            <div class="cyber-section-icon project-content-card__section-icon">
+                                <i class="bi bi-file-earmark"></i>
+                            </div>
+                            <span class="cyber-badge cyber-badge--compact {{ entriesCount > 0 ? 'cyber-badge--mod' : '' }}">
+                                {{ entriesCount }} entrades
+                            </span>
+                        </div>
+                        <div class="project-content-card__body">
+                            <h3 class="project-content-card__title">{{ ct.name }}</h3>
+                            {% if ct.description %}
+                            <p class="project-content-card__desc">{{ ct.description }}</p>
+                            {% endif %}
+                        </div>
+                        <a href="{{ ctLink }}" class="cyber-btn cyber-btn--projects project-content-card__btn">
+                            <i class="bi bi-eye"></i> <span>Veure entrades</span>
+                        </a>
+                    </div>
+                </div>
+                {% else %}
+                <div class="col-12">
+                    <div class="cyber-card cyber-card--empty" data-anim="cyber-card">
+                        <div class="cyber-empty-icon--xl">
+                            <i class="bi bi-layers"></i>
+                        </div>
+                        <p class="field-help-text field-help-text--action">Aquest projecte no té seccions encara</p>
+                        {% if is_granted('ROLE_ADMIN') %}
+                        <a href="{{ pLink }}" class="cyber-btn-primary cyber-btn--compact">
+                            <i class="bi bi-plus-lg"></i> <span>Crear secció</span>
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+{% endmacro %}
+
 {% if filterUser is defined and filterUser %}
 {# ═══════════════════════════════════
    Single-user view (filterUser)
    ═══════════════════════════════════ #}
-
-
-
 {% if is_granted('ROLE_ADMIN') %}
 <div class="d2-back-row">
     <a href="{{ path('admin_projects') }}" class="d2-back-link">
@@ -30,119 +102,13 @@
 </div>
 {% endif %}
 
-{% if mainProject %}
-{% set color = mainProject.color ?: '#06B6D4' %}
+{% set allProjects = mainProject ? [mainProject]|merge(otherProjects) : otherProjects %}
 
-<div class="d2-panel">
-    <div class="d2-panel-head">
-        <div class="d2-panel-head-left">
-            <div class="d2-project-head-icon" style="background:{{ color }}20; border-color:{{ color }}40; color:{{ color }};">
-                <i class="bi bi-folder2-open"></i>
-            </div>
-            <div>
-                <div class="d2-panel-title">{{ mainProject.name }}</div>
-                <div class="d2-panel-subtitle">Projecte principal</div>
-            </div>
-        </div>
-        <div class="d2-panel-head-right">
-            {% if is_granted('ROLE_ADMIN') %}
-            <a href="{{ path('admin_switch_project', {id: mainProject.id, _redirect: path('admin_content_type_new')}) }}"
-               class="cyber-btn-primary cyber-btn--compact" style="margin-right:8px;">
-                <i class="bi bi-plus-lg"></i> <span>Nova secció</span>
-            </a>
-            <a href="{{ path('admin_project_edit', {id: mainProject.id}) }}" class="cyber-btn cyber-btn--icon cyber-btn--edit" title="Editar projecte">
-                <i class="bi bi-pencil"></i>
-            </a>
-            {% endif %}
-        </div>
-    </div>
-    <div class="d2-panel-body">
-        <div class="row g-3 project-cards-grid">
-            {% for ct in mainProject.contentTypes %}
-            {% set icon = 'bi-file-earmark' %}
-            {% set entriesCount = ct.entries|length %}
-            {% set ctLink = path('admin_switch_project', {id: mainProject.id, _redirect: path('admin_entry_by_type', {slug: ct.slug})}) %}
-            <div class="col-md-6 col-lg-4">
-                <div class="cyber-card project-content-card" data-anim="cyber-card" data-link="{{ ctLink }}">
-                    <div class="project-content-card__header">
-                        <div class="cyber-section-icon project-content-card__section-icon">
-                            <i class="bi {{ icon }}"></i>
-                        </div>
-                        <span class="cyber-badge cyber-badge--compact {{ entriesCount > 0 ? 'cyber-badge--mod' : '' }}">
-                            {{ entriesCount }} entrades
-                        </span>
-                    </div>
-                    <div class="project-content-card__body">
-                        <h3 class="project-content-card__title">{{ ct.name }}</h3>
-                        {% if ct.description %}
-                        <p class="project-content-card__desc">{{ ct.description }}</p>
-                        {% endif %}
-                    </div>
-                    <a href="{{ ctLink }}" class="cyber-btn cyber-btn--projects project-content-card__btn">
-                        <i class="bi bi-eye"></i> <span>Veure entrades</span>
-                    </a>
-                </div>
-            </div>
-            {% else %}
-            <div class="col-12">
-                <div class="cyber-card cyber-card--empty" data-anim="cyber-card">
-                    <div class="cyber-empty-icon--xl">
-                        <i class="bi bi-layers"></i>
-                    </div>
-                    <p class="field-help-text field-help-text--action">Aquest projecte no té seccions encara</p>
-                    {% if is_granted('ROLE_ADMIN') %}
-                    <a href="{{ path('admin_switch_project', {id: mainProject.id}) }}" class="cyber-btn-primary cyber-btn--compact">
-                        <i class="bi bi-plus-lg"></i> <span>Crear secció</span>
-                    </a>
-                    {% endif %}
-                </div>
-            </div>
-            {% endfor %}
-        </div>
-    </div>
-</div>
-{% endif %}
-
-{% if otherProjects|length > 0 %}
-<div class="d2-panel">
-    <div class="d2-panel-head" style="cursor:pointer;" data-expand-others>
-        <div class="d2-panel-head-left">
-            <span class="d2-panel-title"><i class="bi bi-folder2-open" style="margin-right:6px;color:rgba(96,165,250,0.5);"></i>Altres projectes</span>
-            <span class="d2-panel-badge">{{ otherProjects|length }}</span>
-        </div>
-        <i class="bi bi-chevron-down d2-expand-chevron" data-expand-icon></i>
-    </div>
-    <div class="d2-panel-body d2-panel-body--flush" data-expand-body style="display:none;">
-        {% for project in otherProjects %}
-        {% set color = project.color ?: '#4945FF' %}
-        {% set secCount = project.contentTypes|length %}
-        {% set entCount = project.contentTypes|reduce((carry, ct) => carry + ct.entries|length, 0) %}
-        <a href="{{ path('admin_switch_project', {id: project.id}) }}" class="d2-project-row" data-id="{{ project.id }}">
-            <div class="d2-project-row__info">
-                <span class="d2-color-dot" style="background:{{ color }}; box-shadow:0 0 6px {{ color }}60;"></span>
-                <div>
-                    <div class="d2-project-row__name">{{ project.name }}</div>
-                </div>
-            </div>
-            <div class="d2-project-row__metrics">
-                <div class="d2-project-row__metric">
-                    <span class="d2-project-row__metric-num">{{ secCount }}</span>
-                    <span class="d2-project-row__metric-lbl">sec.</span>
-                </div>
-                <div class="d2-project-row__metric-divider"></div>
-                <div class="d2-project-row__metric">
-                    <span class="d2-project-row__metric-num">{{ entCount }}</span>
-                    <span class="d2-project-row__metric-lbl">ent.</span>
-                </div>
-            </div>
-            <i class="bi bi-chevron-right d2-project-row__arrow"></i>
-        </a>
-        {% endfor %}
-    </div>
-</div>
-{% endif %}
-
-{% if not mainProject and otherProjects is empty %}
+{% if allProjects|length > 0 %}
+    {% for proj in allProjects %}
+        {{ _self.project_card(proj, filterUser.id) }}
+    {% endfor %}
+{% else %}
 <div class="d2-empty-state">
     <div class="d2-empty-state-icon">
         <svg width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" opacity="0.3">
@@ -160,9 +126,6 @@
 {# ═══════════════════════════════════
    All projects view (grouped by client) — admin only
    ═══════════════════════════════════ #}
-
-
-
 {% set currentUserId = -1 %}
 {% for project in projects %}
 {% set pid = project.user ? project.user.id : 0 %}
@@ -196,72 +159,9 @@
             {% endif %}
         </div>
     </div>
-    <div class="d2-panel-body d2-panel-body--flush">
+    <div class="d2-panel-body">
 {% endif %}
-
-        {% set color = project.color ?: '#4945FF' %}
-        {% set secCount = project.contentTypes|length %}
-        {% set entCount = project.contentTypes|reduce((carry, ct) => carry + ct.entries|length, 0) %}
-
-        <div class="d2-project-row{{ not project.active ? ' d2-project-row--inactive' : '' }}" data-id="{{ project.id }}">
-            <a href="{{ path('admin_switch_project', {id: project.id}) }}" class="d2-project-row__info">
-                <span class="d2-color-dot" style="background:{{ color }}; box-shadow:0 0 6px {{ color }}60;"></span>
-                <div>
-                    <div class="d2-project-row__name">{{ project.name }}</div>
-                    <div class="d2-project-row__slug">{{ project.slug }}</div>
-                </div>
-            </a>
-            <div class="d2-project-row__metrics">
-                <div class="d2-project-row__metric">
-                    <span class="d2-project-row__metric-num">{{ secCount }}</span>
-                    <span class="d2-project-row__metric-lbl">seccions</span>
-                </div>
-                <div class="d2-project-row__metric-divider"></div>
-                <div class="d2-project-row__metric">
-                    <span class="d2-project-row__metric-num">{{ entCount }}</span>
-                    <span class="d2-project-row__metric-lbl">entrades</span>
-                </div>
-                <div class="d2-project-row__metric-divider"></div>
-                {% set projStatus = project.active ? 'active' : 'inactive' %}
-                <span class="d2-project-row__status d2-project-row__status--{{ projStatus }}">{{ project.active ? 'Actiu' : 'Inactiu' }}</span>
-            </div>
-            <div class="d2-project-row__actions">
-                <a href="{{ path('admin_switch_project', {id: project.id}) }}"
-                   class="d2-btn-icon" title="Obrir projecte">
-                    <i class="bi bi-arrow-right-circle"></i>
-                </a>
-                <form method="post" action="{{ path('admin_project_toggle_active', {id: project.id}) }}" class="d2-form-inline" id="tact-project-{{ project.id }}">
-                    <input type="hidden" name="_token" value="{{ csrf_token('toggle-active-' ~ project.id) }}">
-                    <button type="submit"
-                            class="d2-btn-icon {{ project.active ? '' : 'd2-btn-icon--muted' }}"
-                            title="{{ project.active ? 'Desactivar' : 'Activar' }}">
-                        <i class="bi {{ project.active ? 'bi-toggle2-on' : 'bi-toggle2-off' }}"></i>
-                    </button>
-                </form>
-                <a href="{{ path('admin_project_edit', {id: project.id}) }}"
-                   class="d2-btn-icon" title="Editar">
-                    <i class="bi bi-pencil"></i>
-                </a>
-                {% if project.id in protectedProjectIds|default([]) %}
-                <button type="button" class="d2-btn-icon d2-btn-icon--disabled"
-                        title="No es pot eliminar l'únic projecte de l'usuari" disabled>
-                    <i class="bi bi-trash3"></i>
-                </button>
-                {% else %}
-                <form method="post" action="{{ path('admin_project_delete', {id: project.id}) }}" class="d2-form-inline" id="del-project-{{ project.id }}">
-                    <input type="hidden" name="_token" value="{{ csrf_token('delete-project-' ~ project.id) }}">
-                    <button type="button"
-                            class="d2-btn-icon d2-btn-icon--danger"
-                            title="Eliminar"
-                            data-confirm="Segur que vols eliminar el projecte «{{ project.name }}» i totes les seves seccions i entrades?"
-                            data-form="del-project-{{ project.id }}">
-                        <i class="bi bi-trash3"></i>
-                    </button>
-                </form>
-                {% endif %}
-            </div>
-        </div>
-
+        {{ _self.project_card(project, pid) }}
 {% if loop.last %}</div></div>{% endif %}
 {% else %}
 <div class="d2-empty-state">
@@ -287,19 +187,6 @@
 {% include 'admin/components/_help_faq.html.twig' with { form_context: 'projects_index' } %}
 <script>
 document.addEventListener('DOMContentLoaded', function () {
-  // ─── Toggle others panel (single-user view) ───
-  var expandHead = document.querySelector('[data-expand-others]');
-  if (expandHead) {
-    expandHead.addEventListener('click', function () {
-      var body = document.querySelector('[data-expand-body]');
-      var icon = document.querySelector('[data-expand-icon]');
-      if (!body) return;
-      var isOpen = body.style.display !== 'none';
-      body.style.display = isOpen ? 'none' : 'block';
-      if (icon) icon.style.transform = isOpen ? 'rotate(0deg)' : 'rotate(180deg)';
-    });
-  }
-
   // ─── Project delete confirmation ───
   var delBtns = document.querySelectorAll('[data-confirm]');
   for (var i = 0; i < delBtns.length; i++) {

@@ -136,6 +136,24 @@ class ContentTypeRepository extends ServiceEntityRepository
     /**
      * @return ContentType[]
      */
+    public function findBaseByFeatures(array $features): array
+    {
+        return $this->createQueryBuilder('ct')
+            ->where('ct.active = :active')
+            ->andWhere('ct.base = :base')
+            ->andWhere('ct.project IS NULL')
+            ->andWhere('ct.feature IN (:features)')
+            ->setParameter('active', true)
+            ->setParameter('base', true)
+            ->setParameter('features', $features)
+            ->orderBy('ct.name', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
+
+    /**
+     * @return ContentType[]
+     */
     public function findAutoCloneTemplates(): array
     {
         return $this->createQueryBuilder('ct')

@@ -35,6 +35,9 @@ class ContentType
     #[ORM\Column(options: ['default' => false])]
     private bool $base = false;
 
+    #[ORM\Column(length: 20, options: ['default' => 'custom'])]
+    private string $feature = 'custom';
+
     #[ORM\Column(options: ['default' => true])]
     private bool $autoClone = true;
 
@@ -79,6 +82,9 @@ class ContentType
 
     public function isBase(): bool { return $this->base; }
     public function setBase(bool $base): static { $this->base = $base; return $this; }
+
+    public function getFeature(): string { return $this->feature ?? 'custom'; }
+    public function setFeature(string $feature): static { $this->feature = $feature; return $this; }
 
     public function isAutoClone(): bool { return $this->autoClone; }
     public function setAutoClone(bool $autoClone): static { $this->autoClone = $autoClone; return $this; }
