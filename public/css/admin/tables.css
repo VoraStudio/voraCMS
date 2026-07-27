@@ -320,19 +320,19 @@
 
 /* --- Projects table column widths --- */
 .cyber-table--projects th:nth-child(1) {
-  width: 35%;
+  width: 30%;
 }
 .cyber-table--projects th:nth-child(2) {
-  width: 12%;
+  width: 6%;
 }
 .cyber-table--projects th:nth-child(3) {
-  width: 12%;
+  width: 30%;
 }
 .cyber-table--projects th:nth-child(4) {
-  width: 15%;
+  width: 10%;
 }
 .cyber-table--projects th:nth-child(5) {
-  width: 26%;
+  width: 24%;
 }
 
 /* --- Numeric cell (counts, stats) --- */

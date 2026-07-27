@@ -519,7 +519,9 @@ class DashboardController extends AbstractController
                 }
             }
         } elseif ($clientId) {
-            $entryQb->andWhere('e.user = :clientId')
+            $entryQb->join('e.contentType', 'lect')
+                    ->join('lect.project', 'p')
+                    ->andWhere('p.user = :clientId')
                     ->setParameter('clientId', $clientId);
         }
 
