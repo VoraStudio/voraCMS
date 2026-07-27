@@ -36,7 +36,7 @@ class Project
     #[ORM\Column(options: ['default' => true])]
     private ?bool $active = true;
 
-    #[ORM\Column(type: 'json', options: ['default' => '["noticies","events","custom"]'])]
+    #[ORM\Column(type: 'json', nullable: true)]
     private array $contentFeatures = ['noticies', 'events', 'custom'];
 
     #[ORM\ManyToOne(inversedBy: 'projects')]
