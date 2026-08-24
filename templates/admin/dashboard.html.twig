@@ -255,8 +255,8 @@
         {# --- Client: weekly visits chart --- #}
         <div class="d2-panel">
             <div class="d2-panel-head">
-                <span class="d2-panel-title">Visites setmanals</span>
-                <span class="d2-panel-badge">Últims 7 dies</span>
+                <span class="d2-panel-title">{{ 'dashboard.weekly_visits'|trans }}</span>
+                <span class="d2-panel-badge">{{ 'dashboard.last_7_days'|trans }}</span>
             </div>
             <div class="d2-panel-body">
                 {% set maxV = maxDailyVisits > 0 ? maxDailyVisits : 1 %}

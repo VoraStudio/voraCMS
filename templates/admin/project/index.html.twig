@@ -163,10 +163,10 @@
                     <td class="cyber-cell">
                         {% if proj.active %}
                             <span class="cyber-status-dot cyber-status-dot--active" style="display:inline-block;margin-right:4px;"></span>
-                            <span class="cyber-status-text">Actiu</span>
+                            <span class="cyber-status-text">{{ 'status.active'|trans }}</span>
                         {% else %}
                             <span class="cyber-status-dot" style="display:inline-block;background:rgba(148,163,184,0.4);margin-right:4px;"></span>
-                            <span class="cyber-status-text--draft">Inactiu</span>
+                            <span class="cyber-status-text--draft">{{ 'status.inactive'|trans }}</span>
                         {% endif %}
                     </td>
                     <td class="cyber-cell" style="text-align:right;white-space:nowrap;">
