@@ -1,8 +1,8 @@
 {% extends 'admin/layout.html.twig' %}
 
 {% set breadcrumbs = [
-    {label: 'Dashboard', url: path('admin_dashboard')},
-    {label: 'Projectes', url: path('admin_projects')},
+    {label: 'nav.dashboard'|trans, url: path('admin_dashboard')},
+    {label: 'nav.projects'|trans, url: path('admin_projects')},
     {label: project.name}
 ] %}
 {% set page_desc = project.description ?: '' %}
@@ -12,12 +12,12 @@
 {% block topbar_actions %}
 <div class="topbar-actions-group">
     {% if is_granted('ROLE_ADMIN') %}
-    <a href="{{ path('admin_project_edit', {id: project.id}) }}" class="cyber-btn cyber-btn--projects" title="Editar projecte">
-        <i class="bi bi-pencil"></i> <span>Editar projecte</span>
+    <a href="{{ path('admin_project_edit', {id: project.id}) }}" class="cyber-btn cyber-btn--projects" title="{{ 'action.edit_project'|trans }}">
+        <i class="bi bi-pencil"></i> <span>{{ 'action.edit_project'|trans }}</span>
     </a>
     {% endif %}
     <a href="{{ path('admin_projects') }}" class="cyber-btn cyber-btn--projects">
-        <i class="bi bi-arrow-left"></i> <span>Tornar a Projectes</span>
+        <i class="bi bi-arrow-left"></i> <span>{{ 'action.back_to_projects'|trans }}</span>
     </a>
 </div>
 {% endblock %}
@@ -150,16 +150,16 @@
                     <span class="cyber-status">
                         {% if entry.status == 'published' %}
                             <span class="cyber-status-dot cyber-status-dot--active"></span>
-                            <span class="cyber-status-text">Publicat</span>
+                            <span class="cyber-status-text">{{ 'status.published'|trans }}</span>
                         {% elseif entry.status == 'draft' %}
                             <span class="cyber-status-dot cyber-status-dot--draft"></span>
-                            <span class="cyber-status-text--draft">No publicat</span>
+                            <span class="cyber-status-text--draft">{{ 'status.draft'|trans }}</span>
                         {% elseif entry.status == 'scheduled' %}
                             <span class="cyber-status-dot" style="background:#3b82f6"></span>
-                            <span class="cyber-status-text--scheduled">Programat</span>
+                            <span class="cyber-status-text--scheduled">{{ 'status.scheduled'|trans }}</span>
                         {% else %}
                             <span class="cyber-status-dot cyber-status-dot--archived"></span>
-                            <span class="cyber-status-text--archived">Arxivat</span>
+                            <span class="cyber-status-text--archived">{{ 'status.archived'|trans }}</span>
                         {% endif %}
                     </span>
                 </td>

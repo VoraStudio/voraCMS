@@ -29,6 +29,7 @@ action:
   new_entry: "+ Nova entrada"
   new_project: "+ Nou projecte"
   new_type: "+ Nou tipus"
+  new_section: "Nova secció"
   new_global_template: "Nova plantilla global"
   edit: "Editar"
   delete: "Eliminar"
@@ -36,12 +37,27 @@ action:
   save: "Desar"
   cancel: "Cancel·lar"
   confirm_delete: "Segur que vols eliminar aquest element?"
+  back_to_projects: "Tornar a Projectes"
+  edit_project: "Editar projecte"
+  search_placeholder: "Buscar per nom o URL..."
   all_states: "TOTS ELS ESTATS"
-  order_recent: "ORDENA: DATA (MÉS RECENT)"
+  active_state: "Actius"
+  inactive_state: "Inactius"
+  order_newest: "ORDENA: DATA (MÉS RECENT)"
+  order_oldest: "ORDENA: DATA (MÉS ANTIC)"
+  order_name: "ORDENA: NOM"
+  upload: "Pujar"
+  drag_or_select: "Arrossega o selecciona fitxers"
+  no_project: "Sense projecte"
+  view_entries: "Veure entrades"
+  create_first_section: "Crear primera secció"
+  move_to_project: "Mou al projecte"
+  deselect: "Desseleccionar"
+  selected: "seleccionades"
 
 # Statuses
 status:
-  active: "Activa"
+  active: "Actiu"
   inactive: "Inactiu"
   published: "Publicat"
   publicats: "Publicats"
@@ -80,9 +96,16 @@ dashboard:
   last_week: "Última setmana"
   last_7_days: "Últims 7 dies"
   vs_yesterday: "vs ahir"
+  today_visits: "visites avui"
+  last_visit_time: "Última visita: Fa"
+  hours_ago: "h"
+  no_visits_yet: "Sense visites encara"
 
 # Project Show & Tables
 project:
+  projects_title: "Projectes"
+  projects_desc: "Gestiona i organitza tots els projectes de Vora Studio"
+  projects_of: "Projectes i seccions de"
   section: "Secció"
   entries_count: "entrades"
   title: "Títol"
@@ -93,6 +116,14 @@ project:
   actions_col: "Accions"
   no_entries_in_section: "Encara no hi ha cap entrada en aquesta secció"
   create_first_entry: "Crea la primera entrada"
+  project_col: "PROJECTE"
+  published_col: "PUBLICADES"
+  no_sections: "Aquest projecte no té seccions encara."
+
+# Media
+media:
+  title: "Mediateca"
+  desc: "Gestiona les teves imatges i fitxers multimèdia"
 
 # Footer
 footer:

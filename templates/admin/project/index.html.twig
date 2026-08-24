@@ -1,19 +1,19 @@
 {% extends 'admin/layout.html.twig' %}
 
 {% set breadcrumbs = [
-    {label: 'Dashboard', url: path('admin_dashboard')},
-    {label: 'Projectes'}
+    {label: 'nav.dashboard'|trans, url: path('admin_dashboard')},
+    {label: 'project.projects_title'|trans}
 ] %}
-{% set page_desc = filterUser is defined and filterUser ? 'Projectes i seccions de ' ~ filterUser.name : 'Gestiona i organitza tots els projectes de Vora Studio' %}
+{% set page_desc = filterUser is defined and filterUser ? ('project.projects_of'|trans ~ ' ' ~ filterUser.name) : 'project.projects_desc'|trans %}
 
-{% block page_title %}Projectes{% endblock %}
+{% block page_title %}{{ 'project.projects_title'|trans }}{% endblock %}
 
 {% block topbar_actions %}{% endblock %}
 
 {% block content %}
 <div class="d2-body">
 
-{% include 'admin/project/_project_header_bar.html.twig' with {title_override: 'Projectes:'} %}
+{% include 'admin/project/_project_header_bar.html.twig' with {title_override: ('project.projects_title'|trans ~ ':')} %}
 
 {% macro project_card(project, filterUserId) %}
     {% set pColor = project.color ?: '#4945FF' %}
@@ -36,9 +36,9 @@
                 {% if is_granted('ROLE_ADMIN') %}
                 <a href="{{ path('admin_switch_project', {id: project.id, _redirect: path('admin_content_type_new')}) }}"
                    class="cyber-btn-primary cyber-btn--compact" style="margin-right:8px;">
-                    <i class="bi bi-plus-lg"></i> <span>Nova secció</span>
+                    <i class="bi bi-plus-lg"></i> <span>{{ 'action.new_section'|trans }}</span>
                 </a>
-                <a href="{{ path('admin_project_edit', {id: project.id}) }}" class="cyber-btn cyber-btn--icon cyber-btn--edit" title="Editar projecte">
+                <a href="{{ path('admin_project_edit', {id: project.id}) }}" class="cyber-btn cyber-btn--icon cyber-btn--edit" title="{{ 'action.edit_project'|trans }}">
                     <i class="bi bi-pencil"></i>
                 </a>
                 {% endif %}
@@ -56,7 +56,7 @@
                                 <i class="bi bi-file-earmark"></i>
                             </div>
                             <span class="cyber-badge cyber-badge--compact {{ entriesCount > 0 ? 'cyber-badge--mod' : '' }}">
-                                {{ entriesCount }} entrades
+                                {{ entriesCount }} {{ 'project.entries_count'|trans }}
                             </span>
                         </div>
                         <div class="project-content-card__body">
@@ -66,7 +66,7 @@
                             {% endif %}
                         </div>
                         <a href="{{ ctLink }}" class="cyber-btn cyber-btn--projects project-content-card__btn">
-                            <i class="bi bi-eye"></i> <span>Veure entrades</span>
+                            <i class="bi bi-eye"></i> <span>{{ 'action.view_entries'|trans }}</span>
                         </a>
                     </div>
                 </div>
@@ -137,11 +137,11 @@
         <table class="cyber-table">
             <thead>
                 <tr>
-                    <th>Projecte</th>
-                    <th>Entrades</th>
-                    <th>Publicades</th>
-                    <th>Estat</th>
-                    <th>Accions</th>
+                    <th>{{ 'project.project_col'|trans }}</th>
+                    <th>{{ 'project.entries_count'|trans|upper }}</th>
+                    <th>{{ 'project.published_col'|trans }}</th>
+                    <th>{{ 'project.status_col'|trans|upper }}</th>
+                    <th>{{ 'project.actions_col'|trans|upper }}</th>
                 </tr>
             </thead>
             <tbody>

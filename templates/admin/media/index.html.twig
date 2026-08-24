@@ -1,12 +1,12 @@
 {% extends 'admin/layout.html.twig' %}
 
 {% set breadcrumbs = [
-    {label: 'Dashboard', url: path('admin_dashboard')},
-    {label: 'Mediateca'}
+    {label: 'nav.dashboard'|trans, url: path('admin_dashboard')},
+    {label: 'media.title'|trans}
 ] %}
-{% set page_desc = 'Gestiona les teves imatges i fitxers multimèdia' %}
+{% set page_desc = 'media.desc'|trans %}
 
-{% block page_title %}Mediateca{% endblock %}
+{% block page_title %}{{ 'media.title'|trans }}{% endblock %}
 
 {% block topbar_actions %}{% endblock %}
 
@@ -19,11 +19,11 @@
         <i class="bi bi-cloud-upload media-picker__upload-icon"></i>
         <label class="media-picker__upload-label">
           <input type="file" name="files[]" class="media-picker__file-input" accept=".jpg,.jpeg,.png,.webp,.avif" multiple>
-          <span>Arrossega o selecciona fitxers</span>
+          <span>{{ 'action.drag_or_select'|trans }}</span>
         </label>
         {% if groupedMode and projectGroups|length > 0 %}
         <select name="project_id" class="media-index__project-select">
-          <option value="">Sense projecte</option>
+          <option value="">{{ 'action.no_project'|trans }}</option>
           {% for company, users in projectGroups %}
           {% for userLabel, projects in users %}
           <optgroup label="{{ company }} — {{ userLabel }}">
@@ -36,7 +36,7 @@
         </select>
         {% endif %}
         <button type="submit" class="media-picker__upload-btn" id="uploadBtn">
-          <i class="bi bi-cloud-arrow-up"></i> Pujar
+          <i class="bi bi-cloud-arrow-up"></i> {{ 'action.upload'|trans }}
         </button>
       </div>
       <div id="uploadPreview" class="media-picker__preview"></div>
@@ -46,12 +46,12 @@
 
   {# ─── Batch toolbar (hidden per defecte) ─── #}
   <div class="media-index__batch-toolbar" id="batchToolbar" hidden>
-    <span class="media-index__batch-count" id="batchCount">0 seleccionades</span>
+    <span class="media-index__batch-count" id="batchCount">0 {{ 'action.selected'|trans }}</span>
     <button type="button" class="media-index__batch-move" id="batchMoveBtn">
-      <i class="bi bi-folder-symlink"></i> Mou al projecte
+      <i class="bi bi-folder-symlink"></i> {{ 'action.move_to_project'|trans }}
     </button>
     <button type="button" class="media-index__batch-clear" id="batchClearBtn">
-      <i class="bi bi-x-lg"></i> Desseleccionar
+      <i class="bi bi-x-lg"></i> {{ 'action.deselect'|trans }}
     </button>
   </div>
 

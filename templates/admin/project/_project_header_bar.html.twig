@@ -96,31 +96,31 @@
     <!-- Filters Bar -->
     <div class="d2-filters-bar">
         <div class="d2-search-wrapper">
-            <input type="text" id="sectionSearch" class="d2-search-input" placeholder="Buscar per nom o URL...">
-            <button type="button" class="d2-search-btn" title="Buscar">
+            <input type="text" id="sectionSearch" class="d2-search-input" placeholder="{{ 'action.search_placeholder'|trans }}">
+            <button type="button" class="d2-search-btn" title="{{ 'user.search_placeholder'|trans }}">
                 <i class="bi bi-search"></i>
             </button>
         </div>
         <div class="d2-filter-select-wrapper">
             <span class="d2-status-dot d2-status-dot--publicats"></span>
             <select id="statusFilter" class="d2-select-filter">
-                <option value="all">TOTS ELS ESTATS</option>
-                <option value="active">Actius</option>
-                <option value="inactive">Inactius</option>
+                <option value="all">{{ 'action.all_states'|trans }}</option>
+                <option value="active">{{ 'action.active_state'|trans }}</option>
+                <option value="inactive">{{ 'action.inactive_state'|trans }}</option>
             </select>
         </div>
         <div class="d2-filter-select-wrapper">
             <select id="orderFilter" class="d2-select-filter">
-                <option value="newest">Ordena: Data (més recent)</option>
-                <option value="oldest">Ordena: Data (més antic)</option>
-                <option value="name">Ordena: Nom</option>
+                <option value="newest">{{ 'action.order_newest'|trans }}</option>
+                <option value="oldest">{{ 'action.order_oldest'|trans }}</option>
+                <option value="name">{{ 'action.order_name'|trans }}</option>
             </select>
         </div>
     </div>
 </div>
 
 <div class="d2-section-bar">
-    {{ title_override|default(contentType is defined ? 'Secció: ' ~ contentType.name : (project is defined ? 'Projecte: ' ~ project.name : 'Projectes:')) }}
+    {{ title_override|default(contentType is defined ? ('project.section'|trans ~ ': ' ~ contentType.name) : (project is defined ? ('project.section'|trans ~ ': ' ~ project.name) : ('project.projects_title'|trans ~ ':'))) }}
 </div>
 
 <script>

@@ -29,6 +29,7 @@ action:
   new_entry: "+ New entry"
   new_project: "+ New project"
   new_type: "+ New type"
+  new_section: "New section"
   new_global_template: "New global template"
   edit: "Edit"
   delete: "Delete"
@@ -36,8 +37,23 @@ action:
   save: "Save"
   cancel: "Cancel"
   confirm_delete: "Are you sure you want to delete this item?"
+  back_to_projects: "Back to Projects"
+  edit_project: "Edit project"
+  search_placeholder: "Search by name or URL..."
   all_states: "ALL STATUSES"
-  order_recent: "ORDER: DATE (NEWEST)"
+  active_state: "Active"
+  inactive_state: "Inactive"
+  order_newest: "ORDER: DATE (NEWEST)"
+  order_oldest: "ORDER: DATE (OLDEST)"
+  order_name: "ORDER: NAME"
+  upload: "Upload"
+  drag_or_select: "Drag or select files"
+  no_project: "No project"
+  view_entries: "View entries"
+  create_first_section: "Create first section"
+  move_to_project: "Move to project"
+  deselect: "Deselect"
+  selected: "selected"
 
 # Statuses
 status:
@@ -80,9 +96,16 @@ dashboard:
   last_week: "Last week"
   last_7_days: "Last 7 days"
   vs_yesterday: "vs yesterday"
+  today_visits: "visits today"
+  last_visit_time: "Last visit: "
+  hours_ago: "h ago"
+  no_visits_yet: "No visits yet"
 
 # Project Show & Tables
 project:
+  projects_title: "Projects"
+  projects_desc: "Manage and organize all Vora Studio projects"
+  projects_of: "Projects and sections of"
   section: "Section"
   entries_count: "entries"
   title: "Title"
@@ -93,6 +116,14 @@ project:
   actions_col: "Actions"
   no_entries_in_section: "No entries in this section yet"
   create_first_entry: "Create the first entry"
+  project_col: "PROJECT"
+  published_col: "PUBLISHED"
+  no_sections: "This project has no sections yet."
+
+# Media
+media:
+  title: "Media Library"
+  desc: "Manage your images and media files"
 
 # Footer
 footer:

@@ -29,6 +29,7 @@ action:
   new_entry: "+ Nueva entrada"
   new_project: "+ Nuevo proyecto"
   new_type: "+ Nuevo tipo"
+  new_section: "Nueva sección"
   new_global_template: "Nueva plantilla global"
   edit: "Editar"
   delete: "Eliminar"
@@ -36,12 +37,27 @@ action:
   save: "Guardar"
   cancel: "Cancelar"
   confirm_delete: "¿Seguro que deseas eliminar este elemento?"
+  back_to_projects: "Volver a Proyectos"
+  edit_project: "Editar proyecto"
+  search_placeholder: "Buscar por nombre o URL..."
   all_states: "TODOS LOS ESTADOS"
-  order_recent: "ORDENAR: FECHA (MÁS RECIENTE)"
+  active_state: "Activos"
+  inactive_state: "Inactivos"
+  order_newest: "ORDENAR: FECHA (MÁS RECIENTE)"
+  order_oldest: "ORDENAR: FECHA (MÁS ANTIGUO)"
+  order_name: "ORDENAR: NOMBRE"
+  upload: "Subir"
+  drag_or_select: "Arrastra o selecciona archivos"
+  no_project: "Sin proyecto"
+  view_entries: "Ver entradas"
+  create_first_section: "Crear primera sección"
+  move_to_project: "Mover al proyecto"
+  deselect: "Deseleccionar"
+  selected: "seleccionadas"
 
 # Statuses
 status:
-  active: "Activa"
+  active: "Activo"
   inactive: "Inactivo"
   published: "Publicado"
   publicats: "Publicados"
@@ -80,9 +96,16 @@ dashboard:
   last_week: "Última semana"
   last_7_days: "Últimos 7 días"
   vs_yesterday: "vs ayer"
+  today_visits: "visitas hoy"
+  last_visit_time: "Última visita: Hace"
+  hours_ago: "h"
+  no_visits_yet: "Sin visitas todavía"
 
 # Project Show & Tables
 project:
+  projects_title: "Proyectos"
+  projects_desc: "Gestiona y organiza todos los proyectos de Vora Studio"
+  projects_of: "Proyectos y secciones de"
   section: "Sección"
   entries_count: "entradas"
   title: "Título"
@@ -93,6 +116,14 @@ project:
   actions_col: "Acciones"
   no_entries_in_section: "Todavía no hay ninguna entrada en esta sección"
   create_first_entry: "Crea la primera entrada"
+  project_col: "PROYECTO"
+  published_col: "PUBLICADAS"
+  no_sections: "Este proyecto no tiene secciones todavía."
+
+# Media
+media:
+  title: "Mediateca"
+  desc: "Gestiona tus imágenes y archivos multimedia"
 
 # Footer
 footer:
