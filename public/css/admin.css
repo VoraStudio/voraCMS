@@ -3793,17 +3793,17 @@ input[type="time"] {
 
 .cyber-table--project-show th.col-title,
 .cyber-table--project-show td:nth-child(1) {
-  width: 28%;
+  width: 26%;
 }
 
 .cyber-table--project-show th.col-date,
 .cyber-table--project-show td:nth-child(2) {
-  width: 16%;
+  width: 15%;
 }
 
 .cyber-table--project-show th.col-desc,
 .cyber-table--project-show td:nth-child(3) {
-  width: 24%;
+  width: 22%;
 }
 
 .cyber-table--project-show th.col-status,
@@ -3820,8 +3820,18 @@ input[type="time"] {
 
 .cyber-table--project-show th.col-actions,
 .cyber-table--project-show td:nth-child(6) {
-  width: 12%;
+  width: 17%;
   text-align: right;
+  white-space: nowrap;
+}
+
+.cyber-table--project-show .cyber-actions {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+  flex-wrap: nowrap;
+  white-space: nowrap;
 }
 
 .cyber-btn--toggle-active i {
