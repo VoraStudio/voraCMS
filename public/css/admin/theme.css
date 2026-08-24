@@ -411,23 +411,23 @@
   color: rgba(71, 85, 105, 0.5);
 }
 [data-theme="light"] {
-  /* Surface / bg — Modern clean slate */
+  /* Surface / bg — Cohesive light canvas */
   --s-bg: #f8fafc;
-  --s-main-bg: #f1f5f9;
-  --s-topbar-bg: rgba(248, 250, 252, 0.85);
+  --s-main-bg: #f8fafc;
+  --s-topbar-bg: transparent;
   --s-surface: #ffffff;
   --s-surface-translucent: rgba(255, 255, 255, 0.85);
-  --s-surface-secondary: #f8fafc;
-  --s-border: rgba(0, 0, 0, 0.1);
-  --s-border-light: rgba(0, 0, 0, 0.06);
+  --s-surface-secondary: #ffffff;
+  --s-border: rgba(0, 0, 0, 0.08);
+  --s-border-light: rgba(0, 0, 0, 0.05);
 
-  /* Sidebar */
-  --s-sidebar-bg: #ffffff;
+  /* Sidebar — Exact match with body and header */
+  --s-sidebar-bg: #f8fafc;
   --s-sidebar-hover: rgba(0, 0, 0, 0.04);
   --s-sidebar-active: rgba(249, 115, 22, 0.1);
   --s-sidebar-text: #334155;
   --s-sidebar-text-hover: #0f172a;
-  --s-sidebar-divider: rgba(0, 0, 0, 0.08);
+  --s-sidebar-divider: rgba(0, 0, 0, 0.06);
 
   /* Brand */
   --s-primary: #f97316;
@@ -492,9 +492,9 @@ body::before {
 }
 [data-theme="light"] .s-sidebar {
   background: var(--s-sidebar-bg) !important;
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  border-right: 1px solid rgba(0, 0, 0, 0.08);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border-right: none !important;
 }
 [data-theme="light"] .s-sidebar-link,
 [data-theme="light"] .s-sidebar-link:visited {

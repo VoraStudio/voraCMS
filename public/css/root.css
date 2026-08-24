@@ -3,9 +3,9 @@
    ═══════════════════════════════════════════════════ */
 
 :root {
-  /* Background system — Warm charcoal dark */
-  --s-bg: #111015;
-  --s-main-bg: linear-gradient(175deg, #111015 0%, #15131a 35%, #18151f 70%, #1a1622 100%);
+  /* Background system — Cohesive dark canvas */
+  --s-bg: #121116;
+  --s-main-bg: #121116;
   --s-topbar-bg: transparent;
   --s-surface: rgba(255, 255, 255, 0.045);
   --s-surface-translucent: rgba(255, 255, 255, 0.03);
@@ -13,8 +13,8 @@
   --s-border: rgba(255, 255, 255, 0.22);
   --s-border-light: rgba(255, 255, 255, 0.12);
 
-  /* Sidebar */
-  --s-sidebar-bg: #0c0b0f;
+  /* Sidebar — Continuous with header and body */
+  --s-sidebar-bg: #121116;
   --s-sidebar-hover: rgba(255, 255, 255, 0.06);
   --s-sidebar-active: rgba(249, 115, 22, 0.18);
   --s-sidebar-text: rgba(255, 255, 255, 0.85);
