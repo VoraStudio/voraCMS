@@ -1,14 +1,14 @@
 {% extends 'admin/layout.html.twig' %}
 
 {% set breadcrumbs = [
-    {label: 'Dashboard', url: path('admin_dashboard')},
-    {label: 'Projectes', url: path('admin_projects')},
+    {label: 'nav.dashboard'|trans, url: path('admin_dashboard')},
+    {label: 'nav.projects'|trans, url: path('admin_projects')},
     {label: contentType.name, url: path('admin_entry_by_type', {slug: contentType.slug})},
-    {label: 'Nova entrada'}
+    {label: 'entry.new_entry_title'|trans}
 ] %}
-{% set page_desc = 'Crea una nova entrada per a aquesta secció de contingut' %}
+{% set page_desc = 'entry.new_entry_desc'|trans %}
 
-{% block page_title %}Nova entrada: {{ contentType.name }}{% endblock %}
+{% block page_title %}{{ 'entry.new_entry_title'|trans }}: {{ contentType.name }}{% endblock %}
 
 {% block stylesheets %}
 {{ parent() }}
@@ -17,7 +17,7 @@
 
 {% block topbar_actions %}
 <a href="{{ path('admin_entry_by_type', {slug: contentType.slug}) }}" class="cyber-btn cyber-btn--projects">
-    <i class="bi bi-arrow-left"></i> <span>Tornar</span>
+    <i class="bi bi-arrow-left"></i> <span>{{ 'action.back'|trans }}</span>
 </a>
 {% endblock %}
 
@@ -28,38 +28,38 @@
 <div class="cyber-card cyber-card--flush" data-anim="cyber-card">
     <form method="post" id="entryForm" enctype="multipart/form-data" novalidate class="cyber-form-body">
             <input type="hidden" name="_token" value="{{ csrf_token('entry-new-' ~ contentType.id) }}">
-            <div class="s-status mb-3" role="radiogroup" aria-label="Estat de l'entrada">
+            <div class="s-status mb-3" role="radiogroup" aria-label="{{ 'project.status_col'|trans }}">
                 <div class="s-status__toggles" id="statusSeg">
                     <div class="s-toggle s-toggle--sel" data-value="published" tabindex="0" role="radio" aria-checked="true" style="--s-toggle-color:#22c55e">
                         <span class="s-toggle__switch"></span>
                         <span class="s-toggle__icon"><i class="bi bi-globe"></i></span>
-                        <span class="s-toggle__label">No publicat</span>
+                        <span class="s-toggle__label">{{ 'status.published'|trans }}</span>
                     </div>
                     <div class="s-toggle" data-value="archived" tabindex="0" role="radio" aria-checked="false">
                         <span class="s-toggle__switch"></span>
                         <span class="s-toggle__icon"><i class="bi bi-archive"></i></span>
-                        <span class="s-toggle__label">No arxivat</span>
+                        <span class="s-toggle__label">{{ 'status.not_archived'|trans }}</span>
                     </div>
                     <div class="s-toggle" data-value="scheduled" tabindex="0" role="radio" aria-checked="false">
                         <span class="s-toggle__switch"></span>
                         <span class="s-toggle__icon"><i class="bi bi-clock-history"></i></span>
-                        <span class="s-toggle__label">No programat</span>
+                        <span class="s-toggle__label">{{ 'status.not_scheduled'|trans }}</span>
                     </div>
                 </div>
                 <input type="hidden" name="status" id="statusInput" value="published">
                 <div class="s-status__schedule" id="schedulePicker" style="display:none">
                     <div class="s-sched-row">
                         <div class="s-sched-field">
-                            <label class="s-label s-label--sub">Inici</label>
+                            <label class="s-label s-label--sub">{{ 'entry.start'|trans }}</label>
                             <input type="datetime-local" name="scheduled_start" class="s-date-inline">
                         </div>
                         <div class="s-sched-field">
-                            <label class="s-label s-label--sub">Fi</label>
+                            <label class="s-label s-label--sub">{{ 'entry.end'|trans }}</label>
                             <input type="datetime-local" name="scheduled_end" class="s-date-inline">
                         </div>
                     </div>
                     <button type="submit" class="cyber-btn cyber-btn--projects" style="margin-top:16px">
-                        <i class="bi bi-clock-history"></i> <span>Programar</span>
+                        <i class="bi bi-clock-history"></i> <span>{{ 'action.schedule_action'|trans }}</span>
                     </button>
                 </div>
             </div>
@@ -212,10 +212,10 @@
 
             <div class="s-actions">
                 <a href="{{ path('admin_entry_by_type', {slug: contentType.slug}) }}" class="s-btn s-btn--sec">
-                    <i class="bi bi-x"></i> Cancel·lar
+                    <i class="bi bi-x"></i> {{ 'action.cancel'|trans }}
                 </a>
                 <button type="submit" class="s-btn s-btn--pri">
-                    <i class="bi bi-check2"></i> Crear entrada
+                    <i class="bi bi-check2"></i> {{ 'action.create_entry'|trans }}
                 </button>
             </div>
         </form>
@@ -237,9 +237,9 @@ document.addEventListener('DOMContentLoaded', function () {
     if (!seg) return;
 
     var labels = {
-        published: { on: 'Publicat',     off: 'No publicat' },
-        archived:  { on: 'Arxivat',      off: 'No arxivat' },
-        scheduled: { on: 'Programat',    off: 'No programat' }
+        published: { on: '{{ 'status.published'|trans|e('js') }}', off: '{{ 'status.not_published'|trans|e('js') }}' },
+        archived:  { on: '{{ 'status.archived'|trans|e('js') }}', off: '{{ 'status.not_archived'|trans|e('js') }}' },
+        scheduled: { on: '{{ 'status.scheduled'|trans|e('js') }}', off: '{{ 'status.not_scheduled'|trans|e('js') }}' }
     };
     var icons = {
         published: 'bi-globe',

@@ -9,8 +9,8 @@
         <input type="file" name="field_{{ fieldId }}_files[]" id="{{ inputId }}" class="gallery-field__file-input" accept=".jpg,.jpeg,.png,.webp,.avif" multiple>
         <label for="{{ inputId }}" class="gallery-field__label">
             <i class="bi bi-cloud-upload gallery-field__icon"></i>
-            <p class="gallery-field__text">Arrossega fitxers o selecciona'ls</p>
-            <span class="gallery-field__hint">JPG, WebP o AVIF · Màxim 1MB cadascuna</span>
+            <p class="gallery-field__text">{{ 'action.drag_files_or_select'|trans }}</p>
+            <span class="gallery-field__hint">{{ 'action.upload_hint'|trans }}</span>
         </label>
     </div>
 
@@ -21,13 +21,13 @@
         {% for gid in itemIds %}
         <div class="gallery-thumb" data-id="{{ gid }}" draggable="true">
             <img src="{{ mediaPaths[gid] ?? '' }}" alt="">
-            <button type="button" class="remove-gallery-item" aria-label="Eliminar"><i class="bi bi-x"></i></button>
+            <button type="button" class="remove-gallery-item" aria-label="{{ 'action.delete'|trans }}"><i class="bi bi-x"></i></button>
         </div>
         {% endfor %}
     </div>
 
     <!-- Media picker link -->
     <button type="button" class="gallery-field__pick-btn pick-media" data-field="{{ fieldId }}" data-multiple="true">
-        <i class="bi bi-images"></i> Escull des de la mediateca
+        <i class="bi bi-images"></i> {{ 'action.choose_from_media'|trans }}
     </button>
 </div>

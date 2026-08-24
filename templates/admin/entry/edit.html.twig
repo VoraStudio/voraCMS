@@ -9,12 +9,12 @@
 {% set calculatedTitle = entryTitle ?: (contentType.name ~ ' #' ~ entry.id) %}
 
 {% set breadcrumbs = [
-    {label: 'Dashboard', url: path('admin_dashboard')},
-    {label: 'Projectes', url: path('admin_projects')},
+    {label: 'nav.dashboard'|trans, url: path('admin_dashboard')},
+    {label: 'nav.projects'|trans, url: path('admin_projects')},
     {label: contentType.name, url: path('admin_entry_by_type', {slug: contentType.slug})},
-    {label: 'Editar: ' ~ calculatedTitle}
+    {label: 'entry.edit_entry_title'|trans ~ ': ' ~ calculatedTitle}
 ] %}
-{% set page_desc = 'Modifica els camps de l\'entrada' %}
+{% set page_desc = 'entry.edit_entry_desc'|trans %}
 
 {% block page_title %}{{ calculatedTitle }}{% endblock %}
 
@@ -28,16 +28,16 @@
     {% if contentType.slug in ['noticia', 'event', 'artistes_victoria_taylor'] %}
         {% if contentType.slug in ['artistes_victoria_taylor'] %}
             <a href="{{ path('admin_entry_preview', {id: entry.id}) }}" class="cyber-btn cyber-btn--projects js-preview-newtab">
-                <i class="bi bi-eye"></i> <span>Previsualitzar</span>
+                <i class="bi bi-eye"></i> <span>{{ 'action.preview'|trans }}</span>
             </a>
         {% else %}
             <a href="{{ path('admin_entry_preview', {id: entry.id}) }}" class="cyber-btn cyber-btn--projects js-preview-modal" data-type="{{ contentType.slug }}">
-                <i class="bi bi-eye"></i> <span>Previsualitzar</span>
+                <i class="bi bi-eye"></i> <span>{{ 'action.preview'|trans }}</span>
             </a>
         {% endif %}
     {% endif %}
     <a href="{{ path('admin_entry_by_type', {slug: contentType.slug}) }}" class="cyber-btn cyber-btn--projects">
-        <i class="bi bi-arrow-left"></i> <span>Tornar</span>
+        <i class="bi bi-arrow-left"></i> <span>{{ 'action.back'|trans }}</span>
     </a>
 </div>
 {% endblock %}
@@ -50,22 +50,22 @@
     <form method="post" id="entryForm" enctype="multipart/form-data" novalidate class="cyber-form-body">
             <input type="hidden" name="_token" value="{{ csrf_token('entry-edit-' ~ entry.id) }}">
             <!-- Status: toggle switches -->
-            <div class="s-status mb-3" role="radiogroup" aria-label="Estat de l'entrada">
+            <div class="s-status mb-3" role="radiogroup" aria-label="{{ 'project.status_col'|trans }}">
                 <div class="s-status__toggles" id="statusSeg">
                     <div class="s-toggle{% if entry.status == 'published' %} s-toggle--sel{% endif %}" data-value="published" tabindex="0" role="radio" aria-checked="{% if entry.status == 'published' %}true{% else %}false{% endif %}" style="{% if entry.status == 'published' %}--s-toggle-color:#22c55e{% endif %}">
                         <span class="s-toggle__switch"></span>
                         <span class="s-toggle__icon"><i class="bi bi-globe"></i></span>
-                        <span class="s-toggle__label">{% if entry.status == 'published' %}Publicat{% else %}No publicat{% endif %}</span>
+                        <span class="s-toggle__label">{% if entry.status == 'published' %}{{ 'status.published'|trans }}{% else %}{{ 'status.not_published'|trans }}{% endif %}</span>
                     </div>
                     <div class="s-toggle{% if entry.status == 'archived' %} s-toggle--sel{% endif %}" data-value="archived" tabindex="0" role="radio" aria-checked="{% if entry.status == 'archived' %}true{% else %}false{% endif %}" style="{% if entry.status == 'archived' %}--s-toggle-color:#f59e0b{% endif %}">
                         <span class="s-toggle__switch"></span>
                         <span class="s-toggle__icon"><i class="bi bi-archive"></i></span>
-                        <span class="s-toggle__label">{% if entry.status == 'archived' %}Arxivat{% else %}No arxivat{% endif %}</span>
+                        <span class="s-toggle__label">{% if entry.status == 'archived' %}{{ 'status.archived'|trans }}{% else %}{{ 'status.not_archived'|trans }}{% endif %}</span>
                     </div>
-                    <div class="s-toggle{% if entry.status == 'scheduled' %} s-toggle--sel{% endif %}" data-value="scheduled" tabindex="0" role="radio" aria-checked="{% if entry.status == 'scheduled' %}true{% else %}false{% endif %}" style="{% if entry.status == 'scheduled' %}--s-toggle-color:#f97316{% endif %}">
+                    <div class="s-toggle{% if entry.status == 'scheduled' %} s-toggle--sel{% endif %}" data-value="scheduled" tabindex="0" role="radio" aria-checked="{% if entry.status == 'scheduled' %}true{% else %}false{% endif %}" style="{% if entry.status == 'scheduled' %}--s-toggle-color:#3b82f6{% endif %}">
                         <span class="s-toggle__switch"></span>
                         <span class="s-toggle__icon"><i class="bi bi-clock-history"></i></span>
-                        <span class="s-toggle__label">{% if entry.status == 'scheduled' %}Programat{% else %}No programat{% endif %}</span>
+                        <span class="s-toggle__label">{% if entry.status == 'scheduled' %}{{ 'status.scheduled'|trans }}{% else %}{{ 'status.not_scheduled'|trans }}{% endif %}</span>
                     </div>
                 </div>
                 <input type="hidden" name="status" id="statusInput" value="{{ entry.status }}">
@@ -247,10 +247,10 @@
             <!-- Bento actions -->
             <div class="s-actions">
                 <a href="{{ path('admin_entry_by_type', {slug: contentType.slug}) }}" class="s-btn s-btn--sec">
-                    <i class="bi bi-x"></i> Cancel·lar
+                    <i class="bi bi-x"></i> {{ 'action.cancel'|trans }}
                 </a>
                 <button type="submit" class="s-btn s-btn--pri">
-                    <i class="bi bi-check2"></i> Guardar canvis
+                    <i class="bi bi-check2"></i> {{ 'action.save_changes'|trans }}
                 </button>
             </div>
         </form>
@@ -272,9 +272,9 @@ document.addEventListener('DOMContentLoaded', function () {
     var seg = document.getElementById('statusSeg');
     if (seg) {
         var labels = {
-            published: { on: 'Publicat',     off: 'No publicat' },
-            archived:  { on: 'Arxivat',      off: 'No arxivat' },
-            scheduled: { on: 'Programat',    off: 'No programat' }
+            published: { on: '{{ 'status.published'|trans|e('js') }}', off: '{{ 'status.not_published'|trans|e('js') }}' },
+            archived:  { on: '{{ 'status.archived'|trans|e('js') }}', off: '{{ 'status.not_archived'|trans|e('js') }}' },
+            scheduled: { on: '{{ 'status.scheduled'|trans|e('js') }}', off: '{{ 'status.not_scheduled'|trans|e('js') }}' }
         };
         var icons = {
             published: 'bi-globe',

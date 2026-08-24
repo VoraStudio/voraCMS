@@ -154,6 +154,9 @@ class DashboardController extends AbstractController
         $intlFull = new \IntlDateFormatter($locale, \IntlDateFormatter::NONE, \IntlDateFormatter::NONE, null, null, 'EEEE');
         $intlShort = new \IntlDateFormatter($locale, \IntlDateFormatter::NONE, \IntlDateFormatter::NONE, null, null, 'EE');
 
+        $dayAbbrCa = ['Monday' => 'Dl', 'Tuesday' => 'Dt', 'Wednesday' => 'Dc', 'Thursday' => 'Dj', 'Friday' => 'Dv', 'Saturday' => 'Ds', 'Sunday' => 'Dg'];
+        $dayAbbrEs = ['Monday' => 'Lu', 'Tuesday' => 'Ma', 'Wednesday' => 'Mi', 'Thursday' => 'Ju', 'Friday' => 'Vi', 'Saturday' => 'Sá', 'Sunday' => 'Do'];
+
         for ($i = 6; $i >= 0; $i--) {
             $dayStart = $todayStart->modify("-{$i} days");
             $dayEnd = $dayStart->modify('+1 day');
@@ -171,7 +174,16 @@ class DashboardController extends AbstractController
             if ($dayTotal > $maxDailyVisits) {
                 $maxDailyVisits = $dayTotal;
             }
-            $shortDay = ucfirst($intlShort->format($dayStart) ?: $dayStart->format('D'));
+
+            $rawEngDay = $dayStart->format('l');
+            if ($locale === 'ca') {
+                $shortDay = $dayAbbrCa[$rawEngDay] ?? $dayStart->format('D');
+            } elseif ($locale === 'es') {
+                $shortDay = $dayAbbrEs[$rawEngDay] ?? $dayStart->format('D');
+            } else {
+                $shortDay = ucfirst($intlShort->format($dayStart) ?: $dayStart->format('D'));
+            }
+
             $weeklyVisits[] = [
                 'day' => $shortDay,
                 'total' => $dayTotal

@@ -1,7 +1,7 @@
 {% set roleLabels = {
-    'ROLE_ADMIN':   'Admin',
-    'ROLE_MOD':     'Gestor',
-    'ROLE_USUARIO': 'Usuari',
+    'ROLE_ADMIN':   'user.role_admin'|trans,
+    'ROLE_MOD':     'user.role_mod'|trans,
+    'ROLE_USUARIO': 'user.role_user'|trans,
 } %}
 {% set userRole = app.user.roles|filter(r => r starts with 'ROLE_')|last %}
 
