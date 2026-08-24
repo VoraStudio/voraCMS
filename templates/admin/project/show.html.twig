@@ -74,21 +74,18 @@
             <a href="{{ path('admin_entry_new', {slug: ct.slug}) }}" class="cyber-btn-primary cyber-btn--compact">
                 <i class="bi bi-plus-lg"></i> <span>Nova</span>
             </a>
-            <a href="{{ path('admin_entry_by_type', {slug: ct.slug}) }}" class="cyber-btn cyber-btn--projects">
-                <i class="bi bi-eye"></i> <span>Veure totes</span>
-            </a>
         </div>
     </div>
 
-    <table class="cyber-table">
+    <table class="cyber-table cyber-table--project-show">
         <thead>
             <tr>
-                <th>Títol</th>
-                <th>Data</th>
-                <th>Descripció</th>
-                <th>Estat</th>
-                <th>Actiu</th>
-                <th>Accions</th>
+                <th class="col-title">Títol</th>
+                <th class="col-date">Data</th>
+                <th class="col-desc">Descripció</th>
+                <th class="col-status">Estat</th>
+                <th class="col-active">Actiu</th>
+                <th class="col-actions">Accions</th>
             </tr>
         </thead>
         <tbody>
@@ -174,12 +171,11 @@
                         {% set isPreviewable = entry.contentType and entry.contentType.slug in ['noticia', 'event'] %}
                         {% set isCustomPreview = entry.contentType and entry.contentType.slug in ['artistes_victoria_taylor'] %}
                         <a href="{{ isPreviewable or isCustomPreview ? path('admin_entry_preview', {id: entry.id}) : path('admin_entry_show', {id: entry.id}) }}"
-                           class="cyber-btn cyber-btn--projects {{ isPreviewable ? 'js-preview-modal' : '' }} {{ isCustomPreview ? 'js-preview-newtab' : '' }}" 
+                           class="cyber-btn cyber-btn--icon cyber-btn--view {{ isPreviewable ? 'js-preview-modal' : '' }} {{ isCustomPreview ? 'js-preview-newtab' : '' }}" 
                            {% if isPreviewable %}data-type="{{ entry.contentType.slug }}"{% endif %}
                            title="Veure">
-                            <i class="bi bi-eye"></i> <span>Veure</span>
+                            <i class="bi bi-eye"></i>
                         </a>
-                        <span class="cyber-actions-divider"></span>
                         {% include 'admin/components/_toggle_btn.html.twig' with {
                             formId: 'tact-entry-' ~ entry.id,
                             csrfToken: csrf_token('toggle-active-' ~ entry.id),

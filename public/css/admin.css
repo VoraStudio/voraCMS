@@ -3785,6 +3785,45 @@ input[type="time"] {
   line-height: 1.35;
 }
 
+/* --- Project Show (Sections Entries) Column Widths Alignment --- */
+.cyber-table--project-show {
+  table-layout: fixed;
+  width: 100%;
+}
+
+.cyber-table--project-show th.col-title,
+.cyber-table--project-show td:nth-child(1) {
+  width: 28%;
+}
+
+.cyber-table--project-show th.col-date,
+.cyber-table--project-show td:nth-child(2) {
+  width: 16%;
+}
+
+.cyber-table--project-show th.col-desc,
+.cyber-table--project-show td:nth-child(3) {
+  width: 24%;
+}
+
+.cyber-table--project-show th.col-status,
+.cyber-table--project-show td:nth-child(4) {
+  width: 12%;
+  text-align: center;
+}
+
+.cyber-table--project-show th.col-active,
+.cyber-table--project-show td:nth-child(5) {
+  width: 8%;
+  text-align: center;
+}
+
+.cyber-table--project-show th.col-actions,
+.cyber-table--project-show td:nth-child(6) {
+  width: 12%;
+  text-align: right;
+}
+
 .cyber-btn--toggle-active i {
   color: rgba(34, 197, 94, 0.9);
 }

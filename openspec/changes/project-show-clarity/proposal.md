@@ -8,15 +8,14 @@ A la vista de detall d'un projecte (`/admin/project/{id}`, `templates/admin/proj
 
 ## 2. Proposed Solution
 1. **Targeta d'Encapçalament de Secció / Tipus de Contingut**:
-   - Badge identificador visual: `SECCIÓ / TIPUS DE CONTINGUT` amb icona `bi-layers-fill`.
+   - Badge identificador visual: `SECCIÓ` amb icona `bi-layers-fill`.
    - Nom del tipus de contingut destacat en gran.
-   - Pills de metadades: Badge amb el recompte d'entrades (ex: `3 entrades`) i slug del model (ex: `activitats-aula-gastronomica`).
+   - Pills de metadades: Badge amb el recompte d'entrades (ex: `3 entrades`) i slug del model (ex: `#activitats-aula-gastronomica`).
    - Descripció de la secció clara i ben espaiada.
+   - Botó d'acció unificat i enfocat: `+ Nova` (s'elimina el botó redundant `Veure totes` que feia un viatge circular innecessari).
 2. **Neteja i Optimització de la Taula d'Entrades**:
    - Eliminar la columna redundant "CLIENT" de la taula del projecte.
    - Donar més amplada i visibilitat al Títol, ID, Estat (Publicat/Esborrany/Arxivat), Actiu (Toggle) i Data.
-3. **Resum visual de Seccions del Projecte**:
-   - Indicador de quantes seccions té el projecte i accés ràpid a cadascuna.
 
 ## 3. Impact
 - Millora dràstica de la claredat i usabilitat (UI/UX) per als gestors i clients del CMS.

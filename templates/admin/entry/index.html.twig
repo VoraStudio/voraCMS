@@ -99,13 +99,11 @@
                 <td class="cyber-cell" data-label="Accions">
                     <div class="cyber-actions">
                         <a href="{{ path('admin_entry_preview', {id: entry.id}) }}"
-                           class="cyber-btn cyber-btn--projects {% if contentType.slug in ['noticia', 'event'] %}js-preview-modal{% elseif contentType.slug in ['artistes_victoria_taylor'] %}js-preview-newtab{% endif %}"
+                           class="cyber-btn cyber-btn--icon cyber-btn--view {% if contentType.slug in ['noticia', 'event'] %}js-preview-modal{% elseif contentType.slug in ['artistes_victoria_taylor'] %}js-preview-newtab{% endif %}"
                            data-type="{{ contentType.slug }}"
                            title="Veure">
-                            <i class="bi bi-eye"></i> <span>Veure</span>
+                            <i class="bi bi-eye"></i>
                         </a>
-
-                        <span class="cyber-actions-divider"></span>
 
                         {% include 'admin/components/_toggle_btn.html.twig' with {
                             formId: 'tact-entry-' ~ entry.id,
