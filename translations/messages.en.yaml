@@ -131,6 +131,25 @@ media:
   title: "Media Library"
   desc: "Manage your images and media files"
 
+# Profile & Account Info
+profile:
+  title: "User Profile"
+  my_profile: "My Profile"
+  account_info: "Account Information"
+  username_org: "Username / Organization"
+  slug_id: "Identifier (Slug)"
+  email: "Email address"
+  company: "Company / Entity"
+  preferred_lang: "Preferred language"
+  registration_date: "Registration date"
+  associated_projects: "Associated projects"
+  current_session: "Current session"
+  connected_now: "Connected now"
+  back_dashboard: "Back to Dashboard"
+  role_admin: "Administrator"
+  role_mod: "Manager"
+  role_user: "User"
+
 # Footer
 footer:
   developed_by: "Powered by"

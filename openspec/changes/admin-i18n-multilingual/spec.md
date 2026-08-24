@@ -23,4 +23,9 @@
 - `translations/messages.ca.yaml` (Base Català)
 - `translations/messages.es.yaml` (Castellà)
 - `translations/messages.en.yaml` (Anglès)
-- Cobertura de termes: Seccions de menú, botons d'acció, estats d'entrades, títols de dashboard, mètrics, etc.
+- Cobertura de termes: Seccions de menú, botons d'acció, estats d'entrades, títols de dashboard, mètrics, fitxa de perfil, etc.
+
+### Req 4: Persistència a la Base de Dades (User.locale)
+- Quan l'usuari commuta l'idioma via `LocaleController`, s'actualitza `$user->setLocale($locale)` i es fa `flush()` a la taula `users`.
+- Creat `LoginSuccessSubscriber` per carregar el `user.locale` guardat a la BDD cap a la sessió en fer login.
+- La fitxa de perfil `templates/admin/user/profile.html.twig` mostra el valor de l'idioma preferit guardat i està 100% traduïda.

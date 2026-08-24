@@ -131,6 +131,25 @@ media:
   title: "Mediateca"
   desc: "Gestiona les teves imatges i fitxers multimèdia"
 
+# Profile & Account Info
+profile:
+  title: "Perfil d'usuari"
+  my_profile: "El meu perfil"
+  account_info: "Informació del compte"
+  username_org: "Nom d'usuari / Organització"
+  slug_id: "Identificador (Slug)"
+  email: "Correu electrònic"
+  company: "Empresa / Entitat"
+  preferred_lang: "Idioma preferit"
+  registration_date: "Data de registre"
+  associated_projects: "Projectes associats"
+  current_session: "Sessió actual"
+  connected_now: "Connectat ara"
+  back_dashboard: "Tornar al Dashboard"
+  role_admin: "Administrador"
+  role_mod: "Gestor"
+  role_user: "Usuari"
+
 # Footer
 footer:
   developed_by: "Desenvolupat per"

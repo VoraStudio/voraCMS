@@ -28,8 +28,8 @@ class ProfileController extends AbstractController
         return $this->render('admin/user/profile.html.twig', [
             'user' => $user,
             'breadcrumbs' => [
-                ['label' => 'Dashboard', 'url' => $this->generateUrl('admin_dashboard')],
-                ['label' => 'El meu perfil'],
+                ['label' => 'nav.dashboard', 'url' => $this->generateUrl('admin_dashboard')],
+                ['label' => 'profile.my_profile'],
             ],
         ]);
     }

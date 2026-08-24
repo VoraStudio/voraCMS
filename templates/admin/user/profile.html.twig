@@ -1,12 +1,12 @@
 {% extends 'admin/layout.html.twig' %}
 
-{% block title %}Perfil d'usuari — VoraCMS{% endblock %}
-{% block page_title %}Perfil d'usuari{% endblock %}
+{% block title %}{{ 'profile.title'|trans }} — VoraCMS{% endblock %}
+{% block page_title %}{{ 'profile.title'|trans }}{% endblock %}
 
 {% set roleLabels = {
-    'ROLE_ADMIN':   'Administrador',
-    'ROLE_MOD':     'Gestor',
-    'ROLE_USUARIO': 'Usuari',
+    'ROLE_ADMIN':   'profile.role_admin'|trans,
+    'ROLE_MOD':     'profile.role_mod'|trans,
+    'ROLE_USUARIO': 'profile.role_user'|trans,
 } %}
 {% set primaryRole = user.roles|filter(r => r starts with 'ROLE_')|last %}
 
@@ -29,11 +29,11 @@
                             </span>
                             {% if user.active %}
                                 <span class="profile-badge-status active">
-                                    <span class="status-indicator-dot"></span> Actiu
+                                    <span class="status-indicator-dot"></span> {{ 'status.active'|trans }}
                                 </span>
                             {% else %}
                                 <span class="profile-badge-status inactive">
-                                    <span class="status-indicator-dot"></span> Inactiu
+                                    <span class="status-indicator-dot"></span> {{ 'status.inactive'|trans }}
                                 </span>
                             {% endif %}
                         </div>
@@ -46,53 +46,53 @@
                 {# Contingut amb detalls del compte #}
                 <div class="profile-card-body">
                     <h3 class="profile-section-title">
-                        <i class="bi bi-info-circle"></i> Informació del compte
+                        <i class="bi bi-info-circle"></i> {{ 'profile.account_info'|trans }}
                     </h3>
 
                     <div class="profile-grid">
                         <div class="profile-grid-item">
-                            <span class="profile-grid-label">Nom d'usuari / Organització</span>
+                            <span class="profile-grid-label">{{ 'profile.username_org'|trans }}</span>
                             <span class="profile-grid-value">{{ user.name }}</span>
                         </div>
 
                         <div class="profile-grid-item">
-                            <span class="profile-grid-label">Identificador (Slug)</span>
+                            <span class="profile-grid-label">{{ 'profile.slug_id'|trans }}</span>
                             <span class="profile-grid-value font-monospace text-primary-gradient">{{ user.slug }}</span>
                         </div>
 
                         <div class="profile-grid-item">
-                            <span class="profile-grid-label">Correu electrònic</span>
+                            <span class="profile-grid-label">{{ 'profile.email'|trans }}</span>
                             <span class="profile-grid-value">{{ user.email }}</span>
                         </div>
 
                         <div class="profile-grid-item">
-                            <span class="profile-grid-label">Empresa / Entitat</span>
+                            <span class="profile-grid-label">{{ 'profile.company'|trans }}</span>
                             <span class="profile-grid-value">{{ user.company ? user.company : '—' }}</span>
                         </div>
 
                         <div class="profile-grid-item">
-                            <span class="profile-grid-label">Idioma preferit</span>
+                            <span class="profile-grid-label">{{ 'profile.preferred_lang'|trans }}</span>
                             <span class="profile-grid-value text-uppercase">{{ user.locale ?? 'ca' }}</span>
                         </div>
 
                         <div class="profile-grid-item">
-                            <span class="profile-grid-label">Data de registre</span>
+                            <span class="profile-grid-label">{{ 'profile.registration_date'|trans }}</span>
                             <span class="profile-grid-value">
                                 <i class="bi bi-calendar3 me-1"></i> {{ user.createdAt ? user.createdAt|date('d/m/Y H:i') : '—' }}
                             </span>
                         </div>
 
                         <div class="profile-grid-item">
-                            <span class="profile-grid-label">Projectes associats</span>
+                            <span class="profile-grid-label">{{ 'profile.associated_projects'|trans }}</span>
                             <span class="profile-grid-value">
-                                <i class="bi bi-folder2-open me-1"></i> {{ user.projects|length }} projecte{{ user.projects|length == 1 ? '' : 's' }}
+                                <i class="bi bi-folder2-open me-1"></i> {{ user.projects|length }} {{ 'project.projects_title'|trans }}
                             </span>
                         </div>
 
                         <div class="profile-grid-item">
-                            <span class="profile-grid-label">Sessió actual</span>
+                            <span class="profile-grid-label">{{ 'profile.current_session'|trans }}</span>
                             <span class="profile-grid-value text-success">
-                                <i class="bi bi-broadcast me-1"></i> Connectat ara
+                                <i class="bi bi-broadcast me-1"></i> {{ 'profile.connected_now'|trans }}
                             </span>
                         </div>
                     </div>
@@ -101,10 +101,10 @@
                 {# Peu de la fitxa amb accions #}
                 <div class="profile-card-footer">
                     <a href="{{ path('admin_dashboard') }}" class="btn btn-outline-secondary">
-                        <i class="bi bi-arrow-left me-1"></i> Tornar al Dashboard
+                        <i class="bi bi-arrow-left me-1"></i> {{ 'profile.back_dashboard'|trans }}
                     </a>
                     <a href="{{ path('admin_logout') }}" class="btn btn-outline-danger">
-                        <i class="bi bi-box-arrow-right me-1"></i> Tancar sessió
+                        <i class="bi bi-box-arrow-right me-1"></i> {{ 'user.logout'|trans }}
                     </a>
                 </div>
             </div>

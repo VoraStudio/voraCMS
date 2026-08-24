@@ -131,6 +131,25 @@ media:
   title: "Mediateca"
   desc: "Gestiona tus imágenes y archivos multimedia"
 
+# Profile & Account Info
+profile:
+  title: "Perfil de usuario"
+  my_profile: "Mi perfil"
+  account_info: "Información de la cuenta"
+  username_org: "Nombre de usuario / Organización"
+  slug_id: "Identificador (Slug)"
+  email: "Correo electrónico"
+  company: "Empresa / Entidad"
+  preferred_lang: "Idioma preferido"
+  registration_date: "Fecha de registro"
+  associated_projects: "Proyectos asociados"
+  current_session: "Sesión actual"
+  connected_now: "Conectado ahora"
+  back_dashboard: "Volver al Panel"
+  role_admin: "Administrador"
+  role_mod: "Gestor"
+  role_user: "Usuario"
+
 # Footer
 footer:
   developed_by: "Desarrollado por"
