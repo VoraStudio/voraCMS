@@ -6,7 +6,7 @@
   /* Background system — Warm charcoal dark */
   --s-bg: #111015;
   --s-main-bg: linear-gradient(175deg, #111015 0%, #15131a 35%, #18151f 70%, #1a1622 100%);
-  --s-topbar-bg: rgba(17, 16, 21, 0.65);
+  --s-topbar-bg: transparent;
   --s-surface: rgba(255, 255, 255, 0.045);
   --s-surface-translucent: rgba(255, 255, 255, 0.03);
   --s-surface-secondary: rgba(255, 255, 255, 0.04);
