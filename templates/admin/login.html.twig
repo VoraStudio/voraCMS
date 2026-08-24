@@ -132,15 +132,17 @@
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     // Dropdown d'idioma
+    const langSwitcher = document.getElementById('langSwitcher');
     const langBtn = document.getElementById('langBtn');
-    const langMenu = document.getElementById('langMenu');
-    if (langBtn && langMenu) {
+    if (langSwitcher && langBtn) {
         langBtn.addEventListener('click', function (e) {
             e.stopPropagation();
-            langMenu.classList.toggle('is-open');
+            langSwitcher.classList.toggle('is-open');
         });
-        document.addEventListener('click', function () {
-            langMenu.classList.remove('is-open');
+        document.addEventListener('click', function (e) {
+            if (!langSwitcher.contains(e.target)) {
+                langSwitcher.classList.remove('is-open');
+            }
         });
     }
 
