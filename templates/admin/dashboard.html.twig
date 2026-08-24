@@ -346,6 +346,21 @@
             <div class="d2-news-grid d2-news-grid--taller">
                 {% for entry in latestEntries|slice(0, 4) %}
                 <a href="{{ path('admin_entry_edit', {id: entry.id}) }}" class="d2-news-card" title="{{ entry.title }}">
+                    {# Badge/Icona d'estat a la banda superior dreta #}
+                    <div class="d2-news-card__status-corner" title="{% if entry.status == 'published' %}Publicat{% elseif entry.status == 'draft' %}No publicat (Esborrany){% elseif entry.status == 'scheduled' %}Programat{% else %}Arxivat{% endif %}{% if not entry.active %} · Inactiu{% endif %}">
+                        {% if not entry.active %}
+                            <span class="d2-corner-badge d2-corner-badge--inactive"><i class="bi bi-pause-circle-fill"></i> Inactiu</span>
+                        {% elseif entry.status == 'published' %}
+                            <span class="d2-corner-badge d2-corner-badge--published"><i class="bi bi-check-circle-fill"></i> Activa</span>
+                        {% elseif entry.status == 'scheduled' %}
+                            <span class="d2-corner-badge d2-corner-badge--scheduled"><i class="bi bi-clock-fill"></i> Programada</span>
+                        {% elseif entry.status == 'archived' %}
+                            <span class="d2-corner-badge d2-corner-badge--archived"><i class="bi bi-archive-fill"></i> Arxivada</span>
+                        {% else %}
+                            <span class="d2-corner-badge d2-corner-badge--draft"><i class="bi bi-pencil-fill"></i> Esborrany</span>
+                        {% endif %}
+                    </div>
+
                     <div class="d2-news-card__thumb">
                         {% if entry.imageUrl %}
                         <img src="{{ asset(entry.imageUrl) }}" alt="{{ entry.title }}" loading="lazy" class="d2-news-card__img">
@@ -363,9 +378,6 @@
                         <div class="d2-news-card__meta">
                             <span class="d2-news-card__date">{{ entry.createdAt|date('d/m/Y') }}</span>
                             <span class="d2-news-card__project" style="color:{{ entry.projectColor }};">{{ entry.projectName }}</span>
-                            {% if entry.status == 'draft' %}
-                            <span class="d2-news-card__status d2-news-card__status--draft">Esborrany</span>
-                            {% endif %}
                         </div>
                     </div>
                 </a>

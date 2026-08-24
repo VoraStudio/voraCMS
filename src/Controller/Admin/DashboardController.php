@@ -564,6 +564,7 @@ class DashboardController extends AbstractController
                 'projectName' => $projectName,
                 'projectColor' => $projectColor,
                 'status' => $entry->getStatus(),
+                'active' => $entry->isActive(),
             ];
         }
 
@@ -616,6 +617,7 @@ class DashboardController extends AbstractController
                     'projectName' => $projectName,
                     'projectColor' => $projectColor,
                     'status' => $entry->getStatus(),
+                    'active' => $entry->isActive(),
                 ];
             }
         }
