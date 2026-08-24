@@ -611,6 +611,19 @@ body::before {
   background: #f8fafc;
   border-top-color: rgba(0, 0, 0, 0.08);
 }
+[data-theme="light"] .d2-section-badge {
+  background: rgba(249, 115, 22, 0.1);
+  border-color: rgba(249, 115, 22, 0.3);
+  color: #ea580c;
+}
+[data-theme="light"] .d2-section-meta-item {
+  background: #f1f5f9;
+  border-color: rgba(0, 0, 0, 0.08);
+  color: #64748b;
+}
+[data-theme="light"] .d2-panel-subtitle {
+  color: #64748b;
+}
 [data-theme="light"] .s-theme-toggle {
   color: rgba(0, 0, 0, 0.45);
 }

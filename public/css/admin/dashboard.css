@@ -3144,10 +3144,48 @@
 /* --- Panel head left/right flex helpers --- */
 .d2-panel-head-left {
   display: flex;
-  align-items: center;
-  gap: 10px;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
   flex: 1;
   min-width: 0;
+}
+
+.d2-section-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 3px 9px;
+  border-radius: 6px;
+  background: rgba(249, 115, 22, 0.14);
+  border: 1px solid rgba(249, 115, 22, 0.35);
+  color: #fb923c;
+  box-shadow: 0 0 10px rgba(249, 115, 22, 0.1);
+}
+
+.d2-section-badge i {
+  font-size: 0.75rem;
+}
+
+.d2-section-meta {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: 4px;
+}
+
+.d2-section-meta-item {
+  font-size: 0.7rem;
+  font-weight: 500;
+  color: var(--s-text-secondary);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 2px 8px;
+  border-radius: 10px;
 }
 
 .d2-panel-head-right {
@@ -3158,11 +3196,11 @@
 }
 
 .d2-panel-subtitle {
-  font-family: var(--d2-font-mono);
-  font-size: 10px;
+  font-size: 0.75rem;
   color: var(--s-text-secondary);
-  opacity: 0.7;
-  margin-top: 1px;
+  opacity: 0.85;
+  margin-top: 2px;
+  line-height: 1.35;
 }
 
 /* --- Client count badge --- */

@@ -52,9 +52,22 @@
 
     <div class="d2-panel-head">
         <div class="d2-panel-head-left">
-            <span class="d2-panel-title text-capitalize">{{ ct.name }}</span>
+            <div class="d-flex align-items-center gap-2 flex-wrap">
+                <span class="d2-section-badge">
+                    <i class="bi bi-layers-fill"></i> Secció
+                </span>
+                <span class="d2-panel-title text-capitalize">{{ ct.name }}</span>
+                <div class="d2-section-meta">
+                    <span class="d2-section-meta-item">
+                        <i class="bi bi-file-earmark-text me-1"></i>{{ entries|length }} {{ entries|length == 1 ? 'entrada' : 'entrades' }}
+                    </span>
+                    <span class="d2-section-meta-item font-monospace text-muted" title="Identificador de tipus">
+                        #{{ ct.slug }}
+                    </span>
+                </div>
+            </div>
             {% if ct.description %}
-            <span class="d2-panel-subtitle">{{ ct.description }}</span>
+            <div class="d2-panel-subtitle">{{ ct.description }}</div>
             {% endif %}
         </div>
         <div class="d2-panel-head-right">
@@ -71,7 +84,6 @@
         <thead>
             <tr>
                 <th>Títol</th>
-                <th>Client</th>
                 <th>Data</th>
                 <th>Descripció</th>
                 <th>Estat</th>
@@ -82,9 +94,9 @@
         <tbody>
         {% if entries is empty %}
             <tr>
-                <td colspan="7" class="cyber-empty">
+                <td colspan="6" class="cyber-empty">
                     <div class="cyber-empty-icon"><i class="bi bi-file-earmark-text"></i></div>
-                    <p class="cyber-empty-text">No hi ha entrades</p>
+                    <p class="cyber-empty-text">No hi ha entrades en aquesta secció</p>
                     <a href="{{ path('admin_entry_new', {slug: ct.slug}) }}" class="cyber-btn-primary cyber-btn--action">
                         <i class="bi bi-plus-lg"></i> <span>Crear primera entrada</span>
                     </a>
@@ -123,12 +135,9 @@
                                     <span class="cyber-cell__placeholder">Sense títol</span>
                                 {% endif %}
                             </div>
-                            <div class="cyber-cell__subtitle">ID {{ entry.id }}</div>
+                            <div class="cyber-cell__subtitle font-monospace">ID {{ entry.id }}</div>
                         </div>
                     </div>
-                </td>
-                <td class="cyber-cell" data-label="Client">
-                    {{ entry.author ? entry.author.name : (entry.user ? entry.user.name : '-') }}
                 </td>
                 <td class="cyber-cell cyber-cell--date" data-label="Data">
                     {{ entry.createdAt|date('d/m/Y H:i') }}
