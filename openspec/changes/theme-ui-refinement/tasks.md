@@ -14,7 +14,8 @@
 
 ## 2. Tasks Status
 
-- [x] 1. Actualitzar tokens a `public/css/root.css` per al mode fosc.
-- [x] 2. Actualitzar tokens a `public/css/admin/theme.css` per al mode clar.
+- [x] 1. Actualitzar tokens a `public/css/root.css` per al mode fosc unificat i topbar translúcida.
+- [x] 2. Actualitzar tokens a `public/css/admin/theme.css` per al mode clar unificat i topbar translúcida.
 - [x] 3. Afegir regla de filtre per al logo en mode clar a `public/css/admin/theme.css`.
-- [x] 4. Afegir vora de separació al sidebar a `public/css/admin/layout.css` i `public/css/admin.css`.
+- [x] 4. Retirar ratlles divisòries (`border-right` i `border-bottom`) a `layout.css`, `admin.css` i `theme.css`.
+- [x] 5. Aplicar efecte glassmorphism blur a `s-topbar` (`backdrop-filter: blur(18px)`) per a un scroll fluid i nítid.

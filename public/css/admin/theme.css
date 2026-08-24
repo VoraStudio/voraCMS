@@ -414,7 +414,7 @@
   /* Surface / bg — Cohesive light canvas */
   --s-bg: #f8fafc;
   --s-main-bg: #f8fafc;
-  --s-topbar-bg: transparent;
+  --s-topbar-bg: rgba(248, 250, 252, 0.82);
   --s-surface: #ffffff;
   --s-surface-translucent: rgba(255, 255, 255, 0.85);
   --s-surface-secondary: #ffffff;

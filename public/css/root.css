@@ -6,7 +6,7 @@
   /* Background system — Cohesive dark canvas */
   --s-bg: #121116;
   --s-main-bg: #121116;
-  --s-topbar-bg: transparent;
+  --s-topbar-bg: rgba(18, 17, 22, 0.78);
   --s-surface: rgba(255, 255, 255, 0.045);
   --s-surface-translucent: rgba(255, 255, 255, 0.03);
   --s-surface-secondary: rgba(255, 255, 255, 0.04);
