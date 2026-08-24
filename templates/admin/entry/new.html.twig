@@ -35,7 +35,7 @@
                         <span class="s-toggle__icon"><i class="bi bi-globe"></i></span>
                         <span class="s-toggle__label">{{ 'status.published'|trans }}</span>
                     </div>
-                    <div class="s-toggle" data-value="archived" tabindex="0" role="radio" aria-checked="false">
+                    <div class="s-toggle s-toggle--disabled" data-value="archived" tabindex="-1" role="radio" aria-checked="false" aria-disabled="true" style="opacity: 0.45; cursor: not-allowed; pointer-events: none;" title="{{ 'status.archived'|trans }}">
                         <span class="s-toggle__switch"></span>
                         <span class="s-toggle__icon"><i class="bi bi-archive"></i></span>
                         <span class="s-toggle__label">{{ 'status.not_archived'|trans }}</span>
@@ -80,17 +80,17 @@
                         <div class="s-media-bento">
                             <div class="s-media-bento__row">
                                 <div class="s-media-bento__col">
-                                    <label class="s-label">{{ logoField.name }}{% if logoField.required %}<span class="s-label__req">*</span>{% endif %}</label>
+                                    <label class="s-label">{{ logoField.name|trans_field }}{% if logoField.required %}<span class="s-label__req">*</span>{% endif %}</label>
                                     {% include 'admin/components/_gallery_field.html.twig' with { fieldId: logoField.id, fieldType: 'image', value: '', mediaPaths: {} } %}
                                 </div>
                                 <div class="s-media-bento__col">
-                                    <label class="s-label">{{ mainImageField.name }}{% if mainImageField.required %}<span class="s-label__req">*</span>{% endif %}</label>
+                                    <label class="s-label">{{ mainImageField.name|trans_field }}{% if mainImageField.required %}<span class="s-label__req">*</span>{% endif %}</label>
                                     {% include 'admin/components/_gallery_field.html.twig' with { fieldId: mainImageField.id, fieldType: 'image', value: '', mediaPaths: {} } %}
                                 </div>
                             </div>
                             <div class="s-media-bento__row">
                                 <div class="s-media-bento__col s-media-bento__col--wide">
-                                    <label class="s-label">{{ galleryField.name }}{% if galleryField.required %}<span class="s-label__req">*</span>{% endif %}</label>
+                                    <label class="s-label">{{ galleryField.name|trans_field }}{% if galleryField.required %}<span class="s-label__req">*</span>{% endif %}</label>
                                     {% include 'admin/components/_gallery_field.html.twig' with { fieldId: galleryField.id, fieldType: 'gallery', value: '', mediaPaths: {} } %}
                                 </div>
                             </div>
@@ -103,11 +103,11 @@
                     <div class="s-field s-field--wide">
                         <div class="s-media-pair">
                             <div class="s-media-pair__col">
-                                <label class="s-label">{{ mediaPair.first.name }}{% if mediaPair.first.required %}<span class="s-label__req">*</span>{% endif %}</label>
+                                <label class="s-label">{{ mediaPair.first.name|trans_field }}{% if mediaPair.first.required %}<span class="s-label__req">*</span>{% endif %}</label>
                                 {% include 'admin/components/_gallery_field.html.twig' with { fieldId: mediaPair.first.id, fieldType: mediaPair.first.fieldType, value: '', mediaPaths: {} } %}
                             </div>
                             <div class="s-media-pair__col">
-                                <label class="s-label">{{ mediaPair.second.name }}{% if mediaPair.second.required %}<span class="s-label__req">*</span>{% endif %}</label>
+                                <label class="s-label">{{ mediaPair.second.name|trans_field }}{% if mediaPair.second.required %}<span class="s-label__req">*</span>{% endif %}</label>
                                 {% include 'admin/components/_gallery_field.html.twig' with { fieldId: mediaPair.second.id, fieldType: mediaPair.second.fieldType, value: '', mediaPaths: {} } %}
                             </div>
                         </div>
@@ -117,7 +117,7 @@
             {% set isWide = field.fieldType in ['richtext', 'textarea', 'repeater', 'youtube'] %}
             <div class="s-field{% if isWide %} s-field--wide{% endif %} field-{{ field.fieldType }}">
                 <label class="s-label">
-                    {{ field.name }}
+                    {{ field.name|trans_field }}
                     {% if field.required %}<span class="s-label__req">*</span>{% endif %}
                 </label>
 

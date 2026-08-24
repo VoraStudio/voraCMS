@@ -22,6 +22,7 @@ use App\Repository\ContentTypeRepository;
 use App\Repository\ProjectRepository;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Contracts\Translation\TranslatorInterface;
 use Twig\Extension\AbstractExtension;
 use Twig\Extension\GlobalsInterface;
 use Twig\TwigFilter;
@@ -34,6 +35,7 @@ class AdminExtension extends AbstractExtension implements GlobalsInterface
         private readonly ProjectRepository $projectRepo,
         private readonly Security $security,
         private readonly RequestStack $requestStack,
+        private readonly TranslatorInterface $translator,
     ) {}
 
     public function getFunctions(): array
@@ -50,7 +52,49 @@ class AdminExtension extends AbstractExtension implements GlobalsInterface
     {
         return [
             new TwigFilter('json_decode', [$this, 'decodeJson']),
+            new TwigFilter('trans_field', [$this, 'translateFieldLabel']),
         ];
+    }
+
+    public function translateFieldLabel(string $name): string
+    {
+        $clean = mb_strtolower(trim($name), 'UTF-8');
+        $map = [
+            'titol' => 'entry.title_field',
+            'títol' => 'entry.title_field',
+            'titulo' => 'entry.title_field',
+            'título' => 'entry.title_field',
+            'title' => 'entry.title_field',
+            'descripcio' => 'entry.description_field',
+            'descripció' => 'entry.description_field',
+            'descripcion' => 'entry.description_field',
+            'descripción' => 'entry.description_field',
+            'description' => 'entry.description_field',
+            'imatge' => 'entry.image_field',
+            'imagen' => 'entry.image_field',
+            'image' => 'entry.image_field',
+            'foto' => 'entry.image_field',
+            'categoria' => 'entry.category_field',
+            'categoría' => 'entry.category_field',
+            'category' => 'entry.category_field',
+            'data' => 'entry.date_field',
+            'fecha' => 'entry.date_field',
+            'date' => 'entry.date_field',
+            'preu' => 'entry.price_field',
+            'precio' => 'entry.price_field',
+            'price' => 'entry.price_field',
+            'places' => 'entry.places_field',
+            'plazas' => 'entry.places_field',
+            'ordre' => 'entry.order_field',
+            'orden' => 'entry.order_field',
+            'order' => 'entry.order_field',
+        ];
+
+        if (isset($map[$clean])) {
+            return $this->translator->trans($map[$clean], [], 'messages');
+        }
+
+        return $name;
     }
 
     /* -----------------------------------------------------------

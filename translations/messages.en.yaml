@@ -151,7 +151,7 @@ entry:
   category_field: "Category"
   date_field: "Date"
   price_field: "Price"
-  places_field: "Places"
+  places_field: "Capacity"
   order_field: "Order"
 
 # Media
