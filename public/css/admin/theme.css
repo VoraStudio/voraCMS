@@ -535,25 +535,81 @@ body::before {
   color: rgba(0, 0, 0, 0.5);
 }
 [data-theme="light"] .s-user-card {
-  background: transparent;
-  border-color: transparent;
-}
-[data-theme="light"] .s-user-card:hover {
-  background: rgba(0, 0, 0, 0.04);
+  background: rgba(0, 0, 0, 0.03);
   border-color: rgba(0, 0, 0, 0.1);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+[data-theme="light"] .s-user-card:hover,
+[data-theme="light"] .s-user-dropdown.is-open .s-user-card {
+  background: rgba(0, 0, 0, 0.06);
+  border-color: rgba(0, 0, 0, 0.18);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
 }
 [data-theme="light"] .s-user-card-name {
   color: #111111;
 }
 [data-theme="light"] .s-user-card-role {
-  color: #888888;
+  color: #64748b;
 }
-[data-theme="light"] .s-user-card-logout {
-  color: #999999;
+[data-theme="light"] .s-user-card-chevron {
+  color: #94a3b8;
 }
-[data-theme="light"] .s-user-card-logout:hover {
-  color: #ef5350;
+[data-theme="light"] .s-user-dropdown-menu {
+  background: rgba(255, 255, 255, 0.98);
+  border-color: rgba(0, 0, 0, 0.12);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+[data-theme="light"] .s-user-dropdown-item {
+  color: #334155;
+}
+[data-theme="light"] .s-user-dropdown-item:hover {
+  background: rgba(0, 0, 0, 0.05);
+  color: #0f172a;
+}
+[data-theme="light"] .s-user-dropdown-item--logout {
+  color: #dc2626;
+}
+[data-theme="light"] .s-user-dropdown-item--logout:hover {
+  background: rgba(220, 38, 38, 0.08);
+  color: #b91c1c;
+}
+[data-theme="light"] .s-user-dropdown-divider {
+  background: rgba(0, 0, 0, 0.08);
+}
+[data-theme="light"] .profile-card {
+  background: #ffffff;
+  border-color: rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+}
+[data-theme="light"] .profile-card-header {
+  background: linear-gradient(135deg, rgba(249, 115, 22, 0.08) 0%, rgba(255, 255, 255, 0) 100%);
+  border-bottom-color: rgba(0, 0, 0, 0.08);
+}
+[data-theme="light"] .profile-name {
+  color: #0f172a;
+}
+[data-theme="light"] .profile-email {
+  color: #64748b;
+}
+[data-theme="light"] .profile-section-title {
+  color: #0f172a;
+}
+[data-theme="light"] .profile-grid-item {
+  background: #f8fafc;
+  border-color: rgba(0, 0, 0, 0.06);
+}
+[data-theme="light"] .profile-grid-item:hover {
+  background: #f1f5f9;
+  border-color: rgba(0, 0, 0, 0.12);
+}
+[data-theme="light"] .profile-grid-label {
+  color: #64748b;
+}
+[data-theme="light"] .profile-grid-value {
+  color: #0f172a;
+}
+[data-theme="light"] .profile-card-footer {
+  background: #f8fafc;
+  border-top-color: rgba(0, 0, 0, 0.08);
 }
 [data-theme="light"] .s-theme-toggle {
   color: rgba(0, 0, 0, 0.45);

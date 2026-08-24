@@ -5,13 +5,24 @@
 } %}
 {% set userRole = app.user.roles|filter(r => r starts with 'ROLE_')|last %}
 
-<div class="s-user-card">
-    <img src="{{ asset('img/logo_blanc.png') }}" alt="Vora Studio" class="s-user-card-avatar">
-    <div class="s-user-card-info">
-        <span class="s-user-card-name">{{ currentUser is defined and currentUser ? currentUser.name : (app.user.name ?? app.user.email) }}</span>
-        <span class="s-user-card-role">{{ roleLabels[userRole] ?? userRole|replace({'ROLE_': ''})|lower }}</span>
+<div class="s-user-dropdown" id="userDropdown">
+    <button type="button" class="s-user-card s-user-dropdown-toggle" id="userDropdownToggle" aria-haspopup="true" aria-expanded="false">
+        <img src="{{ asset('img/logo_blanc.png') }}" alt="Vora Studio" class="s-user-card-avatar">
+        <div class="s-user-card-info">
+            <span class="s-user-card-name">{{ currentUser is defined and currentUser ? currentUser.name : (app.user.name ?? app.user.email) }}</span>
+            <span class="s-user-card-role">{{ roleLabels[userRole] ?? userRole|replace({'ROLE_': ''})|lower }}</span>
+        </div>
+        <i class="bi bi-chevron-down s-user-card-chevron"></i>
+    </button>
+    <div class="s-user-dropdown-menu" id="userDropdownMenu">
+        <a href="{{ path('admin_profile') }}" class="s-user-dropdown-item">
+            <i class="bi bi-person-badge"></i>
+            <span>Perfil d'usuari</span>
+        </a>
+        <div class="s-user-dropdown-divider"></div>
+        <a href="{{ path('admin_logout') }}" class="s-user-dropdown-item s-user-dropdown-item--logout">
+            <i class="bi bi-box-arrow-right"></i>
+            <span>Tancar sessió</span>
+        </a>
     </div>
-    <a href="{{ path('admin_logout') }}" class="s-user-card-logout" title="Tancar sessió">
-        <i class="bi bi-box-arrow-right"></i>
-    </a>
 </div>

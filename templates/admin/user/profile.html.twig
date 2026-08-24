@@ -1,0 +1,115 @@
+{% extends 'admin/layout.html.twig' %}
+
+{% block title %}Perfil d'usuari — VoraCMS{% endblock %}
+{% block page_title %}Perfil d'usuari{% endblock %}
+
+{% set roleLabels = {
+    'ROLE_ADMIN':   'Administrador',
+    'ROLE_MOD':     'Gestor',
+    'ROLE_USUARIO': 'Usuari',
+} %}
+{% set primaryRole = user.roles|filter(r => r starts with 'ROLE_')|last %}
+
+{% block content %}
+<div class="container-fluid px-0 py-2">
+    <div class="row justify-content-center">
+        <div class="col-12 col-xl-10">
+
+            <div class="profile-card">
+                {# Header de la fitxa #}
+                <div class="profile-card-header">
+                    <div class="profile-avatar-wrap">
+                        <img src="{{ asset('img/logo_blanc.png') }}" alt="Avatar" class="profile-avatar-img">
+                    </div>
+                    <div class="profile-identity">
+                        <div class="d-flex align-items-center gap-2 flex-wrap">
+                            <h2 class="profile-name mb-0">{{ user.name }}</h2>
+                            <span class="profile-badge-role">
+                                <i class="bi bi-shield-check"></i> {{ roleLabels[primaryRole] ?? primaryRole }}
+                            </span>
+                            {% if user.active %}
+                                <span class="profile-badge-status active">
+                                    <span class="status-indicator-dot"></span> Actiu
+                                </span>
+                            {% else %}
+                                <span class="profile-badge-status inactive">
+                                    <span class="status-indicator-dot"></span> Inactiu
+                                </span>
+                            {% endif %}
+                        </div>
+                        <p class="profile-email mb-0">
+                            <i class="bi bi-envelope"></i> {{ user.email }}
+                        </p>
+                    </div>
+                </div>
+
+                {# Contingut amb detalls del compte #}
+                <div class="profile-card-body">
+                    <h3 class="profile-section-title">
+                        <i class="bi bi-info-circle"></i> Informació del compte
+                    </h3>
+
+                    <div class="profile-grid">
+                        <div class="profile-grid-item">
+                            <span class="profile-grid-label">Nom d'usuari / Organització</span>
+                            <span class="profile-grid-value">{{ user.name }}</span>
+                        </div>
+
+                        <div class="profile-grid-item">
+                            <span class="profile-grid-label">Identificador (Slug)</span>
+                            <span class="profile-grid-value font-monospace text-primary-gradient">{{ user.slug }}</span>
+                        </div>
+
+                        <div class="profile-grid-item">
+                            <span class="profile-grid-label">Correu electrònic</span>
+                            <span class="profile-grid-value">{{ user.email }}</span>
+                        </div>
+
+                        <div class="profile-grid-item">
+                            <span class="profile-grid-label">Empresa / Entitat</span>
+                            <span class="profile-grid-value">{{ user.company ? user.company : '—' }}</span>
+                        </div>
+
+                        <div class="profile-grid-item">
+                            <span class="profile-grid-label">Idioma preferit</span>
+                            <span class="profile-grid-value text-uppercase">{{ user.locale ?? 'ca' }}</span>
+                        </div>
+
+                        <div class="profile-grid-item">
+                            <span class="profile-grid-label">Data de registre</span>
+                            <span class="profile-grid-value">
+                                <i class="bi bi-calendar3 me-1"></i> {{ user.createdAt ? user.createdAt|date('d/m/Y H:i') : '—' }}
+                            </span>
+                        </div>
+
+                        <div class="profile-grid-item">
+                            <span class="profile-grid-label">Projectes associats</span>
+                            <span class="profile-grid-value">
+                                <i class="bi bi-folder2-open me-1"></i> {{ user.projects|length }} projecte{{ user.projects|length == 1 ? '' : 's' }}
+                            </span>
+                        </div>
+
+                        <div class="profile-grid-item">
+                            <span class="profile-grid-label">Sessió actual</span>
+                            <span class="profile-grid-value text-success">
+                                <i class="bi bi-broadcast me-1"></i> Connectat ara
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                {# Peu de la fitxa amb accions #}
+                <div class="profile-card-footer">
+                    <a href="{{ path('admin_dashboard') }}" class="btn btn-outline-secondary">
+                        <i class="bi bi-arrow-left me-1"></i> Tornar al Dashboard
+                    </a>
+                    <a href="{{ path('admin_logout') }}" class="btn btn-outline-danger">
+                        <i class="bi bi-box-arrow-right me-1"></i> Tancar sessió
+                    </a>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endblock %}

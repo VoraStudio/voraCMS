@@ -96,6 +96,39 @@
       });
     }
 
+    /* ─── User Dropdown ─── */
+    var userDropdown = document.getElementById('userDropdown');
+    var userDropdownToggle = document.getElementById('userDropdownToggle');
+
+    if (userDropdown && userDropdownToggle) {
+      userDropdownToggle.addEventListener('click', function (e) {
+        e.stopPropagation();
+        var isOpen = userDropdown.classList.contains('is-open');
+        if (isOpen) {
+          userDropdown.classList.remove('is-open');
+          userDropdownToggle.setAttribute('aria-expanded', 'false');
+        } else {
+          userDropdown.classList.add('is-open');
+          userDropdownToggle.setAttribute('aria-expanded', 'true');
+        }
+      });
+
+      document.addEventListener('click', function (e) {
+        if (!userDropdown.contains(e.target)) {
+          userDropdown.classList.remove('is-open');
+          userDropdownToggle.setAttribute('aria-expanded', 'false');
+        }
+      });
+
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && userDropdown.classList.contains('is-open')) {
+          userDropdown.classList.remove('is-open');
+          userDropdownToggle.setAttribute('aria-expanded', 'false');
+          userDropdownToggle.focus();
+        }
+      });
+    }
+
     /* ─── Form validation ─── */
     document.querySelectorAll('form').forEach(function (form) {
       form.setAttribute('novalidate', '');
