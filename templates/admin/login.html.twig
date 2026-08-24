@@ -1,24 +1,53 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}VoraCMS · Inici de sessió{% endblock %}
+{% block title %}VoraCMS · {{ 'auth.login_title'|trans }}{% endblock %}
 
 {% block stylesheets %}
     {{ parent() }}
     <link rel="stylesheet" href="{{ asset('css/admin/layout.css') }}?v=2.0">
     <link rel="stylesheet" href="{{ asset('css/admin/components.css') }}?v=2.0">
     <link rel="stylesheet" href="{{ asset('css/admin/forms.css') }}?v=2.0">
-    <link rel="stylesheet" href="{{ asset('css/admin/login.css') }}?v=2.1">
+    <link rel="stylesheet" href="{{ asset('css/admin/login.css') }}?v=2.2">
     <link rel="stylesheet" href="{{ asset('css/admin/theme.css') }}?v=2.0">
 {% endblock %}
 
 {% block body %}
 <div class="s-login">
+    {# Selector d'idioma a la cantonada superior dreta #}
+    {% set currentLocale = app.request.locale|default('ca') %}
+    <div class="s-login-topbar">
+        <div class="s-lang-switcher" id="langSwitcher">
+            <button type="button" class="s-lang-btn" id="langBtn" aria-label="Canviar idioma" title="Idioma">
+                <i class="bi bi-translate s-lang-icon"></i>
+                <span class="s-lang-current">{{ currentLocale|upper }}</span>
+                <i class="bi bi-chevron-down s-lang-chevron"></i>
+            </button>
+            <div class="s-lang-menu" id="langMenu">
+                <a href="{{ path('admin_switch_locale', {locale: 'ca'}) }}" class="s-lang-item{% if currentLocale == 'ca' %} active{% endif %}">
+                    <span class="s-lang-code">CAT</span>
+                    <span class="s-lang-label">Català</span>
+                    {% if currentLocale == 'ca' %}<i class="bi bi-check2"></i>{% endif %}
+                </a>
+                <a href="{{ path('admin_switch_locale', {locale: 'es'}) }}" class="s-lang-item{% if currentLocale == 'es' %} active{% endif %}">
+                    <span class="s-lang-code">ESP</span>
+                    <span class="s-lang-label">Español</span>
+                    {% if currentLocale == 'es' %}<i class="bi bi-check2"></i>{% endif %}
+                </a>
+                <a href="{{ path('admin_switch_locale', {locale: 'en'}) }}" class="s-lang-item{% if currentLocale == 'en' %} active{% endif %}">
+                    <span class="s-lang-code">ENG</span>
+                    <span class="s-lang-label">English</span>
+                    {% if currentLocale == 'en' %}<i class="bi bi-check2"></i>{% endif %}
+                </a>
+            </div>
+        </div>
+    </div>
+
     <div class="s-login-card">
         <div class="card">
             <div class="card-body">
                 <div class="s-login-brand">
                     <img src="{{ asset('img/logoVora.png') }}" alt="Vora Studio" class="s-login-brand-img">
-                    <p>Inicia sessió per continuar</p>
+                    <p>{{ 'auth.sign_in_prompt'|trans }}</p>
                 </div>
 
                 {% if error %}
@@ -36,21 +65,110 @@
                 <form method="post">
                     <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
                     <div class="mb-3">
-                        <label for="email" class="form-label">Email</label>
+                        <label for="email" class="form-label">{{ 'auth.email_label'|trans }}</label>
                         <input type="email" id="email" name="_username" value="{{ last_email }}" class="form-control" required autofocus placeholder="admin@vorastudio.cat">
                     </div>
                     <div class="mb-4">
-                        <label for="password" class="form-label">Contrasenya</label>
+                        <label for="password" class="form-label">{{ 'auth.password_label'|trans }}</label>
                         <input type="password" id="password" name="_password" class="form-control" required placeholder="········">
                     </div>
-                    <button type="submit" class="btn btn-primary w-100"><span>Entrar</span></button>
+                    <button type="submit" class="btn btn-primary w-100"><span>{{ 'auth.sign_in_btn'|trans }}</span></button>
                 </form>
             </div>
         </div>
 
         <div class="s-login-footer">
-            Desenvolupat per <img src="{{ asset('img/logoVora.png') }}" alt="VoraData" class="s-login-footer-img" style="display: inline-block !important; vertical-align: middle;">
+            <div>
+                {{ 'footer.developed_by'|trans }} <a href="https://cms.voradata.cat/" target="_blank" rel="noopener noreferrer" class="s-brand-link"><img src="{{ asset('img/logoVora.png') }}" alt="VoraData" class="s-login-footer-img" style="display: inline-block !important; vertical-align: middle;"></a>
+            </div>
+            <div class="s-login-legal-links">
+                <a href="#legalModal" id="openLegalBtn" class="s-legal-link">{{ 'auth.legal_terms'|trans }} &amp; {{ 'auth.privacy_policy'|trans }}</a>
+                <span class="s-legal-sep">·</span>
+                <a href="https://cms.voradata.cat/" target="_blank" rel="noopener noreferrer" class="s-legal-link s-legal-link--landing">
+                    <i class="bi bi-box-arrow-up-right"></i> {{ 'auth.discover_voradata'|trans }}
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+{# Modal de Condicions Legals & Privacitat #}
+<div class="s-legal-modal-backdrop" id="legalModal" style="display: none;">
+    <div class="s-legal-modal">
+        <div class="s-legal-modal-header">
+            <div class="d-flex align-items-center gap-2">
+                <i class="bi bi-shield-check s-legal-icon"></i>
+                <h5 class="m-0">{{ 'legal.modal_title'|trans }}</h5>
+            </div>
+            <button type="button" class="s-legal-close" id="closeLegalBtn" aria-label="Tancar">
+                <i class="bi bi-x-lg"></i>
+            </button>
+        </div>
+        <div class="s-legal-modal-body">
+            <div class="s-legal-section">
+                <h6>{{ 'legal.section_relationship_title'|trans }}</h6>
+                <p>{{ 'legal.section_relationship_desc'|trans }}</p>
+            </div>
+            <div class="s-legal-section">
+                <h6>{{ 'legal.section_privacy_title'|trans }}</h6>
+                <p>{{ 'legal.section_privacy_desc'|trans }}</p>
+            </div>
+            <div class="s-legal-section">
+                <h6>{{ 'legal.section_cookies_ai_title'|trans }}</h6>
+                <p>{{ 'legal.section_cookies_ai_desc'|trans }}</p>
+            </div>
+        </div>
+        <div class="s-legal-modal-footer">
+            <button type="button" class="cyber-btn cyber-btn--projects" id="acceptLegalBtn">
+                <i class="bi bi-check2"></i> <span>{{ 'legal.close_btn'|trans }}</span>
+            </button>
         </div>
     </div>
 </div>
 {% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    // Dropdown d'idioma
+    const langBtn = document.getElementById('langBtn');
+    const langMenu = document.getElementById('langMenu');
+    if (langBtn && langMenu) {
+        langBtn.addEventListener('click', function (e) {
+            e.stopPropagation();
+            langMenu.classList.toggle('is-open');
+        });
+        document.addEventListener('click', function () {
+            langMenu.classList.remove('is-open');
+        });
+    }
+
+    // Modal de Condicions Legals
+    const modal = document.getElementById('legalModal');
+    const openBtn = document.getElementById('openLegalBtn');
+    const closeBtn = document.getElementById('closeLegalBtn');
+    const acceptBtn = document.getElementById('acceptLegalBtn');
+
+    function openModal(e) {
+        if (e) e.preventDefault();
+        if (modal) modal.style.display = 'flex';
+    }
+
+    function closeModal() {
+        if (modal) modal.style.display = 'none';
+    }
+
+    if (openBtn) openBtn.addEventListener('click', openModal);
+    if (closeBtn) closeBtn.addEventListener('click', closeModal);
+    if (acceptBtn) acceptBtn.addEventListener('click', closeModal);
+
+    if (modal) {
+        modal.addEventListener('click', function (e) {
+            if (e.target === modal) closeModal();
+        });
+    }
+});
+</script>
+{% endblock %}
+

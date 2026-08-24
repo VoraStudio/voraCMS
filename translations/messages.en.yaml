@@ -178,6 +178,27 @@ profile:
   role_mod: "Manager"
   role_user: "User"
 
+# Login & Legal
+auth:
+  login_title: "Sign In"
+  sign_in_prompt: "Sign in to continue"
+  email_label: "Email"
+  password_label: "Password"
+  sign_in_btn: "Sign in"
+  legal_terms: "Legal terms"
+  privacy_policy: "Privacy policy"
+  discover_voradata: "Discover VoraData"
+
+legal:
+  modal_title: "Legal Terms & Privacy Policy"
+  section_relationship_title: "1. VoraCMS, VoraData & VoraStudio"
+  section_relationship_desc: "VoraCMS is a content management platform (CMS) developed by VoraData as a specialized service for VoraStudio clients. Both brands share corporate alignment, direct technical integration, and common development goals."
+  section_privacy_title: "2. Data Processing and Purpose"
+  section_privacy_desc: "All information stored and managed in VoraCMS is processed solely for the purpose of serving the client's own websites and landing pages. Data is never shared with third parties or used for unauthorized commercial purposes."
+  section_cookies_ai_title: "3. No Third-Party Cookies or External AI"
+  section_cookies_ai_desc: "This platform version uses zero third-party tracking or advertising cookies and no external AI systems that could compromise or process user data outside our secure environment."
+  close_btn: "Understood"
+
 # Footer
 footer:
   developed_by: "Powered by"

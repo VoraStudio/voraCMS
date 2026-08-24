@@ -175,6 +175,27 @@ profile:
   role_mod: "Gestor"
   role_user: "Usuari"
 
+# Login & Legal
+auth:
+  login_title: "Inici de sessió"
+  sign_in_prompt: "Inicia sessió per continuar"
+  email_label: "Email"
+  password_label: "Contrasenya"
+  sign_in_btn: "Entrar"
+  legal_terms: "Condicions legals"
+  privacy_policy: "Política de privacitat"
+  discover_voradata: "Descobreix VoraData"
+
+legal:
+  modal_title: "Condicions Legals i Política de Privacitat"
+  section_relationship_title: "1. VoraCMS, VoraData i VoraStudio"
+  section_relationship_desc: "VoraCMS és una plataforma de gestió de continguts (CMS) desenvolupada per VoraData com a servei especialitzat per als clients de VoraStudio. Ambdues marques comparteixen estructura corporativa, integració directa i objectius comuns de desenvolupament tecnològic."
+  section_privacy_title: "2. Tractament de Dades i Finalitat"
+  section_privacy_desc: "La informació emmagatzemada i gestionada a VoraCMS és tractada exclusivament amb el propòsit d'oferir servei a les pàgines web i landing pages del propi client. No es cedeixen dades a tercers ni es realitza cap ús comercial no autoritzat."
+  section_cookies_ai_title: "3. Sense Cookies de Tercers ni IA Externa"
+  section_cookies_ai_desc: "Aquesta versió de la plataforma no utilitza cap mena de cookie de seguiment o publicitària de tercers ni sistemes d'Intel·ligència Artificial externs que puguin comprometre o processar la informació de l'usuari fora del nostre entorn segur."
+  close_btn: "Entesos"
+
 # Footer
 footer:
   developed_by: "Desenvolupat per"
