@@ -407,9 +407,108 @@ body {
   transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), color 0.2s ease;
 }
 
-.s-user-dropdown.is-open .s-user-card-chevron {
+/* --- Language Switcher Component --- */
+.s-lang-switcher {
+  position: relative;
+}
+
+.s-lang-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--s-border-light, rgba(255, 255, 255, 0.1));
+  color: var(--s-text, #fff);
+  padding: 6px 10px;
+  border-radius: 9px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.s-lang-btn:hover {
+  background: rgba(255, 255, 255, 0.09);
+  border-color: rgba(249, 115, 22, 0.3);
+}
+
+.s-lang-icon {
+  font-size: 0.85rem;
+  color: #f97316;
+}
+
+.s-lang-chevron {
+  font-size: 0.65rem;
+  opacity: 0.6;
+  transition: transform 0.2s ease;
+}
+
+.s-lang-switcher.is-open .s-lang-chevron {
   transform: rotate(180deg);
   color: #f97316;
+}
+
+.s-lang-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  min-width: 140px;
+  background: linear-gradient(135deg, rgba(18, 14, 22, 0.98) 0%, rgba(24, 18, 28, 0.98) 100%);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(249, 115, 22, 0.25);
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7), 0 0 20px rgba(249, 115, 22, 0.12);
+  padding: 6px;
+  z-index: 1050;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-8px);
+  transition: opacity 0.2s ease, transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), visibility 0.2s ease;
+}
+
+.s-lang-switcher.is-open .s-lang-menu {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.s-lang-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 10px;
+  color: var(--s-text-primary, #e2e8f0);
+  text-decoration: none;
+  font-size: 0.8rem;
+  font-weight: 500;
+  border-radius: 8px;
+  transition: background 0.18s ease, color 0.18s ease;
+}
+
+.s-lang-item:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+}
+
+.s-lang-item.active {
+  background: rgba(249, 115, 22, 0.14);
+  color: #fb923c;
+  font-weight: 700;
+}
+
+.s-lang-code {
+  font-size: 0.7rem;
+  font-weight: 700;
+  background: rgba(255, 255, 255, 0.06);
+  padding: 2px 5px;
+  border-radius: 4px;
+  margin-right: 6px;
+}
+
+.s-lang-item.active .s-lang-code {
+  background: rgba(249, 115, 22, 0.25);
+  color: #fb923c;
 }
 
 /* User Dropdown Menu */

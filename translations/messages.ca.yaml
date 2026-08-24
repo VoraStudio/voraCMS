@@ -1,0 +1,99 @@
+# Català (ca)
+# Menu & Navigation
+nav:
+  general: "General"
+  dashboard: "Dashboard"
+  projects: "Projectes"
+  users: "Usuaris"
+  content_types: "Tipus de contingut"
+  media: "Mediateca"
+  developer: "Desenvolupador"
+  api_guide: "Guia API"
+  security: "Seguretat"
+  jwt_tests: "Tests JWT"
+
+# Topbar & Profile
+user:
+  profile: "Perfil d'usuari"
+  logout: "Tancar sessió"
+  search_placeholder: "Buscar..."
+  help_title: "Ajuda ràpida"
+  theme_toggle: "Canviar tema"
+  role_admin: "Admin"
+  role_mod: "Gestor"
+  role_user: "Usuari"
+
+# Common Actions
+action:
+  new: "+ Nou"
+  new_entry: "+ Nova entrada"
+  new_project: "+ Nou projecte"
+  new_type: "+ Nou tipus"
+  new_global_template: "Nova plantilla global"
+  edit: "Editar"
+  delete: "Eliminar"
+  view: "Veure"
+  save: "Desar"
+  cancel: "Cancel·lar"
+  confirm_delete: "Segur que vols eliminar aquest element?"
+  all_states: "TOTS ELS ESTATS"
+  order_recent: "ORDENA: DATA (MÉS RECENT)"
+
+# Statuses
+status:
+  active: "Activa"
+  inactive: "Inactiu"
+  published: "Publicat"
+  publicats: "Publicats"
+  draft: "Esborrany"
+  no_publicats: "No Publicats"
+  scheduled: "Programat"
+  programats: "Programats"
+  archived: "Arxivat"
+  arxivats: "Arxivats"
+  total_projects: "Total Projectes"
+  activity: "Activitat"
+
+# Dashboard
+dashboard:
+  title: "Dashboard"
+  subtitle: "Resum de l'activitat dels teus projectes i estadístiques"
+  visits_today: "Visites avui"
+  weekly_visits: "Visites setmanals"
+  peak_visits: "Pic de visites"
+  last_visit: "Última visita"
+  recent_content: "Contingut recent"
+  recent_entries: "Últimes entrades"
+  recent_news: "Últimes notícies"
+  all_projects: "Tots els projectes"
+  recent_files: "Fitxers recents"
+  requested_resources: "Recursos sol·licitats"
+  images: "Imatges"
+  entries: "Entrades"
+  others: "Altres"
+  storage: "Emmagatzematge"
+  total_files: "Fitxers totals"
+  no_recent_entries: "Sense entrades recents"
+  no_recent_files: "No hi ha fitxers recents"
+  no_visit_data: "No hi ha prou dades de visites"
+  most_viewed_sections: "Seccions més consultades"
+  last_week: "Última setmana"
+  last_7_days: "Últims 7 dies"
+  vs_yesterday: "vs ahir"
+
+# Project Show & Tables
+project:
+  section: "Secció"
+  entries_count: "entrades"
+  title: "Títol"
+  date: "Data"
+  description: "Descripció"
+  status_col: "Estat"
+  active_col: "Actiu"
+  actions_col: "Accions"
+  no_entries_in_section: "Encara no hi ha cap entrada en aquesta secció"
+  create_first_entry: "Crea la primera entrada"
+
+# Footer
+footer:
+  developed_by: "Desenvolupat per"

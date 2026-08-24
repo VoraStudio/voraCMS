@@ -1,0 +1,99 @@
+# English (en)
+# Menu & Navigation
+nav:
+  general: "General"
+  dashboard: "Dashboard"
+  projects: "Projects"
+  users: "Users"
+  content_types: "Content Types"
+  media: "Media Library"
+  developer: "Developer"
+  api_guide: "API Guide"
+  security: "Security"
+  jwt_tests: "JWT Tests"
+
+# Topbar & Profile
+user:
+  profile: "User Profile"
+  logout: "Log Out"
+  search_placeholder: "Search..."
+  help_title: "Quick Help"
+  theme_toggle: "Toggle Theme"
+  role_admin: "Admin"
+  role_mod: "Manager"
+  role_user: "User"
+
+# Common Actions
+action:
+  new: "+ New"
+  new_entry: "+ New entry"
+  new_project: "+ New project"
+  new_type: "+ New type"
+  new_global_template: "New global template"
+  edit: "Edit"
+  delete: "Delete"
+  view: "View"
+  save: "Save"
+  cancel: "Cancel"
+  confirm_delete: "Are you sure you want to delete this item?"
+  all_states: "ALL STATUSES"
+  order_recent: "ORDER: DATE (NEWEST)"
+
+# Statuses
+status:
+  active: "Active"
+  inactive: "Inactive"
+  published: "Published"
+  publicats: "Published"
+  draft: "Draft"
+  no_publicats: "Unpublished"
+  scheduled: "Scheduled"
+  programats: "Scheduled"
+  archived: "Archived"
+  arxivats: "Archived"
+  total_projects: "Total Projects"
+  activity: "Activity"
+
+# Dashboard
+dashboard:
+  title: "Dashboard"
+  subtitle: "Summary of project activity and statistics"
+  visits_today: "Visits today"
+  weekly_visits: "Weekly visits"
+  peak_visits: "Peak visits"
+  last_visit: "Last visit"
+  recent_content: "Recent content"
+  recent_entries: "Recent entries"
+  recent_news: "Recent news"
+  all_projects: "All projects"
+  recent_files: "Recent files"
+  requested_resources: "Requested resources"
+  images: "Images"
+  entries: "Entries"
+  others: "Others"
+  storage: "Storage"
+  total_files: "Total files"
+  no_recent_entries: "No recent entries"
+  no_recent_files: "No recent files"
+  no_visit_data: "Not enough visit data"
+  most_viewed_sections: "Top viewed sections"
+  last_week: "Last week"
+  last_7_days: "Last 7 days"
+  vs_yesterday: "vs yesterday"
+
+# Project Show & Tables
+project:
+  section: "Section"
+  entries_count: "entries"
+  title: "Title"
+  date: "Date"
+  description: "Description"
+  status_col: "Status"
+  active_col: "Active"
+  actions_col: "Actions"
+  no_entries_in_section: "No entries in this section yet"
+  create_first_entry: "Create the first entry"
+
+# Footer
+footer:
+  developed_by: "Powered by"

@@ -54,3 +54,24 @@
   }
   ```
 - Suport per a `[data-theme="light"]`.
+
+### `public/css/admin/tables.css` & `public/css/admin.css`
+- `.cyber-table--project-show`:
+  ```css
+  .cyber-table--project-show {
+    table-layout: fixed;
+    width: 100%;
+  }
+  .cyber-table--project-show th.col-title,
+  .cyber-table--project-show td:nth-child(1) { width: 26%; }
+  .cyber-table--project-show th.col-date,
+  .cyber-table--project-show td:nth-child(2) { width: 15%; }
+  .cyber-table--project-show th.col-desc,
+  .cyber-table--project-show td:nth-child(3) { width: 22%; }
+  .cyber-table--project-show th.col-status,
+  .cyber-table--project-show td:nth-child(4) { width: 12%; text-align: center; }
+  .cyber-table--project-show th.col-active,
+  .cyber-table--project-show td:nth-child(5) { width: 8%; text-align: center; }
+  .cyber-table--project-show th.col-actions,
+  .cyber-table--project-show td:nth-child(6) { width: 17%; text-align: right; white-space: nowrap; }
+  ```

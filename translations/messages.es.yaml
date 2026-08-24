@@ -1,0 +1,99 @@
+# Español (es)
+# Menu & Navigation
+nav:
+  general: "General"
+  dashboard: "Panel de control"
+  projects: "Proyectos"
+  users: "Usuarios"
+  content_types: "Tipos de contenido"
+  media: "Mediateca"
+  developer: "Desarrollador"
+  api_guide: "Guía API"
+  security: "Seguridad"
+  jwt_tests: "Tests JWT"
+
+# Topbar & Profile
+user:
+  profile: "Perfil de usuario"
+  logout: "Cerrar sesión"
+  search_placeholder: "Buscar..."
+  help_title: "Ayuda rápida"
+  theme_toggle: "Cambiar tema"
+  role_admin: "Admin"
+  role_mod: "Gestor"
+  role_user: "Usuario"
+
+# Common Actions
+action:
+  new: "+ Nuevo"
+  new_entry: "+ Nueva entrada"
+  new_project: "+ Nuevo proyecto"
+  new_type: "+ Nuevo tipo"
+  new_global_template: "Nueva plantilla global"
+  edit: "Editar"
+  delete: "Eliminar"
+  view: "Ver"
+  save: "Guardar"
+  cancel: "Cancelar"
+  confirm_delete: "¿Seguro que deseas eliminar este elemento?"
+  all_states: "TODOS LOS ESTADOS"
+  order_recent: "ORDENAR: FECHA (MÁS RECIENTE)"
+
+# Statuses
+status:
+  active: "Activa"
+  inactive: "Inactivo"
+  published: "Publicado"
+  publicats: "Publicados"
+  draft: "Borrador"
+  no_publicats: "No Publicados"
+  scheduled: "Programado"
+  programats: "Programados"
+  archived: "Archivado"
+  arxivats: "Archivados"
+  total_projects: "Total Proyectos"
+  activity: "Actividad"
+
+# Dashboard
+dashboard:
+  title: "Panel de control"
+  subtitle: "Resumen de la actividad de tus proyectos y estadísticas"
+  visits_today: "Visitas hoy"
+  weekly_visits: "Visitas semanales"
+  peak_visits: "Pico de visitas"
+  last_visit: "Última visita"
+  recent_content: "Contenido reciente"
+  recent_entries: "Últimas entradas"
+  recent_news: "Últimas noticias"
+  all_projects: "Todos los proyectos"
+  recent_files: "Archivos recientes"
+  requested_resources: "Recursos solicitados"
+  images: "Imágenes"
+  entries: "Entradas"
+  others: "Otros"
+  storage: "Almacenamiento"
+  total_files: "Archivos totales"
+  no_recent_entries: "Sin entradas recientes"
+  no_recent_files: "No hay archivos recientes"
+  no_visit_data: "No hay suficientes datos de visitas"
+  most_viewed_sections: "Secciones más consultadas"
+  last_week: "Última semana"
+  last_7_days: "Últimos 7 días"
+  vs_yesterday: "vs ayer"
+
+# Project Show & Tables
+project:
+  section: "Sección"
+  entries_count: "entradas"
+  title: "Título"
+  date: "Fecha"
+  description: "Descripción"
+  status_col: "Estado"
+  active_col: "Activo"
+  actions_col: "Acciones"
+  no_entries_in_section: "Todavía no hay ninguna entrada en esta sección"
+  create_first_entry: "Crea la primera entrada"
+
+# Footer
+footer:
+  developed_by: "Desarrollado por"

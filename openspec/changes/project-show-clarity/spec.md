@@ -30,3 +30,14 @@
 
 ### Req 3: Resum de Seccions Disponibles al Projecte
 - Sota el títol del projecte o abans de les seccions, mostrar un mini selector/índex de les seccions disponibles (si n'hi ha més d'una) per navegar ràpidament.
+
+### Req 4: Alineació Vertical Fixa de Columnes Entre Seccions
+- Aplicar `table-layout: fixed` mitjançant `.cyber-table--project-show` a totes les taules de secció.
+- Distribució d'amplades fixes:
+  - **Títol & ID**: `26%`
+  - **Data**: `15%`
+  - **Descripció**: `22%`
+  - **Estat**: `12%` (centrat)
+  - **Actiu**: `8%` (centrat)
+  - **Accions**: `17%` (dreta, `white-space: nowrap`)
+- Garantir que totes les taules de la mateixa vista mantenen exactament la mateixa graella vertical de columnes.

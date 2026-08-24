@@ -17,12 +17,12 @@
     <div class="s-user-dropdown-menu" id="userDropdownMenu">
         <a href="{{ path('admin_profile') }}" class="s-user-dropdown-item">
             <i class="bi bi-person-badge"></i>
-            <span>Perfil d'usuari</span>
+            <span>{{ 'user.profile'|trans }}</span>
         </a>
         <div class="s-user-dropdown-divider"></div>
         <a href="{{ path('admin_logout') }}" class="s-user-dropdown-item s-user-dropdown-item--logout">
             <i class="bi bi-box-arrow-right"></i>
-            <span>Tancar sessió</span>
+            <span>{{ 'user.logout'|trans }}</span>
         </a>
     </div>
 </div>

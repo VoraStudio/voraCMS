@@ -41,32 +41,32 @@
 
         {# ─── Navigation ─── #}
         <div class="s-sidebar-nav">
-            <div class="s-sidebar-section">General</div>
+            <div class="s-sidebar-section">{{ 'nav.general'|trans }}</div>
 
             <a class="s-sidebar-link{% if app.request.get('_route') == 'admin_dashboard' %} active{% endif %}" href="{{ path('admin_dashboard') }}">
-                <i class="bi bi-grid-1x2-fill"></i> Dashboard
+                <i class="bi bi-grid-1x2-fill"></i> {{ 'nav.dashboard'|trans }}
             </a>
 
             {# ─── Project selector / current project ─── #}
             {% set sidebarTypes = admin_content_types() %}
             <a class="s-sidebar-link{% if app.request.get('_route') starts with 'admin_project_' %} active{% endif %}" href="{{ path('admin_projects') }}">
-                <i class="bi bi-folder"></i> Projectes
+                <i class="bi bi-folder"></i> {{ 'nav.projects'|trans }}
             </a>
             {% if is_granted('ROLE_ADMIN') %}
             <a class="s-sidebar-link{% if app.request.get('_route') starts with 'admin_user_' %} active{% endif %}" href="{{ path('admin_user_index') }}">
-                <i class="bi bi-people"></i> Usuaris
+                <i class="bi bi-people"></i> {{ 'nav.users'|trans }}
             </a>
             {% endif %}
 
             {# ─── Seccions (gestió de tipus de contingut i plantilles globals) ─── #}
             {% if is_granted('ROLE_ADMIN') %}
             <a class="s-sidebar-link{% if app.request.get('_route') starts with 'admin_content_type_' or app.request.get('_route') starts with 'admin_base_content_' %} active{% endif %}" href="{{ path('admin_content_type_index') }}">
-                <i class="bi bi-layers-fill"></i> Tipus de contingut
+                <i class="bi bi-layers-fill"></i> {{ 'nav.content_types'|trans }}
             </a>
             {% endif %}
 
             <a class="s-sidebar-link{% if app.request.get('_route') == 'admin_media_index' %} active{% endif %}" href="{{ path('admin_media_index') }}">
-                <i class="bi bi-images"></i> Mediateca
+                <i class="bi bi-images"></i> {{ 'nav.media'|trans }}
             </a>
 
             {# ─── Si hi ha projecte actiu → mostrem les seves seccions ─── #}
@@ -86,15 +86,15 @@
             {% endif %}
 
             {% if is_granted('ROLE_ADMIN') %}
-            <div class="s-sidebar-section">Desenvolupador</div>
+            <div class="s-sidebar-section">{{ 'nav.developer'|trans }}</div>
             <a class="s-sidebar-link{% if app.request.get('_route') == 'admin_api_guide' %} active{% endif %}" href="{{ path('admin_api_guide') }}">
-                <i class="bi bi-code-slash"></i> Guia API
+                <i class="bi bi-code-slash"></i> {{ 'nav.api_guide'|trans }}
             </a>
             <a class="s-sidebar-link s-sidebar-link--sub{% if app.request.get('_route') == 'admin_api_guide_security' %} active{% endif %}" href="{{ path('admin_api_guide_security') }}">
-                <i class="bi bi-shield-check"></i> Seguretat
+                <i class="bi bi-shield-check"></i> {{ 'nav.security'|trans }}
             </a>
             <a class="s-sidebar-link s-sidebar-link--sub{% if app.request.get('_route') == 'admin_api_guide_tests' %} active{% endif %}" href="{{ path('admin_api_guide_tests') }}">
-                <i class="bi bi-check-circle"></i> Tests JWT
+                <i class="bi bi-check-circle"></i> {{ 'nav.jwt_tests'|trans }}
             </a>
             <div class="s-sidebar-group{% if app.request.get('_route') == 'admin_api_guide_jwt' %} is-open{% endif %}">
                 <a class="s-sidebar-link s-sidebar-link--sub{% if app.request.get('_route') == 'admin_api_guide_jwt' %} active{% endif %} s-sidebar-group-toggle" href="{{ path('admin_api_guide_jwt') }}">
@@ -159,19 +159,46 @@
             <div class="s-topbar-actions">
                 <!-- Topbar Search -->
                 <div class="d2-search-wrapper d2-search-wrapper--topbar">
-                    <input type="text" id="projectSearch" class="d2-search-input" placeholder="Buscar...">
-                    <button type="button" class="d2-search-btn" title="Buscar">
+                    <input type="text" id="projectSearch" class="d2-search-input" placeholder="{{ 'user.search_placeholder'|trans }}">
+                    <button type="button" class="d2-search-btn" title="{{ 'user.search_placeholder'|trans }}">
                         <i class="bi bi-search"></i>
                     </button>
                 </div>
 
+                {# ─── Language selector ─── #}
+                {% set currentLocale = app.request.locale|default('ca') %}
+                <div class="s-lang-switcher" id="langSwitcher">
+                    <button type="button" class="s-lang-btn" id="langBtn" aria-label="Canviar idioma" title="Idioma">
+                        <i class="bi bi-translate s-lang-icon"></i>
+                        <span class="s-lang-current">{{ currentLocale|upper }}</span>
+                        <i class="bi bi-chevron-down s-lang-chevron"></i>
+                    </button>
+                    <div class="s-lang-menu" id="langMenu">
+                        <a href="{{ path('admin_switch_locale', {locale: 'ca'}) }}" class="s-lang-item{% if currentLocale == 'ca' %} active{% endif %}">
+                            <span class="s-lang-code">CAT</span>
+                            <span class="s-lang-label">Català</span>
+                            {% if currentLocale == 'ca' %}<i class="bi bi-check2"></i>{% endif %}
+                        </a>
+                        <a href="{{ path('admin_switch_locale', {locale: 'es'}) }}" class="s-lang-item{% if currentLocale == 'es' %} active{% endif %}">
+                            <span class="s-lang-code">ESP</span>
+                            <span class="s-lang-label">Español</span>
+                            {% if currentLocale == 'es' %}<i class="bi bi-check2"></i>{% endif %}
+                        </a>
+                        <a href="{{ path('admin_switch_locale', {locale: 'en'}) }}" class="s-lang-item{% if currentLocale == 'en' %} active{% endif %}">
+                            <span class="s-lang-code">ENG</span>
+                            <span class="s-lang-label">English</span>
+                            {% if currentLocale == 'en' %}<i class="bi bi-check2"></i>{% endif %}
+                        </a>
+                    </div>
+                </div>
+
                 {# ─── Theme toggle ─── #}
-                <button class="s-theme-toggle" id="themeToggle" title="Canviar tema">
+                <button class="s-theme-toggle" id="themeToggle" title="{{ 'user.theme_toggle'|trans }}">
                     <i class="bi bi-sun-fill s-theme-icon-light"></i>
                     <i class="bi bi-moon-fill s-theme-icon-dark"></i>
                 </button>
                 {# ─── Help / FAQ ─── #}
-                <button class="s-help-toggle faq-btn" type="button" title="Ajuda ràpida" aria-label="Ajuda ràpida">
+                <button class="s-help-toggle faq-btn" type="button" title="{{ 'user.help_title'|trans }}" aria-label="{{ 'user.help_title'|trans }}">
                     <i class="bi bi-question-circle-fill"></i>
                 </button>
                 {# ─── User card ─── #}

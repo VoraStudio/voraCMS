@@ -129,6 +129,35 @@
       });
     }
 
+    /* ─── Language Switcher Dropdown ─── */
+    var langSwitcher = document.getElementById('langSwitcher');
+    var langBtn = document.getElementById('langBtn');
+
+    if (langSwitcher && langBtn) {
+      langBtn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        var isOpen = langSwitcher.classList.contains('is-open');
+        if (isOpen) {
+          langSwitcher.classList.remove('is-open');
+        } else {
+          langSwitcher.classList.add('is-open');
+        }
+      });
+
+      document.addEventListener('click', function (e) {
+        if (!langSwitcher.contains(e.target)) {
+          langSwitcher.classList.remove('is-open');
+        }
+      });
+
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && langSwitcher.classList.contains('is-open')) {
+          langSwitcher.classList.remove('is-open');
+          langBtn.focus();
+        }
+      });
+    }
+
     /* ─── Form validation ─── */
     document.querySelectorAll('form').forEach(function (form) {
       form.setAttribute('novalidate', '');

@@ -329,35 +329,35 @@
     </div>
 
     {# ─── Últimes notícies (Full width and taller) ─── #}
-    {% set featuresTitle = 'Últimes entrades' %}
+    {% set featuresTitle = 'dashboard.recent_entries'|trans %}
     {% if activeProject is defined and activeProject.contentFeatures is defined %}
         {% if 'noticies' in activeProject.contentFeatures %}
-            {% set featuresTitle = 'Últimes notícies' %}
+            {% set featuresTitle = 'dashboard.recent_news'|trans %}
         {% elseif 'custom' in activeProject.contentFeatures %}
-            {% set featuresTitle = 'Contingut recent' %}
+            {% set featuresTitle = 'dashboard.recent_content'|trans %}
         {% endif %}
     {% endif %}
     <div class="d2-panel">
         <div class="d2-panel-head">
             <span class="d2-panel-title">{{ featuresTitle }}</span>
-            <a href="{{ path('admin_projects') }}" class="d2-panel-link">Tots els projectes</a>
+            <a href="{{ path('admin_projects') }}" class="d2-panel-link">{{ 'dashboard.all_projects'|trans }}</a>
         </div>
         <div class="d2-panel-body">
             <div class="d2-news-grid d2-news-grid--taller">
                 {% for entry in latestEntries|slice(0, 4) %}
                 <a href="{{ path('admin_entry_edit', {id: entry.id}) }}" class="d2-news-card" title="{{ entry.title }}">
                     {# Badge/Icona d'estat a la banda superior dreta #}
-                    <div class="d2-news-card__status-corner" title="{% if entry.status == 'published' %}Publicat{% elseif entry.status == 'draft' %}No publicat (Esborrany){% elseif entry.status == 'scheduled' %}Programat{% else %}Arxivat{% endif %}{% if not entry.active %} · Inactiu{% endif %}">
+                    <div class="d2-news-card__status-corner" title="{% if entry.status == 'published' %}{{ 'status.published'|trans }}{% elseif entry.status == 'draft' %}{{ 'status.draft'|trans }}{% elseif entry.status == 'scheduled' %}{{ 'status.scheduled'|trans }}{% else %}{{ 'status.archived'|trans }}{% endif %}{% if not entry.active %} · {{ 'status.inactive'|trans }}{% endif %}">
                         {% if not entry.active %}
-                            <span class="d2-corner-badge d2-corner-badge--inactive"><i class="bi bi-pause-circle-fill"></i> Inactiu</span>
+                            <span class="d2-corner-badge d2-corner-badge--inactive"><i class="bi bi-pause-circle-fill"></i> {{ 'status.inactive'|trans }}</span>
                         {% elseif entry.status == 'published' %}
-                            <span class="d2-corner-badge d2-corner-badge--published"><i class="bi bi-check-circle-fill"></i> Activa</span>
+                            <span class="d2-corner-badge d2-corner-badge--published"><i class="bi bi-check-circle-fill"></i> {{ 'status.active'|trans }}</span>
                         {% elseif entry.status == 'scheduled' %}
-                            <span class="d2-corner-badge d2-corner-badge--scheduled"><i class="bi bi-clock-fill"></i> Programada</span>
+                            <span class="d2-corner-badge d2-corner-badge--scheduled"><i class="bi bi-clock-fill"></i> {{ 'status.scheduled'|trans }}</span>
                         {% elseif entry.status == 'archived' %}
-                            <span class="d2-corner-badge d2-corner-badge--archived"><i class="bi bi-archive-fill"></i> Arxivada</span>
+                            <span class="d2-corner-badge d2-corner-badge--archived"><i class="bi bi-archive-fill"></i> {{ 'status.archived'|trans }}</span>
                         {% else %}
-                            <span class="d2-corner-badge d2-corner-badge--draft"><i class="bi bi-pencil-fill"></i> Esborrany</span>
+                            <span class="d2-corner-badge d2-corner-badge--draft"><i class="bi bi-pencil-fill"></i> {{ 'status.draft'|trans }}</span>
                         {% endif %}
                     </div>
 
@@ -382,7 +382,7 @@
                     </div>
                 </a>
                 {% else %}
-                <div class="d2-empty-row">Sense entrades recents</div>
+                <div class="d2-empty-row">{{ 'dashboard.no_recent_entries'|trans }}</div>
                 {% endfor %}
             </div>
         </div>
@@ -393,8 +393,8 @@
         {# --- Left column: Fitxers recents --- #}
         <div class="d2-panel" style="margin-bottom: 0;">
             <div class="d2-panel-head">
-                <span class="d2-panel-title">Fitxers recents</span>
-                <a href="{{ path('admin_media_index') }}" class="d2-panel-link">Mediateca</a>
+                <span class="d2-panel-title">{{ 'dashboard.recent_files'|trans }}</span>
+                <a href="{{ path('admin_media_index') }}" class="d2-panel-link">{{ 'nav.media'|trans }}</a>
             </div>
             <div class="d2-panel-body">
                 <div class="d2-file-grid">
@@ -412,7 +412,7 @@
                             {% endif %}
                         </div>
                     {% else %}
-                        <div class="d2-empty-row">No hi ha fitxers recents</div>
+                        <div class="d2-empty-row">{{ 'dashboard.no_recent_files'|trans }}</div>
                     {% endfor %}
                 </div>
             </div>
@@ -421,7 +421,7 @@
         {# --- Right column: Resources / Donut --- #}
         <div class="d2-panel" style="margin-bottom: 0;">
             <div class="d2-panel-head">
-                <span class="d2-panel-title">Recursos sol·licitats</span>
+                <span class="d2-panel-title">{{ 'dashboard.requested_resources'|trans }}</span>
             </div>
             <div class="d2-panel-body">
                 {% set circ = 188 %}

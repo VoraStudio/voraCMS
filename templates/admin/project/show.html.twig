@@ -54,12 +54,12 @@
         <div class="d2-panel-head-left">
             <div class="d-flex align-items-center gap-2 flex-wrap">
                 <span class="d2-section-badge">
-                    <i class="bi bi-layers-fill"></i> Secció
+                    <i class="bi bi-layers-fill"></i> {{ 'project.section'|trans }}
                 </span>
                 <span class="d2-panel-title text-capitalize">{{ ct.name }}</span>
                 <div class="d2-section-meta">
                     <span class="d2-section-meta-item">
-                        <i class="bi bi-file-earmark-text me-1"></i>{{ entries|length }} {{ entries|length == 1 ? 'entrada' : 'entrades' }}
+                        <i class="bi bi-file-earmark-text me-1"></i>{{ entries|length }} {{ 'project.entries_count'|trans }}
                     </span>
                     <span class="d2-section-meta-item font-monospace text-muted" title="Identificador de tipus">
                         #{{ ct.slug }}
@@ -72,7 +72,7 @@
         </div>
         <div class="d2-panel-head-right">
             <a href="{{ path('admin_entry_new', {slug: ct.slug}) }}" class="cyber-btn-primary cyber-btn--compact">
-                <i class="bi bi-plus-lg"></i> <span>Nova</span>
+                <i class="bi bi-plus-lg"></i> <span>{{ 'action.new'|trans }}</span>
             </a>
         </div>
     </div>
@@ -80,12 +80,12 @@
     <table class="cyber-table cyber-table--project-show">
         <thead>
             <tr>
-                <th class="col-title">Títol</th>
-                <th class="col-date">Data</th>
-                <th class="col-desc">Descripció</th>
-                <th class="col-status">Estat</th>
-                <th class="col-active">Actiu</th>
-                <th class="col-actions">Accions</th>
+                <th class="col-title">{{ 'project.title'|trans }}</th>
+                <th class="col-date">{{ 'project.date'|trans }}</th>
+                <th class="col-desc">{{ 'project.description'|trans }}</th>
+                <th class="col-status">{{ 'project.status_col'|trans }}</th>
+                <th class="col-active">{{ 'project.active_col'|trans }}</th>
+                <th class="col-actions">{{ 'project.actions_col'|trans }}</th>
             </tr>
         </thead>
         <tbody>
@@ -93,9 +93,9 @@
             <tr>
                 <td colspan="6" class="cyber-empty">
                     <div class="cyber-empty-icon"><i class="bi bi-file-earmark-text"></i></div>
-                    <p class="cyber-empty-text">No hi ha entrades en aquesta secció</p>
-                    <a href="{{ path('admin_entry_new', {slug: ct.slug}) }}" class="cyber-btn-primary cyber-btn--action">
-                        <i class="bi bi-plus-lg"></i> <span>Crear primera entrada</span>
+                    <div class="cyber-empty-text">{{ 'project.no_entries_in_section'|trans }}</div>
+                    <a href="{{ path('admin_entry_new', {slug: ct.slug}) }}" class="cyber-btn-primary cyber-btn--compact" style="margin-top: 10px;">
+                        <i class="bi bi-plus-lg"></i> {{ 'project.create_first_entry'|trans }}
                     </a>
                 </td>
             </tr>

@@ -655,6 +655,31 @@ body::before {
   border-color: rgba(239, 68, 68, 0.25);
   color: #dc2626;
 }
+[data-theme="light"] .s-lang-btn {
+  background: #ffffff;
+  border-color: rgba(0, 0, 0, 0.1);
+  color: #1e293b;
+}
+[data-theme="light"] .s-lang-btn:hover {
+  background: #f1f5f9;
+  border-color: rgba(249, 115, 22, 0.4);
+}
+[data-theme="light"] .s-lang-menu {
+  background: #ffffff;
+  border-color: rgba(0, 0, 0, 0.12);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+}
+[data-theme="light"] .s-lang-item {
+  color: #334155;
+}
+[data-theme="light"] .s-lang-item:hover {
+  background: #f1f5f9;
+  color: #0f172a;
+}
+[data-theme="light"] .s-lang-code {
+  background: #e2e8f0;
+  color: #475569;
+}
 [data-theme="light"] .s-theme-toggle {
   color: rgba(0, 0, 0, 0.45);
 }
