@@ -26,6 +26,7 @@ body {
 .s-sidebar {
   width: var(--s-sidebar-width);
   background: var(--s-sidebar-bg);
+  border-right: 1px solid var(--s-border-light);
   display: flex;
   flex-direction: column;
   position: fixed;

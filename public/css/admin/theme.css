@@ -411,53 +411,59 @@
   color: rgba(71, 85, 105, 0.5);
 }
 [data-theme="light"] {
-  /* Surface / bg — warm corporate */
-  --s-bg: #f5f2eb;
-  --s-main-bg: linear-gradient(175deg, #f5f2eb 0%, #f6f0e8 30%, #f7efe4 60%, #f5ece0 100%);
-  --s-topbar-bg: transparent;
-  --s-surface: rgba(255, 255, 255, 0.78);
-  --s-surface-translucent: rgba(255, 255, 255, 0.55);
-  --s-surface-secondary: #ffffff;
-  --s-border: rgba(0, 0, 0, 0.12);
-  --s-border-light: rgba(0, 0, 0, 0.08);
+  /* Surface / bg — Modern clean slate */
+  --s-bg: #f8fafc;
+  --s-main-bg: #f1f5f9;
+  --s-topbar-bg: rgba(248, 250, 252, 0.85);
+  --s-surface: #ffffff;
+  --s-surface-translucent: rgba(255, 255, 255, 0.85);
+  --s-surface-secondary: #f8fafc;
+  --s-border: rgba(0, 0, 0, 0.1);
+  --s-border-light: rgba(0, 0, 0, 0.06);
 
   /* Sidebar */
-  --s-sidebar-bg: rgba(255, 255, 255, 0.25);
+  --s-sidebar-bg: #ffffff;
   --s-sidebar-hover: rgba(0, 0, 0, 0.04);
-  --s-sidebar-active: rgba(249, 115, 22, 0.08);
-  --s-sidebar-text: rgba(0, 0, 0, 0.9);
-  --s-sidebar-text-hover: #000000;
-  --s-sidebar-divider: rgba(0, 0, 0, 0.06);
+  --s-sidebar-active: rgba(249, 115, 22, 0.1);
+  --s-sidebar-text: #334155;
+  --s-sidebar-text-hover: #0f172a;
+  --s-sidebar-divider: rgba(0, 0, 0, 0.08);
 
   /* Brand */
   --s-primary: #f97316;
   --s-primary-hover: #ea580c;
-  --s-primary-light: rgba(249, 115, 22, 0.08);
+  --s-primary-light: rgba(249, 115, 22, 0.1);
 
   /* Accent */
   --s-accent: #f59e0b;
-  --s-accent-light: rgba(245, 158, 11, 0.08);
+  --s-accent-light: rgba(245, 158, 11, 0.1);
 
   /* Text */
-  --s-text: #111111;
-  --s-text-secondary: #2d3748;
-  --s-text-muted: #5a6578;
-  --s-text-label: #1e293b;
+  --s-text: #0f172a;
+  --s-text-secondary: #475569;
+  --s-text-muted: #64748b;
+  --s-text-label: #334155;
 
   /* Inputs — Clean Figma style */
   --s-input-bg: #ffffff;
-  --s-input-border: #e3e3e3;
-  --s-input-focus-border: #111111;
+  --s-input-border: #cbd5e1;
+  --s-input-focus-border: #f97316;
   --s-input-focus-bg: #ffffff;
-  --s-input-focus: #111111;
-  --s-input-placeholder: #c5c5c5;
+  --s-input-focus: #f97316;
+  --s-input-placeholder: #94a3b8;
   --s-input-radius: 9px;
 
   /* Shadows */
   --s-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.05);
-  --s-shadow-md: 0 4px 16px rgba(0, 0, 0, 0.07);
-  --s-shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.1);
+  --s-shadow-md: 0 4px 16px rgba(0, 0, 0, 0.06);
+  --s-shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.08);
 }
+
+/* Light mode logo contrast */
+[data-theme="light"] .s-sidebar-logo {
+  filter: brightness(0) opacity(0.85);
+}
+
 [data-theme="light"] body {
   background: var(--s-main-bg, var(--s-bg));
 }

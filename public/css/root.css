@@ -3,23 +3,23 @@
    ═══════════════════════════════════════════════════ */
 
 :root {
-  /* Background system — Deep control-room dark */
-  --s-bg: #08080a;
-  --s-main-bg: linear-gradient(175deg, #08080a 0%, #0b0808 30%, #0e0907 60%, #100908 100%);
-  --s-topbar-bg: transparent;
-  --s-surface: rgba(255, 255, 255, 0.035);
-  --s-surface-translucent: rgba(255, 255, 255, 0.025);
-  --s-surface-secondary: rgba(255, 255, 255, 0.03);
-  --s-border: rgba(255, 255, 255, 0.25);
-  --s-border-light: rgba(255, 255, 255, 0.15);
+  /* Background system — Warm charcoal dark */
+  --s-bg: #111015;
+  --s-main-bg: linear-gradient(175deg, #111015 0%, #15131a 35%, #18151f 70%, #1a1622 100%);
+  --s-topbar-bg: rgba(17, 16, 21, 0.65);
+  --s-surface: rgba(255, 255, 255, 0.045);
+  --s-surface-translucent: rgba(255, 255, 255, 0.03);
+  --s-surface-secondary: rgba(255, 255, 255, 0.04);
+  --s-border: rgba(255, 255, 255, 0.22);
+  --s-border-light: rgba(255, 255, 255, 0.12);
 
   /* Sidebar */
-  --s-sidebar-bg: rgba(10, 10, 12, 0.25);
-  --s-sidebar-hover: rgba(255, 255, 255, 0.05);
-  --s-sidebar-active: rgba(249, 115, 22, 0.15);
-  --s-sidebar-text: rgba(255, 255, 255, 0.8);
+  --s-sidebar-bg: #0c0b0f;
+  --s-sidebar-hover: rgba(255, 255, 255, 0.06);
+  --s-sidebar-active: rgba(249, 115, 22, 0.18);
+  --s-sidebar-text: rgba(255, 255, 255, 0.85);
   --s-sidebar-text-hover: #ffffff;
-  --s-sidebar-divider: rgba(255, 255, 255, 0.06);
+  --s-sidebar-divider: rgba(255, 255, 255, 0.08);
 
   /* Brand — VoraStudio Warm Orange (flat value kept for base; always use gradients in UI) */
   --s-primary: #f97316;

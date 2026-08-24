@@ -25,7 +25,8 @@ body {
 /* ───────── Sidebar ───────── */
 .s-sidebar {
   width: var(--s-sidebar-width);
-  background: linear-gradient(180deg, rgba(8, 10, 30, 1) 0%, rgba(15, 25, 55, 1) 60%, rgba(20, 40, 75, 1) 100%);
+  background: var(--s-sidebar-bg);
+  border-right: 1px solid var(--s-border-light);
   display: flex;
   flex-direction: column;
   position: fixed;
