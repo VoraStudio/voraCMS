@@ -97,9 +97,15 @@ dashboard:
   last_7_days: "Últims 7 dies"
   vs_yesterday: "vs ahir"
   today_visits: "visites avui"
-  last_visit_time: "Última visita: Fa"
-  hours_ago: "h"
+  last_visit_time: "Última visita:"
   no_visits_yet: "Sense visites encara"
+
+# Time Ago
+time:
+  few_seconds_ago: "Fa uns segons"
+  minutes_ago: "Fa %count% min"
+  hours_ago: "Fa %count% h"
+  days_ago: "Fa %count% dies"
 
 # Project Show & Tables
 project:

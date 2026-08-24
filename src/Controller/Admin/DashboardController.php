@@ -31,6 +31,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 #[Route('/admin')]
 class DashboardController extends AbstractController
@@ -52,6 +53,7 @@ class DashboardController extends AbstractController
         VisitRepository $visitRepo,
         UserRepository $userRepo,
         ApiRequestLogRepository $apiLogRepo,
+        TranslatorInterface $translator,
     ): Response {
         $user = $this->getUser();
         $isAdmin = $this->isGranted('ROLE_ADMIN');
@@ -148,7 +150,10 @@ class DashboardController extends AbstractController
         $visitPeakDay = null;
         $weeklyVisits = [];
         $maxDailyVisits = 0;
-        $dayNamesCa = ['Monday' => 'Dilluns', 'Tuesday' => 'Dimarts', 'Wednesday' => 'Dimecres', 'Thursday' => 'Dijous', 'Friday' => 'Divendres', 'Saturday' => 'Dissabte', 'Sunday' => 'Diumenge'];
+        $locale = $request->getLocale();
+        $intlFull = new \IntlDateFormatter($locale, \IntlDateFormatter::NONE, \IntlDateFormatter::NONE, null, null, 'EEEE');
+        $intlShort = new \IntlDateFormatter($locale, \IntlDateFormatter::NONE, \IntlDateFormatter::NONE, null, null, 'EE');
+
         for ($i = 6; $i >= 0; $i--) {
             $dayStart = $todayStart->modify("-{$i} days");
             $dayEnd = $dayStart->modify('+1 day');
@@ -161,16 +166,14 @@ class DashboardController extends AbstractController
                 ->getSingleScalarResult();
             if ($dayTotal > $visitPeak) {
                 $visitPeak = $dayTotal;
-                $rawDay = $dayStart->format('l');
-                $visitPeakDay = $dayNamesCa[$rawDay] ?? $rawDay;
+                $visitPeakDay = ucfirst($intlFull->format($dayStart) ?: $dayStart->format('l'));
             }
             if ($dayTotal > $maxDailyVisits) {
                 $maxDailyVisits = $dayTotal;
             }
-            $rawDayName = $dayStart->format('D');
-            $shortDay = $dayNamesCa[$dayStart->format('l')] ?? $rawDayName;
+            $shortDay = ucfirst($intlShort->format($dayStart) ?: $dayStart->format('D'));
             $weeklyVisits[] = [
-                'day' => mb_substr($shortDay, 0, 2),
+                'day' => $shortDay,
                 'total' => $dayTotal
             ];
         }
@@ -190,16 +193,16 @@ class DashboardController extends AbstractController
             $now = new \DateTimeImmutable();
             $diff = $now->getTimestamp() - $lastVisit->getTimestamp();
             if ($diff < 60) {
-                $lastVisitAgo = 'Fa uns segons';
+                $lastVisitAgo = $translator->trans('time.few_seconds_ago', [], 'messages');
             } elseif ($diff < 3600) {
                 $mins = floor($diff / 60);
-                $lastVisitAgo = "Fa $mins min";
+                $lastVisitAgo = $translator->trans('time.minutes_ago', ['%count%' => $mins], 'messages');
             } elseif ($diff < 86400) {
                 $hours = floor($diff / 3600);
-                $lastVisitAgo = "Fa $hours h";
+                $lastVisitAgo = $translator->trans('time.hours_ago', ['%count%' => $hours], 'messages');
             } elseif ($diff < 604800) {
                 $days = floor($diff / 86400);
-                $lastVisitAgo = "Fa $days dies";
+                $lastVisitAgo = $translator->trans('time.days_ago', ['%count%' => $days], 'messages');
             } else {
                 $lastVisitAgo = $lastVisit->format('d/m/Y');
             }

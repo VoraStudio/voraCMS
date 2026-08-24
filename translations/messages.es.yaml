@@ -97,9 +97,15 @@ dashboard:
   last_7_days: "Últimos 7 días"
   vs_yesterday: "vs ayer"
   today_visits: "visitas hoy"
-  last_visit_time: "Última visita: Hace"
-  hours_ago: "h"
+  last_visit_time: "Última visita:"
   no_visits_yet: "Sin visitas todavía"
+
+# Time Ago
+time:
+  few_seconds_ago: "Hace unos segundos"
+  minutes_ago: "Hace %count% min"
+  hours_ago: "Hace %count% h"
+  days_ago: "Hace %count% días"
 
 # Project Show & Tables
 project:
