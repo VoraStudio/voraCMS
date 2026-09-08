@@ -17,3 +17,7 @@
 
 ### REQ-4: Formularis
 - Els formularis de creació i edició de projecte no han d'incloure la barra de mètriques `_project_header_bar.html.twig`.
+
+### REQ-5: Vistes de Configuració de Tipus de Contingut
+- Les vistes de definició i gestió d'estructures de tipus de contingut (`/admin/content-type` i `/admin/base-content`, tant llistat com formularis de creació i edició) no han d'incloure la capçalera de mètriques i filtres operacionals `_project_header_bar.html.twig`.
+
