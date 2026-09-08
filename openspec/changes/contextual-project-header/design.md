@@ -33,3 +33,9 @@ Es mostren 6 targetes enfocades 100% a les entrades del context seleccionat:
 - **Mode A (Admin Global)**: El selector `#statusFilter` ofereix `[all, active, inactive]` per filtrar files de projecte (`.d2-project-row`).
 - **Mode B (Contextual / Client)**: El selector `#statusFilter` ofereix `[all, published, draft, scheduled, archived]` i filtra files de taula (`tr.cyber-row[data-status]`).
 - **Cercador unificat**: Filtra tant noms de projecte com el text de qualsevol fila d'entrada a les taules.
+
+## 4. Eliminació de la Barra Redundant `.d2-section-bar`
+S'elimina el bloc `<div class="d2-section-bar">`:
+- Era redundant perquè el nom del projecte ja encapçala la pàgina (H1) i cada requadre/panell de contingut ja disposa del seu propi badge `SECCIÓ` identificatiu.
+- Evita la confusió d'etiquetar el nom d'un projecte com a «Secció».
+

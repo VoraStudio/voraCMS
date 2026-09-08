@@ -13,7 +13,7 @@
 {% block content %}
 <div class="d2-body">
 
-{% include 'admin/project/_project_header_bar.html.twig' with {title_override: ('project.projects_title'|trans ~ ':')} %}
+{% include 'admin/project/_project_header_bar.html.twig' %}
 
 {% macro project_card(project, filterUserId) %}
     {% set pColor = project.color ?: '#4945FF' %}

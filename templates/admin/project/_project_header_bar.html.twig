@@ -237,10 +237,6 @@
     </div>
 </div>
 
-<div class="d2-section-bar">
-    {{ title_override|default(currentSection ? ('project.section'|trans ~ ': ' ~ currentSection.name) : (currentProject ? ('project.section'|trans ~ ': ' ~ currentProject.name) : ('project.projects_title'|trans ~ ':'))) }}
-</div>
-
 <script>
 document.addEventListener('DOMContentLoaded', function () {
   var searchInput = document.getElementById('projectSearch');
