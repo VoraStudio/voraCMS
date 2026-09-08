@@ -24,7 +24,6 @@
 
 {% block content %}
 {% include 'admin/project/_project_header_bar.html.twig' %}
-
 <div class="d2-body">
 
 {% set totalSections = sections|length %}
@@ -112,7 +111,7 @@
                 {% endif %}
             {% endfor %}
 
-            <tr class="cyber-row" data-anim="cyber-row">
+            <tr class="cyber-row" data-status="{{ entry.status }}" data-anim="cyber-row">
                 <td class="cyber-cell" data-label="Títol">
                     <div class="cyber-cell__content">
                         {% set thumb = thumbnails[entry.id] ?? null %}

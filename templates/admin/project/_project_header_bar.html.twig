@@ -1,43 +1,97 @@
 {# ─── Component: _project_header_bar.html.twig ─── #}
-{% set headerProjects = admin_projects() %}
+{% set isAdmin = is_granted('ROLE_ADMIN') %}
+{% set isInsideProject = (project is defined and project is not null) or (contentType is defined and contentType is not null) or (not isAdmin) %}
+{% set currentProject = project ?? (contentType is defined and contentType ? contentType.project : null) %}
+{% set currentSection = contentType ?? null %}
 
-{% set totalProjectsCount = headerProjects|length %}
 {% set publishedEntriesCount = 0 %}
 {% set draftEntriesCount = 0 %}
 {% set revisionEntriesCount = 0 %}
 {% set cancelledEntriesCount = 0 %}
+{% set totalEntriesCount = 0 %}
 {% set thisWeekActivity = 0 %}
 {% set lastWeekActivity = 0 %}
 {% set thisWeekStart = date('now')|date_modify('monday this week') %}
 {% set lastWeekStart = thisWeekStart|date_modify('-7 days') %}
 
-{% for p in headerProjects %}
-    {% set headerFilteredTypes = admin_content_types_for_project(p) %}
-    {% for ct in headerFilteredTypes %}
-        {% for e in ct.entries %}
-            {% if e.status == 'published' %}
-                {% set publishedEntriesCount = publishedEntriesCount + 1 %}
-            {% elseif e.status == 'draft' %}
-                {% set draftEntriesCount = draftEntriesCount + 1 %}
-            {% elseif e.status == 'scheduled' %}
-                {% set cancelledEntriesCount = cancelledEntriesCount + 1 %}
-            {% elseif e.status == 'archived' %}
-                {% set revisionEntriesCount = revisionEntriesCount + 1 %}
-            {% endif %}
-            {% if e.createdAt and e.createdAt >= thisWeekStart %}
-                {% set thisWeekActivity = thisWeekActivity + 1 %}
-            {% elseif e.createdAt and e.createdAt >= lastWeekStart and e.createdAt < thisWeekStart %}
-                {% set lastWeekActivity = lastWeekActivity + 1 %}
-            {% endif %}
+{% if not isInsideProject %}
+    {# ─── Cas A: ADMIN al llistat general de projectes (/admin/projects) ─── #}
+    {% set headerProjects = admin_projects() %}
+    {% set totalProjectsCount = headerProjects|length %}
+    {% set activeProjectsCount = headerProjects|filter(p => p.active)|length %}
+    {% set inactiveProjectsCount = headerProjects|filter(p => not p.active)|length %}
+
+    {% for p in headerProjects %}
+        {% set headerFilteredTypes = admin_content_types_for_project(p) %}
+        {% for ct in headerFilteredTypes %}
+            {% for e in ct.entries %}
+                {% set totalEntriesCount = totalEntriesCount + 1 %}
+                {% if e.status == 'published' %}
+                    {% set publishedEntriesCount = publishedEntriesCount + 1 %}
+                {% elseif e.status == 'draft' %}
+                    {% set draftEntriesCount = draftEntriesCount + 1 %}
+                {% elseif e.status == 'scheduled' %}
+                    {% set cancelledEntriesCount = cancelledEntriesCount + 1 %}
+                {% elseif e.status == 'archived' %}
+                    {% set revisionEntriesCount = revisionEntriesCount + 1 %}
+                {% endif %}
+                {% if e.createdAt and e.createdAt >= thisWeekStart %}
+                    {% set thisWeekActivity = thisWeekActivity + 1 %}
+                {% elseif e.createdAt and e.createdAt >= lastWeekStart and e.createdAt < thisWeekStart %}
+                    {% set lastWeekActivity = lastWeekActivity + 1 %}
+                {% endif %}
+            {% endfor %}
         {% endfor %}
     {% endfor %}
-{% endfor %}
+{% else %}
+    {# ─── Cas B: Dins d'un projecte/secció o vista de client ─── #}
+    {% set entriesToCount = [] %}
+    {% if currentSection is not null %}
+        {% set entriesToCount = currentSection.entries %}
+    {% elseif currentProject is not null %}
+        {% set projectTypes = admin_content_types_for_project(currentProject) %}
+        {% for ct in projectTypes %}
+            {% for e in ct.entries %}
+                {% set entriesToCount = entriesToCount|merge([e]) %}
+            {% endfor %}
+        {% endfor %}
+    {% else %}
+        {% set clientProjects = admin_projects() %}
+        {% for p in clientProjects %}
+            {% set projectTypes = admin_content_types_for_project(p) %}
+            {% for ct in projectTypes %}
+                {% for e in ct.entries %}
+                    {% set entriesToCount = entriesToCount|merge([e]) %}
+                {% endfor %}
+            {% endfor %}
+        {% endfor %}
+    {% endif %}
+
+    {% set totalEntriesCount = entriesToCount|length %}
+    {% for e in entriesToCount %}
+        {% if e.status == 'published' %}
+            {% set publishedEntriesCount = publishedEntriesCount + 1 %}
+        {% elseif e.status == 'draft' %}
+            {% set draftEntriesCount = draftEntriesCount + 1 %}
+        {% elseif e.status == 'scheduled' %}
+            {% set cancelledEntriesCount = cancelledEntriesCount + 1 %}
+        {% elseif e.status == 'archived' %}
+            {% set revisionEntriesCount = revisionEntriesCount + 1 %}
+        {% endif %}
+        {% if e.createdAt and e.createdAt >= thisWeekStart %}
+            {% set thisWeekActivity = thisWeekActivity + 1 %}
+        {% elseif e.createdAt and e.createdAt >= lastWeekStart and e.createdAt < thisWeekStart %}
+            {% set lastWeekActivity = lastWeekActivity + 1 %}
+        {% endif %}
+    {% endfor %}
+{% endif %}
 
 {% set activityChange = thisWeekActivity %}
 
 <div class="d2-sticky-header-container">
     <!-- Metrics Grid -->
     <div class="d2-kpis d2-kpis--projects">
+    {% if not isInsideProject %}
         <!-- 1. Total Projectes -->
         <div class="d2-kpi">
             <div class="d2-kpi-top-row">
@@ -46,7 +100,62 @@
             </div>
             <div class="d2-kpi-label">{{ 'status.total_projects'|trans }}</div>
         </div>
-        
+
+        <!-- 2. Projectes Actius -->
+        <div class="d2-kpi">
+            <div class="d2-kpi-top-row">
+                <i class="fa-solid fa-circle-check d2-status-icon--publicats"></i>
+                <div class="d2-kpi-val">{{ activeProjectsCount }}</div>
+            </div>
+            <div class="d2-kpi-label">{{ 'status.active_projects'|trans }}</div>
+        </div>
+
+        <!-- 3. Projectes Inactius -->
+        <div class="d2-kpi">
+            <div class="d2-kpi-top-row">
+                <i class="fa-solid fa-circle-pause" style="color:#ef4444;"></i>
+                <div class="d2-kpi-val" style="color:#ef4444; background:none; -webkit-text-fill-color:#ef4444;">{{ inactiveProjectsCount }}</div>
+            </div>
+            <div class="d2-kpi-label">{{ 'status.inactive_projects'|trans }}</div>
+        </div>
+
+        <!-- 4. Total Entrades -->
+        <div class="d2-kpi">
+            <div class="d2-kpi-top-row">
+                <i class="fa-solid fa-file-lines" style="color:#38bdf8;"></i>
+                <div class="d2-kpi-val">{{ totalEntriesCount }}</div>
+            </div>
+            <div class="d2-kpi-label">{{ 'status.total_entries'|trans }}</div>
+        </div>
+
+        <!-- 5. Publicats -->
+        <div class="d2-kpi">
+            <div class="d2-kpi-top-row">
+                <i class="fa-solid fa-globe d2-status-icon--publicats"></i>
+                <div class="d2-kpi-val">{{ publishedEntriesCount }}</div>
+            </div>
+            <div class="d2-kpi-label">{{ 'status.publicats'|trans }}</div>
+        </div>
+
+        <!-- 6. No Publicats -->
+        <div class="d2-kpi">
+            <div class="d2-kpi-top-row">
+                <i class="fa-solid fa-file-pen d2-status-icon--esboranys"></i>
+                <div class="d2-kpi-val">{{ draftEntriesCount }}</div>
+            </div>
+            <div class="d2-kpi-label">{{ 'status.no_publicats'|trans }}</div>
+        </div>
+    {% else %}
+        <!-- Dins de Projecte / Secció o Client: Només informació d'entrades -->
+        <!-- 1. Total Entrades -->
+        <div class="d2-kpi">
+            <div class="d2-kpi-top-row">
+                <i class="fa-solid fa-file-lines" style="color:#f59e0b;"></i>
+                <div class="d2-kpi-val">{{ totalEntriesCount }}</div>
+            </div>
+            <div class="d2-kpi-label">{{ 'status.total_entries'|trans }}</div>
+        </div>
+
         <!-- 2. Publicats -->
         <div class="d2-kpi">
             <div class="d2-kpi-top-row">
@@ -56,7 +165,7 @@
             <div class="d2-kpi-label">{{ 'status.publicats'|trans }}</div>
         </div>
 
-        <!-- 3. Esboranys -->
+        <!-- 3. No Publicats (Esborranys) -->
         <div class="d2-kpi">
             <div class="d2-kpi-top-row">
                 <i class="fa-solid fa-file-pen d2-status-icon--esboranys"></i>
@@ -65,7 +174,7 @@
             <div class="d2-kpi-label">{{ 'status.no_publicats'|trans }}</div>
         </div>
 
-        <!-- 4. En revisió / Arxivats -->
+        <!-- 4. Arxivats -->
         <div class="d2-kpi">
             <div class="d2-kpi-top-row">
                 <i class="fa-solid fa-hourglass-half d2-status-icon--revisio"></i>
@@ -74,7 +183,7 @@
             <div class="d2-kpi-label">{{ 'status.arxivats'|trans }}</div>
         </div>
 
-        <!-- 5. Cancel·lat -->
+        <!-- 5. Programats -->
         <div class="d2-kpi">
             <div class="d2-kpi-top-row">
                 <i class="fa-solid fa-clock d2-status-icon--cancelat"></i>
@@ -83,7 +192,7 @@
             <div class="d2-kpi-label">{{ 'status.programats'|trans }}</div>
         </div>
 
-        <!-- 6. Trend -->
+        <!-- 6. Activitat / Trend -->
         <div class="d2-kpi">
             <div class="d2-kpi-top-row">
                 <i class="fa-solid fa-chart-line d2-status-icon--publicats"></i>
@@ -91,6 +200,7 @@
             </div>
             <div class="d2-kpi-label">{{ 'status.activity'|trans }}</div>
         </div>
+    {% endif %}
     </div>
 
     <!-- Filters Bar -->
@@ -104,9 +214,17 @@
         <div class="d2-filter-select-wrapper">
             <span class="d2-status-dot d2-status-dot--publicats"></span>
             <select id="statusFilter" class="d2-select-filter">
+            {% if not isInsideProject %}
                 <option value="all">{{ 'action.all_states'|trans }}</option>
-                <option value="active">{{ 'action.active_state'|trans }}</option>
-                <option value="inactive">{{ 'action.inactive_state'|trans }}</option>
+                <option value="active">{{ 'status.active_projects'|trans }}</option>
+                <option value="inactive">{{ 'status.inactive_projects'|trans }}</option>
+            {% else %}
+                <option value="all">{{ 'action.all_states'|trans }}</option>
+                <option value="published">{{ 'status.publicats'|trans }}</option>
+                <option value="draft">{{ 'status.no_publicats'|trans }}</option>
+                <option value="scheduled">{{ 'status.programats'|trans }}</option>
+                <option value="archived">{{ 'status.arxivats'|trans }}</option>
+            {% endif %}
             </select>
         </div>
         <div class="d2-filter-select-wrapper">
@@ -120,7 +238,7 @@
 </div>
 
 <div class="d2-section-bar">
-    {{ title_override|default(contentType is defined ? ('project.section'|trans ~ ': ' ~ contentType.name) : (project is defined ? ('project.section'|trans ~ ': ' ~ project.name) : ('project.projects_title'|trans ~ ':'))) }}
+    {{ title_override|default(currentSection ? ('project.section'|trans ~ ': ' ~ currentSection.name) : (currentProject ? ('project.section'|trans ~ ': ' ~ currentProject.name) : ('project.projects_title'|trans ~ ':'))) }}
 </div>
 
 <script>
@@ -179,10 +297,16 @@ document.addEventListener('DOMContentLoaded', function () {
     tableRows.forEach(function (row) {
       var text = row.textContent.toLowerCase();
       var textMatch = !query || text.indexOf(query) !== -1;
-      var isActive = row.classList.contains('row-active');
-      var statusMatch = (status === 'all') || 
-                        (status === 'active' && isActive) || 
-                        (status === 'inactive' && !isActive);
+      var rowStatus = row.getAttribute('data-status');
+      var statusMatch;
+      if (status === 'all') {
+        statusMatch = true;
+      } else if (rowStatus) {
+        statusMatch = (rowStatus === status);
+      } else {
+        var isActive = row.classList.contains('row-active') || !row.classList.contains('d2-project-row--inactive');
+        statusMatch = (status === 'active' && isActive) || (status === 'inactive' && !isActive);
+      }
 
       if (textMatch && statusMatch) {
         row.style.setProperty('display', '', 'important');

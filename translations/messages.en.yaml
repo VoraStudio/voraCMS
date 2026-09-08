@@ -79,6 +79,9 @@ status:
   not_archived: "Not archived"
   arxivats: "Archived"
   total_projects: "Total Projects"
+  total_entries: "Total Entries"
+  active_projects: "Active Projects"
+  inactive_projects: "Inactive Projects"
   activity: "Activity"
 
 # Dashboard
