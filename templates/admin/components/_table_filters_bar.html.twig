@@ -1,0 +1,102 @@
+{# ─── Component: _table_filters_bar.html.twig ─── #}
+{% set statusMode = status_mode|default('active_inactive') %}
+{% set searchPlaceholder = search_placeholder|default('action.search_placeholder'|trans) %}
+
+<div class="d2-sticky-header-container d2-sticky-header-container--filters-only" style="margin-bottom: 1.25rem;">
+    <div class="d2-filters-bar">
+        <div class="d2-search-wrapper">
+            <input type="text" class="d2-search-input js-table-search" placeholder="{{ searchPlaceholder }}">
+            <button type="button" class="d2-search-btn" title="{{ 'user.search_placeholder'|trans }}">
+                <i class="bi bi-search"></i>
+            </button>
+        </div>
+        <div class="d2-filter-select-wrapper">
+            <span class="d2-status-dot d2-status-dot--publicats"></span>
+            <select class="d2-select-filter js-table-status-filter">
+                <option value="all">{{ 'action.all_states'|trans }}</option>
+                {% if statusMode == 'active_inactive' %}
+                    <option value="active">{{ 'status.active'|trans|default('Actiu') }}</option>
+                    <option value="inactive">{{ 'status.inactive'|trans|default('Inactiu') }}</option>
+                {% else %}
+                    <option value="published">{{ 'status.publicats'|trans }}</option>
+                    <option value="draft">{{ 'status.no_publicats'|trans }}</option>
+                    <option value="scheduled">{{ 'status.programats'|trans }}</option>
+                    <option value="archived">{{ 'status.arxivats'|trans }}</option>
+                {% endif %}
+            </select>
+        </div>
+        <div class="d2-filter-select-wrapper">
+            <select class="d2-select-filter js-table-order-filter">
+                <option value="name">{{ 'action.order_name'|trans }}</option>
+                <option value="newest">{{ 'action.order_newest'|trans }}</option>
+                <option value="oldest">{{ 'action.order_oldest'|trans }}</option>
+            </select>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var searchInput = document.querySelector('.js-table-search');
+  var statusFilter = document.querySelector('.js-table-status-filter');
+  var orderFilter = document.querySelector('.js-table-order-filter');
+  var table = document.querySelector('.cyber-table');
+
+  if (!table) return;
+  var tbody = table.querySelector('tbody');
+  if (!tbody) return;
+
+  function filterRows() {
+    var query = (searchInput ? searchInput.value : '').toLowerCase().trim();
+    var status = statusFilter ? statusFilter.value : 'all';
+    var rows = tbody.querySelectorAll('tr.cyber-row');
+
+    rows.forEach(function (row) {
+      var text = row.textContent.toLowerCase();
+      var textMatch = !query || text.indexOf(query) !== -1;
+      var isActive = row.classList.contains('row-active') || !row.classList.contains('row-inactive');
+      var statusMatch = true;
+
+      if (status === 'active') {
+        statusMatch = isActive;
+      } else if (status === 'inactive') {
+        statusMatch = !isActive;
+      } else if (status !== 'all') {
+        var rowStatus = row.getAttribute('data-status');
+        statusMatch = (rowStatus === status);
+      }
+
+      if (textMatch && statusMatch) {
+        row.style.setProperty('display', '', 'important');
+      } else {
+        row.style.setProperty('display', 'none', 'important');
+      }
+    });
+  }
+
+  if (searchInput) searchInput.addEventListener('input', filterRows);
+  if (statusFilter) statusFilter.addEventListener('change', filterRows);
+
+  if (orderFilter) {
+    // Preserve initial rows order for newest/oldest toggling
+    var initialRows = Array.from(tbody.querySelectorAll('tr.cyber-row'));
+    orderFilter.addEventListener('change', function () {
+      var order = this.value;
+      var rows = Array.from(tbody.querySelectorAll('tr.cyber-row'));
+
+      if (order === 'name') {
+        rows.sort(function (a, b) {
+          var nameA = (a.querySelector('.cyber-cell:first-child')?.textContent || '').trim().toLowerCase();
+          var nameB = (b.querySelector('.cyber-cell:first-child')?.textContent || '').trim().toLowerCase();
+          return nameA.localeCompare(nameB);
+        });
+        rows.forEach(function (row) { tbody.appendChild(row); });
+      } else if (order === 'oldest') {
+        initialRows.slice().reverse().forEach(function (row) { tbody.appendChild(row); });
+      } else {
+        initialRows.forEach(function (row) { tbody.appendChild(row); });
+      }
+    });
+  }
+});
+</script>
