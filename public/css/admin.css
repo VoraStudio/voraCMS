@@ -6926,24 +6926,31 @@ input[type="time"] {
 .vt-preview-modal-container {
   position: relative;
   z-index: 1;
-  height: 72vh;
-  background: transparent;
-  border: none;
-  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.8);
-  border-radius: 24px;
+  width: 88vw;
+  max-width: 980px;
+  height: 82vh;
+  background: #0f172a;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.85);
+  border-radius: 20px;
   overflow: hidden;
   display: flex;
   flex-direction: column;
 }
 
 .vt-preview-modal-container--noticia {
-  width: 82vw;
-  max-width: 800px;
+  width: 85vw;
+  max-width: 840px;
 }
 
 .vt-preview-modal-container--event {
-  width: 82vw;
-  max-width: 800px;
+  width: 85vw;
+  max-width: 840px;
+}
+
+.vt-preview-modal-container--wide {
+  width: 92vw;
+  max-width: 1120px;
 }
 
 .vt-preview-modal-header {
@@ -7020,27 +7027,46 @@ input[type="time"] {
   100% { transform: scale(0.8); opacity: 0.5; }
 }
 
-.vt-preview-modal-close {
+.vt-preview-modal-top-actions {
   position: absolute;
-  top: 16px;
+  top: 14px;
   right: 16px;
   z-index: 10100;
-  background: rgba(0, 0, 0, 0.6);
-  border: none;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.vt-preview-modal-action-btn,
+.vt-preview-modal-close {
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
   color: #ffffff;
-  width: 40px;
-  height: 40px;
+  width: 38px;
+  height: 38px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: all 0.3s ease;
+  text-decoration: none;
+  font-size: 0.95rem;
+  transition: all 0.25s ease;
+}
+
+.vt-preview-modal-action-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+  border-color: rgba(255, 255, 255, 0.35);
+  transform: translateY(-1px);
 }
 
 .vt-preview-modal-close:hover {
-  background: #ffffff;
-  color: #000000;
+  background: #ef4444;
+  border-color: #ef4444;
+  color: #ffffff;
   transform: rotate(90deg);
 }
 

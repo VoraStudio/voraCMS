@@ -163,12 +163,10 @@
                 </td>
                 <td class="cyber-cell" data-label="Accions">
                     <div class="cyber-actions">
-                        {% set isPreviewable = entry.contentType and entry.contentType.slug in ['noticia', 'event'] %}
-                        {% set isCustomPreview = entry.contentType and entry.contentType.slug in ['artistes_victoria_taylor'] %}
-                        <a href="{{ isPreviewable or isCustomPreview ? path('admin_entry_preview', {id: entry.id}) : path('admin_entry_show', {id: entry.id}) }}"
-                           class="cyber-btn cyber-btn--icon cyber-btn--view {{ isPreviewable ? 'js-preview-modal' : '' }} {{ isCustomPreview ? 'js-preview-newtab' : '' }}" 
-                           {% if isPreviewable %}data-type="{{ entry.contentType.slug }}"{% endif %}
-                           title="Veure">
+                        <a href="{{ path('admin_entry_preview', {id: entry.id}) }}"
+                           class="cyber-btn cyber-btn--icon cyber-btn--view js-preview-modal" 
+                           data-type="{{ entry.contentType ? entry.contentType.slug : 'generic' }}"
+                           title="{{ 'action.preview'|trans }}">
                             <i class="bi bi-eye"></i>
                         </a>
                         <a href="{{ path('admin_entry_edit', {id: entry.id}) }}"

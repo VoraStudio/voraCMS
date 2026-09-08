@@ -439,17 +439,24 @@
       var containerClass = 'vt-preview-modal-container';
       if (type === 'noticia') {
         containerClass += ' vt-preview-modal-container--noticia';
-      } else {
+      } else if (type === 'event') {
         containerClass += ' vt-preview-modal-container--event';
+      } else {
+        containerClass += ' vt-preview-modal-container--wide';
       }
 
       var modalHTML = 
         '<div class="vt-preview-modal" aria-hidden="true" role="dialog">' +
           '<div class="vt-preview-modal-overlay"></div>' +
           '<div class="' + containerClass + '">' +
-            '<button class="vt-preview-modal-close" aria-label="Tancar">' +
-              '<i class="bi bi-x-lg"></i>' +
-            '</button>' +
+            '<div class="vt-preview-modal-top-actions">' +
+              '<a href="' + url + '" target="_blank" class="vt-preview-modal-action-btn" title="Obrir en pestanya nova">' +
+                '<i class="bi bi-box-arrow-up-right"></i>' +
+              '</a>' +
+              '<button class="vt-preview-modal-close" aria-label="Tancar">' +
+                '<i class="bi bi-x-lg"></i>' +
+              '</button>' +
+            '</div>' +
             '<div class="vt-preview-modal-iframe-wrapper">' +
               '<iframe class="vt-preview-modal-iframe" src="' + url + '"></iframe>' +
             '</div>' +

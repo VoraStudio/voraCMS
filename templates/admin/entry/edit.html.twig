@@ -25,17 +25,9 @@
 
 {% block topbar_actions %}
 <div class="topbar-actions-group">
-    {% if contentType.slug in ['noticia', 'event', 'artistes_victoria_taylor'] %}
-        {% if contentType.slug in ['artistes_victoria_taylor'] %}
-            <a href="{{ path('admin_entry_preview', {id: entry.id}) }}" class="cyber-btn cyber-btn--projects js-preview-newtab">
-                <i class="bi bi-eye"></i> <span>{{ 'action.preview'|trans }}</span>
-            </a>
-        {% else %}
-            <a href="{{ path('admin_entry_preview', {id: entry.id}) }}" class="cyber-btn cyber-btn--projects js-preview-modal" data-type="{{ contentType.slug }}">
-                <i class="bi bi-eye"></i> <span>{{ 'action.preview'|trans }}</span>
-            </a>
-        {% endif %}
-    {% endif %}
+    <a href="{{ path('admin_entry_preview', {id: entry.id}) }}" class="cyber-btn cyber-btn--projects js-preview-modal" data-type="{{ contentType.slug }}">
+        <i class="bi bi-eye"></i> <span>{{ 'action.preview'|trans }}</span>
+    </a>
     <a href="{{ path('admin_entry_by_type', {slug: contentType.slug}) }}" class="cyber-btn cyber-btn--projects">
         <i class="bi bi-arrow-left"></i> <span>{{ 'action.back'|trans }}</span>
     </a>

@@ -95,9 +95,9 @@
                 <td class="cyber-cell" data-label="Accions">
                     <div class="cyber-actions">
                         <a href="{{ path('admin_entry_preview', {id: entry.id}) }}"
-                           class="cyber-btn cyber-btn--icon cyber-btn--view {% if contentType.slug in ['noticia', 'event'] %}js-preview-modal{% elseif contentType.slug in ['artistes_victoria_taylor'] %}js-preview-newtab{% endif %}"
+                           class="cyber-btn cyber-btn--icon cyber-btn--view js-preview-modal"
                            data-type="{{ contentType.slug }}"
-                           title="Veure">
+                           title="{{ 'action.preview'|trans }}">
                             <i class="bi bi-eye"></i>
                         </a>
 
