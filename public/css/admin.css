@@ -3260,12 +3260,47 @@ input[type="time"] {
   transform: translateX(4px);
 }
 
-.cyber-row.row-inactive .cyber-cell:not(.cyber-cell--status) {
-  opacity: 0.2;
+/* Inactive rows — readable, distinct status & fully accessible actions */
+.cyber-row.row-inactive {
+  background: rgba(239, 68, 68, 0.05);
+  border: 1px solid rgba(239, 68, 68, 0.14);
 }
 
-.cyber-row.row-inactive:hover .cyber-cell:not(.cyber-cell--status) {
-  opacity: 0.4;
+.cyber-row.row-inactive .cyber-cell:first-child::before {
+  background: linear-gradient(180deg, rgba(239, 68, 68, 0.8), rgba(239, 68, 68, 0.3));
+  opacity: 0.85;
+}
+
+.cyber-row.row-inactive .cyber-cell {
+  opacity: 0.82;
+  transition: opacity 0.2s ease;
+}
+
+.cyber-row.row-inactive:hover {
+  background: rgba(239, 68, 68, 0.08);
+  box-shadow:
+    0 4px 24px rgba(0, 0, 0, 0.3),
+    0 0 0 1px rgba(239, 68, 68, 0.2);
+}
+
+.cyber-row.row-inactive:hover .cyber-cell {
+  opacity: 1;
+}
+
+.cyber-row.row-inactive .cyber-cell--status,
+.cyber-row.row-inactive [data-label="Estat"],
+.cyber-row.row-inactive [data-label="Actiu"],
+.cyber-row.row-inactive [data-label="Accions"],
+.cyber-row.row-inactive .cyber-actions {
+  opacity: 1 !important;
+}
+
+.cyber-row.row-inactive .cyber-actions .cyber-btn {
+  opacity: 0.9;
+}
+
+.cyber-row.row-inactive .cyber-actions .cyber-btn:hover {
+  opacity: 1;
 }
 
 .cyber-cell {
@@ -5287,8 +5322,7 @@ input[type="time"] {
 }
 
 .row-inactive {
-  background-color: rgba(239, 68, 68, 0.1) !important;
-  opacity: 0.55;
+  background-color: rgba(239, 68, 68, 0.05) !important;
 }
 
 [data-theme="light"] .row-active {
@@ -5296,8 +5330,7 @@ input[type="time"] {
 }
 
 [data-theme="light"] .row-inactive {
-  background-color: rgba(239, 68, 68, 0.12) !important;
-  opacity: 0.55;
+  background-color: rgba(239, 68, 68, 0.05) !important;
 }
 
 /* ─── Project cards: same height in grid rows ─── */

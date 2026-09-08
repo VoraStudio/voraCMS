@@ -966,8 +966,11 @@ body::before {
   background-color: rgba(249, 115, 22, 0.06);
 }
 [data-theme="light"] .row-inactive {
-  background-color: rgba(239, 68, 68, 0.12) !important;
-  opacity: 0.55;
+  background-color: rgba(239, 68, 68, 0.05) !important;
+}
+[data-theme="light"] .cyber-row.row-inactive {
+  background-color: rgba(239, 68, 68, 0.04);
+  border-color: rgba(239, 68, 68, 0.16);
 }
 [data-theme="light"] .api-hero {
   background: linear-gradient(135deg, rgba(249, 115, 22, 0.04), rgba(99, 102, 241, 0.03));

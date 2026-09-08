@@ -743,8 +743,7 @@
 }
 
 .row-inactive {
-  background-color: rgba(239, 68, 68, 0.1) !important;
-  opacity: 0.55;
+  background-color: rgba(239, 68, 68, 0.05) !important;
 }
 /* --- Project cards: same height in grid rows --- */
 .project-cards-grid {

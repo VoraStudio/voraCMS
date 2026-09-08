@@ -59,7 +59,7 @@ Degradado sólido cyan→azul, texto blanco, top LED line, shine sweep al hover.
 ## Filas de tabla
 
 - `.row-active`: fondo `rgba(59, 130, 246, 0.04)` (dark) / `rgba(59, 130, 246, 0.06)` (light) — azul, NO verde.
-- `.row-inactive`: opacidad 0.55, fondo `rgba(239, 68, 68, 0.10)` (dark) / `rgba(239, 68, 68, 0.12)` (light). Celdas (excepto estado) con opacidad 0.20. El texto "Inactiu" usa color sólido `rgb(239,68,68)` (no opacidad reducida).
+- `.row-inactive`: fondo sutil `rgba(239, 68, 68, 0.05)` (dark) / `rgba(239, 68, 68, 0.05)` (light), borde sutil vermell i línia indicadora lateral vermella. El contingut de text manté opacitat 0.82 (llegible), mentre que l'estat ("Actiu", "Estat") i els botons d'accions (`.cyber-actions`) tenen opacitat 1.0 per garantir accessibilitat i usabilitat completa.
 - Filas con `.cyber-row`: border-radius 12px, glass con `box-shadow`, hover con glow sutil.
 
 ---
