@@ -33,7 +33,6 @@
                 <th>Títol</th>
                 <th>Data</th>
                 <th>Estat</th>
-                <th>Actiu</th>
                 <th>Idioma</th>
                 <th>Accions</th>
             </tr>
@@ -47,7 +46,7 @@
                 {% endif %}
             {% endfor %}
 
-            <tr class="cyber-row {{ entry.active ? 'row-active' : 'row-inactive' }}" data-anim="cyber-row">
+            <tr class="cyber-row" data-anim="cyber-row">
                 <td class="cyber-cell" data-label="Títol">
                     <div class="cyber-cell__content">
                         {% set thumb = thumbnails[entry.id] ?? null %}
@@ -90,9 +89,6 @@
                         {% endif %}
                     </span>
                 </td>
-                <td class="cyber-cell cyber-cell--status" data-label="Actiu">
-                    {% include 'admin/components/_status.html.twig' with {active: entry.active} %}
-                </td>
                 <td class="cyber-cell cyber-cell--locale" data-label="Idioma">
                     {{ entry.locale|upper }}
                 </td>
@@ -104,13 +100,6 @@
                            title="Veure">
                             <i class="bi bi-eye"></i>
                         </a>
-
-                        {% include 'admin/components/_toggle_btn.html.twig' with {
-                            formId: 'tact-entry-' ~ entry.id,
-                            csrfToken: csrf_token('toggle-active-' ~ entry.id),
-                            route: path('admin_entry_toggle_active', {id: entry.id}),
-                            active: entry.active
-                        } %}
 
                         <a href="{{ path('admin_entry_edit', {id: entry.id}) }}"
                            class="cyber-btn cyber-btn--icon cyber-btn--edit"
@@ -134,7 +123,7 @@
             </tr>
             {% else %}
             <tr>
-                <td colspan="6" class="cyber-empty">
+                <td colspan="5" class="cyber-empty">
                     <div class="cyber-empty-icon"><i class="bi bi-file-text"></i></div>
                     <p class="cyber-empty-text">No hi ha entrades encara</p>
                     <a href="{{ path('admin_entry_new', {slug: contentType.slug}) }}" class="cyber-btn cyber-btn--projects">

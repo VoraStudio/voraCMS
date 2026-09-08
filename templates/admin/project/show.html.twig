@@ -84,14 +84,13 @@
                 <th class="col-date">{{ 'project.date'|trans }}</th>
                 <th class="col-desc">{{ 'project.description'|trans }}</th>
                 <th class="col-status">{{ 'project.status_col'|trans }}</th>
-                <th class="col-active">{{ 'project.active_col'|trans }}</th>
                 <th class="col-actions">{{ 'project.actions_col'|trans }}</th>
             </tr>
         </thead>
         <tbody>
         {% if entries is empty %}
             <tr>
-                <td colspan="6" class="cyber-empty">
+                <td colspan="5" class="cyber-empty">
                     <div class="cyber-empty-icon"><i class="bi bi-file-earmark-text"></i></div>
                     <div class="cyber-empty-text">{{ 'project.no_entries_in_section'|trans }}</div>
                     <a href="{{ path('admin_entry_new', {slug: ct.slug}) }}" class="cyber-btn-primary cyber-btn--compact" style="margin-top: 10px;">
@@ -113,7 +112,7 @@
                 {% endif %}
             {% endfor %}
 
-            <tr class="cyber-row {{ entry.active ? 'row-active' : 'row-inactive' }}" data-anim="cyber-row">
+            <tr class="cyber-row" data-anim="cyber-row">
                 <td class="cyber-cell" data-label="Títol">
                     <div class="cyber-cell__content">
                         {% set thumb = thumbnails[entry.id] ?? null %}
@@ -163,9 +162,6 @@
                         {% endif %}
                     </span>
                 </td>
-                <td class="cyber-cell cyber-cell--status" data-label="Actiu">
-                    {% include 'admin/components/_status.html.twig' with {active: entry.active} %}
-                </td>
                 <td class="cyber-cell" data-label="Accions">
                     <div class="cyber-actions">
                         {% set isPreviewable = entry.contentType and entry.contentType.slug in ['noticia', 'event'] %}
@@ -176,12 +172,6 @@
                            title="Veure">
                             <i class="bi bi-eye"></i>
                         </a>
-                        {% include 'admin/components/_toggle_btn.html.twig' with {
-                            formId: 'tact-entry-' ~ entry.id,
-                            csrfToken: csrf_token('toggle-active-' ~ entry.id),
-                            route: path('admin_entry_toggle_active', {id: entry.id}),
-                            active: entry.active
-                        } %}
                         <a href="{{ path('admin_entry_edit', {id: entry.id}) }}"
                            class="cyber-btn cyber-btn--icon cyber-btn--edit" title="Editar">
                             <i class="bi bi-pencil"></i>
