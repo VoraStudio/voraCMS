@@ -157,14 +157,6 @@
                 </div>
             </div>
             <div class="s-topbar-actions">
-                <!-- Topbar Search -->
-                <div class="d2-search-wrapper d2-search-wrapper--topbar">
-                    <input type="text" id="projectSearch" class="d2-search-input" placeholder="{{ 'user.search_placeholder'|trans }}">
-                    <button type="button" class="d2-search-btn" title="{{ 'user.search_placeholder'|trans }}">
-                        <i class="bi bi-search"></i>
-                    </button>
-                </div>
-
                 {# ─── Language selector ─── #}
                 {% set currentLocale = app.request.locale|default('ca') %}
                 <div class="s-lang-switcher" id="langSwitcher">

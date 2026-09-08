@@ -239,23 +239,12 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function () {
-  var searchInput = document.getElementById('projectSearch');
   var sectionSearchInput = document.getElementById('sectionSearch');
   var statusFilter = document.getElementById('statusFilter');
   var orderFilter = document.getElementById('orderFilter');
 
-  function filterProjects(e) {
-    // Sync the two inputs
-    if (e && e.target === searchInput && sectionSearchInput) {
-      sectionSearchInput.value = searchInput.value;
-    } else if (e && e.target === sectionSearchInput && searchInput) {
-      searchInput.value = sectionSearchInput.value;
-    }
-
-    var query = (searchInput ? searchInput.value : '').toLowerCase().trim();
-    if (!query && sectionSearchInput) {
-      query = sectionSearchInput.value.toLowerCase().trim();
-    }
+  function filterProjects() {
+    var query = (sectionSearchInput ? sectionSearchInput.value : '').toLowerCase().trim();
     var status = statusFilter ? statusFilter.value : 'all';
 
     // 1. Filter project rows
@@ -338,7 +327,6 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   }
 
-  if (searchInput) searchInput.addEventListener('input', filterProjects);
   if (sectionSearchInput) sectionSearchInput.addEventListener('input', filterProjects);
   if (statusFilter) statusFilter.addEventListener('change', filterProjects);
   

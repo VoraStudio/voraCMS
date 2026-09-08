@@ -137,6 +137,7 @@ project:
   no_entries_in_section: "Encara no hi ha cap entrada en aquesta secció"
   create_first_entry: "Crea la primera entrada"
   project_col: "PROJECTE"
+  published_col: "PUBLICACIÓ"
 # Entry Form & Fields
 entry:
   new_entry_title: "Nova entrada"
