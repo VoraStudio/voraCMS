@@ -10,3 +10,5 @@
 - [x] 4. Assegurar la inclusió correcta de la capçalera a `project/show.html.twig` i la seva absència a `project/form.html.twig`. <!-- id: 4 -->
 - [x] 5. Eliminar la línia redundant `.d2-section-bar` («Seccio: [Nom del projecte]») de `_project_header_bar.html.twig`. <!-- id: 5 -->
 - [x] 6. Eliminar la capçalera de mètriques de les vistes de configuració de tipus de contingut (`content-type` i `base-content`). <!-- id: 6 -->
+- [x] 7. Resolució robusta i deduplicació de seccions de projecte (`ContentTypeRepository::findForProject`). <!-- id: 7 -->
+

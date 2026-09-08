@@ -144,25 +144,8 @@ class AdminExtension extends AbstractExtension implements GlobalsInterface
 
     private function resolveContentTypes($project): array
     {
-        $features = $project->getContentFeatures();
-
-        // 1. ContentTypes propis del projecte, filtrats per features
-        $projectTypes = $this->ctRepo->findActive($project->getId());
-        $filtered = array_values(array_filter($projectTypes, function ($ct) use ($features) {
-            return in_array($ct->getFeature(), $features, true);
-        }));
-
-        // 2. Features que ja tenen CT propi
-        $covered = array_unique(array_map(fn($ct) => $ct->getFeature(), $filtered));
-        $missing = array_diff($features, $covered);
-
-        // 3. Fallback a plantilles base per a features sense CT propi
-        if (!empty($missing)) {
-            $baseTypes = $this->ctRepo->findBaseByFeatures($missing);
-            $filtered = array_merge($filtered, $baseTypes);
-        }
-
-        return $filtered;
+        if (!$project) return [];
+        return $this->ctRepo->findForProject($project);
     }
 
     /* -----------------------------------------------------------

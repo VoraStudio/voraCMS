@@ -8,6 +8,7 @@
 namespace App\Repository;
 
 use App\Entity\ContentType;
+use App\Entity\Project;
 use App\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
@@ -183,5 +184,52 @@ class ContentTypeRepository extends ServiceEntityRepository
         }
 
         return $qb->getQuery()->getResult();
+    }
+
+    /**
+     * Retorna els ContentTypes visibles per a un projecte sense duplicats.
+     * Dona prioritat absoluta als ContentTypes propis del projecte,
+     * i només afegeix plantilles base per a features no cobertes que
+     * no comparteixin slug amb cap existent.
+     *
+     * @return ContentType[]
+     */
+    public function findForProject(Project $project): array
+    {
+        $features = $project->getContentFeatures();
+
+        // 1. ContentTypes propis del projecte actius
+        $projectTypes = $this->findActive($project->getId());
+        $filtered = array_values(array_filter($projectTypes, function (ContentType $ct) use ($features) {
+            return in_array($ct->getFeature(), $features, true);
+        }));
+
+        $existingSlugs = array_map(fn(ContentType $ct) => $ct->getSlug(), $filtered);
+        $covered = array_unique(array_map(fn(ContentType $ct) => $ct->getFeature(), $filtered));
+        $missing = array_diff($features, $covered);
+
+        // 2. Fallback a plantilles base per a features no cobertes (evitant duplicats per slug)
+        if (!empty($missing)) {
+            $baseTypes = $this->findBaseByFeatures($missing);
+            foreach ($baseTypes as $baseCt) {
+                if (!in_array($baseCt->getSlug(), $existingSlugs, true)) {
+                    $filtered[] = $baseCt;
+                    $existingSlugs[] = $baseCt->getSlug();
+                }
+            }
+        }
+
+        // 3. Deduplicació final per slug (el propi del projecte sempre té prioritat)
+        $seen = [];
+        $deduped = [];
+        foreach ($filtered as $ct) {
+            $slug = $ct->getSlug();
+            if (!isset($seen[$slug])) {
+                $seen[$slug] = true;
+                $deduped[] = $ct;
+            }
+        }
+
+        return $deduped;
     }
 }

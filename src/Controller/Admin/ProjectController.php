@@ -183,21 +183,7 @@ class ProjectController extends AbstractController
 
         $request->getSession()->set('_project_id', $project->getId());
 
-        $features = $project->getContentFeatures();
-
-        // 1. ContentTypes propis del projecte, filtrats per features
-        $projectTypes = $ctRepo->findActive($project->getId());
-        $contentTypes = array_values(array_filter($projectTypes, function ($ct) use ($features) {
-            return in_array($ct->getFeature(), $features, true);
-        }));
-
-        // 2. Fallback a plantilles base per a features sense CT propi
-        $covered = array_unique(array_map(fn($ct) => $ct->getFeature(), $contentTypes));
-        $missing = array_diff($features, $covered);
-        if (!empty($missing)) {
-            $baseTypes = $ctRepo->findBaseByFeatures($missing);
-            $contentTypes = array_merge($contentTypes, $baseTypes);
-        }
+        $contentTypes = $ctRepo->findForProject($project);
         $sections = [];
         foreach ($contentTypes as $ct) {
             $entries = $ct->getEntries();

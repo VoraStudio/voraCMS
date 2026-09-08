@@ -83,7 +83,19 @@ class ContentType
     public function isBase(): bool { return $this->base; }
     public function setBase(bool $base): static { $this->base = $base; return $this; }
 
-    public function getFeature(): string { return $this->feature ?? 'custom'; }
+    public function getFeature(): string
+    {
+        if (!empty($this->feature) && $this->feature !== 'custom') {
+            return $this->feature;
+        }
+
+        if ($this->slug !== null) {
+            if (str_contains($this->slug, 'notici')) return 'noticies';
+            if (str_contains($this->slug, 'event')) return 'events';
+        }
+
+        return $this->feature ?? 'custom';
+    }
     public function setFeature(string $feature): static { $this->feature = $feature; return $this; }
 
     public function isAutoClone(): bool { return $this->autoClone; }
